@@ -1,0 +1,7 @@
+{
+  "description": "CineFlow Production OS with Google Maps integration and Calendar support.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "name": "CineFlow OS"
+}

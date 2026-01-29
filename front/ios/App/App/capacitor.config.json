@@ -1,0 +1,12 @@
+{
+	"appId": "com.vemakin.app",
+	"appName": "Vemakin",
+	"webDir": "dist",
+	"server": {
+		"androidScheme": "https"
+	},
+	"ios": {
+		"useSwiftPM": true
+	},
+	"packageClassList": []
+}
