@@ -206,17 +206,17 @@ const CineFlowApp = () => {
   const LAYOUT_CONFIG = {
     // Mobile: Tight spacing (screen width < 768px)
     mobile: {
-      headerOffset: -40,  // Negative value pulls content closer to header
+      headerOffset: -40, // Negative value pulls content closer to header
       fallbackPadding: 100 // Fallback before header is measured
     },
-    // Desktop: Comfortable spacing (screen width >= 768px)  
+    // Desktop: Comfortable spacing (screen width >= 768px) 
     desktop: {
-      headerOffset: 8,    // Positive value adds breathing room
+      headerOffset: 8,  // Positive value adds breathing room
       fallbackPadding: 160
     },
     // View-specific adjustments (added to base offset)
     viewOverrides: {
-      shots: -8,    // Timeline page needs extra tight spacing
+      shots: -8,  // Timeline page needs extra tight spacing
       'shot-detail': 0,
       overview: 0,
       inventory: 0,
@@ -647,7 +647,7 @@ const CineFlowApp = () => {
 
   return (
     <HeaderActionsProvider>
-      <div className={`min-h-screen bg-[#F2F2F7] dark:bg-[#141417] text-[#1C1C1E] font-sans selection:bg-blue-100 dark:text-white transition-colors duration-500 ${darkMode ? 'dark' : ''}`}>
+      <div className={`min-h-screen bg-[#F2F2F7] dark:bg-[#141417] text-[#1C1C1E] selection:bg-blue-100 dark:text-white transition-colors duration-500 ${darkMode ? 'dark' : ''}`}>
         <Header
           showHeader={true}
           showControls={showControls}

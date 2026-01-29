@@ -6,20 +6,20 @@ import { useEffect, RefObject } from 'react';
  * Consolidates click-outside logic used across all drawer components
  */
 export function useClickOutside<T extends HTMLElement>(
-    ref: RefObject<T>,
-    callback: () => void,
-    enabled: boolean = true
+  ref: RefObject<T>,
+  callback: () => void,
+  enabled: boolean = true
 ): void {
-    useEffect(() => {
-        if (!enabled) return;
+  useEffect(() => {
+    if (!enabled) return;
 
-        const handleClickOutside = (event: MouseEvent) => {
-            if (ref.current && !ref.current.contains(event.target as Node)) {
-                callback();
-            }
-        };
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        callback();
+      }
+    };
 
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [ref, callback, enabled]);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [ref, callback, enabled]);
 }

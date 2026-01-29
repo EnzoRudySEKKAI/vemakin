@@ -1,331 +1,331 @@
 /* 
-  CineFlow Header V2 Styles 
-  Guaranteed to work - Standard CSS 
+ CineFlow Header V2 Styles 
+ Guaranteed to work - Standard CSS 
 */
 
 :root {
-    /* ==============================================
-       HEADER SPACING CONFIGURATION
-       Adjust these values to control header padding
-       ============================================== */
-    --header-padding-top: 16px;
-    --header-padding-bottom: 4px;
-    --header-controls-gap: 2px;
-    --header-fade-height: 16px;
+  /* ==============================================
+    HEADER SPACING CONFIGURATION
+    Adjust these values to control header padding
+    ============================================== */
+  --header-padding-top: 16px;
+  --header-padding-bottom: 4px;
+  --header-controls-gap: 2px;
+  --header-fade-height: 16px;
 
-    /* Control element height */
-    --header-height: 48px;
+  /* Control element height */
+  --header-height: 48px;
 
-    /* Colors */
-    --header-primary: #3762E3;
-    --header-primary-dark: #4E47DD;
-    --header-bg-light: #ffffff;
-    --header-bg-dark: #1c1c1e;
-    --header-border-light: #e5e7eb;
-    --header-border-dark: rgba(255, 255, 255, 0.08);
-    /* Faint border for dark mode */
-    --header-text-light: #111827;
-    --header-text-dark: #ffffff;
-    --header-text-muted-light: #6b7280;
-    --header-text-muted-dark: #9ca3af;
+  /* Colors */
+  --header-primary: #3762E3;
+  --header-primary-dark: #4E47DD;
+  --header-bg-light: #ffffff;
+  --header-bg-dark: #1c1c1e;
+  --header-border-light: #e5e7eb;
+  --header-border-dark: rgba(255, 255, 255, 0.08);
+  /* Faint border for dark mode */
+  --header-text-light: #111827;
+  --header-text-dark: #ffffff;
+  --header-text-muted-light: #6b7280;
+  --header-text-muted-dark: #9ca3af;
 }
 
 /* Base Control Class - applied to EVERYTHING */
 .cf-control {
-    height: var(--header-height);
-    border-radius: 16px;
-    /* rounded-2xl */
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 14px;
-    border: 1px solid var(--header-border-light);
-    background-color: var(--header-bg-light);
-    color: var(--header-text-light);
-    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-sizing: border-box;
-    overflow: hidden;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    position: relative;
-    cursor: pointer;
-    white-space: nowrap;
+  height: var(--header-height);
+  border-radius: 16px;
+  /* rounded-2xl */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  border: 1px solid var(--header-border-light);
+  background-color: var(--header-bg-light);
+  color: var(--header-text-light);
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-sizing: border-box;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  position: relative;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 /* Dark Mode Overrides for Base */
 .dark .cf-control {
-    border-color: var(--header-border-dark);
-    background-color: var(--header-bg-dark);
-    color: var(--header-text-dark);
-    box-shadow: none;
-    /* Cleaner look in dark mode */
+  border-color: var(--header-border-dark);
+  background-color: var(--header-bg-dark);
+  color: var(--header-text-dark);
+  box-shadow: none;
+  /* Cleaner look in dark mode */
 }
 
 /* -----------------------------------------------------------------
-   VARIANT: PILL (Filter Buttons like All, Camera, Lens...)
-   ----------------------------------------------------------------- */
+  VARIANT: PILL (Filter Buttons like All, Camera, Lens...)
+  ----------------------------------------------------------------- */
 .cf-pill {
-    padding: 0 20px;
-    /* px-5 */
-    min-width: max-content;
+  padding: 0 20px;
+  /* px-5 */
+  min-width: max-content;
 }
 
 .cf-pill.active {
-    background-color: var(--header-primary);
-    border-color: var(--header-primary);
-    color: white;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: var(--header-primary);
+  border-color: var(--header-primary);
+  color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .dark .cf-pill.active {
-    background-color: var(--header-primary-dark);
-    border-color: var(--header-primary-dark);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: var(--header-primary-dark);
+  border-color: var(--header-primary-dark);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .cf-pill.inactive {
-    color: var(--header-text-muted-light);
+  color: var(--header-text-muted-light);
 }
 
 .dark .cf-pill.inactive {
-    color: var(--header-text-muted-dark);
-    border-color: transparent;
-    /* Cleaner inactive state in dark mode */
+  color: var(--header-text-muted-dark);
+  border-color: transparent;
+  /* Cleaner inactive state in dark mode */
 }
 
 .cf-pill.inactive:hover {
-    background-color: #f3f4f6;
-    /* gray-100 */
-    color: var(--header-text-light);
+  background-color: #f3f4f6;
+  /* gray-100 */
+  color: var(--header-text-light);
 }
 
 .dark .cf-pill.inactive:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    color: white;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: white;
 }
 
 /* -----------------------------------------------------------------
-   VARIANT: SEGMENT CONTAINER (The outer shell of toggles)
-   ----------------------------------------------------------------- */
+  VARIANT: SEGMENT CONTAINER (The outer shell of toggles)
+  ----------------------------------------------------------------- */
 .cf-segment-container {
-    height: var(--header-height);
-    padding: 2px;
-    /* Reduced from 4px to maintain better alignment with 48px height */
-    background-color: var(--header-bg-light);
-    border: 1px solid var(--header-border-light);
-    border-radius: 16px;
-    display: flex !important;
-    flex-direction: row;
-    align-items: center;
-    gap: 0;
-    box-sizing: border-box;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  height: var(--header-height);
+  padding: 2px;
+  /* Reduced from 4px to maintain better alignment with 48px height */
+  background-color: var(--header-bg-light);
+  border: 1px solid var(--header-border-light);
+  border-radius: 16px;
+  display: flex !important;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+  box-sizing: border-box;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .dark .cf-segment-container {
-    background-color: var(--header-bg-dark);
-    border-color: transparent;
-    /* Hide border container in dark mode for cleaner look */
-    /* border: 1px solid var(--header-border-dark); */
+  background-color: var(--header-bg-dark);
+  border-color: transparent;
+  /* Hide border container in dark mode for cleaner look */
+  /* border: 1px solid var(--header-border-dark); */
 }
 
 /* Inner Items of Segment */
 .cf-segment-item {
-    flex: 1;
-    height: 100%;
-    border-radius: 12px;
-    /* Slightly smaller than container */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--header-text-muted-light);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  flex: 1;
+  height: 100%;
+  border-radius: 12px;
+  /* Slightly smaller than container */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: ;
+  letter-spacing: 0.05em;
+  color: var(--header-text-muted-light);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .dark .cf-segment-item {
-    color: var(--header-text-muted-dark);
+  color: var(--header-text-muted-dark);
 }
 
 .cf-segment-item.active {
-    background-color: var(--header-primary);
-    color: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: var(--header-primary);
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .dark .cf-segment-item.active {
-    background-color: var(--header-primary-dark);
+  background-color: var(--header-primary-dark);
 }
 
 .cf-segment-item:hover:not(.active) {
-    background-color: rgba(0, 0, 0, 0.03);
+  background-color: rgba(0, 0, 0, 0.03);
 }
 
 .dark .cf-segment-item:hover:not(.active) {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: white;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: white;
 }
 
 /* Icon variant for segments (Grid/List toggles) */
 .cf-segment-item.icon-only {
-    width: 40px;
-    /* Fixed width */
-    flex: none;
+  width: 40px;
+  /* Fixed width */
+  flex: none;
 }
 
 /* -----------------------------------------------------------------
-   VARIANT: FLUID BUTTON (Full width / Flex 1 buttons)
-   ----------------------------------------------------------------- */
+  VARIANT: FLUID BUTTON (Full width / Flex 1 buttons)
+  ----------------------------------------------------------------- */
 .cf-btn-fluid {
-    width: 100%;
-    padding: 0 16px;
-    justify-content: space-between;
-    /* Default for dropdowns */
+  width: 100%;
+  padding: 0 16px;
+  justify-content: space-between;
+  /* Default for dropdowns */
 }
 
 /* Center content variant */
 .cf-btn-center {
-    justify-content: center;
-    gap: 8px;
+  justify-content: center;
+  gap: 8px;
 }
 
 .cf-btn-fluid:hover {
-    background-color: #f9fafb;
+  background-color: #f9fafb;
 }
 
 .dark .cf-btn-fluid:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 /* Active State for Dropdowns */
 .cf-btn-fluid.active {
-    background-color: #f9fafb;
-    box-shadow: inset 0 0 0 2px var(--header-primary);
+  background-color: #f9fafb;
+  box-shadow: inset 0 0 0 2px var(--header-primary);
 }
 
 .dark .cf-btn-fluid.active {
-    background-color: #2C2C2E;
-    box-shadow: inset 0 0 0 2px var(--header-primary-dark);
+  background-color: #2C2C2E;
+  box-shadow: inset 0 0 0 2px var(--header-primary-dark);
 }
 
 /* Primary Fluid Action (Solid Color) */
 .cf-btn-primary {
-    background-color: var(--header-primary);
-    color: white;
-    border-color: transparent;
+  background-color: var(--header-primary);
+  color: white;
+  border-color: transparent;
 }
 
 .dark .cf-btn-primary {
-    background-color: var(--header-primary-dark);
+  background-color: var(--header-primary-dark);
 }
 
 .cf-btn-primary:hover {
-    filter: brightness(1.05);
+  filter: brightness(1.05);
 }
 
 /* -----------------------------------------------------------------
-   VARIANT: ICON BUTTON (Square buttons)
-   ----------------------------------------------------------------- */
+  VARIANT: ICON BUTTON (Square buttons)
+  ----------------------------------------------------------------- */
 .cf-icon-btn {
-    width: var(--header-height);
-    padding: 0;
-    flex: none;
-    /* Don't shrink */
+  width: var(--header-height);
+  padding: 0;
+  flex: none;
+  /* Don't shrink */
 }
 
 /* -----------------------------------------------------------------
-   VARIANT: INPUT FIELD
-   ----------------------------------------------------------------- */
+  VARIANT: INPUT FIELD
+  ----------------------------------------------------------------- */
 .cf-input-wrapper {
-    position: relative;
-    width: 100%;
-    /* Changed from flex: 1 to width: 100% for stability in stack */
-    height: var(--header-height);
-    display: block;
+  position: relative;
+  width: 100%;
+  /* Changed from flex: 1 to width: 100% for stability in stack */
+  height: var(--header-height);
+  display: block;
 }
 
 .cf-input {
-    width: 100%;
-    height: 100%;
-    border-radius: 16px;
-    border: 1px solid var(--header-border-light);
-    background-color: var(--header-bg-light);
-    color: var(--header-text-light);
-    padding-left: 48px;
-    /* Space for icon */
-    padding-right: 48px;
-    /* Space for right action */
-    font-size: 14px;
-    outline: none;
-    transition: all 0.2s ease;
-    appearance: none;
-    /* Critical for Safari/Mac */
-    -webkit-appearance: none;
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  border: 1px solid var(--header-border-light);
+  background-color: var(--header-bg-light);
+  color: var(--header-text-light);
+  padding-left: 48px;
+  /* Space for icon */
+  padding-right: 48px;
+  /* Space for right action */
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+  appearance: none;
+  /* Critical for Safari/Mac */
+  -webkit-appearance: none;
 }
 
 .dark .cf-input {
-    background-color: var(--header-bg-dark);
-    border-color: var(--header-border-dark);
-    color: var(--header-text-dark);
+  background-color: var(--header-bg-dark);
+  border-color: var(--header-border-dark);
+  color: var(--header-text-dark);
 }
 
 .cf-input:focus {
-    border-color: var(--header-primary);
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  border-color: var(--header-primary);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
 .dark .cf-input:focus {
-    border-color: var(--header-primary-dark);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+  border-color: var(--header-primary-dark);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
 .cf-input-icon {
-    position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--header-text-muted-light);
-    pointer-events: none;
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--header-text-muted-light);
+  pointer-events: none;
 }
 
 .dark .cf-input-icon {
-    color: var(--header-text-muted-dark);
+  color: var(--header-text-muted-dark);
 }
 
 .cf-input-action-right {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--header-text-muted-light);
-    background: transparent;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--header-text-muted-light);
+  background: transparent;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .cf-input-action-right:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    color: var(--header-text-light);
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--header-text-light);
 }
 
 .dark .cf-input-action-right {
-    color: var(--header-text-muted-dark);
+  color: var(--header-text-muted-dark);
 }
 
 .dark .cf-input-action-right:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
 }
