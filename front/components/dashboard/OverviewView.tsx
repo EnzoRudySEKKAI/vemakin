@@ -8,7 +8,7 @@ import {
   PenLine, Scissors, Music, Layers, Palette
 } from 'lucide-react';
 import { HoverCard } from '../ui/HoverCard';
-import { Shot, Equipment, Currency, PostProdTask, Note, User } from '../../types';
+import { Shot, Equipment, Currency, PostProdTask, Note, User, Project } from '../../types';
 
 interface OverviewViewProps {
   shots: Shot[];
@@ -17,9 +17,9 @@ interface OverviewViewProps {
   inventory: Equipment[];
   currency: Currency;
   user: User | null;
-  projects: string[];
-  currentProject: string;
-  onSelectProject: (project: string) => void;
+  projects: Project[];
+  currentProject: string | null;
+  onSelectProject: (id: string) => void;
   onAddProject: (name: string) => void;
   onAddClick: () => void;
   onNavigateToShot: (shot: Shot) => void;
@@ -113,7 +113,7 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
     let cumulativeAngle = 0;
     const donutSegments = chartData.map(segment => {
       const startAngle = cumulativeAngle;
-      const angle = (segment.value / totalItems) * 360;
+      const angle = totalItems > 0 ? (segment.value / totalItems) * 360 : 0;
       cumulativeAngle += angle;
       return { ...segment, startAngle, angle };
     });
@@ -125,11 +125,11 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
   const describeArc = (x: number, y: number, radius: number, startAngle: number, endAngle: number) => {
     const start = polarToCartesian(x, y, radius, endAngle);
     const end = polarToCartesian(x, y, radius, startAngle);
-    const largeArcFlag = endAngle - startAngle <= 180 ?"0":"1";
+    const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
     return [
-     "M", start.x, start.y,
-     "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y
-    ].join("");
+      "M", start.x, start.y,
+      "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y
+    ].join(" ");
   };
 
   const polarToCartesian = (centerX: number, centerY: number, radius: number, angleInDegrees: number) => {
@@ -181,10 +181,10 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
       <div className="flex flex-col gap-6">
 
         {/* SECTION 1: INVENTORY (Full Width) */}
-        <motion.section variants={itemVariants} className="w-full"onClick={onNavigateToInventory}>
+        <motion.section variants={itemVariants} className="w-full" onClick={onNavigateToInventory}>
           <div className="flex items-center justify-between mb-3 px-2">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <Package size={20} className="text-blue-600 dark:text-[#4E47DD]"/>
+              <Package size={20} className="text-blue-600 dark:text-[#4E47DD]" />
               Inventory
             </h2>
             <div className="flex items-center gap-1 text-sm font-semibold text-blue-600 dark:text-indigo-600 dark:text-blue-400 dark:text-indigo-400 cursor-pointer hover:underline">
@@ -192,7 +192,7 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
             </div>
           </div>
 
-          <HoverCard className="p-6 cursor-pointer"blobColor="from-indigo-400 to-indigo-500">
+          <HoverCard className="p-6 cursor-pointer" blobColor="from-indigo-400 to-indigo-500">
             <div className="flex flex-col md:flex-row gap-8 items-center">
               {/* Left Side: Summary Stats */}
               <div className="flex-1">
@@ -212,9 +212,9 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
                 </div>
                 {/* SVG Donut Chart */}
                 <div className="relative w-32 h-32 shrink-0">
-                  <svg viewBox="0 0 100 100"className="w-full h-full -rotate-90 transform">
+                  <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90 transform">
                     {/* Background Circle */}
-                    <circle cx="50"cy="50"r="40"fill="transparent"stroke="currentColor"strokeWidth="12"className="text-gray-200 dark:text-white/5"/>
+                    <circle cx="50" cy="50" r="40" fill="transparent" stroke="currentColor" strokeWidth="12" className="text-gray-200 dark:text-white/5" />
 
                     {/* Animated Segments */}
                     {inventoryStats.donutSegments.map((segment, i) => (
@@ -227,13 +227,13 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
                         strokeLinecap="butt"// Changed to butt to fix double-rounded tips
                         initial={{ pathLength: 0 }}
                         animate={{ pathLength: 1 }}
-                        transition={{ duration: 1, delay: i * 0.1, ease:"easeOut"}}
+                        transition={{ duration: 1, delay: i * 0.1, ease: "easeOut" }}
                       />
                     ))}
                   </svg>
                   {/* Center Text (Optional) */}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <Package size={20} className="text-gray-400 dark:text-[#4E47DD] opacity-50"/>
+                    <Package size={20} className="text-gray-400 dark:text-[#4E47DD] opacity-50" />
                   </div>
                 </div>
 
@@ -242,7 +242,7 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
                   {inventoryStats.donutSegments.map(segment => (
                     <div key={segment.name} className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full"style={{ backgroundColor: segment.color }} />
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: segment.color }} />
                         <span className="font-semibold text-gray-700 dark:text-gray-300 truncate max-w-[80px]">{segment.name}</span>
                       </div>
                       <span className="font-medium text-gray-500">{Math.round((segment.value / inventoryStats.totalItems) * 100)}%</span>
@@ -259,7 +259,7 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
           <div className="flex items-center justify-between mb-3 px-2">
             <div className="flex items-center gap-3">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <Film size={20} className="text-blue-600 dark:text-[#4E47DD]"/>
+                <Film size={20} className="text-blue-600 dark:text-[#4E47DD]" />
                 Next up
               </h2>
               <div className="px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-indigo-500/10 text-[10px] font-semibold border border-blue-100 dark:border-indigo-500/20 text-blue-600 dark:text-[#4E47DD]">
@@ -275,7 +275,7 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
           </div>
 
           {nextShot ? (
-            <HoverCard className="p-6"blobColor="from-indigo-400 to-indigo-500">
+            <HoverCard className="p-6" blobColor="from-indigo-400 to-indigo-500">
               {/* Main Next Shot (Clickable) */}
               <div
                 onClick={() => onNavigateToShot(nextShot)}
@@ -305,13 +305,13 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
 
                       {/* Gear Info (Mobile Only) */}
                       <div className="flex items-center gap-2 md:hidden shrink-0">
-                        <Package size={18} className="text-blue-600 dark:text-[#4E47DD]"/>
+                        <Package size={18} className="text-blue-600 dark:text-[#4E47DD]" />
                         <span className="text-xs font-semibold text-gray-500">Gear</span>
                         <span className="text-base font-semibold text-gray-900 dark:text-white ml-0.5">{nextShot.equipmentIds?.length || 0}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 font-medium truncate">
-                      <MapPin size={18} className="text-gray-400 shrink-0"/>
+                      <MapPin size={18} className="text-gray-400 shrink-0" />
                       <span className="truncate">{nextShot.location}</span>
                     </div>
                   </div>
@@ -319,7 +319,7 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
                   {/* Gear Info (Desktop Only) */}
                   <div className="hidden md:flex gap-4 shrink-0 self-start mt-1">
                     <div className="flex items-center gap-2">
-                      <Package size={18} className="text-blue-600 dark:text-[#4E47DD]"/>
+                      <Package size={18} className="text-blue-600 dark:text-[#4E47DD]" />
                       <span className="text-xs font-semibold text-gray-500">Gear</span>
                       <span className="text-base font-semibold text-gray-900 dark:text-white ml-0.5">{nextShot.equipmentIds?.length || 0}</span>
                     </div>
@@ -337,7 +337,7 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
                   }}
                 >
                   {/* Spacer for mask fade */}
-                  <div className="min-w-[10px] shrink-0"/>
+                  <div className="min-w-[10px] shrink-0" />
                   {upcomingShots.slice(1).map((shot) => (
                     <div
                       key={shot.id}
@@ -355,13 +355,13 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
                     </div>
                   ))}
                   {/* Spacer for mask fade */}
-                  <div className="min-w-[20px] shrink-0"/>
+                  <div className="min-w-[20px] shrink-0" />
                 </div>
               )}
             </HoverCard>
           ) : (
             <div className="glass-card rounded-[32px] p-12 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] flex flex-col items-center justify-center text-gray-500 bg-white/80 dark:bg-[#1A1A1D]/80 backdrop-blur-xl border border-white/20 dark:border-white/5 transition-all duration-300">
-              <Film size={32} className="mb-2 opacity-50"/>
+              <Film size={32} className="mb-2 opacity-50" />
               <span className="text-xs">No upcoming shots</span>
             </div>
           )}
@@ -375,7 +375,7 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
             <div className="flex items-center justify-between mb-3 px-2">
               <div className="flex items-center gap-3">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Zap size={20} className="text-blue-600 dark:text-[#4E47DD]"/>
+                  <Zap size={20} className="text-blue-600 dark:text-[#4E47DD]" />
                   Pipeline
                 </h2>
                 <div className="px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-indigo-500/10 text-[10px] font-semibold border border-blue-100 dark:border-indigo-500/20 text-blue-600 dark:text-[#4E47DD]">
@@ -390,7 +390,7 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
               </div>
             </div>
 
-            <HoverCard className="p-6 flex flex-col flex-1"blobColor="from-indigo-400 to-indigo-500">
+            <HoverCard className="p-6 flex flex-col flex-1" blobColor="from-indigo-400 to-indigo-500">
               {/* Task List */}
               <div className="flex-1 space-y-2 z-10">
                 {pendingTasks.length > 0 ? pendingTasks.map(task => (
@@ -412,7 +412,7 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
                   </div>
                 )) : (
                   <div className="h-full flex flex-col items-center justify-center text-gray-500">
-                    <CheckCircle2 size={32} className="mb-2 opacity-50"/>
+                    <CheckCircle2 size={32} className="mb-2 opacity-50" />
                     <span className="text-xs">All caught up</span>
                   </div>
                 )}
@@ -425,7 +425,7 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
             <div className="flex items-center justify-between mb-3 px-2">
               <div className="flex items-center gap-3">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <StickyNote size={20} className="text-blue-600 dark:text-[#4E47DD]"/>
+                  <StickyNote size={20} className="text-blue-600 dark:text-[#4E47DD]" />
                   Notes
                 </h2>
                 <div className="px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-indigo-500/10 text-[10px] font-semibold border border-blue-100 dark:border-indigo-500/20 text-blue-600 dark:text-[#4E47DD]">
@@ -440,7 +440,7 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
               </div>
             </div>
 
-            <HoverCard className="p-6 flex flex-col flex-1"blobColor="from-indigo-400 to-indigo-500">
+            <HoverCard className="p-6 flex flex-col flex-1" blobColor="from-indigo-400 to-indigo-500">
               <div className="flex-1 space-y-2 z-10">
                 {recentNotes.length > 0 ? (
                   <div className="space-y-1">
@@ -457,7 +457,7 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
                   </div>
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center text-gray-500 py-4">
-                    <StickyNote size={32} className="mb-2 opacity-50"/>
+                    <StickyNote size={32} className="mb-2 opacity-50" />
                     <span className="text-xs">No recent notes</span>
                   </div>
                 )}

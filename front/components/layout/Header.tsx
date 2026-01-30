@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import {
   MainView, ShotLayout, InventoryLayout,
-  Shot, InventoryFilters, PostProdFilters, NotesFilters, Currency, Equipment, PostProdTask
+  Shot, InventoryFilters, PostProdFilters, NotesFilters, Currency, Equipment, PostProdTask, Project
 } from '../../types';
 import { DatePicker } from '../ui/DatePicker';
 import { ScrollFade } from '../ui/ScrollFade';
@@ -19,9 +19,9 @@ import { useHeaderActions } from '../../context/HeaderActionsContext';
 interface HeaderProps {
   showHeader: boolean;
   showControls: boolean;
-  currentProject: string;
-  setCurrentProject: (name: string) => void;
-  projects: Record<string, any>;
+  projects: Project[];
+  currentProject: string | null;
+  setCurrentProject: (id: string) => void;
   onAddProject: (name: string) => void;
   viewTitle: string;
   mainView: MainView;
@@ -82,6 +82,7 @@ export const Header: React.FC<HeaderProps> = ({
   showControls,
   viewTitle,
   mainView,
+  // ...
   currentProject,
   setCurrentProject,
   projects,
@@ -130,6 +131,8 @@ export const Header: React.FC<HeaderProps> = ({
   const [showPostProdCategoryDropdown, setShowPostProdCategoryDropdown] = useState(false);
 
   const { actions, backAction, detailTitle, detailLabel } = useHeaderActions();
+
+  const currentProjectName = projects.find(p => p.id === currentProject)?.name || 'Select Project';
 
   // Filter Options
   const statusOptions = ['All', 'todo', 'progress', 'review', 'done'];
@@ -212,7 +215,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={onToggleDarkMode}
                 className="w-9 h-9 rounded-[12px] bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-blue-400 dark:text-indigo-400 transition-all hover:scale-105 active:scale-95"
               >
-                {darkMode ? <Moon size={18} fill="currentColor"/> : <Sun size={18} />}
+                {darkMode ? <Moon size={18} fill="currentColor" /> : <Sun size={18} />}
               </button>
 
               <button
@@ -250,7 +253,7 @@ export const Header: React.FC<HeaderProps> = ({
                           onClick={backAction || undefined}
                           className={`w-10 h-10 rounded-xl bg-white dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-white transition-all font-semibold ${backAction ? 'hover:bg-gray-100 dark:hover:bg-white/20' : 'opacity-50 cursor-default'}`}
                         >
-                          <ChevronLeft size={20} className="mr-0.5"strokeWidth={2.5} />
+                          <ChevronLeft size={20} className="mr-0.5" strokeWidth={2.5} />
                         </button>
                         {detailTitle ? (
                           <div className="flex flex-col justify-center">
@@ -261,7 +264,7 @@ export const Header: React.FC<HeaderProps> = ({
                         ) : (
                           // Skeleton Loading Title
                           <div className="flex flex-col justify-center gap-1.5 py-1">
-                            <div className="h-4 w-32 bg-gray-200 dark:bg-white/10 rounded-md animate-pulse"/>
+                            <div className="h-4 w-32 bg-gray-200 dark:bg-white/10 rounded-md animate-pulse" />
                           </div>
                         )}
                       </div>
@@ -282,12 +285,12 @@ export const Header: React.FC<HeaderProps> = ({
                           >
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-xl bg-blue-500/10 dark:bg-indigo-500/10 flex items-center justify-center text-blue-500 dark:text-indigo-500">
-                                <Folder size={20} fill="currentColor"className="opacity-80"/>
+                                <Folder size={20} fill="currentColor" className="opacity-80" />
                               </div>
                               <div className="flex flex-col items-start">
                                 <span className="text-[9px] font-semibold text-gray-500">Current production</span>
                                 <span className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                                  {currentProject} <ChevronDown size={14} className="text-gray-500"/>
+                                  {currentProjectName} <ChevronDown size={14} className="text-gray-500" />
                                 </span>
                               </div>
                             </div>
@@ -296,7 +299,7 @@ export const Header: React.FC<HeaderProps> = ({
                           <AnimatePresence>
                             {showProjectMenu && (
                               <>
-                                <div className="fixed inset-0 z-20"onClick={() => setShowProjectMenu(false)} />
+                                <div className="fixed inset-0 z-20" onClick={() => setShowProjectMenu(false)} />
                                 <motion.div
                                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                   animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -305,18 +308,18 @@ export const Header: React.FC<HeaderProps> = ({
                                   className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#252529] rounded-3xl p-2 border border-gray-200 dark:border-white/10 shadow-2xl z-30 overflow-hidden"
                                 >
                                   <div className="max-h-[240px] overflow-y-auto">
-                                    {Object.keys(projects).map(p => (
+                                    {projects.map(p => (
                                       <button
-                                        key={p}
-                                        onClick={() => { setCurrentProject(p); setShowProjectMenu(false); }}
-                                        className={`w-full flex items-center justify-between p-4 rounded-2xl mb-1 transition-colors ${currentProject === p ? 'bg-blue-50 dark:bg-indigo-500/20 text-blue-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
+                                        key={p.id}
+                                        onClick={() => { setCurrentProject(p.id); setShowProjectMenu(false); }}
+                                        className={`w-full flex items-center justify-between p-4 rounded-2xl mb-1 transition-colors ${currentProject === p.id ? 'bg-blue-50 dark:bg-indigo-500/20 text-blue-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
                                       >
-                                        <span className="font-semibold">{p}</span>
-                                        {currentProject === p && <Check size={16} />}
+                                        <span className="font-semibold">{p.name}</span>
+                                        {currentProject === p.id && <Check size={16} />}
                                       </button>
                                     ))}
                                   </div>
-                                  <div className="h-px bg-gray-100 dark:bg-white/5 my-2"/>
+                                  <div className="h-px bg-gray-100 dark:bg-white/5 my-2" />
                                   <button
                                     onClick={() => { onAddProject("New Project"); setShowProjectMenu(false); }}
                                     className="w-full flex items-center gap-3 p-4 rounded-2xl text-gray-900 dark:text-white font-semibold hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
@@ -338,7 +341,7 @@ export const Header: React.FC<HeaderProps> = ({
                         mainView !== 'shot-detail' && mainView !== 'task-detail' &&
                         mainView !== 'note-detail' && mainView !== 'equipment-detail' && (
                           <div className="cf-input-wrapper h-[48px]">
-                            <Search className="cf-input-icon"size={18} />
+                            <Search className="cf-input-icon" size={18} />
                             <input
                               type="text"
                               placeholder={getPlaceholder()}
@@ -404,7 +407,7 @@ export const Header: React.FC<HeaderProps> = ({
                           </div>
 
                           {/* Vertical Divider */}
-                          <div className="w-px h-6 bg-gray-200 dark:bg-white/10"/>
+                          <div className="w-px h-6 bg-gray-200 dark:bg-white/10" />
 
                           {/* Stats Section (Compact Row) */}
                           <div className="flex items-center gap-4 shrink-0">
@@ -459,7 +462,7 @@ export const Header: React.FC<HeaderProps> = ({
                                     <AnimatePresence>
                                       {showPostProdCategoryDropdown && (
                                         <>
-                                          <div className="fixed inset-0 z-[60]"onClick={() => setShowPostProdCategoryDropdown(false)} />
+                                          <div className="fixed inset-0 z-[60]" onClick={() => setShowPostProdCategoryDropdown(false)} />
                                           <motion.div
                                             initial={{ opacity: 0, y: -10, scale: 0.95 }}
                                             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -645,14 +648,14 @@ export const Header: React.FC<HeaderProps> = ({
                                           {tasks.length}
                                         </span>
                                       </div>
-                                      <div className="w-px h-5 bg-gray-200 dark:bg-white/10"/>
+                                      <div className="w-px h-5 bg-gray-200 dark:bg-white/10" />
                                       <div className="flex flex-col items-center">
                                         <span className="text-[10px] font-semibold text-gray-400 leading-none mb-0.5">Done</span>
                                         <span className="text-base font-semibold text-gray-900 dark:text-white leading-none">
                                           {tasks.filter(t => t.status === 'done').length}
                                         </span>
                                       </div>
-                                      <div className="w-px h-5 bg-gray-200 dark:bg-white/10"/>
+                                      <div className="w-px h-5 bg-gray-200 dark:bg-white/10" />
                                       <div className="flex flex-col items-center">
                                         <span className="text-[10px] font-semibold text-gray-400 leading-none mb-0.5">Remain</span>
                                         <span className="text-base font-semibold text-gray-900 dark:text-white leading-none">
@@ -685,7 +688,7 @@ export const Header: React.FC<HeaderProps> = ({
                                   <span className="text-[10px] font-semibold text-gray-400 leading-none mb-0.5">Total Gear</span>
                                   <span className="text-base font-semibold text-gray-900 dark:text-white leading-none">{inventory.length}</span>
                                 </div>
-                                <div className="w-px h-6 bg-gray-200 dark:bg-white/10"/>
+                                <div className="w-px h-6 bg-gray-200 dark:bg-white/10" />
                                 <div className="flex flex-col items-center">
                                   <span className="text-[10px] font-semibold text-gray-400 leading-none mb-0.5">Owned</span>
                                   <span className="text-base font-semibold text-blue-600 dark:text-blue-400 leading-none">
@@ -768,7 +771,7 @@ export const Header: React.FC<HeaderProps> = ({
                                   <AnimatePresence>
                                     {showStatusDropdown && (
                                       <>
-                                        <div className="fixed inset-0 z-[60]"onClick={() => setShowStatusDropdown(false)} />
+                                        <div className="fixed inset-0 z-[60]" onClick={() => setShowStatusDropdown(false)} />
                                         <motion.div
                                           initial={{ opacity: 0, y: -10, scale: 0.95 }}
                                           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -816,7 +819,7 @@ export const Header: React.FC<HeaderProps> = ({
                                   <AnimatePresence>
                                     {showPriorityDropdown && (
                                       <>
-                                        <div className="fixed inset-0 z-[60]"onClick={() => setShowPriorityDropdown(false)} />
+                                        <div className="fixed inset-0 z-[60]" onClick={() => setShowPriorityDropdown(false)} />
                                         <motion.div
                                           initial={{ opacity: 0, y: -10, scale: 0.95 }}
                                           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -954,7 +957,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         </div>
       </div>
-      <div className="absolute -bottom-6 left-0 right-0 h-6 bg-gradient-to-b from-[#F2F2F7] to-transparent dark:from-[#141417] pointer-events-none"/>
+      <div className="absolute -bottom-6 left-0 right-0 h-6 bg-gradient-to-b from-[#F2F2F7] to-transparent dark:from-[#141417] pointer-events-none" />
     </motion.header>
   );
 };

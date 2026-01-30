@@ -1,266 +1,150 @@
+import { useEffect } from 'react';
+import { ProjectService } from '../services/project';
+import { InventoryService } from '../services/inventory';
+import { useUIStore } from './store/useUIStore';
+import { useAuthStore } from './store/useAuthStore';
+import { useProjectsList } from './store/useProjectsList';
+import { useInventoryStore } from './store/useInventoryStore';
+import { useProjectData } from './store/useProjectData';
 
-import { useState, useMemo, useCallback } from 'react';
-import { MainView, Shot, ShotLayout, Equipment, Note, PostProdTask, CrewMember, PostProdFilters, NotesFilters, User } from '../types.ts';
-import { PROJECTS, SHOOT_DATES, GLOBAL_INVENTORY, INITIAL_SHOTS, POSTPROD_TASKS, INITIAL_CREW, INITIAL_NOTES } from '../constants.ts';
-import { timeToMinutes } from '../utils.ts';
+import { useGearCatalog } from './store/useGearCatalog';
 
-export interface ProjectState {
- shots: Shot[];
- notes: Note[];
- tasks: PostProdTask[];
- crew: CrewMember[];
-}
+// ... (existing imports)
 
 export const useProductionStore = () => {
- const [mainView, setMainView] = useState<MainView>('overview');
- const [shotLayout, setShotLayout] = useState<ShotLayout>('timeline');
- const [shotStatusFilter, setShotStatusFilter] = useState<'all' | 'pending' | 'done'>('all');
- const [projects, setProjects] = useState<string[]>(PROJECTS);
- const [currentProject, setCurrentProject] = useState(PROJECTS[0]);
- const [allInventory, setAllInventory] = useState<Equipment[]>(GLOBAL_INVENTORY);
- const [currentUser, setCurrentUser] = useState<User | null>(null);
- const [isGuest, setIsGuest] = useState(false);
+  // 1. UI State
+  const uiStore = useUIStore();
 
- // PostProd View State
- const [postProdFilters, setPostProdFilters] = useState<PostProdFilters>({
-  category: 'All',
-  searchQuery: '',
-  status: 'All',
-  priority: 'All',
-  date: 'All',
-  sortBy: 'status',
-  sortDirection: 'asc'
- });
+  // 2. Auth State
+  const authStore = useAuthStore();
 
- // Notes View State
- const [notesFilters, setNotesFilters] = useState<NotesFilters>({
-  query: '',
-  category: 'All',
-  date: 'All',
-  sortBy: 'updated',
-  sortDirection: 'desc'
- });
+  // 3. Projects List State
+  const projectsStore = useProjectsList(authStore.currentUser, authStore.setCurrentUser);
 
- const [notesLayout, setNotesLayout] = useState<'grid' | 'list'>('grid');
+  // 4. Global Inventory State
+  const inventoryStore = useInventoryStore();
 
- // Theme State
- const [darkMode, setDarkMode] = useState(true); // Default to dark mode as requested for implementation
+  // 5. Active Project Data State
+  const projectDataStore = useProjectData(projectsStore.currentProject);
 
- const [projectData, setProjectData] = useState<Record<string, ProjectState>>({
-  [PROJECTS[0]]: {
-   shots: INITIAL_SHOTS,
-   tasks: POSTPROD_TASKS,
-   crew: INITIAL_CREW,
-   notes: INITIAL_NOTES
-  },
-  ...PROJECTS.slice(1).reduce((acc, p) => ({ ...acc, [p]: { shots: [], notes: [], tasks: [], crew: INITIAL_CREW } }), {})
- });
+  // =========================================================================
+  // Coordination & Initialization Logic
+  // =========================================================================
 
- const activeData = useMemo(() => projectData[currentProject] || { shots: [], notes: [], tasks: [], crew: [] }, [projectData, currentProject]);
+  // Initial Data Load & Sync on Auth Change
+  useEffect(() => {
+    if (!authStore.currentUser) return;
 
- const updateActiveProjectData = useCallback((updates: Partial<ProjectState>) => {
-  setProjectData(prev => ({ ...prev, [currentProject]: { ...prev[currentProject], ...updates } }));
- }, [currentProject]);
+    // Default to overview on connection
+    uiStore.setMainView('overview');
 
- const login = useCallback((name: string, email: string) => {
-  setCurrentUser({
-   name: name,
-   email: email
-  });
-  setIsGuest(false);
-  setMainView('overview');
- }, []);
+    const loadInitialData = async () => {
+      try {
+        // Parallelize Data Fetching
+        // Consolidate API Calls
+        const res = await fetch('/api/init');
+        if (!res.ok) throw new Error('Failed to fetch initial data');
 
- const enterGuest = useCallback(() => {
-  setIsGuest(true);
-  setCurrentUser(null);
-  setMainView('overview');
- }, []);
+        const {
+          projects,
+          inventory,
+          categories,
+          catalog,
+          activeProjectData
+        } = await res.json();
 
- const logout = useCallback(() => {
-  setCurrentUser(null);
-  setIsGuest(false);
- }, []);
+        // Batch Updates
+        projectsStore.setProjects(projects);
+        inventoryStore.setAllInventory(inventory);
 
- const addProject = useCallback((name: string, data: Partial<ProjectState>) => {
-  const newProjectName = name.trim();
-  if (projects.includes(newProjectName)) return;
+        // Update Catalog Store directly
+        useGearCatalog.setState({ categories, catalog, isLoading: false });
 
-  setProjects(prev => [newProjectName, ...prev]);
-  setProjectData(prev => ({
-   ...prev,
-   [newProjectName]: {
-    shots: [],
-    notes: [],
-    tasks: [],
-    crew: INITIAL_CREW,
-    ...data
-   } as ProjectState
-  }));
-  setCurrentProject(newProjectName);
-  setMainView('shots');
- }, [projects]);
+        // Initialize Project placeholders
+        const initialData: Record<string, any> = {};
+        const lastProjectId = authStore.currentUser?.last_project_id;
 
- const deleteProject = useCallback((name: string) => {
-  if (projects.length <= 1) return; // Prevent deleting last project
+        for (const p of projects) {
+          // If we fetched data for this project (active one), use it.
+          if (activeProjectData && p.id === activeProjectData.id) {
+            initialData[p.id] = activeProjectData;
+          } else {
+            initialData[p.id] = { shots: [], notes: [], tasks: [] };
+          }
+        }
+        projectDataStore.setProjectData(initialData);
 
-  setProjects(prev => prev.filter(p => p !== name));
-  setProjectData(prev => {
-   const newData = { ...prev };
-   delete newData[name];
-   return newData;
-  });
+        // Smart Project Selection Update (Prioritize backend last_project_id)
+        projectsStore._setCurrentProject((prev: string | null) => {
+          // 1. If we have a stored preference from the backend, use it
+          if (lastProjectId && projects.find((p: any) => p.id === lastProjectId)) {
+            return lastProjectId;
+          }
+          // ... rest of logic
+          if (prev && projects.find((p: any) => p.id === prev)) return prev;
+          return projects.length > 0 ? projects[0].id : null;
+        });
+      } catch (e) {
+        console.error('Failed to load initial data', e);
+      } finally {
+        projectsStore.setIsProjectsLoaded(true);
+      }
 
-  if (currentProject === name) {
-   setCurrentProject(projects.find(p => p !== name) || projects[0]);
-  }
- }, [projects, currentProject]);
+    };
 
- const renameProject = useCallback((oldName: string, newName: string) => {
-  if (oldName === newName || projects.includes(newName)) return;
+    loadInitialData();
+  }, [authStore.currentUser?.id, authStore.currentUser?.last_project_id]);
 
-  setProjects(prev => prev.map(p => p === oldName ? newName : p));
-  setProjectData(prev => {
-   const newData = { ...prev };
-   newData[newName] = newData[oldName];
-   delete newData[oldName];
-   return newData;
-  });
+  // =========================================================================
+  // Composite Actions
+  // =========================================================================
 
-  if (currentProject === oldName) {
-   setCurrentProject(newName);
-  }
- }, [projects, currentProject]);
+  const importProject = async (file: File) => {
+    try {
+      const text = await file.text();
+      const json = JSON.parse(text);
+      if (json.shots && json.tasks) {
+        const name = file.name.replace('.json', '').replace(/_export$/, '');
 
- // Export/Import Stubs
- const exportProject = useCallback((name: string) => {
-  const data = projectData[name];
-  if (!data) return;
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${name.replace(/\s+/g, '_')}_export.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
- }, [projectData]);
+        // Use the addProject from store, but we need to inject the data 
+        // addProject in useProjectsList only creates the project entity.
+        // We need to set the data in projectDataStore.
 
- const importProject = useCallback(async (file: File) => {
-  try {
-   const text = await file.text();
-   const json = JSON.parse(text);
-   if (json.shots && json.tasks) {
-    const name = file.name.replace('.json', '').replace(/_export$/, '');
-    addProject(name, json);
-   }
-  } catch (e) {
-   console.error("Import failed", e);
-  }
- }, [addProject]);
+        projectsStore.addProject(name, {}, (newId, newProj) => {
+          // This callback runs after project creation success
+          projectDataStore.setProjectData(prev => ({
+            ...prev,
+            [newId]: {
+              shots: [],
+              notes: [],
+              tasks: [],
+              ...json // Spread imported data
+            }
+          }));
+        });
+      }
+    } catch (e) {
+      console.error("Import failed", e);
+    }
+  };
 
- const addShot = useCallback((shot: Shot) => {
-  updateActiveProjectData({ shots: [...activeData.shots, shot] });
- }, [activeData.shots]);
+  // Wire up Auth Store to clear projects on logout (Manual bridge if not circular)
+  // useAuthStore definition handles basic clearing, but if we need extra logic:
+  const logout = async () => {
+    await authStore.logout();
+    projectsStore.clearProjects();
+    uiStore.resetUI();
+  };
 
- const addTask = useCallback((task: PostProdTask) => {
-  updateActiveProjectData({ tasks: [...activeData.tasks, task] });
- }, [activeData.tasks]);
+  return {
+    ...uiStore,
+    ...authStore,
+    logout, // Override authStore.logout with composed one if needed, or just use authStore's if it covers it.
 
- const addGear = useCallback((gear: Equipment) => {
-  setAllInventory(prev => [gear, ...prev]);
- }, []);
+    ...projectsStore,
+    importProject, // Add the composite action
 
- const addNote = useCallback((note: Note) => {
-  updateActiveProjectData({ notes: [note, ...activeData.notes] });
- }, [activeData.notes]);
-
- const toggleShotStatus = useCallback((id: string) => {
-  const updatedShots = activeData.shots.map(s =>
-   s.id === id
-    ? { ...s, status: (s.status === 'done' ? 'pending' : 'done') as Shot['status'] }
-    : s
-  );
-  updateActiveProjectData({ shots: updatedShots });
- }, [activeData.shots]);
-
- const toggleEquipmentStatus = useCallback((shotId: string, equipmentId: string) => {
-  const updatedShots = activeData.shots.map(s => {
-   if (s.id !== shotId) return s;
-   const isPrepared = s.preparedEquipmentIds.includes(equipmentId);
-   const newPrepared = isPrepared
-    ? s.preparedEquipmentIds.filter(id => id !== equipmentId)
-    : [...s.preparedEquipmentIds, equipmentId];
-   return { ...s, preparedEquipmentIds: newPrepared };
-  });
-  updateActiveProjectData({ shots: updatedShots });
- }, [activeData.shots]);
-
- const groupedShots = useMemo(() => {
-  const groups = activeData.shots.reduce((acc, shot) => {
-   const date = shot.date;
-   if (!acc[date]) acc[date] = [];
-   acc[date].push(shot);
-   return acc;
-  }, {} as Record<string, Shot[]>);
-
-  Object.keys(groups).forEach(date => {
-   groups[date].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
-  });
-
-  return groups;
- }, [activeData.shots]);
-
- const dynamicDates = useMemo(() => {
-  const allDates = Array.from(new Set([...SHOOT_DATES, ...activeData.shots.map(s => s.date)]));
-  return allDates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
- }, [activeData.shots]);
-
- const projectProgress = useMemo(() => {
-  if (activeData.shots.length === 0) return 0;
-  const done = activeData.shots.filter(s => s.status === 'done').length;
-  return Math.round((done / activeData.shots.length) * 100);
- }, [activeData.shots]);
-
- const toggleDarkMode = useCallback(() => setDarkMode(prev => !prev), []);
-
- return {
-  mainView, setMainView,
-  shotLayout, setShotLayout,
-  shotStatusFilter, setShotStatusFilter,
-  projects, setProjects,
-  currentProject, setCurrentProject,
-  allInventory, setAllInventory,
-  currentUser,
-  isGuest,
-  login,
-  enterGuest,
-  logout,
-  projectData, setProjectData,
-  activeData,
-  updateActiveProjectData,
-  groupedShots,
-  dynamicDates,
-  projectProgress,
-  toggleShotStatus,
-  toggleEquipmentStatus,
-  addProject,
-  deleteProject,
-  renameProject,
-  addShot,
-  addTask,
-  addGear,
-  addNote,
-  postProdFilters,
-  setPostProdFilters,
-  notesFilters,
-  setNotesFilters,
-  notesLayout,
-  setNotesLayout,
-  darkMode,
-  toggleDarkMode,
-  exportProject,
-  importProject
- };
+    ...inventoryStore,
+    ...projectDataStore,
+  };
 };

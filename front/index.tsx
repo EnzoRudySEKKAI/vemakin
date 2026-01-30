@@ -21,12 +21,14 @@ import { EquipmentDetailView } from './components/inventory/EquipmentDetailView.
 import { TaskDetailView } from './components/postprod/TaskDetailView.tsx';
 import { NoteDetailView } from './components/notes/NoteDetailView.tsx';
 import { ActionSuite } from './components/layout/ActionSuite.tsx';
+import { EmptyProjectsView } from './components/dashboard/EmptyProjectsView.tsx';
 import { LandingView } from './components/auth/LandingView.tsx';
 import { SignInView } from './components/auth/SignInView.tsx';
 import { SignUpView } from './components/auth/SignUpView.tsx';
 import { OnboardingView } from './components/auth/OnboardingView.tsx';
 import { NewsModal } from './components/modals/NewsModal.tsx';
 import { TutorialModal } from './components/modals/TutorialModal.tsx';
+import { LoadingScreen } from './components/ui/LoadingScreen.tsx';
 import { useProductionStore } from './hooks/useProductionStore.ts';
 
 const CineFlowApp = () => {
@@ -68,7 +70,9 @@ const CineFlowApp = () => {
     darkMode,
     toggleDarkMode,
     exportProject,
-    importProject
+    importProject,
+    isAuthReady,
+    isProjectsLoaded
   } = useProductionStore();
 
   const [authView, setAuthView] = useState<'landing' | 'signin' | 'signup'>('landing');
@@ -605,7 +609,19 @@ const CineFlowApp = () => {
         );
 
       case 'settings':
-        return <SettingsView />;
+        return (
+          <SettingsView
+            user={currentUser}
+            onLogout={logout}
+            onLogin={() => {
+              // If user is guest/null, this allows logging in
+              logout().then(() => setAuthView('signin'));
+            }}
+            onNavigateToProjects={() => setMainView('manage-projects')}
+            onOpenNews={() => { }}
+            onOpenTutorial={() => { }}
+          />
+        );
 
       case 'manage-projects':
         return (
@@ -624,6 +640,14 @@ const CineFlowApp = () => {
         return null;
     }
   };
+  // 1. Loading State (Auth initialization or Project fetching)
+  const isInitializing = !isAuthReady || (currentUser && !isProjectsLoaded);
+
+  if (isInitializing) {
+    return <LoadingScreen />;
+  }
+
+  // 2. Auth State (Guest or Authenticated)
   if (!currentUser && !isGuest) {
     if (showOnboarding) {
       return <OnboardingView onComplete={() => setShowOnboarding(false)} />;
@@ -639,6 +663,18 @@ const CineFlowApp = () => {
         onSignIn={() => setAuthView('signin')}
         onSignUp={() => setAuthView('signup')}
         onGuest={enterGuest}
+      />
+    );
+  }
+
+  // 3. No Projects State (Only for authenticated users with 0 projects)
+  if (!isGuest && projects.length === 0) {
+    return (
+      <EmptyProjectsView
+        onCreate={async (name) => {
+          await addProject(name, {});
+        }}
+        onLogout={logout}
       />
     );
   }

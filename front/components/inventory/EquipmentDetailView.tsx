@@ -11,19 +11,21 @@ import {
   ArrowRight, ChevronLeft, ChevronRight, Home, Share2, Archive, ArrowLeft, Pencil, Calendar, Settings, User
 } from 'lucide-react';
 import { useHeaderActions } from '../../context/HeaderActionsContext';
-import { Equipment, Currency, Shot } from '../../types';
+import { Equipment, Currency, Shot, Project } from '../../types';
 import { GlassCard } from '../ui/GlassCard';
 import { HoverCard } from '../ui/HoverCard';
 import { EmptyState } from '../ui/EmptyState';
 import { ConfirmModal } from '../ui/ConfirmModal';
-import { CATEGORY_ICONS, GEAR_DATABASE } from '../../constants';
+import { CATEGORY_ICONS } from '../../constants';
 import { IconButton } from '../ui/IconButton';
 
 import { useClickOutside } from '../../hooks/useClickOutside';
+import { useGearCatalog } from '../../hooks/store/useGearCatalog';
 
 interface EquipmentDetailViewProps {
   item: Equipment;
   involvedProjects?: string[];
+  projects: Project[];
   projectData: Record<string, any>;
   onClose: () => void;
   onNavigateToShot: (projectName: string, shotId: string) => void;
@@ -35,6 +37,7 @@ interface EquipmentDetailViewProps {
 export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
   item,
   involvedProjects = [],
+  projects,
   projectData,
   onClose,
   onNavigateToShot,
@@ -48,6 +51,27 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
   const [editedItem, setEditedItem] = useState<Equipment>(item);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const { getSpecs } = useGearCatalog();
+  const [specs, setSpecs] = useState<any>(item.specs || {});
+  const [loadingSpecs, setLoadingSpecs] = useState(false);
+
+  useEffect(() => {
+    const fetchSpecs = async () => {
+      // If item has a gear_id and specs are empty (except for potentially custom ones)
+      // but item.gear_id is not exactly on the Equipment type yet in some places
+      const gearId = (item as any).gearId || (item as any).gear_id;
+      if (gearId && Object.keys(specs).length === 0) {
+        setLoadingSpecs(true);
+        const fetchedSpecs = await getSpecs(gearId);
+        if (fetchedSpecs) {
+          const { gear_id, id, ...cleanSpecs } = fetchedSpecs;
+          setSpecs(cleanSpecs);
+        }
+        setLoadingSpecs(false);
+      }
+    };
+    fetchSpecs();
+  }, [item, getSpecs]);
 
   const handleSave = useCallback(() => {
     if (onUpdate) {
@@ -143,18 +167,20 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
     return projectShots.filter((s: Shot) => s.equipmentIds.includes(item.id));
   };
 
-  const renderProjectItem = (pName: string) => {
-    const relatedShots = getShotsForEquipmentInProject(pName);
-    const isExpanded = expandedProjectShots === pName;
+  const renderProjectItem = (projectId: string) => {
+    const relatedShots = getShotsForEquipmentInProject(projectId);
+    const isExpanded = expandedProjectShots === projectId;
+    const project = projects.find(p => p.id === projectId);
+    const projectName = project?.name || 'Unknown Project';
 
     return (
-      <div key={pName} className="border-b border-gray-100/50 dark:border-white/5 last:border-none bg-transparent">
+      <div key={projectId} className="border-b border-gray-100/50 dark:border-white/5 last:border-none bg-transparent">
         <button
-          onClick={() => toggleProjectShots(pName)}
+          onClick={() => toggleProjectShots(projectId)}
           className={`w-full flex justify-between items-center py-4 px-4 hover:bg-white/50 dark:hover:bg-white/5 rounded-2xl transition-all group my-1 ${isExpanded ? 'bg-white/50 dark:bg-white/5' : ''}`}
         >
           <div className="flex items-center gap-4 min-w-0">
-            <span className={`text-sm font-semibold truncate ${isExpanded ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200'}`}>{pName}</span>
+            <span className={`text-sm font-semibold truncate ${isExpanded ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200'}`}>{projectName}</span>
           </div>
           <div className="flex items-center gap-3">
             {relatedShots.length > 0 && (
@@ -182,7 +208,7 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
                   relatedShots.map(shot => (
                     <button
                       key={shot.id}
-                      onClick={() => onNavigateToShot(pName, shot.id)}
+                      onClick={() => onNavigateToShot(projectId, shot.id)}
                       className="w-full flex items-center justify-between p-3 pl-4 rounded-xl text-left hover:bg-gray-50 dark:hover:bg-white/5 transition-all group/shot"
                     >
                       <div className="flex items-center gap-4 truncate">
@@ -327,16 +353,24 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-y-12 gap-x-8">
-                  {Object.entries(item.specs).map(([key, val]) => (
-                    <div key={key} className="group">
-                      <span className="detail-subtitle block mb-2.5 leading-none dark:text-white">
-                        {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim()}
-                      </span>
-                      <p className="detail-title">
-                        {String(val || "—")}
-                      </p>
+                  {loadingSpecs ? (
+                    <div className="col-span-full py-12 flex justify-center">
+                      <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
                     </div>
-                  ))}
+                  ) : Object.keys(specs).length > 0 ? (
+                    Object.entries(specs).map(([key, val]) => (
+                      <div key={key} className="group">
+                        <span className="detail-subtitle block mb-2.5 leading-none dark:text-white">
+                          {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim()}
+                        </span>
+                        <p className="detail-title">
+                          {String(val || "—")}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="col-span-full text-sm text-gray-400 italic">No technical specifications available</p>
+                  )}
                 </div>
               </section>
             </div>
@@ -350,7 +384,7 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
 
                 <div className="space-y-1">
                   {involvedProjects.length > 0 ? (
-                    involvedProjects.map((pName) => renderProjectItem(pName))
+                    involvedProjects.map((pId) => renderProjectItem(pId))
                   ) : (
                     <div className="py-12 flex flex-col items-center justify-center text-center opacity-40">
                       <Package size={32} className="mb-4 text-gray-300" />

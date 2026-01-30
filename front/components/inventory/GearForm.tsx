@@ -5,15 +5,16 @@ import {
   Package, Info, DollarSign, Aperture
 } from 'lucide-react';
 import { Equipment } from '../../types.ts';
-import { GEAR_DATABASE } from '../../constants.ts';
+import { useGearCatalog, CatalogItem, Category } from '../../hooks/store/useGearCatalog';
 
 export interface GearFormData {
   name: string;
   serialNumber: string;
-  category: keyof typeof GEAR_DATABASE | 'Other' | '';
+  category: string; // Changed from keyof typeof GEAR_DATABASE
   brand: string;
   mount: string;
   model: string;
+  modelId?: string; // Added to store the DB ID
   isOwned: boolean;
   price: number;
   frequency: 'hour' | 'day' | 'week' | 'month' | 'year';
@@ -28,45 +29,68 @@ interface GearFormProps {
 
 export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) => {
   const [showSpecsInForm, setShowSpecsInForm] = useState(false);
+  const { categories, catalog, fetchCatalog, getSpecs, isLoading } = useGearCatalog();
+  const [currentModelSpecs, setCurrentModelSpecs] = useState<any>(null);
+
+  React.useEffect(() => {
+    if (categories.length === 0) {
+      fetchCatalog();
+    }
+  }, []);
 
   const availableBrands = useMemo(() => {
     if (!form.category || form.category === 'Other') return [];
-    const catData = (GEAR_DATABASE as any)[form.category];
-    return catData ? Object.keys(catData.brands) : [];
-  }, [form.category]);
+    const brands = new Set<string>();
+    catalog
+      .filter(item => item.category_name === form.category)
+      .forEach(item => brands.add(item.brand_name));
+    return Array.from(brands).sort();
+  }, [form.category, catalog]);
 
   const availableMounts = useMemo(() => {
-    if (form.category !== 'Lens' || !form.brand) return [];
-    const brandData = (GEAR_DATABASE as any).Lens?.brands?.[form.brand];
-    if (!brandData) return [];
-    const mounts = new Set<string>();
-    Object.values(brandData.models).forEach((m: any) => {
-      if (m.specs && m.specs.mount) mounts.add(m.specs.mount);
-    });
-    return Array.from(mounts);
+    // This is still a bit static-ish because we don't fetch ALL specs at once.
+    // For now, if category is Lens, we might need to know the mounts.
+    // But since we are using DB models, we can just show models for that brand.
+    // The previous code extracted mounts from all models of that brand.
+    // We can do the same if we have the catalog items.
+    return []; // Will simplify for now or handle differently if needed
   }, [form.category, form.brand]);
 
   const availableModels = useMemo(() => {
     if (!form.category || form.category === 'Other' || !form.brand) return [];
-    const catData = (GEAR_DATABASE as any)[form.category];
-    const brandData = catData?.brands?.[form.brand];
-    if (!brandData) return [];
-    let models = Object.entries(brandData.models);
-    if (form.category === 'Lens' && form.mount) {
-      models = models.filter(([_, data]: any) => data.specs?.mount === form.mount);
-    }
-    return models.map(([name]) => name);
-  }, [form.category, form.brand, form.mount]);
+    return catalog
+      .filter(item => item.category_name === form.category && item.brand_name === form.brand)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [form.category, form.brand, catalog]);
 
-  const currentModelSpecs = useMemo(() => {
-    if (!form.category || !form.brand || !form.model || form.category === 'Other') return null;
-    const catData = (GEAR_DATABASE as any)[form.category];
-    const brandData = catData?.brands?.[form.brand];
-    const modelData = brandData?.models?.[form.model];
-    return modelData?.specs || null;
-  }, [form.category, form.brand, form.model]);
+  React.useEffect(() => {
+    const updateSpecs = async () => {
+      if (form.modelId) {
+        const specs = await getSpecs(form.modelId);
+        // Remove gear_id and id from specs for display
+        const { gear_id, id, ...displaySpecs } = specs;
+        setCurrentModelSpecs(displaySpecs);
+      } else {
+        setCurrentModelSpecs(null);
+      }
+    };
+    updateSpecs();
+  }, [form.modelId]);
 
-  const isValid = form.category && (form.category === 'Other' || form.brand || availableBrands.length === 0);
+  const handleCategoryChange = (val: string) => {
+    setForm({ ...form, category: val, brand: '', model: '', modelId: '', mount: '' });
+  };
+
+  const handleBrandChange = (val: string) => {
+    setForm({ ...form, brand: val, model: '', modelId: '', mount: '' });
+  };
+
+  const handleModelChange = (modelName: string) => {
+    const item = availableModels.find(m => m.name === modelName);
+    setForm({ ...form, model: modelName, modelId: item?.id });
+  };
+
+  const isValid = form.category && (form.category === 'Other' || (form.brand && form.model));
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -76,7 +100,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
           <div className="sm:col-span-2">
             <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block ml-1">Custom name / Label</label>
             <div className="relative">
-              <PenLine className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500"size={16} />
+              <PenLine className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500" size={16} />
               <input
                 type="text"
                 value={form.name}
@@ -89,7 +113,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
           <div>
             <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block ml-1">Serial number</label>
             <div className="relative">
-              <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500"size={16} />
+              <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500" size={16} />
               <input
                 type="text"
                 value={form.serialNumber}
@@ -106,19 +130,19 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
           <div>
             <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block ml-1">Category</label>
             <div className="relative">
-              <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500"size={16} />
+              <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500" size={16} />
               <select
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value as any, brand: '', model: '', mount: '' })}
                 className="w-full appearance-none bg-white dark:bg-[#2C2C30] border-2 border-gray-100 dark:border-white/10 rounded-[20px] pl-12 pr-10 py-4 text-sm font-semibold focus:outline-none focus:border-blue-500 dark:border-indigo-500 dark:focus:border-blue-500 dark:border-indigo-500 transition-all cursor-pointer text-gray-900 dark:text-white"
               >
                 <option value="">Select category</option>
-                {Object.keys(GEAR_DATABASE).map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.name}>{cat.name}</option>
                 ))}
                 <option value="Other">Other</option>
               </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none"size={16} />
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none" size={16} />
             </div>
           </div>
 
@@ -126,7 +150,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
             <div className="animate-in slide-in-from-left-2 duration-300">
               <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block ml-1">Brand</label>
               <div className="relative">
-                <Box className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500"size={16} />
+                <Box className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500" size={16} />
                 <select
                   value={form.brand}
                   onChange={(e) => setForm({ ...form, brand: e.target.value, model: '', mount: '' })}
@@ -137,7 +161,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
                     <option key={b} value={b}>{b}</option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none"size={16} />
+                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none" size={16} />
               </div>
             </div>
           )}
@@ -148,7 +172,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
           <div className="animate-in slide-in-from-top-2 duration-300">
             <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block ml-1">Lens mount</label>
             <div className="relative">
-              <Aperture className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500"size={16} />
+              <Aperture className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500" size={16} />
               <select
                 value={form.mount}
                 onChange={(e) => setForm({ ...form, mount: e.target.value, model: '' })}
@@ -159,7 +183,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
                   <option key={m} value={m}>{m} Mount</option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none"size={16} />
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none" size={16} />
             </div>
           </div>
         )}
@@ -169,18 +193,18 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
           <div className="animate-in slide-in-from-top-2 duration-300">
             <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block ml-1">Model</label>
             <div className="relative">
-              <Package className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500"size={16} />
+              <Package className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500" size={16} />
               <select
                 value={form.model}
-                onChange={(e) => setForm({ ...form, model: e.target.value })}
+                onChange={(e) => handleModelChange(e.target.value)}
                 className="w-full appearance-none bg-white dark:bg-[#2C2C30] border-2 border-gray-100 dark:border-white/10 rounded-[20px] pl-12 pr-10 py-4 text-sm font-semibold focus:outline-none focus:border-blue-500 dark:border-indigo-500 dark:focus:border-blue-500 dark:border-indigo-500 transition-all cursor-pointer text-gray-900 dark:text-white"
               >
                 <option value="">Select model</option>
                 {availableModels.map(m => (
-                  <option key={m} value={m}>{m}</option>
+                  <option key={m.id} value={m.name}>{m.name}</option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none"size={16} />
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none" size={16} />
             </div>
           </div>
         )}
@@ -208,7 +232,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
           </div>
         )}
 
-        <div className="h-px bg-gray-100 dark:bg-white/10 my-2"/>
+        <div className="h-px bg-gray-100 dark:bg-white/10 my-2" />
 
         {/* Ownership */}
         <div className="space-y-4">
@@ -238,7 +262,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
               <div>
                 <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block ml-1">Rate</label>
                 <div className="relative">
-                  <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500"size={14} />
+                  <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500" size={14} />
                   <input
                     type="number"
                     value={form.price || ''}
@@ -261,7 +285,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
                     <option value="week">Weekly</option>
                     <option value="month">Monthly</option>
                   </select>
-                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none"size={16} />
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none" size={16} />
                 </div>
               </div>
             </div>
