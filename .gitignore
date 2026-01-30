@@ -49,3 +49,12 @@ pnpm-debug.log*
 # Electron
 **/electron/dist/
 **/electron/release/
+
+# Agents
+.agent/
+.agents/
+
+# Server
+server/.env
+server/dist/
+server/node_modules/
