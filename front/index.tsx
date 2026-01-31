@@ -27,6 +27,7 @@ import { SignUpView } from './components/auth/SignUpView.tsx';
 import { OnboardingView } from './components/auth/OnboardingView.tsx';
 import { NewsModal } from './components/modals/NewsModal.tsx';
 import { TutorialModal } from './components/modals/TutorialModal.tsx';
+import { NoProjectsView } from './components/projects/NoProjectsView.tsx';
 import { useProductionStore } from './hooks/useProductionStore.ts';
 
 const CineFlowApp = () => {
@@ -39,6 +40,7 @@ const CineFlowApp = () => {
     allInventory, setAllInventory,
     currentUser,
     isGuest,
+    isLoadingAuth,
     login,
     enterGuest,
     logout,
@@ -54,9 +56,17 @@ const CineFlowApp = () => {
     deleteProject,
     renameProject,
     addShot,
+    updateShot,
+    deleteShot,
     addTask,
+    updateTask,
+    deleteTask,
     addGear,
+    updateGear,
+    deleteGear,
     addNote,
+    updateNote,
+    deleteNote,
     // PostProd State
     postProdFilters,
     setPostProdFilters,
@@ -457,9 +467,9 @@ const CineFlowApp = () => {
             onClose={handleCloseShot}
             onToggleStatus={toggleShotStatus}
             onToggleEquipment={toggleEquipmentStatus}
-            onUpdateShot={(updatedShot) => updateActiveProjectData({ shots: activeData.shots.map(s => s.id === updatedShot.id ? updatedShot : s) })}
+            onUpdateShot={updateShot}
             onDeleteShot={(id) => {
-              updateActiveProjectData({ shots: activeData.shots.filter(s => s.id !== id) });
+              deleteShot(id);
               setSelectedShotId(null);
             }}
             onRetakeShot={(id, newDate, newTime) => {
@@ -513,8 +523,9 @@ const CineFlowApp = () => {
               handleNavigateToShot(projectName, shotId);
             }}
             currency={currency}
-            onUpdate={(updatedItem) => updateActiveProjectData({ inventory: allInventory.map(i => i.id === updatedItem.id ? updatedItem : i) })}
+            onUpdate={updateGear}
             onDelete={(id) => {
+              deleteGear(id);
               setSelectedEquipmentId(null);
             }}
           />
@@ -541,9 +552,9 @@ const CineFlowApp = () => {
             shots={activeData.shots}
             tasks={activeData.tasks}
             onClose={handleCloseNote}
-            onUpdateNote={(updatedNote) => updateActiveProjectData({ notes: activeData.notes.map(n => n.id === updatedNote.id ? updatedNote : n) })}
+            onUpdateNote={updateNote}
             onDeleteNote={(id) => {
-              updateActiveProjectData({ notes: activeData.notes.filter(n => n.id !== id) });
+              deleteNote(id);
               setSelectedNoteId(null);
             }}
             onNavigateToShot={(shotId) => handleNavigateToShot(currentProject, shotId)}
@@ -560,8 +571,8 @@ const CineFlowApp = () => {
             isAdding={false}
             setIsAdding={() => handleOpenActionSuite({ view: 'note' })}
             onAddNote={(n) => { }}
-            onUpdateNote={(n) => updateActiveProjectData({ notes: activeData.notes.map(x => x.id === n.id ? n : x) })}
-            onDeleteNote={(id) => updateActiveProjectData({ notes: activeData.notes.filter(x => x.id !== id) })}
+            onUpdateNote={updateNote}
+            onDeleteNote={deleteNote}
             onSelectShot={(id) => {
               handleNavigateToShot(currentProject, id);
             }}
@@ -582,9 +593,9 @@ const CineFlowApp = () => {
             task={activeData.tasks.find(t => t.id === selectedTaskId)!}
             notes={activeData.notes}
             onClose={handleCloseTask}
-            onUpdateTask={(updatedTask) => updateActiveProjectData({ tasks: activeData.tasks.map(t => t.id === updatedTask.id ? updatedTask : t) })}
+            onUpdateTask={updateTask}
             onDeleteTask={(id) => {
-              updateActiveProjectData({ tasks: activeData.tasks.filter(t => t.id !== id) });
+              deleteTask(id);
               setSelectedTaskId(null);
             }}
             onAddNote={() => handleOpenActionSuite({ view: 'note', link: { type: 'task', id: selectedTaskId! } })}
@@ -597,7 +608,7 @@ const CineFlowApp = () => {
           <PostProdView
             tasks={activePostProdTasks}
             onAddTask={handleAddPostProdTask}
-            onUpdateTask={(updatedTask) => updateActiveProjectData({ tasks: activeData.tasks.map(t => t.id === updatedTask.id ? updatedTask : t) })}
+            onUpdateTask={updateTask}
             onSelectTask={(id) => { setSelectedTaskId(id); setMainView('task-detail'); }}
             filters={postProdFilters}
             layout={postProdLayout}
@@ -643,7 +654,15 @@ const CineFlowApp = () => {
     );
   }
 
+  // Authenticated state but loading data?
+  if (isLoadingAuth) {
+    return <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#141417] flex items-center justify-center text-[#1C1C1E] dark:text-white">Loading...</div>;
+  }
 
+  // Authenticated but no projects? Show NoProjectsView
+  if (currentUser && !isGuest && projects.length === 0) {
+    return <NoProjectsView onCreateProject={(name) => addProject(name, {})} onLogout={logout} />;
+  }
 
   return (
     <HeaderActionsProvider>

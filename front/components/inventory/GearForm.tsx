@@ -4,13 +4,13 @@ import {
   Save, ChevronDown, ChevronUp, PenLine, Hash, Tag, Box,
   Package, Info, DollarSign, Aperture
 } from 'lucide-react';
-import { Equipment } from '../../types.ts';
-import { GEAR_DATABASE } from '../../constants.ts';
+import { Equipment, CatalogCategory, CatalogBrand, CatalogItem } from '../../types.ts';
+import { useProductionStore } from '../../hooks/useProductionStore';
 
 export interface GearFormData {
   name: string;
   serialNumber: string;
-  category: keyof typeof GEAR_DATABASE | 'Other' | '';
+  category: string;
   brand: string;
   mount: string;
   model: string;
@@ -18,6 +18,7 @@ export interface GearFormData {
   price: number;
   frequency: 'hour' | 'day' | 'week' | 'month' | 'year';
   customSpecs: { key: string; value: string }[];
+  specs: Record<string, any>;
 }
 
 interface GearFormProps {
@@ -27,46 +28,47 @@ interface GearFormProps {
 }
 
 export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) => {
+  const {
+    catalogCategories,
+    catalogBrands,
+    catalogItems,
+    fetchBrands,
+    fetchCatalogItems,
+    fetchItemSpecs
+  } = useProductionStore();
+
   const [showSpecsInForm, setShowSpecsInForm] = useState(false);
+  const [currentModelSpecs, setCurrentModelSpecs] = useState<any>(null);
 
-  const availableBrands = useMemo(() => {
-    if (!form.category || form.category === 'Other') return [];
-    const catData = (GEAR_DATABASE as any)[form.category];
-    return catData ? Object.keys(catData.brands) : [];
-  }, [form.category]);
+  const handleCategoryChange = (catId: string) => {
+    const cat = catalogCategories.find(c => c.id === catId);
+    setForm({ ...form, category: catId, brand: '', model: '', mount: '' });
+    if (catId) fetchBrands(catId);
+  };
 
-  const availableMounts = useMemo(() => {
-    if (form.category !== 'Lens' || !form.brand) return [];
-    const brandData = (GEAR_DATABASE as any).Lens?.brands?.[form.brand];
-    if (!brandData) return [];
-    const mounts = new Set<string>();
-    Object.values(brandData.models).forEach((m: any) => {
-      if (m.specs && m.specs.mount) mounts.add(m.specs.mount);
-    });
-    return Array.from(mounts);
-  }, [form.category, form.brand]);
+  const handleBrandChange = (brandId: string) => {
+    setForm({ ...form, brand: brandId, model: '', mount: '' });
+    if (brandId && form.category) fetchCatalogItems(form.category, brandId);
+  };
 
-  const availableModels = useMemo(() => {
-    if (!form.category || form.category === 'Other' || !form.brand) return [];
-    const catData = (GEAR_DATABASE as any)[form.category];
-    const brandData = catData?.brands?.[form.brand];
-    if (!brandData) return [];
-    let models = Object.entries(brandData.models);
-    if (form.category === 'Lens' && form.mount) {
-      models = models.filter(([_, data]: any) => data.specs?.mount === form.mount);
+  const handleModelChange = async (itemId: string) => {
+    if (itemId) {
+      const item = catalogItems.find(i => i.id === itemId);
+      let specs = item?.specs;
+
+      if (!specs) {
+        specs = await fetchItemSpecs(itemId);
+      }
+
+      setCurrentModelSpecs(specs);
+      setForm(prev => ({ ...prev, model: itemId, specs: specs || {} }));
+    } else {
+      setCurrentModelSpecs(null);
+      setForm(prev => ({ ...prev, model: itemId, specs: {} }));
     }
-    return models.map(([name]) => name);
-  }, [form.category, form.brand, form.mount]);
+  };
 
-  const currentModelSpecs = useMemo(() => {
-    if (!form.category || !form.brand || !form.model || form.category === 'Other') return null;
-    const catData = (GEAR_DATABASE as any)[form.category];
-    const brandData = catData?.brands?.[form.brand];
-    const modelData = brandData?.models?.[form.model];
-    return modelData?.specs || null;
-  }, [form.category, form.brand, form.model]);
-
-  const isValid = form.category && (form.category === 'Other' || form.brand || availableBrands.length === 0);
+  const isValid = form.category && (form.category === 'Other' || form.brand || catalogBrands.length === 0);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -76,7 +78,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
           <div className="sm:col-span-2">
             <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block ml-1">Custom name / Label</label>
             <div className="relative">
-              <PenLine className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500"size={16} />
+              <PenLine className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500" size={16} />
               <input
                 type="text"
                 value={form.name}
@@ -89,7 +91,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
           <div>
             <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block ml-1">Serial number</label>
             <div className="relative">
-              <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500"size={16} />
+              <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500" size={16} />
               <input
                 type="text"
                 value={form.serialNumber}
@@ -106,81 +108,61 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
           <div>
             <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block ml-1">Category</label>
             <div className="relative">
-              <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500"size={16} />
+              <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500" size={16} />
               <select
                 value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value as any, brand: '', model: '', mount: '' })}
+                onChange={(e) => handleCategoryChange(e.target.value)}
                 className="w-full appearance-none bg-white dark:bg-[#2C2C30] border-2 border-gray-100 dark:border-white/10 rounded-[20px] pl-12 pr-10 py-4 text-sm font-semibold focus:outline-none focus:border-blue-500 dark:border-indigo-500 dark:focus:border-blue-500 dark:border-indigo-500 transition-all cursor-pointer text-gray-900 dark:text-white"
               >
                 <option value="">Select category</option>
-                {Object.keys(GEAR_DATABASE).map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
+                {catalogCategories.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
                 <option value="Other">Other</option>
               </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none"size={16} />
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none" size={16} />
             </div>
           </div>
 
-          {availableBrands.length > 0 && (
+          {catalogBrands.length > 0 && (
             <div className="animate-in slide-in-from-left-2 duration-300">
               <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block ml-1">Brand</label>
               <div className="relative">
-                <Box className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500"size={16} />
+                <Box className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500" size={16} />
                 <select
                   value={form.brand}
-                  onChange={(e) => setForm({ ...form, brand: e.target.value, model: '', mount: '' })}
+                  onChange={(e) => handleBrandChange(e.target.value)}
                   className="w-full appearance-none bg-white dark:bg-[#2C2C30] border-2 border-gray-100 dark:border-white/10 rounded-[20px] pl-12 pr-10 py-4 text-sm font-semibold focus:outline-none focus:border-blue-500 dark:border-indigo-500 dark:focus:border-blue-500 dark:border-indigo-500 transition-all cursor-pointer text-gray-900 dark:text-white"
                 >
                   <option value="">Select brand</option>
-                  {availableBrands.map(b => (
-                    <option key={b} value={b}>{b}</option>
+                  {catalogBrands.map(b => (
+                    <option key={b.id} value={b.id}>{b.name}</option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none"size={16} />
+                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none" size={16} />
               </div>
             </div>
           )}
         </div>
 
-        {/* Lens Mount */}
-        {form.category === 'Lens' && availableMounts.length > 0 && (
-          <div className="animate-in slide-in-from-top-2 duration-300">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block ml-1">Lens mount</label>
-            <div className="relative">
-              <Aperture className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500"size={16} />
-              <select
-                value={form.mount}
-                onChange={(e) => setForm({ ...form, mount: e.target.value, model: '' })}
-                className="w-full appearance-none bg-white dark:bg-[#2C2C30] border-2 border-gray-100 dark:border-white/10 rounded-[20px] pl-12 pr-10 py-4 text-sm font-semibold focus:outline-none focus:border-blue-500 dark:border-indigo-500 dark:focus:border-blue-500 dark:border-indigo-500 transition-all cursor-pointer text-gray-900 dark:text-white"
-              >
-                <option value="">Select mount</option>
-                {availableMounts.map(m => (
-                  <option key={m} value={m}>{m} Mount</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none"size={16} />
-            </div>
-          </div>
-        )}
 
         {/* Model */}
-        {availableModels.length > 0 && (
+        {catalogItems.length > 0 && (
           <div className="animate-in slide-in-from-top-2 duration-300">
             <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block ml-1">Model</label>
             <div className="relative">
-              <Package className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500"size={16} />
+              <Package className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500" size={16} />
               <select
                 value={form.model}
-                onChange={(e) => setForm({ ...form, model: e.target.value })}
+                onChange={(e) => handleModelChange(e.target.value)}
                 className="w-full appearance-none bg-white dark:bg-[#2C2C30] border-2 border-gray-100 dark:border-white/10 rounded-[20px] pl-12 pr-10 py-4 text-sm font-semibold focus:outline-none focus:border-blue-500 dark:border-indigo-500 dark:focus:border-blue-500 dark:border-indigo-500 transition-all cursor-pointer text-gray-900 dark:text-white"
               >
                 <option value="">Select model</option>
-                {availableModels.map(m => (
-                  <option key={m} value={m}>{m}</option>
+                {catalogItems.map(m => (
+                  <option key={m.id} value={m.id}>{m.name}</option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none"size={16} />
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none" size={16} />
             </div>
           </div>
         )}
@@ -208,7 +190,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
           </div>
         )}
 
-        <div className="h-px bg-gray-100 dark:bg-white/10 my-2"/>
+        <div className="h-px bg-gray-100 dark:bg-white/10 my-2" />
 
         {/* Ownership */}
         <div className="space-y-4">
@@ -238,7 +220,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
               <div>
                 <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block ml-1">Rate</label>
                 <div className="relative">
-                  <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500"size={14} />
+                  <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500" size={14} />
                   <input
                     type="number"
                     value={form.price || ''}
@@ -261,7 +243,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
                     <option value="week">Weekly</option>
                     <option value="month">Monthly</option>
                   </select>
-                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none"size={16} />
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none" size={16} />
                 </div>
               </div>
             </div>

@@ -16,7 +16,7 @@ import { GlassCard } from '../ui/GlassCard';
 import { HoverCard } from '../ui/HoverCard';
 import { EmptyState } from '../ui/EmptyState';
 import { ConfirmModal } from '../ui/ConfirmModal';
-import { CATEGORY_ICONS, GEAR_DATABASE } from '../../constants';
+import { CATEGORY_ICONS } from '../../constants';
 import { IconButton } from '../ui/IconButton';
 
 import { useClickOutside } from '../../hooks/useClickOutside';
@@ -310,7 +310,7 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
                     <div>
                       <span className="text-xs font-semibold text-orange-400 dark:text-orange-500 block mb-1">Rental rate</span>
                       <p className="detail-title text-orange-900 dark:text-orange-50 leading-none">
-                        {currency.symbol}{item.rentalPrice?.toLocaleString()}
+                        {currency.symbol}{(item.rentalPrice ?? 0).toLocaleString()}
                         <span className="detail-subtitle text-orange-400 dark:text-orange-500/50 ml-2">/ {item.rentalFrequency}</span>
                       </p>
                     </div>

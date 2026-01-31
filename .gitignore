@@ -46,6 +46,30 @@ pnpm-debug.log*
 **/android/captures/
 **/android/local.properties
 
+# AI & Agent Frameworks
+.agent/
+.agents/
+.gemini/
+.antigravity/
+brain/
+**/brain/
+
+# Python / Backend
+**/venv/
+**/__pycache__/
+*.pyc
+**/.pytest_cache/
+
+# Credentials & Secrets
+*.key
+secrets.*
+**/*.json
+!package.json
+!tsconfig.json
+!composer.json
+!metadata.json
+
 # Electron
 **/electron/dist/
 **/electron/release/
+cloud_sql_proxy
