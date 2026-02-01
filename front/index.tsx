@@ -30,6 +30,8 @@ import { TutorialModal } from './components/modals/TutorialModal.tsx';
 import { NoProjectsView } from './components/projects/NoProjectsView.tsx';
 import { useProductionStore } from './hooks/useProductionStore.ts';
 import { useHeaderPadding } from './hooks/useHeaderPadding.ts';
+import { LayoutProvider, useLayout } from './context/LayoutContext.tsx';
+import { useSyncLayout } from './hooks/useSyncLayout.ts';
 
 const CineFlowApp = () => {
   const {
@@ -101,7 +103,9 @@ const CineFlowApp = () => {
   const [showControls, setShowControls] = useState(true);
   const [isWideMode, setIsWideMode] = useState(false);
   const lastScrollY = useRef(0);
-  const headerRef = useRef<HTMLElement>(null);
+  
+  // Get header ref from LayoutContext for sync system
+  const { headerRef } = useLayout();
 
   const [isDateSelectorOpen, setIsDateSelectorOpen] = useState(false);
   const [dateFilter, setDateFilter] = useState<string | null>(null);
@@ -170,10 +174,8 @@ const CineFlowApp = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Use the new useHeaderPadding hook for responsive padding calculations
-  const { style: headerPaddingStyle, className: headerPaddingClass, isReady: isHeaderPaddingReady } = useHeaderPadding({
-    headerRef,
-    isHeaderVisible: showControls,
+  // Sync Layout System - Calculates content padding based on header measurements
+  const { style: layoutStyle, isReady: isLayoutReady } = useSyncLayout({
     viewType: mainView,
     animate: true,
     animationDuration: 300,
@@ -649,10 +651,10 @@ const CineFlowApp = () => {
         {/* Navigation - Always visible */}
         <Navigation mainView={mainView} setMainView={handleNavigateToView} onPlusClick={handleMainAddClick} />
 
-        {/* Responsive top padding - Uses useHeaderPadding hook for dynamic calculations */}
+        {/* Sync Layout System - Content wrapper with dynamic padding */}
         <div
-          className="p-4 md:p-6 lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(275px+1.5rem)]"
-          style={headerPaddingStyle}
+          className={`content-wrapper px-4 md:px-6 pb-6 lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(275px+1.5rem)] view-${mainView}`}
+          style={layoutStyle}
         >
           <main className={`mx-auto w-full pb-28 transition-all duration-500 ease-in-out ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`}>
             <AnimatePresence mode="wait">
@@ -711,8 +713,15 @@ const CineFlowApp = () => {
   );
 };
 
+// Wrap app with LayoutProvider for sync layout system
+const AppWithProviders = () => (
+  <LayoutProvider>
+    <CineFlowApp />
+  </LayoutProvider>
+);
+
 const container = document.getElementById('root');
 if (container) {
   const root = createRoot(container);
-  root.render(<CineFlowApp />);
+  root.render(<AppWithProviders />);
 }

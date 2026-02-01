@@ -191,7 +191,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
         <div className={`mx-auto w-full ${isWideMode ? 'max-w-[90%]' : 'max-w-7xl'}`}>
 
           {/* --- ROW 1: Title & Main Actions (Fixed Height for Stability) --- */}
-          <div className="flex items-center justify-between min-h-[50px] mb-2">
+          <div data-header-row="1" className="flex items-center justify-between min-h-[50px] mb-2">
 
             {/* Left: Title & Subtitle */}
             <div className="flex flex-col justify-center">
@@ -236,6 +236,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
           <AnimatePresence>
             {showControls && (
               <motion.div
+                data-header-row="2"
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}

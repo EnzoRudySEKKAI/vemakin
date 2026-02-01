@@ -15,6 +15,29 @@
   /* 12px */
   --detail-text-size: 1rem;
   /* 16px */
+
+  /* 
+   * SYNC LAYOUT SYSTEM
+   * Dynamic variables for header/content synchronization
+   */
+  --safe-area-inset-top: 0px;
+  --header-row-1-height: 58px;
+  --header-row-2-height: 0px;
+  --header-gap: 8px;
+  --header-padding-bottom: 24px;
+  --content-padding-top: 160px;
+  --content-padding-offset: 8px;
+  --layout-animation-duration: 300ms;
+  --layout-animation-easing: cubic-bezier(0.25, 0.1, 0.25, 1);
+  
+  /* View-specific offsets */
+  --view-offset-shots: 8px;
+  --view-offset-inventory: 12px;
+  --view-offset-notes: 16px;
+  --view-offset-postprod: 12px;
+  --view-offset-overview: 12px;
+  --view-offset-settings: 16px;
+  --view-offset-default: 8px;
 }
 
 @media (min-width: 768px) {
@@ -453,3 +476,55 @@ html {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: none;
 }
+
+/* 
+ -----------------------------------------
+ SYNC LAYOUT SYSTEM STYLES
+ -----------------------------------------
+*/
+
+/* Content wrapper with dynamic padding */
+.content-wrapper {
+  padding-top: var(--content-padding-top);
+  transition: padding-top var(--layout-animation-duration) var(--layout-animation-easing);
+  will-change: padding-top;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .content-wrapper {
+    transition: none;
+    will-change: auto;
+  }
+  
+  :root {
+    --layout-animation-duration: 0ms;
+  }
+}
+
+/* Touch optimization for mobile */
+@media (hover: none) and (pointer: coarse) {
+  .content-wrapper {
+    /* Disable expensive will-change on touch devices to save battery */
+    will-change: auto;
+  }
+}
+
+/* Header measurement markers */
+[data-header-row="1"] {
+  contain: layout style;
+}
+
+[data-header-row="2"] {
+  contain: layout style;
+}
+
+/* View-specific offset classes */
+.view-shots { --content-padding-offset: var(--view-offset-shots); }
+.view-inventory { --content-padding-offset: var(--view-offset-inventory); }
+.view-notes { --content-padding-offset: var(--view-offset-notes); }
+.view-postprod { --content-padding-offset: var(--view-offset-postprod); }
+.view-overview { --content-padding-offset: var(--view-offset-overview); }
+.view-settings { --content-padding-offset: var(--view-offset-settings); }
