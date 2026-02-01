@@ -28,7 +28,7 @@ const VIEW_OFFSETS: Record<string, number> = {
 
 /**
  * Hook for synchronizing content padding with header layout.
- * Simplified version without infinite loop issues.
+ * Uses per-view max height tracking to prevent padding issues when switching views.
  */
 export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayoutReturn {
   const { viewType, additionalOffset = 0 } = options;
@@ -38,28 +38,45 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
   const [isReady, setIsReady] = useState(false);
   const rafIdRef = useRef<number | null>(null);
   const isMeasuringRef = useRef(false);
-  const maxHeightRef = useRef(160); // Track maximum height ever measured
-  const lastViewTypeRef = useRef(viewType); // Track view type changes
+  
+  // Per-view max height tracking - key is viewType, value is max height for that view
+  const maxHeightPerViewRef = useRef<Record<string, number>>({});
+  const currentViewRef = useRef(viewType);
+  const isViewChangingRef = useRef(false);
 
-  // Reset and remeasure when view type changes (each view has different header height)
+  // Get or initialize max height for current view
+  const getMaxHeightForView = useCallback((view: string | undefined) => {
+    const key = view || 'default';
+    if (!(key in maxHeightPerViewRef.current)) {
+      maxHeightPerViewRef.current[key] = 160;
+    }
+    return maxHeightPerViewRef.current[key];
+  }, []);
+
+  // Update max height for current view
+  const updateMaxHeightForView = useCallback((view: string | undefined, height: number) => {
+    const key = view || 'default';
+    const currentMax = maxHeightPerViewRef.current[key] || 160;
+    if (height > currentMax) {
+      maxHeightPerViewRef.current[key] = height;
+    }
+  }, []);
+
+  // Handle view type changes
   useEffect(() => {
-    if (viewType !== lastViewTypeRef.current) {
-      // Reset max height for this new view
-      maxHeightRef.current = 160;
-      lastViewTypeRef.current = viewType;
+    if (viewType !== currentViewRef.current) {
+      isViewChangingRef.current = true;
+      currentViewRef.current = viewType;
       setIsReady(false);
       
-      // Force immediate remeasure after a short delay to let header render
+      // Longer delay to let the header fully render with new content and any animations complete
       const timer = setTimeout(() => {
-        // Clear any pending RAF
-        if (rafIdRef.current) {
-          cancelAnimationFrame(rafIdRef.current);
-        }
+        isViewChangingRef.current = false;
         
+        // Force immediate measurement for the new view
         const header = headerRef.current;
         if (!header) return;
         
-        // Force immediate measurement
         const rect = header.getBoundingClientRect();
         const row1El = header.querySelector('[data-header-row="1"]');
         const row2El = header.querySelector('[data-header-row="2"]');
@@ -68,30 +85,32 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
         const row2Height = row2El?.getBoundingClientRect().height || 0;
         const totalHeight = rect.bottom;
         
-        // Set initial max for this view
-        maxHeightRef.current = totalHeight;
+        // Update max for this specific view
+        updateMaxHeightForView(viewType, totalHeight);
+        const stableHeight = getMaxHeightForView(viewType);
         
         const viewOffset = viewType ? (VIEW_OFFSETS[viewType] ?? 8) : 8;
-        const newPadding = Math.round(totalHeight + viewOffset + additionalOffset);
+        const newPadding = Math.round(stableHeight + viewOffset + additionalOffset);
         const clampedPadding = Math.max(80, Math.min(400, newPadding));
         
         setPadding(clampedPadding);
         setIsReady(true);
         
         updateMeasurements({
-          headerHeight: totalHeight,
+          headerHeight: stableHeight,
           row1Height,
           row2Height,
         });
-      }, 50); // 50ms to let new view render
+      }, 150); // Increased from 50ms to 150ms for more reliable measurements
       
       return () => clearTimeout(timer);
     }
-  }, [viewType, headerRef, additionalOffset, updateMeasurements]);
+  }, [viewType, headerRef, additionalOffset, updateMeasurements, getMaxHeightForView, updateMaxHeightForView]);
 
   // Calculate padding from header measurements
   const measureAndUpdate = useCallback(() => {
-    if (isMeasuringRef.current) return;
+    // Skip if view is changing
+    if (isViewChangingRef.current || isMeasuringRef.current) return;
     isMeasuringRef.current = true;
 
     const header = headerRef.current;
@@ -115,14 +134,9 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
         const row2Height = row2El?.getBoundingClientRect().height || 0;
         const totalHeight = rect.bottom;
         
-        // Update max height if current is larger
-        if (totalHeight > maxHeightRef.current) {
-          maxHeightRef.current = totalHeight;
-        }
-        
-        // Use max height for consistent padding (Sticky Content pattern)
-        // This ensures content doesn't jump when header collapses on scroll
-        const stableHeight = maxHeightRef.current;
+        // Update max height for current view only
+        updateMaxHeightForView(viewType, totalHeight);
+        const stableHeight = getMaxHeightForView(viewType);
         
         const viewOffset = viewType ? (VIEW_OFFSETS[viewType] ?? 8) : 8;
         const newPadding = Math.round(stableHeight + viewOffset + additionalOffset);
@@ -130,7 +144,7 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
         // Clamp values
         const clampedPadding = Math.max(80, Math.min(400, newPadding));
         
-        // Only update if changed significantly (avoid micro-changes)
+        // Only update if changed significantly
         if (Math.abs(clampedPadding - padding) > 2) {
           setPadding(clampedPadding);
           
@@ -151,15 +165,18 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
         isMeasuringRef.current = false;
       }
     });
-  }, [headerRef, viewType, additionalOffset, padding, isReady, updateMeasurements]);
+  }, [headerRef, viewType, additionalOffset, padding, isReady, updateMeasurements, getMaxHeightForView, updateMaxHeightForView]);
 
   // Setup ResizeObserver
   useEffect(() => {
     const header = headerRef.current;
     if (!header) return;
 
-    // Initial measurement after a short delay
-    const initialTimer = setTimeout(measureAndUpdate, 100);
+    // Initial measurement after a longer delay to ensure header is fully rendered
+    const initialTimer = setTimeout(measureAndUpdate, 200);
+    
+    // Secondary measurement to catch any late-rendered content
+    const secondaryTimer = setTimeout(measureAndUpdate, 500);
 
     // Setup ResizeObserver
     const resizeObserver = new ResizeObserver(() => {
@@ -180,6 +197,7 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
 
     return () => {
       clearTimeout(initialTimer);
+      clearTimeout(secondaryTimer);
       resizeObserver.disconnect();
       window.removeEventListener('resize', handleResize);
       if (rafIdRef.current) {

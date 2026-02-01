@@ -127,8 +127,8 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
 
  return (
   <div className="flex flex-col h-full bg-[#FAFAFA] dark:bg-[#141417] min-h-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
-   <div className="flex-1 overflow-y-auto custom-scrollbar">
-    <div className="max-w-[1920px] ml-0 p-4 md:p-6 pt-0 grid grid-cols-1 xl:grid-cols-3 gap-8 pb-32">
+    <div className="flex-1 overflow-y-auto custom-scrollbar">
+      <div className="max-w-[1920px] ml-0 p-4 md:p-6 pt-0 grid grid-cols-1 xl:grid-cols-3 gap-8 pb-32">
      {/* LEFT COLUMN */}
      <div className="xl:col-span-2 space-y-6">
       <div className="bg-white dark:bg-[#1C1C1E] rounded-[28px] p-8 shadow-sm border border-gray-100/50 dark:border-white/5">
