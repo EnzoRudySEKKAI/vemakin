@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import { Plus, MessageSquare, Check, Calendar, Hash, Clock, Crop, Activity, Volume2, Layers, Monitor } from 'lucide-react'
+import { Plus, Check, Calendar, Hash, Clock, Crop, Activity, Volume2, Layers, Monitor } from 'lucide-react'
 import { PostProdTask, Note } from '../../types'
 import { POST_PROD_CATEGORIES } from '../../constants'
 import { useDetailView } from '../../hooks/useDetailView'
@@ -9,7 +9,6 @@ import { Text } from '../../components/atoms/Text'
 import { Input } from '../../components/atoms/Input'
 import { FormTextarea } from '../../components/molecules/FormField'
 import { ConfirmModal } from '../ui/ConfirmModal'
-import { EmptyState } from '../ui/EmptyState'
 
 interface TaskDetailViewProps {
   task: PostProdTask
@@ -149,9 +148,12 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
       actions={headerActions}
       size="wide"
       sidebar={
-        <div className="p-8 border border-white/60 dark:border-white/5 shadow-sm rounded-[32px] bg-white dark:bg-[#1C1C1E]">
-          <Text variant="h4" className="mb-6">Status</Text>
-          <div className="space-y-2">
+        <div className="p-2">
+          <div className="mb-10">
+            <Text variant="title" className="mb-2">Status</Text>
+          </div>
+
+          <div className="space-y-1">
             {statusOptions.map((status) => {
               const isActive = task.status === status.key
               return (
@@ -161,7 +163,7 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                   className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all border ${
                     isActive 
                       ? 'bg-blue-50 dark:bg-blue-500/10 border-blue-100 dark:border-blue-500/20 text-blue-700 dark:text-blue-400' 
-                      : 'bg-transparent border-transparent text-gray-500 hover:bg-gray-50'
+                      : 'bg-transparent border-transparent text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5'
                   }`}
                 >
                   <Text variant="body">{status.label}</Text>
@@ -179,7 +181,7 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
         </div>
       }
     >
-      <div className="bg-white dark:bg-[#1C1C1E] rounded-[28px] p-8 shadow-sm border border-gray-100/50 dark:border-white/5 mb-6">
+      <div className="flex flex-col gap-8 mb-12 pb-10 border-b border-gray-100 dark:border-white/5">
         {isEditing ? (
           <div className="space-y-4">
             <Input
@@ -228,81 +230,119 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
           </div>
         ) : (
           <>
-            <Text variant="h3" className="mb-4">{task.title}</Text>
-            <div className="flex items-center gap-3 mb-6">
-              <span className={`px-3 py-1.5 rounded-xl text-xs font-semibold ${
+            <div className="w-full">
+              <Text variant="subtitle" color="muted" className="mb-3 block text-center sm:text-left dark:text-white">
+                Task info
+              </Text>
+              <div className={`flex items-center justify-center gap-3 px-5 py-3 rounded-2xl border transition-all duration-300 w-fit ${
                 task.priority === 'critical' || task.priority === 'high'
-                  ? 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400'
+                  ? 'bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-500/20 text-red-600 dark:text-red-400'
                   : task.priority === 'medium'
-                  ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400'
-                  : 'bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400'
+                  ? 'bg-orange-50 dark:bg-orange-500/10 border-orange-100 dark:border-orange-500/20 text-orange-600 dark:text-orange-400'
+                  : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/10 text-gray-500 dark:text-gray-400'
               }`}>
-                {task.priority === 'critical' || task.priority === 'high' 
-                  ? task.priority.charAt(0).toUpperCase() + task.priority.slice(1) 
-                  : task.priority} priority
-              </span>
-              {task.dueDate && (
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 text-xs font-semibold border border-gray-100 dark:border-white/10">
-                  <Calendar size={12} strokeWidth={2.5} /> {new Date(task.dueDate).toLocaleDateString()}
-                </span>
-              )}
+                <div className="flex items-center gap-2.5">
+                  <div className={`w-2 h-2 rounded-full ${
+                    task.priority === 'critical' || task.priority === 'high'
+                      ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]'
+                      : task.priority === 'medium'
+                      ? 'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.4)]'
+                      : 'bg-gray-400'
+                  }`} />
+                  <Text variant="body">
+                    {task.priority === 'critical' || task.priority === 'high' 
+                      ? task.priority.charAt(0).toUpperCase() + task.priority.slice(1) 
+                      : task.priority} priority
+                  </Text>
+                </div>
+              </div>
             </div>
-            <Text variant="body" color="secondary" className="whitespace-pre-wrap">
-              {task.description || "No description provided."}
-            </Text>
+
+            <div className="grid grid-cols-2 lg:flex lg:flex-wrap items-start gap-x-8 lg:gap-x-16 gap-y-8">
+              <div className="flex flex-col gap-1 min-w-0">
+                <Text variant="subtitle" color="muted" className="dark:text-white">Title</Text>
+                <Text variant="title" className="block leading-tight py-1.5">
+                  {task.title}
+                </Text>
+              </div>
+
+              {task.dueDate && (
+                <div className="flex flex-col gap-1 min-w-0">
+                  <Text variant="subtitle" color="muted" className="dark:text-white">Due date</Text>
+                  <Text variant="title" className="block leading-tight py-1.5">
+                    {new Date(task.dueDate).toLocaleDateString()}
+                  </Text>
+                </div>
+              )}
+
+              <div className="flex flex-col gap-1 min-w-0 flex-1">
+                <Text variant="subtitle" color="muted" className="dark:text-white">Category</Text>
+                <Text variant="title" className="block leading-tight py-1.5">
+                  {task.category}
+                </Text>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3 min-w-0">
+              <Text variant="subtitle" color="muted" className="dark:text-white">Description</Text>
+              <Text variant="body" color="secondary" className="whitespace-pre-wrap max-w-3xl">
+                {task.description || "No description provided."}
+              </Text>
+            </div>
+
             {task.metadata && Object.keys(task.metadata).length > 0 && (
-              <div className="mt-6 pt-5 border-t border-gray-100 dark:border-white/10 grid grid-cols-2 gap-4">
-                {Object.entries(task.metadata).map(([key, val]) => (
-                  val ? (
-                    <div key={key}>
-                      <Text variant="subtitle" color="muted" className="block mb-1">
-                        {key.replace(/([A-Z])/g, ' $1').trim()}
-                      </Text>
-                      <Text variant="body">{String(val)}</Text>
-                    </div>
-                  ) : null
-                ))}
+              <div className="pt-4 border-t border-gray-100 dark:border-white/10">
+                <Text variant="subtitle" color="muted" className="mb-4 dark:text-white">Metadata</Text>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-y-8 gap-x-8">
+                  {Object.entries(task.metadata).map(([key, val]) => (
+                    val ? (
+                      <div key={key} className="group">
+                        <Text variant="subtitle" color="muted" className="block mb-2.5 leading-none dark:text-white">
+                          {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim()}
+                        </Text>
+                        <Text variant="title">{String(val)}</Text>
+                      </div>
+                    ) : null
+                  ))}
+                </div>
               </div>
             )}
           </>
         )}
       </div>
 
-      <div className="px-2">
-        <div className="flex items-center justify-between mb-3">
-          <Text variant="subtitle" color="muted">Linked notes ({linkedNotes.length})</Text>
+      <section>
+        <div className="flex items-center justify-between mb-6">
+          <Text variant="subtitle" color="muted">Notes ({linkedNotes.length})</Text>
           <button 
             onClick={onAddNote} 
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-white/10 rounded-lg text-[10px] font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500/5 text-blue-600 dark:text-indigo-400 text-xs font-semibold hover:bg-blue-500/10 transition-all"
           >
-            <Plus size={12} strokeWidth={3} /> Add note
+            <Plus size={14} /> Add note
           </button>
         </div>
 
         {linkedNotes.length > 0 ? (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {linkedNotes.map(note => (
               <div 
                 key={note.id} 
                 onClick={() => onOpenNote(note.id)} 
-                className="p-4 bg-white dark:bg-[#1C1C1E] rounded-[20px] border border-gray-100 dark:border-white/10 shadow-sm flex items-start gap-4 cursor-pointer hover:border-blue-200 transition-all group"
+                className="p-6 bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/5 rounded-3xl cursor-pointer hover:border-blue-500/30 transition-all group shadow-sm hover:shadow-md"
               >
-                <div className="p-2 bg-blue-50 dark:bg-blue-500/10 text-blue-500 rounded-xl">
-                  <MessageSquare size={16} strokeWidth={2.5} />
-                </div>
-                <div className="min-w-0 flex-1 pt-0.5">
-                  <Text variant="body" className="truncate group-hover:text-blue-600 transition-colors">
-                    {note.title}
-                  </Text>
-                  <Text variant="caption" color="muted" className="truncate">{note.content}</Text>
-                </div>
+                <h4 className="font-semibold text-gray-900 dark:text-white text-lg mb-2 group-hover:text-blue-600 transition-colors">
+                  {note.title || "Untitled note"}
+                </h4>
+                <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-3 leading-relaxed">{note.content}</p>
               </div>
             ))}
           </div>
         ) : (
-          <EmptyState title="No notes attached" icon={MessageSquare} compact iconColor="gray"/>
+          <div className="py-12 bg-gray-50/50 dark:bg-white/[0.02] rounded-[32px] border border-dashed border-gray-200 dark:border-white/10 flex flex-col items-center justify-center text-center">
+            <Text variant="caption" color="muted">No notes for this task yet.</Text>
+          </div>
         )}
-      </div>
+      </section>
 
       <ConfirmModal
         isOpen={showDeleteConfirm}

@@ -1,5 +1,5 @@
 import React, { useRef, useMemo, useCallback } from 'react'
-import { Plus, Paperclip, Image as ImageIcon, File, Film, Briefcase, ExternalLink, ArrowUpRight, Clock, Trash2 } from 'lucide-react'
+import { Plus, Image as ImageIcon, File, Film, Briefcase, ExternalLink, ArrowUpRight, Trash2 } from 'lucide-react'
 import { Note, Shot, PostProdTask, Attachment } from '../../types'
 import { useDetailView } from '../../hooks/useDetailView'
 import { DetailViewLayout } from '../../components/organisms/DetailViewLayout'
@@ -134,13 +134,16 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
       actions={headerActions}
       size="wide"
       sidebar={
-        <div className="p-8 border border-white/60 dark:border-white/5 shadow-sm rounded-[32px] bg-white dark:bg-[#1C1C1E] h-fit">
-          <Text variant="h4" className="mb-6">Linked context</Text>
+        <div className="p-2">
+          <div className="mb-10">
+            <Text variant="title" className="mb-2">Linked context</Text>
+          </div>
+
           <div className="space-y-4">
             {linkedShot && (
               <button 
                 onClick={() => onNavigateToShot(linkedShot.id)} 
-                className="w-full bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/10 flex items-center justify-between group transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full p-4 rounded-2xl border border-gray-100 dark:border-white/5 flex items-center justify-between group transition-all hover:scale-[1.02] active:scale-[0.98] hover:bg-gray-50 dark:hover:bg-white/5"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
@@ -159,7 +162,7 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
             {linkedTask && (
               <button 
                 onClick={() => onNavigateToTask(linkedTask.id)} 
-                className="w-full bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/10 flex items-center justify-between group transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full p-4 rounded-2xl border border-gray-100 dark:border-white/5 flex items-center justify-between group transition-all hover:scale-[1.02] active:scale-[0.98] hover:bg-gray-50 dark:hover:bg-white/5"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500">
@@ -176,28 +179,25 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
               </button>
             )}
             {!linkedShot && !linkedTask && (
-              <div className="py-8 flex flex-col items-center justify-center bg-gray-50/50 dark:bg-white/[0.01] rounded-2xl border border-dashed border-gray-100 dark:border-white/5">
-                <ExternalLink size={24} className="text-gray-300 mb-2"/>
+              <div className="py-12 flex flex-col items-center justify-center text-center">
+                <ExternalLink size={32} className="text-gray-300 mb-3"/>
                 <Text variant="caption" color="muted">No linked items</Text>
               </div>
             )}
           </div>
 
-          <div className="mt-8 pt-8 border-t border-gray-100 dark:border-white/5">
-            <div className="flex items-center gap-2 mb-4 text-gray-400">
-              <Clock size={14} />
-              <Text variant="caption" color="muted">Metadata</Text>
-            </div>
-            <div className="grid grid-cols-1 gap-4">
-              <div className="bg-gray-50 dark:bg-white/[0.02] p-3 rounded-xl border border-gray-100 dark:border-white/5">
-                <Text variant="caption" color="muted" className="mb-1">Last modified</Text>
-                <Text variant="body">
+          <div className="mt-10 pt-10 border-t border-gray-100 dark:border-white/5">
+            <Text variant="title" className="mb-6">Metadata</Text>
+            <div className="grid grid-cols-1 gap-6">
+              <div className="flex flex-col gap-1">
+                <Text variant="subtitle" color="muted" className="dark:text-white">Last modified</Text>
+                <Text variant="title" className="block leading-tight py-1.5">
                   {new Date(note.updatedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </Text>
               </div>
-              <div className="bg-gray-50 dark:bg-white/[0.02] p-3 rounded-xl border border-gray-100 dark:border-white/5">
-                <Text variant="caption" color="muted" className="mb-1">Created</Text>
-                <Text variant="body">
+              <div className="flex flex-col gap-1">
+                <Text variant="subtitle" color="muted" className="dark:text-white">Created</Text>
+                <Text variant="title" className="block leading-tight py-1.5">
                   {new Date(note.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </Text>
               </div>
@@ -206,8 +206,7 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
         </div>
       }
     >
-      <div className="bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-[28px] p-8 shadow-sm mb-6">
-        <Text variant="label" color="muted" className="ml-1 block mb-3">Note content</Text>
+      <div className="flex flex-col gap-8 mb-12 pb-10 border-b border-gray-100 dark:border-white/5">
         {isEditing ? (
           <div className="space-y-4">
             <Input
@@ -215,7 +214,9 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
               value={editedItem.title}
               onChange={(e) => setEditedItem({ ...editedItem, title: e.target.value })}
               placeholder="Note title"
+              variant="underline"
               fullWidth
+              className="text-2xl"
             />
             <FormTextarea
               value={editedItem.content}
@@ -226,30 +227,30 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
             />
           </div>
         ) : (
-          <div className="space-y-4">
-            <Text variant="h3">{note.title || 'Untitled note'}</Text>
-            <div className="h-px bg-gray-100 dark:bg-white/5 w-full"/>
-            <Text variant="body" color="secondary" className="whitespace-pre-wrap">
-              {note.content || 'No content provided.'}
-            </Text>
-          </div>
+          <>
+            <div className="flex flex-col gap-3 min-w-0">
+              <Text variant="subtitle" color="muted" className="dark:text-white">Title</Text>
+              <Text variant="title" className="block leading-tight py-1.5">
+                {note.title || 'Untitled note'}
+              </Text>
+            </div>
+
+            <div className="flex flex-col gap-3 min-w-0">
+              <Text variant="subtitle" color="muted" className="dark:text-white">Content</Text>
+              <Text variant="body" color="secondary" className="whitespace-pre-wrap max-w-3xl">
+                {note.content || 'No content provided.'}
+              </Text>
+            </div>
+          </>
         )}
       </div>
 
-      <div className="bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-[28px] p-8 shadow-sm">
+      <section>
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-indigo-500/10 flex items-center justify-center text-blue-600 dark:text-[#4E47DD]">
-              <Paperclip size={18} />
-            </div>
-            <div>
-              <Text variant="body">Attachments</Text>
-              <Text variant="caption" color="muted">{editedItem.attachments?.length || 0} files</Text>
-            </div>
-          </div>
+          <Text variant="subtitle" color="muted">Attachments ({editedItem.attachments?.length || 0})</Text>
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 rounded-xl text-xs font-semibold transition-all border border-gray-200 dark:border-white/10"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500/5 text-blue-600 dark:text-indigo-400 text-xs font-semibold hover:bg-blue-500/10 transition-all"
           >
             <Plus size={14} /> Add file
           </button>
@@ -261,9 +262,9 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
             editedItem.attachments.map(att => (
               <div 
                 key={att.id} 
-                className="group relative bg-gray-50 dark:bg-white/[0.02] p-4 rounded-2xl border border-gray-100 dark:border-white/5 hover:border-blue-200 dark:hover:border-indigo-500/30 transition-all flex items-center gap-4"
+                className="group relative bg-white dark:bg-[#1C1C1E] p-4 rounded-2xl border border-gray-100 dark:border-white/5 hover:border-blue-200 dark:hover:border-indigo-500/30 transition-all flex items-center gap-4 shadow-sm"
               >
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-white dark:bg-white/5 shadow-sm">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gray-50 dark:bg-white/5">
                   {att.type === 'image' ? <ImageIcon size={20} className="text-blue-500"/> : <File size={20} className="text-gray-400"/>}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -279,14 +280,12 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
               </div>
             ))
           ) : (
-            <div className="col-span-full py-12 flex flex-col items-center justify-center bg-gray-50/50 dark:bg-white/[0.01] rounded-3xl border-2 border-dashed border-gray-100 dark:border-white/5">
-              <Paperclip size={32} className="text-gray-300 mb-3"/>
-              <Text variant="caption" color="muted">No files attached yet</Text>
-              <Text variant="caption" color="muted" className="mt-1">Images, documents, and references</Text>
+            <div className="col-span-full py-12 bg-gray-50/50 dark:bg-white/[0.02] rounded-[32px] border border-dashed border-gray-200 dark:border-white/10 flex flex-col items-center justify-center text-center">
+              <Text variant="caption" color="muted">No attachments for this note yet.</Text>
             </div>
           )}
         </div>
-      </div>
+      </section>
 
       <ConfirmModal
         isOpen={showDeleteConfirm}
