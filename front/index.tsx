@@ -654,7 +654,7 @@ const CineFlowApp = () => {
         {/* Sync Layout System - Content wrapper with dynamic padding */}
         <div
           className={`content-wrapper px-4 md:px-6 pb-6 lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(275px+1.5rem)] view-${mainView}`}
-          style={layoutStyle}
+          style={mainView === 'settings' || mainView === 'manage-projects' ? { paddingTop: 0 } : layoutStyle}
         >
           <main className={`mx-auto w-full pb-28 transition-all duration-500 ease-in-out ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`}>
             <AnimatePresence mode="wait">

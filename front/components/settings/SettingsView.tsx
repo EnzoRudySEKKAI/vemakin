@@ -36,10 +36,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
  };
 
- return (
-  <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+  return (
+   <div className="flex flex-col h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="flex-1 overflow-y-auto custom-scrollbar" style={{ paddingTop: '100px' }}>
+     <div className="max-w-2xl mx-auto space-y-8 px-4 pb-8">
 
-   {/* Account Section */}
+    {/* Account Section */}
    <section>
     <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-3 px-2">Account</h3>
 
@@ -254,9 +256,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
    </section>
 
    <div className="text-center pb-8">
-    <p className="text-[9px] font-semibold text-gray-300 dark:text-gray-600">CineFlow OS v1.2.0</p>
-   </div>
+     <p className="text-[9px] font-semibold text-gray-300 dark:text-gray-600">CineFlow OS v1.2.0</p>
+    </div>
 
-  </div>
- );
-};
+     </div>
+    </div>
+   </div>
+  );
+ };

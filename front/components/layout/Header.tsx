@@ -194,16 +194,27 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
           <div data-header-row="1" className="flex items-center justify-between min-h-[50px] mb-2">
 
             {/* Left: Title & Subtitle */}
-            <div className="flex flex-col justify-center">
-              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white leading-tight">
-                {backAction ? (detailLabel || 'Detail view') : viewTitle}
-              </h1>
-              <div className="h-4 flex items-center">
-                {!backAction && (
-                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-500">
-                    {getSubtitle()}
-                  </span>
-                )}
+            <div className="flex items-center gap-3">
+              {/* Back button for Settings and Manage Projects */}
+              {(mainView === 'settings' || mainView === 'manage-projects') && (
+                <button
+                  onClick={() => setMainView('overview')}
+                  className="w-10 h-10 rounded-xl bg-white dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-white transition-all hover:bg-gray-100 dark:hover:bg-white/20 shrink-0"
+                >
+                  <ChevronLeft size={20} strokeWidth={2.5} />
+                </button>
+              )}
+              <div className="flex flex-col justify-center leading-none">
+                <h1 className="text-2xl font-semibold text-gray-900 dark:text-white leading-none">
+                  {backAction ? (detailLabel || 'Detail view') : viewTitle}
+                </h1>
+                <div className="flex items-center">
+                  {!backAction && (
+                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-500">
+                      {getSubtitle()}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -216,12 +227,15 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
                 {darkMode ? <Moon size={18} fill="currentColor"/> : <Sun size={18} />}
               </button>
 
-              <button
-                onClick={() => setMainView('settings')}
-                className="w-9 h-9 rounded-[12px] bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-[#4E47DD] transition-all hover:scale-105 active:scale-95"
-              >
-                <Settings size={18} />
-              </button>
+              {/* Hide settings button when on settings or manage-projects */}
+              {mainView !== 'settings' && mainView !== 'manage-projects' && (
+                <button
+                  onClick={() => setMainView('settings')}
+                  className="w-9 h-9 rounded-[12px] bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-[#4E47DD] transition-all hover:scale-105 active:scale-95"
+                >
+                  <Settings size={18} />
+                </button>
+              )}
 
               <button
                 onClick={onAdd}
@@ -431,7 +445,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
                       )}
 
                       {/* Filters Row */}
-                      {mainView !== 'overview' && mainView !== 'settings' &&
+                      {mainView !== 'overview' && mainView !== 'settings' && mainView !== 'manage-projects' &&
                         mainView !== 'shot-detail' && mainView !== 'task-detail' &&
                         mainView !== 'note-detail' && mainView !== 'equipment-detail' && (
                           <div className="h-[48px] flex items-center w-full gap-4">
@@ -706,7 +720,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
                         )}
 
                       {/* Secondary Row */}
-                      {mainView !== 'overview' && mainView !== 'settings' && mainView !== 'shots' &&
+                      {mainView !== 'overview' && mainView !== 'settings' && mainView !== 'manage-projects' && mainView !== 'shots' &&
                         mainView !== 'shot-detail' && mainView !== 'task-detail' &&
                         mainView !== 'note-detail' && mainView !== 'equipment-detail' && (
                           <div className="h-[48px] flex items-center gap-2 w-full">

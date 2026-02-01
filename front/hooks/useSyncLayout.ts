@@ -18,12 +18,12 @@ const VIEW_OFFSETS: Record<string, number> = {
   notes: 16,
   postprod: 12,
   overview: 12,
-  settings: 16,
+  settings: 8,
   'equipment-detail': 12,
   'shot-detail': 12,
   'note-detail': 12,
   'task-detail': 12,
-  'manage-projects': 16,
+  'manage-projects': 8,
 };
 
 /**

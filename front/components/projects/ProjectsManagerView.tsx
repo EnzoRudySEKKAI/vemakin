@@ -40,10 +40,12 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
   setEditingProject(null);
  };
 
- return (
-  <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in slide-in-from-right-8 duration-500">
+  return (
+   <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-8 duration-500">
+    <div className="flex-1 overflow-y-auto custom-scrollbar" style={{ paddingTop: '100px' }}>
+     <div className="max-w-2xl mx-auto space-y-6 px-4 pb-8">
 
-   <div className="bg-blue-50/50 dark:bg-blue-500 dark:bg-indigo-500/10 border border-blue-100 dark:border-blue-500 dark:border-indigo-500/20 p-4 rounded-2xl flex items-start gap-3">
+    <div className="bg-blue-50/50 dark:bg-blue-500 dark:bg-indigo-500/10 border border-blue-100 dark:border-blue-500 dark:border-indigo-500/20 p-4 rounded-2xl flex items-start gap-3">
     <AlertCircle size={20} className="text-blue-500 dark:text-indigo-500 shrink-0 mt-0.5"/>
     <div>
      <h4 className="text-[10px] font-semibold text-indigo-700 dark:text-blue-400 dark:text-indigo-400 mb-1">Project management</h4>
@@ -136,14 +138,16 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
     })}
    </div>
 
-   <div className="pt-8 flex justify-center">
-    <button
-     onClick={onBack}
-     className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex items-center gap-2"
-    >
-     <FolderOpen size={14} /> Return to settings
-    </button>
+    <div className="pt-8 flex justify-center">
+     <button
+      onClick={onBack}
+      className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex items-center gap-2"
+     >
+      <FolderOpen size={14} /> Return to settings
+     </button>
+    </div>
+     </div>
+    </div>
    </div>
-  </div>
- );
-};
+  );
+ };
