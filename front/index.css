@@ -528,3 +528,8 @@ html {
 .view-postprod { --content-padding-offset: var(--view-offset-postprod); }
 .view-overview { --content-padding-offset: var(--view-offset-overview); }
 .view-settings { --content-padding-offset: var(--view-offset-settings); }
+.view-equipment-detail { --content-padding-offset: var(--view-offset-inventory); }
+.view-shot-detail { --content-padding-offset: var(--view-offset-shots); }
+.view-note-detail { --content-padding-offset: var(--view-offset-notes); }
+.view-task-detail { --content-padding-offset: var(--view-offset-postprod); }
+.view-manage-projects { --content-padding-offset: var(--view-offset-settings); }

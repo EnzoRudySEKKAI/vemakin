@@ -241,7 +241,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
  return (
   <div className="flex flex-col h-full bg-[#FAFAFA] dark:bg-[#141417] min-h-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
    <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-    <div className="max-w-7xl mx-auto p-4 md:p-8 pt-10 pb-32">
+    <div className="max-w-7xl mx-auto p-4 md:p-8 pt-0 pb-32">
      {isRetaking && (
       <div className="mb-8 p-4 bg-orange-500/10 rounded-2xl border border-orange-500/20 flex flex-wrap items-center gap-4">
        <span className="font-semibold text-orange-600 dark:text-orange-400 text-sm">Schedule retake:</span>
