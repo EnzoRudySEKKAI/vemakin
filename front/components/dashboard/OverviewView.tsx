@@ -80,13 +80,17 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
   }, [notes]);
 
   const inventoryStats = useMemo(() => {
-    const totalItems = inventory.length;
+    // Sum quantities instead of counting items for accurate statistics
+    const totalItems = inventory.reduce((sum, item) => sum + (item.quantity || 1), 0);
 
-    // Group by category
+    // Group by category with quantities
     const byCategory: Record<string, number> = {};
     inventory.forEach(item => {
-      byCategory[item.category] = (byCategory[item.category] || 0) + 1;
+      byCategory[item.category] = (byCategory[item.category] || 0) + (item.quantity || 1);
     });
+
+    // Count unique gear types (categories)
+    const gearTypesCount = Object.keys(byCategory).length;
 
     // Prepare Chart Data (Top 4 Categories + Other)
     const sortedCategories = Object.entries(byCategory)
@@ -118,18 +122,31 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
       return { ...segment, startAngle, angle };
     });
 
-    return { totalItems, donutSegments };
+    return { totalItems, gearTypesCount, donutSegments };
   }, [inventory]);
 
   // Helper to create SVG Arc Path
   const describeArc = (x: number, y: number, radius: number, startAngle: number, endAngle: number) => {
+    // Handle edge cases
+    if (endAngle - startAngle >= 360) {
+      // Full circle - draw as a circle path instead of arc
+      return `M ${x} ${y - radius} A ${radius} ${radius} 0 1 1 ${x} ${y + radius} A ${radius} ${radius} 0 1 1 ${x} ${y - radius}`;
+    }
+    if (endAngle <= startAngle) {
+      return ''; // No arc to draw
+    }
+    
     const start = polarToCartesian(x, y, radius, endAngle);
     const end = polarToCartesian(x, y, radius, startAngle);
-    const largeArcFlag = endAngle - startAngle <= 180 ?"0":"1";
-    return [
-     "M", start.x, start.y,
-     "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y
-    ].join("");
+    const largeArcFlag = endAngle - startAngle <= 180 ? 0 : 1;
+    
+    // Ensure all values are valid numbers
+    const sx = Number(start.x.toFixed(3));
+    const sy = Number(start.y.toFixed(3));
+    const ex = Number(end.x.toFixed(3));
+    const ey = Number(end.y.toFixed(3));
+    
+    return `M ${sx} ${sy} A ${radius} ${radius} 0 ${largeArcFlag} 0 ${ex} ${ey}`;
   };
 
   const polarToCartesian = (centerX: number, centerY: number, radius: number, angleInDegrees: number) => {
@@ -207,8 +224,8 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
               <div className="w-full md:w-1/2 flex items-center justify-center gap-6">
                 {/* Label Left */}
                 <div className="text-right hidden sm:block">
-                  <span className="block text-xs font-semibold text-gray-400">Gear</span>
-                  <span className="block text-xs font-semibold text-gray-400">types</span>
+                  <span className="block text-5xl font-bold text-gray-900 dark:text-white leading-none mb-1">{inventoryStats.gearTypesCount}</span>
+                  <span className="block text-xs font-semibold text-gray-400">Gear types</span>
                 </div>
                 {/* SVG Donut Chart */}
                 <div className="relative w-32 h-32 shrink-0">
@@ -219,15 +236,15 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
                     {/* Animated Segments */}
                     {inventoryStats.donutSegments.map((segment, i) => (
                       <motion.path
-                        key={segment.name}
+                        key={`${segment.name}-${segment.value}-${i}`}
                         d={describeArc(50, 50, 40, segment.startAngle, segment.startAngle + segment.angle)}
                         fill="transparent"
                         stroke={segment.color}
                         strokeWidth="12"
-                        strokeLinecap="butt"// Changed to butt to fix double-rounded tips
-                        initial={{ pathLength: 0 }}
+                        strokeLinecap="butt"
+                        initial={{ pathLength: 1 }}
                         animate={{ pathLength: 1 }}
-                        transition={{ duration: 1, delay: i * 0.1, ease:"easeOut"}}
+                        transition={{ duration: 0.5, delay: i * 0.1, ease:"easeOut"}}
                       />
                     ))}
                   </svg>

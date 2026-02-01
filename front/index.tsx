@@ -616,7 +616,16 @@ const CineFlowApp = () => {
         );
 
       case 'settings':
-        return <SettingsView />;
+        return (
+          <SettingsView
+            user={currentUser}
+            onLogin={() => setAuthView('landing')}
+            onLogout={logout}
+            onNavigateToProjects={() => setMainView('manage-projects')}
+            onOpenNews={() => setShowNews(true)}
+            onOpenTutorial={() => setShowTutorial(true)}
+          />
+        );
 
       case 'manage-projects':
         return (

@@ -30,6 +30,7 @@ export const useProductionStore = () => {
   const [catalogCategories, setCatalogCategories] = useState<CatalogCategory[]>([]);
   const [catalogBrands, setCatalogBrands] = useState<CatalogBrand[]>([]);
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
+  const [hasFetchedCatalog, setHasFetchedCatalog] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user: FirebaseUser | null) => {
@@ -40,10 +41,17 @@ export const useProductionStore = () => {
         });
         setIsGuest(false);
 
-        // Fetch Data from Backend
+        // Fetch Data from Backend in Parallel
         try {
-          // Fetch Projects
-          const projectsRes = await api.get('/projects');
+          // Fetch Projects and Inventory in parallel for faster loading
+          const [projectsRes, invRes] = await Promise.all([
+            api.get('/projects'),
+            api.get('/inventory').catch(err => {
+              console.error("Failed to fetch inventory:", err);
+              return { data: [] };
+            })
+          ]);
+
           const fetchedProjects = projectsRes.data;
 
           if (fetchedProjects.length > 0) {
@@ -68,28 +76,23 @@ export const useProductionStore = () => {
               return newData;
             });
 
-            // Fetch Inventory (Global)
-            try {
-              const invRes = await api.get('/inventory');
-              const fetchedInv: Equipment[] = invRes.data.map((i: any) => ({
-                id: i.id,
-                name: i.name,
-                catalogItemId: i.catalogItemId,
-                customName: i.customName,
-                serialNumber: i.serialNumber,
-                category: i.category,
-                pricePerDay: i.pricePerDay,
-                rentalPrice: i.rentalPrice,
-                rentalFrequency: i.rentalFrequency,
-                quantity: i.quantity,
-                isOwned: i.isOwned,
-                status: i.status,
-                specs: i.specs || {}
-              }));
-              setAllInventory(fetchedInv);
-            } catch (invErr) {
-              console.error("Failed to fetch inventory:", invErr);
-            }
+            // Process inventory data
+            const fetchedInv: Equipment[] = invRes.data.map((i: any) => ({
+              id: i.id,
+              name: i.name,
+              catalogItemId: i.catalogItemId,
+              customName: i.customName,
+              serialNumber: i.serialNumber,
+              category: i.category,
+              pricePerDay: i.pricePerDay,
+              rentalPrice: i.rentalPrice,
+              rentalFrequency: i.rentalFrequency,
+              quantity: i.quantity,
+              isOwned: i.isOwned,
+              status: i.status,
+              specs: i.specs || {}
+            }));
+            setAllInventory(fetchedInv);
 
             setCurrentProject(prev => projectNames.includes(prev) ? prev : projectNames[0]);
           } else {
@@ -111,18 +114,19 @@ export const useProductionStore = () => {
     return () => unsubscribe();
   }, []);
 
-  // Fetch Catalog Categories on Load
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await api.get('/catalog/categories');
-        setCatalogCategories(res.data);
-      } catch (err) {
-        console.error("Failed to fetch catalog categories:", err);
-      }
-    };
-    fetchCategories();
-  }, []);
+  // Lazy load catalog categories only when needed
+  const fetchCatalogCategories = useCallback(async () => {
+    if (hasFetchedCatalog && catalogCategories.length > 0) {
+      return; // Already fetched, skip
+    }
+    try {
+      const res = await api.get('/catalog/categories');
+      setCatalogCategories(res.data);
+      setHasFetchedCatalog(true);
+    } catch (err) {
+      console.error("Failed to fetch catalog categories:", err);
+    }
+  }, [hasFetchedCatalog, catalogCategories.length]);
 
   const fetchBrands = useCallback(async (categoryId: string) => {
     try {
@@ -186,15 +190,26 @@ export const useProductionStore = () => {
     setProjectData(prev => ({ ...prev, [currentProject]: { ...prev[currentProject], ...updates } }));
   }, [currentProject]);
 
-  // Fetch Shots when currentProject changes
+  // Track fetched projects to avoid refetching
+  const [fetchedProjectIds, setFetchedProjectIds] = useState<Set<string>>(new Set());
+
+  // Fetch Project Data when currentProject changes - Parallel fetching for faster loading
   useEffect(() => {
     const fetchProjectData = async () => {
       const projectState = projectData[currentProject];
       if (!projectState?.id || !currentUser) return;
+      
+      // Skip if already fetched this session
+      if (fetchedProjectIds.has(projectState.id)) return;
 
       try {
-        // Fetch Shots
-        const shotsRes = await api.get(`/shots?project_id=${projectState.id}`);
+        // Fetch Shots, Notes, and Tasks in parallel for faster loading
+        const [shotsRes, notesRes, tasksRes] = await Promise.all([
+          api.get(`/shots?project_id=${projectState.id}`),
+          api.get(`/notes?project_id=${projectState.id}`),
+          api.get(`/postprod?project_id=${projectState.id}`)
+        ]);
+
         const fetchedShots: Shot[] = shotsRes.data.map((s: any) => ({
           id: s.id,
           title: s.title,
@@ -210,8 +225,6 @@ export const useProductionStore = () => {
           preparedEquipmentIds: s.prepared_equipment_ids || []
         }));
 
-        // Fetch Notes
-        const notesRes = await api.get(`/notes?project_id=${projectState.id}`);
         const fetchedNotes: Note[] = notesRes.data.map((n: any) => ({
           id: n.id,
           title: n.title,
@@ -221,8 +234,6 @@ export const useProductionStore = () => {
           taskId: n.task_id
         }));
 
-        // Fetch Tasks
-        const tasksRes = await api.get(`/postprod?project_id=${projectState.id}`);
         const fetchedTasks: PostProdTask[] = tasksRes.data.map((t: any) => ({
           id: t.id,
           category: t.category,
@@ -243,13 +254,16 @@ export const useProductionStore = () => {
           }
         }));
 
+        // Mark as fetched
+        setFetchedProjectIds(prev => new Set(prev).add(projectState.id));
+
       } catch (err) {
         console.error("Failed to fetch project data:", err);
       }
     };
 
     fetchProjectData();
-  }, [currentProject, projectData[currentProject]?.id, currentUser]);
+  }, [currentProject, projectData[currentProject]?.id, currentUser, fetchedProjectIds]);
 
   const login = useCallback((name: string, email: string) => {
     // Deprecated: Authentication is handled by Firebase Auth and onAuthStateChanged.
@@ -597,8 +611,19 @@ export const useProductionStore = () => {
     catalogCategories,
     catalogBrands,
     catalogItems,
+    fetchCatalogCategories,
     fetchBrands,
     fetchCatalogItems,
-    fetchItemSpecs
+    fetchItemSpecs,
+    refreshProjectData: () => {
+      const projectState = projectData[currentProject];
+      if (projectState?.id) {
+        setFetchedProjectIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(projectState.id);
+          return newSet;
+        });
+      }
+    }
   };
 };

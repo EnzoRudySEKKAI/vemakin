@@ -1,5 +1,5 @@
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Save, ChevronDown, ChevronUp, PenLine, Hash, Tag, Box,
   Package, Info, DollarSign, Aperture
@@ -32,10 +32,16 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
     catalogCategories,
     catalogBrands,
     catalogItems,
+    fetchCatalogCategories,
     fetchBrands,
     fetchCatalogItems,
     fetchItemSpecs
   } = useProductionStore();
+
+  // Lazy load catalog categories when form opens
+  useEffect(() => {
+    fetchCatalogCategories();
+  }, [fetchCatalogCategories]);
 
   const [showSpecsInForm, setShowSpecsInForm] = useState(false);
   const [currentModelSpecs, setCurrentModelSpecs] = useState<any>(null);

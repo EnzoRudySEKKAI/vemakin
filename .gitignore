@@ -73,3 +73,6 @@ secrets.*
 **/electron/dist/
 **/electron/release/
 cloud_sql_proxy
+
+# OpenCode
+.opencode/
