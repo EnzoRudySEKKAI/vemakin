@@ -4,7 +4,8 @@ from typing import List
 from ..database import get_db
 from ..models import models
 from ..schemas import schemas
-from ..auth import get_current_user
+from ..auth import get_current_user_or_guest
+from ..mock_data import get_mock_db
 
 router = APIRouter(
     prefix="/shots",
@@ -15,13 +16,19 @@ router = APIRouter(
 
 @router.get("")
 def read_shots(
-    project_id: str,  # UUID string
+    project_id: str,
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user_or_guest),
 ):
-    # Use exists() for faster ownership check
+    # Guest mode: return mock shots
+    if current_user.get("is_guest"):
+        mock_db = get_mock_db()
+        shots = mock_db.list_shots(project_id)
+        return shots[skip : skip + limit] if shots else []
+
+    # Normal mode: verify project ownership and query database
     project_exists = (
         db.query(models.Project)
         .filter(
@@ -48,11 +55,28 @@ def read_shots(
 @router.post("")
 def create_shot(
     shot: schemas.ShotCreate,
-    project_id: str,  # UUID string
+    project_id: str,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user_or_guest),
 ):
-    # Verify project belongs to user
+    # Guest mode: create in mock database
+    if current_user.get("is_guest"):
+        mock_db = get_mock_db()
+        shot_data = {
+            "id": shot.id,
+            "project_id": project_id,
+            "title": shot.title,
+            "description": shot.description,
+            "status": shot.status,
+            "start_time": shot.startTime,
+            "date": shot.date,
+            "location": shot.location,
+            "equipment_ids": shot.equipmentIds,
+        }
+        new_shot = mock_db.create_shot(shot_data)
+        return new_shot
+
+    # Normal mode: verify project ownership
     project = (
         db.query(models.Project)
         .filter(
@@ -91,8 +115,26 @@ def update_shot(
     shot_id: str,
     shot_update: schemas.ShotCreate,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user_or_guest),
 ):
+    # Guest mode: update in mock database
+    if current_user.get("is_guest"):
+        mock_db = get_mock_db()
+        update_data = {
+            "title": shot_update.title,
+            "description": shot_update.description,
+            "status": shot_update.status,
+            "start_time": shot_update.startTime,
+            "date": shot_update.date,
+            "location": shot_update.location,
+            "equipment_ids": shot_update.equipmentIds,
+        }
+        updated = mock_db.update_shot(shot_id, update_data)
+        if not updated:
+            raise HTTPException(status_code=404, detail="Shot not found")
+        return updated
+
+    # Normal mode: update real database
     shot = (
         db.query(models.Shot)
         .join(models.Project)
@@ -105,7 +147,6 @@ def update_shot(
     if not shot:
         raise HTTPException(status_code=404, detail="Shot not found")
 
-    # Update fields mapping camelCase to snake_case
     shot.title = shot_update.title
     shot.description = shot_update.description
     shot.status = shot_update.status
@@ -127,8 +168,17 @@ def update_shot(
 def delete_shot(
     shot_id: str,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user_or_guest),
 ):
+    # Guest mode: delete from mock database
+    if current_user.get("is_guest"):
+        mock_db = get_mock_db()
+        deleted = mock_db.delete_shot(shot_id)
+        if not deleted:
+            raise HTTPException(status_code=404, detail="Shot not found")
+        return None
+
+    # Normal mode: delete from real database
     shot = (
         db.query(models.Shot)
         .join(models.Project)

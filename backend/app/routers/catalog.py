@@ -4,7 +4,8 @@ from typing import List, Optional
 from ..database import get_db
 from ..models import models
 from ..schemas import schemas
-from ..auth import get_current_user
+from ..auth import get_current_user_or_guest
+from ..mock_data import get_mock_db
 import uuid
 import time
 
@@ -82,12 +83,41 @@ def batch_get_items_specs(db: Session, items: List[models.GearCatalog]) -> dict:
 
 
 @router.get("/categories", response_model=List[schemas.Category])
-def get_categories(db: Session = Depends(get_db)):
+def get_categories(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user_or_guest),
+):
+    # Check if guest mode
+    if current_user.get("is_guest"):
+        mock_db = get_mock_db()
+        # Return mock catalog categories
+        return mock_db.list_catalog_categories()
+
     return db.query(models.Category).all()
 
 
 @router.get("/brands", response_model=List[schemas.Brand])
-def get_brands(category_id: Optional[uuid.UUID] = None, db: Session = Depends(get_db)):
+def get_brands(
+    category_id: Optional[uuid.UUID] = None,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user_or_guest),
+):
+    # Check if guest mode
+    if current_user.get("is_guest"):
+        mock_db = get_mock_db()
+        # Return mock catalog brands (optionally filtered by category)
+        brands = mock_db.list_catalog_brands()
+        if category_id:
+            # Filter brands that have items in this category
+            items = mock_db.list_catalog_items()
+            brand_ids_in_category = {
+                item.get("brand_id")
+                for item in items
+                if item.get("category_id") == str(category_id)
+            }
+            brands = [b for b in brands if str(b.get("id")) in brand_ids_in_category]
+        return brands
+
     query = db.query(models.Brand)
     if category_id:
         # Join with gear_catalog to find brands that have items in this category
@@ -104,7 +134,21 @@ def get_items(
     category_id: Optional[uuid.UUID] = None,
     brand_id: Optional[uuid.UUID] = None,
     db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user_or_guest),
 ):
+    # Check if guest mode
+    if current_user.get("is_guest"):
+        mock_db = get_mock_db()
+        # Return mock catalog items (optionally filtered)
+        items = mock_db.list_catalog_items()
+        if category_id:
+            items = [
+                item for item in items if item.get("category_id") == str(category_id)
+            ]
+        if brand_id:
+            items = [item for item in items if item.get("brand_id") == str(brand_id)]
+        return items
+
     start_time = time.time()
 
     query = db.query(models.GearCatalog)
@@ -146,7 +190,20 @@ def get_items(
 
 
 @router.get("/items/{item_id}", response_model=schemas.GearCatalog)
-def get_item(item_id: uuid.UUID, db: Session = Depends(get_db)):
+def get_item(
+    item_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user_or_guest),
+):
+    # Check if guest mode
+    if current_user.get("is_guest"):
+        mock_db = get_mock_db()
+        # Return mock catalog item by id
+        item = mock_db.get_catalog_item(str(item_id))
+        if not item:
+            raise HTTPException(status_code=404, detail="Item not found")
+        return item
+
     item = db.query(models.GearCatalog).filter(models.GearCatalog.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -167,7 +224,20 @@ def get_item(item_id: uuid.UUID, db: Session = Depends(get_db)):
 
 
 @router.get("/items/{item_id}/specs")
-def get_item_specs(item_id: uuid.UUID, db: Session = Depends(get_db)):
+def get_item_specs(
+    item_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user_or_guest),
+):
+    # Check if guest mode
+    if current_user.get("is_guest"):
+        mock_db = get_mock_db()
+        # Return mock catalog item specs
+        item = mock_db.get_catalog_item(str(item_id))
+        if not item:
+            raise HTTPException(status_code=404, detail="Item not found")
+        return item.get("specs", {})
+
     item = db.query(models.GearCatalog).filter(models.GearCatalog.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")

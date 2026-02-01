@@ -29,6 +29,7 @@ import { NewsModal } from './components/modals/NewsModal.tsx';
 import { TutorialModal } from './components/modals/TutorialModal.tsx';
 import { NoProjectsView } from './components/projects/NoProjectsView.tsx';
 import { useProductionStore } from './hooks/useProductionStore.ts';
+import { useHeaderPadding } from './hooks/useHeaderPadding.ts';
 
 const CineFlowApp = () => {
   const {
@@ -100,6 +101,7 @@ const CineFlowApp = () => {
   const [showControls, setShowControls] = useState(true);
   const [isWideMode, setIsWideMode] = useState(false);
   const lastScrollY = useRef(0);
+  const headerRef = useRef<HTMLElement>(null);
 
   const [isDateSelectorOpen, setIsDateSelectorOpen] = useState(false);
   const [dateFilter, setDateFilter] = useState<string | null>(null);
@@ -168,104 +170,14 @@ const CineFlowApp = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Dynamic Header Height with Ratchet to prevent layout shift ("push") on mobile
-  const [headerHeight, setHeaderHeight] = useState(0);
-  const headerMeasuredRef = useRef(false);
-
-  // Immediate measurement before paint to prevent layout jump on first render
-  useLayoutEffect(() => {
-    const header = document.querySelector('header');
-    if (header) {
-      setHeaderHeight(header.offsetHeight);
-      headerMeasuredRef.current = true;
-    }
-  }, []);
-
-  // Ongoing resize observation with ratchet logic
-  useEffect(() => {
-    const header = document.querySelector('header');
-    if (!header) return;
-
-    let isMounting = true;
-    let rafId: number;
-
-    const observer = new ResizeObserver(() => {
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        const currentHeight = header.offsetHeight;
-        setHeaderHeight(prev => {
-          if (isMounting) {
-            isMounting = false;
-            return currentHeight;
-          }
-          return Math.max(prev, currentHeight);
-        });
-      });
-    });
-
-    observer.observe(header);
-    return () => {
-      observer.disconnect();
-      cancelAnimationFrame(rafId);
-    };
-  }, [mainView]);
-
-  // ============================================================
-  // LAYOUT CONFIGURATION - Easy to maintain padding values
-  // ============================================================
-  const LAYOUT_CONFIG = {
-    // Mobile: Tight spacing (screen width < 768px)
-    mobile: {
-      headerOffset: -40, // Negative value pulls content closer to header
-      fallbackPadding: 100 // Fallback before header is measured
-    },
-    // Desktop: Comfortable spacing (screen width >= 768px) 
-    desktop: {
-      headerOffset: 8,  // Positive value adds breathing room
-      fallbackPadding: 160
-    },
-    // View-specific adjustments (added to base offset)
-    viewOverrides: {
-      shots: -8,  // Timeline page needs extra tight spacing
-      'shot-detail': 0,
-      overview: 0,
-      inventory: 0,
-      'equipment-detail': 0,
-      postprod: 0,
-      'task-detail': 0,
-      notes: 0,
-      'note-detail': 0,
-      settings: 0,
-      'manage-projects': 0
-    }
-  };
-
-  // Detect mobile vs desktop for responsive padding
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== 'undefined' ? window.innerWidth < 768 : false
-  );
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    window.addEventListener('resize', handleResize, { passive: true });
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Calculate content padding based on device type and current view
-  const getContentPaddingTop = useMemo(() => {
-    const config = isMobile ? LAYOUT_CONFIG.mobile : LAYOUT_CONFIG.desktop;
-    const viewOffset = LAYOUT_CONFIG.viewOverrides[mainView as keyof typeof LAYOUT_CONFIG.viewOverrides] || 0;
-
-    if (headerHeight > 0) {
-      const calculated = headerHeight + config.headerOffset + viewOffset;
-      // Ensure we never dip below the fallback padding (prevents content jumping up behind header during animation)
-      return `${Math.max(calculated, config.fallbackPadding)}px`;
-    }
-    return `calc(${config.fallbackPadding}px + env(safe-area-inset-top))`;
-  }, [headerHeight, isMobile, mainView]);
+  // Use the new useHeaderPadding hook for responsive padding calculations
+  const { style: headerPaddingStyle, className: headerPaddingClass, isReady: isHeaderPaddingReady } = useHeaderPadding({
+    headerRef,
+    isHeaderVisible: showControls,
+    viewType: mainView,
+    animate: true,
+    animationDuration: 300,
+  });
 
   // Sync Dark Mode to HTML/Body for global context (Modals, Scrollbars)
   useEffect(() => {
@@ -677,6 +589,7 @@ const CineFlowApp = () => {
     <HeaderActionsProvider>
       <div className={`min-h-screen bg-[#F2F2F7] dark:bg-[#141417] text-[#1C1C1E] selection:bg-blue-100 dark:text-white transition-colors duration-500 ${darkMode ? 'dark' : ''}`}>
         <Header
+          ref={headerRef}
           showHeader={true}
           showControls={showControls}
           currentProject={currentProject}
@@ -736,10 +649,10 @@ const CineFlowApp = () => {
         {/* Navigation - Always visible */}
         <Navigation mainView={mainView} setMainView={handleNavigateToView} onPlusClick={handleMainAddClick} />
 
-        {/* Responsive top padding - Uses LAYOUT_CONFIG for mobile/desktop values */}
+        {/* Responsive top padding - Uses useHeaderPadding hook for dynamic calculations */}
         <div
           className="p-4 md:p-6 lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(275px+1.5rem)]"
-          style={{ paddingTop: getContentPaddingTop }}
+          style={headerPaddingStyle}
         >
           <main className={`mx-auto w-full pb-28 transition-all duration-500 ease-in-out ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`}>
             <AnimatePresence mode="wait">

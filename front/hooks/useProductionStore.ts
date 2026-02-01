@@ -23,7 +23,9 @@ export const useProductionStore = () => {
   const [currentProject, setCurrentProject] = useState('');
   const [allInventory, setAllInventory] = useState<Equipment[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isGuest, setIsGuest] = useState(false);
+  const [isGuest, setIsGuest] = useState(() => {
+    return localStorage.getItem('vemakin_guest_mode') === 'true';
+  });
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
   // Catalog State
@@ -114,6 +116,77 @@ export const useProductionStore = () => {
     return () => unsubscribe();
   }, []);
 
+  // Guest Mode: Fetch mock data when in guest mode
+  useEffect(() => {
+    if (isGuest) {
+      // Fetch mock data for guest user
+      const fetchGuestData = async () => {
+        try {
+          // Fetch mock projects and inventory in parallel
+          const [projectsRes, invRes] = await Promise.all([
+            api.get('/projects'),
+            api.get('/inventory').catch(err => {
+              console.error("Failed to fetch inventory in guest mode:", err);
+              return { data: [] };
+            })
+          ]);
+
+          const fetchedProjects = projectsRes.data;
+          console.log('[Guest Mode] Fetched projects:', fetchedProjects);
+          console.log('[Guest Mode] Fetched inventory:', invRes.data);
+
+          if (fetchedProjects.length > 0) {
+            const projectNames = fetchedProjects.map((p: any) => p.name);
+            setProjects(projectNames);
+
+            setProjectData(prev => {
+              const newData = { ...prev };
+              fetchedProjects.forEach((p: any) => {
+                if (newData[p.name]) {
+                  newData[p.name] = { ...newData[p.name], id: p.id };
+                } else {
+                  newData[p.name] = {
+                    id: p.id,
+                    shots: [],
+                    notes: [],
+                    tasks: [],
+                    crew: []
+                  };
+                }
+              });
+              return newData;
+            });
+
+            // Process inventory data
+            const fetchedInv: Equipment[] = invRes.data.map((i: any) => ({
+              id: i.id,
+              name: i.name,
+              catalogItemId: i.catalogItemId,
+              customName: i.customName,
+              serialNumber: i.serialNumber,
+              category: i.category,
+              pricePerDay: i.pricePerDay,
+              rentalPrice: i.rentalPrice,
+              rentalFrequency: i.rentalFrequency,
+              quantity: i.quantity,
+              isOwned: i.isOwned,
+              status: i.status,
+              specs: i.specs || {}
+            }));
+            setAllInventory(fetchedInv);
+
+            setCurrentProject(prev => projectNames.includes(prev) ? prev : projectNames[0]);
+          }
+        } catch (err) {
+          console.error("Guest mode data fetch failed:", err);
+        }
+        setIsLoadingAuth(false);
+      };
+
+      fetchGuestData();
+    }
+  }, [isGuest]);
+
   // Lazy load catalog categories only when needed
   const fetchCatalogCategories = useCallback(async () => {
     if (hasFetchedCatalog && catalogCategories.length > 0) {
@@ -197,7 +270,7 @@ export const useProductionStore = () => {
   useEffect(() => {
     const fetchProjectData = async () => {
       const projectState = projectData[currentProject];
-      if (!projectState?.id || !currentUser) return;
+      if (!projectState?.id || (!currentUser && !isGuest)) return;
       
       // Skip if already fetched this session
       if (fetchedProjectIds.has(projectState.id)) return;
@@ -263,7 +336,7 @@ export const useProductionStore = () => {
     };
 
     fetchProjectData();
-  }, [currentProject, projectData[currentProject]?.id, currentUser, fetchedProjectIds]);
+  }, [currentProject, projectData[currentProject]?.id, currentUser, isGuest, fetchedProjectIds]);
 
   const login = useCallback((name: string, email: string) => {
     // Deprecated: Authentication is handled by Firebase Auth and onAuthStateChanged.
@@ -273,6 +346,7 @@ export const useProductionStore = () => {
 
   const enterGuest = useCallback(() => {
     setIsGuest(true);
+    localStorage.setItem('vemakin_guest_mode', 'true');
     setCurrentUser(null);
     setMainView('overview');
   }, []);
@@ -280,6 +354,8 @@ export const useProductionStore = () => {
   const logout = useCallback(async () => {
     try {
       await signOut(auth);
+      localStorage.removeItem('vemakin_guest_mode');
+      setIsGuest(false);
       // State updates via onAuthStateChanged
     } catch (error) {
       console.error("Logout failed", error);

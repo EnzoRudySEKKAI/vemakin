@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Plus, Calendar, Film, Package,
@@ -77,7 +77,7 @@ interface HeaderProps {
   tasks?: PostProdTask[];
 }
 
-export const Header: React.FC<HeaderProps> = ({
+export const Header = forwardRef<HTMLElement, HeaderProps>(({
   showHeader,
   showControls,
   viewTitle,
@@ -122,7 +122,7 @@ export const Header: React.FC<HeaderProps> = ({
   handleDateSelect,
   inventory = [],
   tasks = []
-}) => {
+}, ref) => {
   const [showProjectMenu, setShowProjectMenu] = useState(false);
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
@@ -175,6 +175,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <motion.header
+      ref={ref}
       className="fixed top-0 left-0 right-0 z-50 bg-[#F2F2F7] dark:bg-[#141417] transition-colors duration-150"
       initial={{ y: 0 }}
       animate={{ y: showHeader ? 0 : -100 }}
@@ -957,4 +958,6 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="absolute -bottom-6 left-0 right-0 h-6 bg-gradient-to-b from-[#F2F2F7] to-transparent dark:from-[#141417] pointer-events-none"/>
     </motion.header>
   );
-};
+});
+
+Header.displayName = 'Header';

@@ -4,7 +4,8 @@ from typing import List
 from ..database import get_db
 from ..models import models
 from ..schemas import schemas
-from ..auth import get_current_user
+from ..auth import get_current_user_or_guest
+from ..mock_data import get_mock_db
 import uuid
 import time
 
@@ -249,8 +250,37 @@ def read_inventory(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user_or_guest),
 ):
+    # Check if guest mode
+    if current_user.get("is_guest"):
+        mock_db = get_mock_db()
+        # Return mock inventory items with proper field mapping (snake_case to camelCase)
+        inventory = mock_db.list_inventory()
+        converted_inventory = []
+        for item in inventory:
+            converted_item = {
+                "id": item["id"],
+                "name": item["name"],
+                "category": item["category"],
+                "brand": item.get("brand", ""),
+                "model": item.get("model", ""),
+                "serialNumber": item.get("serial_number", ""),
+                "purchaseDate": item.get("purchase_date"),
+                "purchasePrice": item.get("purchase_price", 0),
+                "currency": item.get("currency", "EUR"),
+                "pricePerDay": item.get("price_per_day", 0),
+                "rentalPrice": item.get("rental_price"),
+                "rentalFrequency": item.get("rental_frequency"),
+                "quantity": item.get("quantity", 1),
+                "isOwned": item.get("is_owned", True),
+                "status": item.get("status", "operational"),
+                "notes": item.get("notes", ""),
+                "specs": item.get("specs", {}),
+            }
+            converted_inventory.append(converted_item)
+        return converted_inventory[skip : skip + limit]
+
     total_start = time.time()
 
     # Fetch equipment belonging to the current user
@@ -281,8 +311,21 @@ def read_inventory(
 def create_equipment(
     equipment: schemas.EquipmentCreate,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user_or_guest),
 ):
+    # Check if guest mode
+    if current_user.get("is_guest"):
+        mock_db = get_mock_db()
+        # Create in mock database
+        item_data = {
+            "id": equipment.id,
+            "name": equipment.name,
+            "category": equipment.category,
+            "serial_number": equipment.serialNumber,
+            "status": equipment.status or "available",
+        }
+        return mock_db.create_inventory_item(item_data)
+
     start_time = time.time()
 
     # Manually map CamelCase from Schema to SnakeCase for Model
@@ -330,8 +373,25 @@ def update_equipment(
     equipment_id: str,
     equipment_update: schemas.EquipmentCreate,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user_or_guest),
 ):
+    # Check if guest mode
+    if current_user.get("is_guest"):
+        mock_db = get_mock_db()
+        # Update in mock database
+        update_data = {
+            "name": equipment_update.name,
+            "category": equipment_update.category,
+            "serial_number": equipment_update.serialNumber,
+            "status": equipment_update.status,
+        }
+        # Remove None values
+        update_data = {k: v for k, v in update_data.items() if v is not None}
+        updated_item = mock_db.update_inventory_item(equipment_id, update_data)
+        if not updated_item:
+            raise HTTPException(status_code=404, detail="Equipment not found")
+        return updated_item
+
     item = (
         db.query(models.Equipment)
         .filter(
@@ -367,8 +427,17 @@ def update_equipment(
 def delete_equipment(
     equipment_id: str,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user_or_guest),
 ):
+    # Check if guest mode
+    if current_user.get("is_guest"):
+        mock_db = get_mock_db()
+        # Delete from mock database
+        deleted = mock_db.delete_inventory_item(equipment_id)
+        if not deleted:
+            raise HTTPException(status_code=404, detail="Equipment not found")
+        return None
+
     item = (
         db.query(models.Equipment)
         .filter(
