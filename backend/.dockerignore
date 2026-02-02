@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Cloud SQL Proxy
+cloud_sql_proxy
+*.exe
+
+# Misc
+*.log
+*.pid
+*.seed
+*.pid.lock
+coverage.xml
+*.cover
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+
+# Scripts non nécessaires en prod
+migrate_*.py
+inspect_*.py
+check_*.py
+cleanup_*.py
+reset_*.py
+drop_*.py

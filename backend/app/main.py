@@ -13,6 +13,7 @@ app = FastAPI()
 
 # CORS Configuration
 origins = [
+    # Local development
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://[::1]:3000",
@@ -22,6 +23,11 @@ origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://[::1]:5173",
+    # Production (Firebase Hosting)
+    "https://vemakin.web.app",
+    "https://vemakin.firebaseapp.com",
+    "https://*.vemakin.web.app",
+    "https://*.vemakin.firebaseapp.com",
 ]
 
 app.add_middleware(
@@ -38,9 +44,11 @@ app.include_router(notes.router)
 app.include_router(postprod.router)
 app.include_router(catalog.router)
 
+
 @app.get("/")
 def read_root():
     return {"message": "Vemakin Backend is running"}
+
 
 @app.get("/health")
 def health_check(db: Session = Depends(get_db)):
@@ -51,11 +59,11 @@ def health_check(db: Session = Depends(get_db)):
     except Exception as e:
         return {"status": "error", "db": str(e)}
 
+
 @app.get("/users/me")
 def read_users_me(current_user: dict = Depends(get_current_user)):
     return {
         "uid": current_user.get("uid"),
         "email": current_user.get("email"),
-        "message": "You are authenticated with Firebase!"
+        "message": "You are authenticated with Firebase!",
     }
-
