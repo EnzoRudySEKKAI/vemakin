@@ -28,6 +28,10 @@ origins = [
     "https://vemakin.firebaseapp.com",
     "https://*.vemakin.web.app",
     "https://*.vemakin.firebaseapp.com",
+    # Mobile apps (Capacitor)
+    "capacitor://localhost",
+    "https://localhost",
+    "http://localhost",
 ]
 
 app.add_middleware(

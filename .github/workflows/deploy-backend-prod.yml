@@ -1,0 +1,90 @@
+name: Deploy Backend to PROD
+
+on:
+  push:
+    branches:
+      - 'release/*'
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend-prod.yml'
+
+concurrency:
+  group: deploy-backend-prod
+  cancel-in-progress: true
+
+env:
+  PROJECT_ID: vemakin-prod
+  SERVICE_NAME: backend-prod
+  REGION: us-central1
+  CLOUD_SQL_CONNECTION: vemakin-prod:us-central1:vemakin-prod
+  FIREBASE_PROJECT_ID: vemakin-prod
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Google Auth
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_NUMBER_PROD }}/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+          service_account: 'github-actions@${{ env.PROJECT_ID }}.iam.gserviceaccount.com'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker
+
+      - name: Build and Push Container
+        run: |
+          cd backend
+          gcloud builds submit --tag gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
+            --platform managed \
+            --region ${{ env.REGION }} \
+            --add-cloudsql-instances ${{ env.CLOUD_SQL_CONNECTION }} \
+            --set-env-vars "DATABASE_URL=${{ secrets.DATABASE_URL_PROD }}" \
+            --set-env-vars "FIREBASE_PROJECT_ID=${{ env.FIREBASE_PROJECT_ID }}" \
+            --allow-unauthenticated \
+            --port 8000 \
+            --memory 1Gi \
+            --cpu 2 \
+            --min-instances 1 \
+            --max-instances 20 \
+            --timeout 300 \
+            --concurrency 100
+
+      - name: Verify Deployment
+        run: |
+          sleep 10
+          gcloud run services describe ${{ env.SERVICE_NAME }} --region ${{ env.REGION }} --format 'value(status.url)'
+
+      - name: Comment on Commit
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ job.status }}';
+            const emoji = status === 'success' ? '✅' : '❌';
+            const message = status === 'success' 
+              ? `${emoji} Backend PROD deployed successfully!` 
+              : `${emoji} Backend PROD deployment failed.`;
+            
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: message
+            });

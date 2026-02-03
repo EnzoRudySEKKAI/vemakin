@@ -2,7 +2,7 @@
 .env
 .env.local
 .env.*.local
-.env.development
+.env.*.*
 .env.production
 .env.test
 .env.staging
