@@ -6,7 +6,7 @@ import { DetailViewLayout } from '../../components/organisms/DetailViewLayout'
 import { ActionButtonGroup } from '../../components/molecules/ActionButton'
 import { Text } from '../../components/atoms/Text'
 import { Input } from '../../components/atoms/Input'
-import { FormTextarea } from '../../components/molecules/FormField'
+
 import { ConfirmModal } from '../ui/ConfirmModal'
 
 interface NoteDetailViewProps {
@@ -207,8 +207,9 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
       }
     >
       <div className="flex flex-col gap-8 mb-12 pb-10 border-b border-gray-100 dark:border-white/5">
-        {isEditing ? (
-          <div className="space-y-4">
+        <div className="flex flex-col gap-1 min-w-0">
+          <Text variant="subtitle" color="muted" className="dark:text-white">Title</Text>
+          {isEditing ? (
             <Input
               type="text"
               value={editedItem.title}
@@ -218,31 +219,29 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
               fullWidth
               className="text-2xl"
             />
-            <FormTextarea
+          ) : (
+            <Text variant="title" className="block leading-tight py-1.5">
+              {note.title || 'Untitled note'}
+            </Text>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1 min-w-0">
+          <Text variant="subtitle" color="muted" className="dark:text-white">Content</Text>
+          {isEditing ? (
+            <textarea
               value={editedItem.content}
               onChange={(e) => setEditedItem({ ...editedItem, content: e.target.value })}
               placeholder="Write something..."
               rows={8}
-              className="min-h-[300px]"
+              className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] resize-none min-h-[300px]"
             />
-          </div>
-        ) : (
-          <>
-            <div className="flex flex-col gap-3 min-w-0">
-              <Text variant="subtitle" color="muted" className="dark:text-white">Title</Text>
-              <Text variant="title" className="block leading-tight py-1.5">
-                {note.title || 'Untitled note'}
-              </Text>
-            </div>
-
-            <div className="flex flex-col gap-3 min-w-0">
-              <Text variant="subtitle" color="muted" className="dark:text-white">Content</Text>
-              <Text variant="body" color="secondary" className="whitespace-pre-wrap max-w-3xl">
-                {note.content || 'No content provided.'}
-              </Text>
-            </div>
-          </>
-        )}
+          ) : (
+            <Text variant="body" color="secondary" className="whitespace-pre-wrap max-w-3xl py-1.5">
+              {note.content || 'No content provided.'}
+            </Text>
+          )}
+        </div>
       </div>
 
       <section>

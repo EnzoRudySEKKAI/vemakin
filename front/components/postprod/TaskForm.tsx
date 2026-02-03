@@ -46,7 +46,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
                   key={cat.id}
                   onClick={() => setForm({ ...form, category: cat.id as any, metadata: {} })}
                   className={`flex flex-col items-center gap-3 p-4 rounded-[24px] border-2 transition-all duration-300 group ${isActive
-                    ? `bg-white dark:bg-[#2C2C30] border-blue-500 dark:border-indigo-500 dark:border-yellow-400 shadow-xl ring-8 ring-blue-500 dark:ring-indigo-500/5 dark:ring-yellow-400/10 ${cat.color} dark:text-blue-400 dark:text-indigo-400`
+                    ? `bg-white dark:bg-[#2C2C30] border-blue-500 dark:border-indigo-500 dark:border-indigo-400 shadow-xl ring-8 ring-blue-500 dark:ring-indigo-500/5 dark:ring-indigo-400/10 ${cat.color} dark:text-blue-400 dark:text-indigo-400`
                     : 'bg-white dark:bg-[#2C2C30] border-gray-100 dark:border-white/10 text-gray-300 dark:text-gray-600 hover:border-gray-200 dark:hover:border-white/20'
                     }`}
                 >
@@ -68,7 +68,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
               type="text"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="w-full bg-white dark:bg-[#2C2C30] border-2 border-gray-100 dark:border-white/10 rounded-[20px] px-6 py-5 text-base font-semibold text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 dark:border-indigo-500 dark:focus:border-yellow-400 transition-all placeholder-gray-200 dark:placeholder-gray-500"
+              className="w-full bg-white dark:bg-[#2C2C30] border-2 border-gray-100 dark:border-white/10 rounded-[20px] px-6 py-5 text-base font-semibold text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 dark:border-indigo-500 dark:focus:border-indigo-400 transition-all placeholder-gray-200 dark:placeholder-gray-500"
               placeholder="e.g. Master Grade Assembly"
             />
           </div>
@@ -79,7 +79,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
             <textarea
               value={form.description || ''}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="w-full bg-white dark:bg-[#2C2C30] border-2 border-gray-100 dark:border-white/10 rounded-[20px] px-6 py-4 text-sm font-medium focus:outline-none focus:border-blue-500 dark:border-indigo-500 dark:focus:border-yellow-400 transition-all placeholder-gray-300 dark:placeholder-gray-500 min-h-[100px] text-gray-900 dark:text-white"
+              className="w-full bg-white dark:bg-[#2C2C30] border-2 border-gray-100 dark:border-white/10 rounded-[20px] px-6 py-4 text-sm font-medium focus:outline-none focus:border-blue-500 dark:border-indigo-500 dark:focus:border-indigo-400 transition-all placeholder-gray-300 dark:placeholder-gray-500 min-h-[100px] text-gray-900 dark:text-white"
               placeholder="Add specific instructions or context..."
             />
           </div>
@@ -94,7 +94,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
                   type="date"
                   value={form.dueDate}
                   onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
-                  className="w-full max-w-full bg-white dark:bg-[#2C2C30] border-2 border-gray-100 dark:border-white/10 rounded-[20px] pl-12 pr-4 py-4 text-sm font-semibold focus:outline-none focus:border-blue-500 dark:border-indigo-500 dark:focus:border-yellow-400 transition-all text-gray-900 dark:text-white appearance-none"
+                  className="w-full max-w-full bg-white dark:bg-[#2C2C30] border-2 border-gray-100 dark:border-white/10 rounded-[20px] pl-12 pr-4 py-4 text-sm font-semibold focus:outline-none focus:border-blue-500 dark:border-indigo-500 dark:focus:border-indigo-400 transition-all text-gray-900 dark:text-white appearance-none"
                 />
               </div>
             </div>
@@ -106,7 +106,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
                 <select
                   value={form.priority}
                   onChange={(e) => setForm({ ...form, priority: e.target.value as any })}
-                  className="w-full bg-white dark:bg-[#2C2C30] border-2 border-gray-100 dark:border-white/10 rounded-[20px] pl-12 pr-8 py-4 text-sm font-semibold focus:outline-none focus:border-blue-500 dark:border-indigo-500 dark:focus:border-yellow-400 transition-all text-gray-900 dark:text-white appearance-none cursor-pointer"
+                  className="w-full bg-white dark:bg-[#2C2C30] border-2 border-gray-100 dark:border-white/10 rounded-[20px] pl-12 pr-8 py-4 text-sm font-semibold focus:outline-none focus:border-blue-500 dark:border-indigo-500 dark:focus:border-indigo-400 transition-all text-gray-900 dark:text-white appearance-none cursor-pointer"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -120,20 +120,20 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
         </div>
 
         {/* Metadata Fields */}
-        <div className="p-6 bg-blue-50/50 dark:bg-yellow-500/5 rounded-[32px] border border-blue-100/50 dark:border-yellow-500/20 animate-in slide-in-from-top-4 duration-500">
+        <div className="p-6 bg-blue-50/50 dark:bg-indigo-500/5 rounded-[32px] border border-blue-100/50 dark:border-indigo-500/20 animate-in slide-in-from-top-4 duration-500">
           <p className="text-[8px] font-semibold text-blue-400 dark:text-indigo-400 dark:text-blue-400 dark:text-indigo-400 mb-4">Pipeline parameters</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6">
             {form.category === 'Script' && (
               <div>
                 <label className="text-[9px] font-semibold text-indigo-700/60 dark:text-blue-400 dark:text-indigo-400/60 mb-2 block">Scene reference</label>
                 <div className="relative">
-                  <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-300 dark:text-yellow-500/50"size={14} />
+                  <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-300 dark:text-indigo-500/50"size={14} />
                   <input
                     type="text"
                     value={form.metadata['scene'] as string || ''}
                     onChange={(e) => setForm({ ...form, metadata: { ...form.metadata, scene: e.target.value } })}
                     placeholder="e.g. 14B"
-                    className="w-full bg-white dark:bg-[#2C2C30] border border-blue-100 dark:border-yellow-500/20 rounded-xl pl-10 pr-4 py-3 text-[11px] font-semibold focus:outline-none shadow-sm text-gray-900 dark:text-white"
+                    className="w-full bg-white dark:bg-[#2C2C30] border border-blue-100 dark:border-indigo-500/20 rounded-xl pl-10 pr-4 py-3 text-[11px] font-semibold focus:outline-none shadow-sm text-gray-900 dark:text-white"
                   />
                 </div>
               </div>
@@ -143,24 +143,24 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
                 <div>
                   <label className="text-[9px] font-semibold text-indigo-700/60 dark:text-blue-400 dark:text-indigo-400/60 mb-2 block">Target duration</label>
                   <div className="relative">
-                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-300 dark:text-yellow-500/50"size={14} />
+                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-300 dark:text-indigo-500/50"size={14} />
                     <input
                       type="text"
                       value={form.metadata['duration'] as string || ''}
                       onChange={(e) => setForm({ ...form, metadata: { ...form.metadata, duration: e.target.value } })}
                       placeholder="e.g. 2m 30s"
-                      className="w-full bg-white dark:bg-[#2C2C30] border border-blue-100 dark:border-yellow-500/20 rounded-xl pl-10 pr-4 py-3 text-[11px] font-semibold focus:outline-none shadow-sm text-gray-900 dark:text-white"
+                      className="w-full bg-white dark:bg-[#2C2C30] border border-blue-100 dark:border-indigo-500/20 rounded-xl pl-10 pr-4 py-3 text-[11px] font-semibold focus:outline-none shadow-sm text-gray-900 dark:text-white"
                     />
                   </div>
                 </div>
                 <div>
                   <label className="text-[9px] font-semibold text-indigo-700/60 dark:text-blue-400 dark:text-indigo-400/60 mb-2 block">Aspect ratio</label>
                   <div className="relative">
-                    <Crop className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-300 dark:text-yellow-500/50"size={14} />
+                    <Crop className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-300 dark:text-indigo-500/50"size={14} />
                     <select
                       value={form.metadata['aspectRatio'] as string || ''}
                       onChange={(e) => setForm({ ...form, metadata: { ...form.metadata, aspectRatio: e.target.value } })}
-                      className="w-full bg-white dark:bg-[#2C2C30] border border-blue-100 dark:border-yellow-500/20 rounded-xl pl-10 pr-4 py-3 text-[11px] font-semibold focus:outline-none shadow-sm appearance-none cursor-pointer text-gray-900 dark:text-white"
+                      className="w-full bg-white dark:bg-[#2C2C30] border border-blue-100 dark:border-indigo-500/20 rounded-xl pl-10 pr-4 py-3 text-[11px] font-semibold focus:outline-none shadow-sm appearance-none cursor-pointer text-gray-900 dark:text-white"
                     >
                       <option value="">Select ratio</option>
                       <option value="16:9">16:9 (widescreen)</option>
@@ -168,7 +168,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
                       <option value="2.39:1">2.39:1 (cinema)</option>
                       <option value="4:3">4:3 (classic)</option>
                     </select>
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-300 dark:text-yellow-500/50 pointer-events-none"size={14} />
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-300 dark:text-indigo-500/50 pointer-events-none"size={14} />
                   </div>
                 </div>
               </>
@@ -181,7 +181,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
           <button
             onClick={onSubmit}
             disabled={!form.title.trim()}
-            className="w-full sm:w-auto sm:px-24 py-4 rounded-full font-semibold text-[12px] bg-blue-400 dark:bg-indigo-400/60 dark:bg-blue-600 dark:bg-indigo-600/60 text-white text-white shadow-2xl shadow-blue-500 dark:shadow-indigo-500/10 dark:shadow-yellow-400/10 active:scale-[0.98] transition-all flex items-center justify-center gap-4 disabled:opacity-40 disabled:grayscale hover:bg-blue-500 dark:bg-indigo-500 dark:hover:bg-blue-700 dark:bg-indigo-700"
+            className="w-full sm:w-auto sm:px-24 py-4 rounded-full font-semibold text-[12px] bg-blue-400 dark:bg-indigo-400/60 dark:bg-blue-600 dark:bg-indigo-600/60 text-white text-white shadow-2xl shadow-blue-500 dark:shadow-indigo-500/10 dark:shadow-indigo-400/10 active:scale-[0.98] transition-all flex items-center justify-center gap-4 disabled:opacity-40 disabled:grayscale hover:bg-blue-500 dark:bg-indigo-500 dark:hover:bg-blue-700 dark:bg-indigo-700"
           >
             Add task <Save size={18} strokeWidth={2.5} />
           </button>

@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import { Plus, Check, Calendar, Hash, Clock, Crop, Activity, Volume2, Layers, Monitor } from 'lucide-react'
+import { Plus, Check, Calendar, Hash, Clock, Crop, Activity, Volume2, Layers, Monitor, ChevronDown } from 'lucide-react'
 import { PostProdTask, Note } from '../../types'
 import { POST_PROD_CATEGORIES } from '../../constants'
 import { useDetailView } from '../../hooks/useDetailView'
@@ -7,7 +7,7 @@ import { DetailViewLayout } from '../../components/organisms/DetailViewLayout'
 import { ActionButtonGroup } from '../../components/molecules/ActionButton'
 import { Text } from '../../components/atoms/Text'
 import { Input } from '../../components/atoms/Input'
-import { FormTextarea } from '../../components/molecules/FormField'
+
 import { ConfirmModal } from '../ui/ConfirmModal'
 
 interface TaskDetailViewProps {
@@ -183,45 +183,63 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
     >
       <div className="flex flex-col gap-8 mb-12 pb-10 border-b border-gray-100 dark:border-white/5">
         {isEditing ? (
-          <div className="space-y-4">
-            <Input
-              type="text"
-              value={editedItem.title}
-              onChange={(e) => setEditedItem({ ...editedItem, title: e.target.value })}
-              placeholder="Task title"
-              variant="underline"
-              fullWidth
-              className="text-2xl"
-            />
-            <div className="flex gap-3">
-              <select
-                value={editedItem.priority}
-                onChange={(e) => setEditedItem({ ...editedItem, priority: e.target.value as any })}
-                className="bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-lg px-3 py-2 text-xs font-semibold text-gray-700 dark:text-white focus:outline-none"
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-                <option value="critical">Critical</option>
-              </select>
-              <input
-                type="date"
-                value={editedItem.dueDate || ''}
-                onChange={(e) => setEditedItem({ ...editedItem, dueDate: e.target.value })}
-                className="bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-lg px-3 py-2 text-xs font-semibold text-gray-700 dark:text-white focus:outline-none"
+          <div className="space-y-8">
+            <div className="flex flex-col gap-1 min-w-0">
+              <Text variant="subtitle" color="muted" className="dark:text-white">Title</Text>
+              <Input
+                type="text"
+                value={editedItem.title}
+                onChange={(e) => setEditedItem({ ...editedItem, title: e.target.value })}
+                placeholder="Task title"
+                variant="underline"
+                fullWidth
+                className="text-2xl"
               />
             </div>
-            <FormTextarea
-              value={editedItem.description || ''}
-              onChange={(e) => setEditedItem({ ...editedItem, description: e.target.value })}
-              placeholder="Add description..."
-              rows={4}
-              className="min-h-[100px]"
-            />
+
+            <div className="grid grid-cols-2 lg:flex lg:flex-wrap items-start gap-x-8 lg:gap-x-16 gap-y-8">
+              <div className="flex flex-col gap-1 min-w-0">
+                <Text variant="subtitle" color="muted" className="dark:text-white">Priority</Text>
+                <div className="relative">
+                  <select
+                    value={editedItem.priority}
+                    onChange={(e) => setEditedItem({ ...editedItem, priority: e.target.value as any })}
+                    className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] appearance-none cursor-pointer pr-8"
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                  <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1 min-w-0">
+                <Text variant="subtitle" color="muted" className="dark:text-white">Due date</Text>
+                <input
+                  type="date"
+                  value={editedItem.dueDate || ''}
+                  onChange={(e) => setEditedItem({ ...editedItem, dueDate: e.target.value })}
+                  className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD]"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1 min-w-0">
+              <Text variant="subtitle" color="muted" className="dark:text-white">Description</Text>
+              <textarea
+                value={editedItem.description || ''}
+                onChange={(e) => setEditedItem({ ...editedItem, description: e.target.value })}
+                placeholder="Add description..."
+                rows={4}
+                className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] resize-none"
+              />
+            </div>
 
             {categoryFields[editedItem.category] && (
               <div className="pt-2">
-                <Text variant="subtitle" color="muted" className="mb-3 ml-1">Pipeline parameters</Text>
+                <Text variant="subtitle" color="muted" className="mb-4 dark:text-white">Pipeline parameters</Text>
                 <div className="grid grid-cols-2 gap-4">
                   {categoryFields[editedItem.category].map(renderMetadataField)}
                 </div>

@@ -5,6 +5,8 @@ import {
   Image as ImageIcon, File, Trash2, Link as LinkIcon
 } from 'lucide-react';
 import { Shot, PostProdTask, Attachment } from '../../types.ts';
+import { Text } from '../../components/atoms/Text';
+import { Input } from '../../components/atoms/Input';
 
 export interface NoteFormData {
   title: string;
@@ -54,14 +56,26 @@ export const NoteForm: React.FC<NoteFormProps> = ({
   return (
     <div className="space-y-6">
       {/* Title */}
-      <div>
-        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block ml-1">Title</label>
-        <input
+      <div className="flex flex-col gap-1 min-w-0">
+        <Text variant="subtitle" color="muted" className="dark:text-white">Title</Text>
+        <Input
           type="text"
           value={form.title}
           onChange={e => setForm({ ...form, title: e.target.value })}
-          className="w-full bg-white dark:bg-[#2C2C30] border-2 border-gray-100 dark:border-white/5 rounded-[20px] px-6 py-4 text-sm font-semibold focus:outline-none focus:border-blue-500 dark:border-indigo-500 dark:focus:border-yellow-400 transition-all placeholder-gray-300 dark:placeholder-gray-500 text-gray-900 dark:text-white"
+          variant="underline"
+          fullWidth
           placeholder="Idea title"
+        />
+      </div>
+
+      {/* Content */}
+      <div className="flex flex-col gap-1 min-w-0">
+        <Text variant="subtitle" color="muted" className="dark:text-white">Content</Text>
+        <textarea
+          value={form.content}
+          onChange={e => setForm({ ...form, content: e.target.value })}
+          className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] resize-none min-h-[150px]"
+          placeholder="Write your note..."
         />
       </div>
 
@@ -95,7 +109,7 @@ export const NoteForm: React.FC<NoteFormProps> = ({
             <select
               value={form.linkedId}
               onChange={e => setForm({ ...form, linkedId: e.target.value })}
-              className="w-full appearance-none bg-white dark:bg-[#2C2C30] border-2 border-gray-100 dark:border-white/5 rounded-[20px] pl-12 pr-10 py-4 text-sm font-semibold focus:outline-none focus:border-blue-500 dark:border-indigo-500 transition-all cursor-pointer text-gray-900 dark:text-white"
+              className="w-full appearance-none bg-transparent border-b border-gray-200 dark:border-white/10 pl-12 pr-10 py-4 text-sm font-semibold focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all cursor-pointer text-gray-900 dark:text-white"
             >
               <option value="">Select reference...</option>
               {form.linkType === 'shot' && existingShots.map(s => (
@@ -108,17 +122,6 @@ export const NoteForm: React.FC<NoteFormProps> = ({
             <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none"size={16} />
           </div>
         )}
-      </div>
-
-      {/* Content */}
-      <div>
-        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block ml-1">Content</label>
-        <textarea
-          value={form.content}
-          onChange={e => setForm({ ...form, content: e.target.value })}
-          className="w-full bg-white dark:bg-[#2C2C30] border-2 border-gray-100 dark:border-white/5 rounded-[20px] px-6 py-4 text-sm font-medium focus:outline-none focus:border-blue-500 dark:border-indigo-500 transition-all min-h-[150px] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
-          placeholder="Write your note..."
-        />
       </div>
 
       {/* Attachments */}
@@ -167,7 +170,7 @@ export const NoteForm: React.FC<NoteFormProps> = ({
         <button
           onClick={onSubmit}
           disabled={!form.title.trim()}
-          className="w-full sm:w-auto sm:px-24 py-4 rounded-full font-semibold text-[12px] bg-blue-400 dark:bg-indigo-400/60 dark:bg-blue-600 dark:bg-indigo-600/60 text-white text-white shadow-2xl shadow-blue-500 dark:shadow-indigo-500/10 dark:shadow-yellow-400/10 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-40 disabled:grayscale hover:bg-blue-500 dark:bg-indigo-500 dark:hover:bg-yellow-500"
+           className="w-full sm:w-auto sm:px-24 py-4 rounded-full font-semibold text-[12px] bg-blue-400 dark:bg-indigo-400/60 dark:bg-blue-600 dark:bg-indigo-600/60 text-white text-white shadow-2xl shadow-blue-500 dark:shadow-indigo-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-40 disabled:grayscale hover:bg-blue-500 dark:bg-indigo-500 dark:hover:bg-indigo-700"
         >
           Add note <Save size={18} strokeWidth={2.5} />
         </button>

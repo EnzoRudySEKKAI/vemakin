@@ -65,7 +65,7 @@ export const DetailViewLayout: React.FC<DetailViewLayoutProps> = ({
       transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
       className={`
         flex flex-col h-full 
-        bg-[#FAFAFA] dark:bg-[#141417] 
+        bg-transparent dark:bg-[#141417] 
         min-h-0
         ${className}
       `}

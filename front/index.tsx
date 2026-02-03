@@ -21,6 +21,10 @@ import { EquipmentDetailView } from './components/inventory/EquipmentDetailView.
 import { TaskDetailView } from './components/postprod/TaskDetailView.tsx';
 import { NoteDetailView } from './components/notes/NoteDetailView.tsx';
 import { ActionSuite } from './components/layout/ActionSuite.tsx';
+import { GearFormPage } from './components/inventory/GearFormPage.tsx';
+import { ShotFormPage } from './components/shots/ShotFormPage.tsx';
+import { TaskFormPage } from './components/postprod/TaskFormPage.tsx';
+import { NoteFormPage } from './components/notes/NoteFormPage.tsx';
 import { LandingView } from './components/auth/LandingView.tsx';
 import { SignInView } from './components/auth/SignInView.tsx';
 import { SignUpView } from './components/auth/SignUpView.tsx';
@@ -140,13 +144,16 @@ const CineFlowApp = () => {
     window.scrollTo(0, 0);
   }, [mainView]);
 
+  // Form views where header should always stay visible
+  const isFormView = ['new-shot', 'new-gear', 'new-task', 'new-note'].includes(mainView);
+
   // Scroll Handling
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
-      // Force controls visible on desktop (>= 1024px)
-      if (window.innerWidth >= 1024) {
+      // Force controls visible on desktop (>= 1024px) or in form views
+      if (window.innerWidth >= 1024 || isFormView) {
         setShowControls(true);
         lastScrollY.current = currentScrollY;
         return;
@@ -172,7 +179,7 @@ const CineFlowApp = () => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isFormView]);
 
   // Sync Layout System - Calculates content padding based on header measurements
   const { style: layoutStyle, isReady: isLayoutReady } = useSyncLayout({
@@ -215,7 +222,11 @@ const CineFlowApp = () => {
     postprod: "Pipeline",
     'task-detail': "Task Detail",
     settings: "Settings",
-    'manage-projects': "Manage Projects"
+    'manage-projects': "Manage Projects",
+    'new-shot': "New Scene",
+    'new-gear': "New Equipment",
+    'new-task': "New Task",
+    'new-note': "New Note"
   }), []);
 
   const handleOpenActionSuite = useCallback((config?: typeof actionSuiteConfig) => {
@@ -224,21 +235,32 @@ const CineFlowApp = () => {
   }, []);
 
   const handleMainAddClick = useCallback(() => {
-    let view = 'shot'; // Default fallback
-    if (mainView === 'shots' || mainView === 'shot-detail') view = 'shot';
-    else if (mainView === 'inventory' || mainView === 'equipment-detail') view = 'gear';
-    else if (mainView === 'postprod' || mainView === 'task-detail') view = 'task';
-    else if (mainView === 'notes' || mainView === 'note-detail') view = 'note';
-    else if (mainView === 'settings' || mainView === 'manage-projects') view = 'project';
-
-    handleOpenActionSuite({ view });
-  }, [mainView, handleOpenActionSuite]);
+    // Navigate to full-page forms based on current view context
+    // Project creation remains a special case using ActionSuite modal
+    if (mainView === 'settings' || mainView === 'manage-projects') {
+      handleOpenActionSuite({ view: 'project' });
+    } else if (mainView === 'inventory' || mainView === 'equipment-detail') {
+      setMainView('new-gear');
+    } else if (mainView === 'postprod' || mainView === 'task-detail') {
+      setMainView('new-task');
+    } else if (mainView === 'notes' || mainView === 'note-detail') {
+      setMainView('new-note');
+    } else {
+      // Default to shot form for overview, shots, or any other view
+      setMainView('new-shot');
+    }
+  }, [mainView, handleOpenActionSuite, setMainView]);
 
   const handleCloseActionSuite = useCallback(() => {
     setIsActionSuiteOpen(false);
     // Reset config after closing animation
     setTimeout(() => setActionSuiteConfig(null), 300);
   }, []);
+
+  // Handle switching between form types (for form tabs)
+  const handleSwitchForm = useCallback((formType: 'gear' | 'shot' | 'task' | 'note') => {
+    setMainView(`new-${formType}` as MainView);
+  }, [setMainView]);
 
   // Memoized Handlers for Header Optimization
   const handleSetPostProdFilters = useCallback((filters: Partial<PostProdFilters>) => {
@@ -551,6 +573,55 @@ const CineFlowApp = () => {
             onDeleteProject={deleteProject}
             onExportProject={exportProject}
             onImportProject={importProject}
+          />
+        );
+
+      case 'new-shot':
+        return (
+          <ShotFormPage
+            onClose={() => setMainView('shots')}
+            onSwitchForm={handleSwitchForm}
+            onSubmit={addShot}
+            inventory={allInventory}
+            existingShots={activeData.shots}
+          />
+        );
+
+      case 'new-gear':
+        return (
+          <GearFormPage
+            onClose={() => setMainView('inventory')}
+            onSwitchForm={handleSwitchForm}
+            onSubmit={addGear}
+          />
+        );
+
+      case 'new-task':
+        return (
+          <TaskFormPage
+            onClose={() => setMainView('postprod')}
+            onSwitchForm={handleSwitchForm}
+            onSubmit={addTask}
+          />
+        );
+
+      case 'new-note':
+        return (
+          <NoteFormPage
+            onClose={() => setMainView('notes')}
+            onSwitchForm={handleSwitchForm}
+            onSubmit={(title, content, linkedId, linkType, attachments) => addNote({
+              id: `note-${Date.now()}`,
+              title,
+              content,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              shotId: linkType === 'shot' ? linkedId : undefined,
+              taskId: linkType === 'task' ? linkedId : undefined,
+              attachments: attachments || []
+            })}
+            existingShots={activeData.shots}
+            existingTasks={activeData.tasks}
           />
         );
 
