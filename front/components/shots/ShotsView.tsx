@@ -103,8 +103,8 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
  };
 
  if (totalShots === 0) {
-  return (
-   <div className="flex flex-col items-center justify-center h-[calc(100vh-220px)] w-full overflow-hidden px-6 pb-32 select-none">
+   return (
+    <div className="flex flex-col items-center justify-center h-[calc(100vh-220px)] w-full overflow-hidden px-6 select-none">
     <div className="w-24 h-24 bg-white dark:bg-[#2C2C30] rounded-[32px] shadow-xl shadow-blue-100 dark:shadow-indigo-900/20/50 dark:shadow-none flex items-center justify-center mb-8 text-blue-600 dark:text-indigo-600 dark:text-blue-400 dark:text-indigo-400">
      <Film size={40} strokeWidth={1.5} />
     </div>

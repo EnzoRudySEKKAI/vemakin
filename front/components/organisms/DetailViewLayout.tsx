@@ -71,7 +71,7 @@ export const DetailViewLayout: React.FC<DetailViewLayoutProps> = ({
       `}
     >
       <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-        <div className={`${sizeClasses[size]} mx-auto p-4 md:p-8 pt-3 pb-32`}>
+        <div className={`${sizeClasses[size]} mx-auto p-4 md:p-8 pt-3`}>
           {sidebar ? (
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-12">
               <div className="xl:col-span-8 space-y-12">

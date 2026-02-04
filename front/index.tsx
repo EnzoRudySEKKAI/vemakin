@@ -123,18 +123,17 @@ const CineFlowApp = () => {
   // Drawer scroll effect - Header filters slide up, Nav slides down
   const { translateY: headerTranslateY } = useDrawerScroll({
     maxTranslateY: 250, // Increased to fully hide filters
-    threshold: 5,
     mobileOnly: true
   });
 
   // Disable drawer effect on detail pages
   const effectiveHeaderTranslateY = isDetailPage ? 0 : headerTranslateY;
 
-  const { translateY: navTranslateY } = useDrawerScroll({
+  const { translateY: navTranslateY, scrollProgress: navScrollProgress, isAnimating: navIsAnimating } = useDrawerScroll({
     maxTranslateY: 100,
-    threshold: 5,
     mobileOnly: true,
-    direction: 'down' // Menu slides down when scrolling
+    direction: 'down', // Menu slides down when scrolling
+    snapToEnds: true // Snap to fully visible or fully hidden
   });
 
   const [isDateSelectorOpen, setIsDateSelectorOpen] = useState(false);
@@ -708,7 +707,7 @@ const CineFlowApp = () => {
 
         {/* Navigation - Hidden on form and detail pages */}
         {!shouldHideNavigation && (
-          <Navigation mainView={mainView} setMainView={handleNavigateToView} onPlusClick={handleMainAddClick} />
+          <Navigation mainView={mainView} setMainView={handleNavigateToView} onPlusClick={handleMainAddClick} scale={1 - navScrollProgress} isAnimating={navIsAnimating} />
         )}
 
 
@@ -718,7 +717,7 @@ const CineFlowApp = () => {
           className={`content-wrapper px-4 md:px-6 pb-0 lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(275px+1.5rem)] view-${mainView}`}
           style={mainView === 'settings' || mainView === 'manage-projects' ? { paddingTop: 0 } : layoutStyle}
         >
-            <main className={`mx-auto w-full transition-all duration-500 ease-in-out ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`} style={{ paddingBottom: shouldHideNavigation ? '24px' : '120px' }}>
+          <main className={`mx-auto w-full transition-all duration-500 ease-in-out ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`} style={{ paddingBottom: shouldHideNavigation ? '24px' : '120px' }}>
             <AnimatePresence mode="wait">
               <PageTransition key={mainView}>
                 {renderMainContent()}

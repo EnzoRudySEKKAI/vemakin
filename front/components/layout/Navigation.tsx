@@ -9,10 +9,11 @@ interface NavigationProps {
   mainView: MainView;
   setMainView: (view: MainView) => void;
   onPlusClick: () => void;
-  translateY?: number;
+  scale?: number; // 1 = full size, 0 = minimized
+  isAnimating?: boolean; // True during snap animation - enables CSS transition
 }
 
-export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, setMainView, onPlusClick, translateY = 0 }) => {
+export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, setMainView, onPlusClick, scale = 1, isAnimating = false }) => {
   const NavItem = ({ view, icon: Icon, label, onClick }: { view?: MainView, icon: any, label: string, onClick: () => void }) => {
     const isActive = view ? mainView === view : false;
     return (
@@ -46,23 +47,38 @@ export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, set
     </button>
   );
 
+  // Disable pointer events when mostly minimized
+  const isInteractive = scale > 0.3;
+
   return (
     <>
       {/* MOBILE BOTTOM NAVIGATION (< 1024px) */}
       <nav
-        className="lg:hidden fixed left-0 right-0 z-[1000] flex items-center justify-center px-4 pointer-events-none will-change-transform transition-transform duration-150 ease-out"
+        className="lg:hidden fixed left-0 right-0 z-[1000]"
         style={{
-          transform: `translateY(${translateY}px)`,
-          bottom: '0.5rem'
+          bottom: '0.5rem',
+          pointerEvents: isInteractive ? 'auto' : 'none'
         }}
       >
-        <GlassCard className="flex items-center justify-between gap-1 p-1 px-3 shadow-[0_15px_40px_rgba(0,0,0,0.25)] border-white/60 dark:border-white/10 bg-white/95 dark:bg-[#1C1C1E]/95 rounded-[20px] pointer-events-auto transition-transform duration-150 ease-out w-full max-w-[480px]">
-          <MobileNavItem active={mainView === 'overview'} onClick={() => setMainView('overview')} icon={LayoutDashboard} label="Home" />
-          <MobileNavItem active={mainView === 'shots'} onClick={() => setMainView('shots')} icon={Film} label="Timeline" />
-          <MobileNavItem active={mainView === 'inventory'} onClick={() => setMainView('inventory')} icon={Package} label="Inventory" />
-          <MobileNavItem active={mainView === 'postprod'} onClick={() => setMainView('postprod')} icon={Zap} label="Pipeline" />
-          <MobileNavItem active={mainView === 'notes'} onClick={() => setMainView('notes')} icon={StickyNote} label="Notes" />
-        </GlassCard>
+        <div
+          className="flex items-center justify-center px-4"
+          style={{
+            transform: `scale(${scale})`,
+            transformOrigin: 'bottom center',
+            opacity: Math.max(0.3, scale),
+            // GPU optimization: will-change only during animation, CSS transition only during snap
+            willChange: isAnimating ? 'transform, opacity' : 'auto',
+            transition: isAnimating ? 'transform 250ms cubic-bezier(0.33, 1, 0.68, 1), opacity 250ms cubic-bezier(0.33, 1, 0.68, 1)' : 'none'
+          }}
+        >
+          <GlassCard className="flex items-center justify-between gap-1 p-1 px-3 shadow-[0_15px_40px_rgba(0,0,0,0.25)] border-white/60 dark:border-white/10 bg-white/95 dark:bg-[#1C1C1E]/95 rounded-[20px] pointer-events-auto w-full max-w-[480px]">
+            <MobileNavItem active={mainView === 'overview'} onClick={() => setMainView('overview')} icon={LayoutDashboard} label="Home" />
+            <MobileNavItem active={mainView === 'shots'} onClick={() => setMainView('shots')} icon={Film} label="Timeline" />
+            <MobileNavItem active={mainView === 'inventory'} onClick={() => setMainView('inventory')} icon={Package} label="Inventory" />
+            <MobileNavItem active={mainView === 'postprod'} onClick={() => setMainView('postprod')} icon={Zap} label="Pipeline" />
+            <MobileNavItem active={mainView === 'notes'} onClick={() => setMainView('notes')} icon={StickyNote} label="Notes" />
+          </GlassCard>
+        </div>
       </nav>
 
       {/* DESKTOP SIDEBAR NAVIGATION (>= 1024px) */}

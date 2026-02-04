@@ -19,7 +19,7 @@ export const HoverCard: React.FC<HoverCardProps> = ({
   return (
     <GlassCard
       className={`
-        group relative overflow-hidden transition-all duration-300
+        group relative transition-all duration-300
         ${enableHoverScale ? 'hover:scale-[1.02] active:scale-[0.98]' : ''}
         hover:shadow-md shadow-sm
         border-white/20 dark:border-white/5

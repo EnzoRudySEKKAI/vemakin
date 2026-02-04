@@ -190,7 +190,7 @@ export const OverviewView: React.FC<OverviewViewProps> = React.memo(({
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="w-full pb-32"
+      className="w-full"
     >
 
       {/* Header / Greeting */}

@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface UseDrawerScrollOptions {
-  threshold?: number;
   maxTranslateY?: number;
   mobileOnly?: boolean;
-  keepVisiblePixels?: number;
-  direction?: 'up' | 'down'; // 'up' for header (slides up), 'down' for bottom menu (slides down)
+  direction?: 'up' | 'down';
+  snapToEnds?: boolean;
 }
 
 interface UseDrawerScrollReturn {
@@ -13,40 +12,35 @@ interface UseDrawerScrollReturn {
   isVisible: boolean;
   scrollDirection: 'up' | 'down' | 'none';
   scrollProgress: number;
+  isAnimating: boolean; // True during snap - use CSS transition
 }
 
 /**
- * Hook pour créer un effet "tiroir" (drawer) sur le scroll
- * Le header/menu suit le contenu et se cache progressivement
- * 
- * Exemple style Airbnb/Twitter mobile :
- * - Scroll vers le bas = élément glisse vers le haut (ou bas pour le menu)
- * - Scroll vers le haut = élément revient
- * - Translation fluide qui suit la vitesse du scroll
+ * Optimized drawer scroll hook
+ * - Uses CSS transforms (GPU accelerated)
+ * - Snap animation via CSS transitions (compositor thread)
+ * - Minimal state updates for performance
  */
 export function useDrawerScroll(options: UseDrawerScrollOptions = {}): UseDrawerScrollReturn {
   const {
-    threshold = 8,
     maxTranslateY = 100,
     mobileOnly = true,
-    keepVisiblePixels = 0,
-    direction = 'up' // Default: header slides up
+    direction = 'up',
+    snapToEnds = false
   } = options;
 
   const [translateY, setTranslateY] = useState(0);
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | 'none'>('none');
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const lastScrollY = useRef(0);
   const currentTranslateY = useRef(0);
   const rafId = useRef<number | null>(null);
-  const lastUpdateTime = useRef(Date.now());
+  const snapTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const updatePosition = useCallback((newTranslateY: number) => {
-    // Clamp based on direction:
-    // 'up' = header slides up = values between -maxTranslateY and 0
-    // 'down' = bottom menu slides down = values between 0 and +maxTranslateY
     let clampedValue: number;
     if (direction === 'up') {
       clampedValue = Math.max(-maxTranslateY, Math.min(0, newTranslateY));
@@ -54,55 +48,88 @@ export function useDrawerScroll(options: UseDrawerScrollOptions = {}): UseDrawer
       clampedValue = Math.max(0, Math.min(maxTranslateY, newTranslateY));
     }
 
-    currentTranslateY.current = clampedValue;
-    setTranslateY(clampedValue);
+    // Only update if changed by more than 0.5px (reduces re-renders)
+    if (Math.abs(clampedValue - currentTranslateY.current) > 0.5) {
+      currentTranslateY.current = clampedValue;
+      setTranslateY(clampedValue);
 
-    // Calculer la progression (0 = visible, 1 = complètement caché)
-    const progress = Math.abs(clampedValue) / maxTranslateY;
-    setScrollProgress(progress);
-    setIsVisible(progress < 0.8); // Considéré visible si moins de 80% caché
+      const progress = Math.abs(clampedValue) / maxTranslateY;
+      setScrollProgress(progress);
+      setIsVisible(progress < 0.8);
+    }
   }, [maxTranslateY, direction]);
+
+  // Snap using CSS transition (GPU accelerated, no JS animation loop)
+  const snapToEnd = useCallback(() => {
+    if (!snapToEnds) return;
+
+    const progress = Math.abs(currentTranslateY.current) / maxTranslateY;
+    const targetValue = progress > 0.5
+      ? (direction === 'up' ? -maxTranslateY : maxTranslateY)
+      : 0;
+
+    // Skip if already at target
+    if (Math.abs(currentTranslateY.current - targetValue) < 1) return;
+
+    // Enable CSS transition flag, update value
+    setIsAnimating(true);
+    currentTranslateY.current = targetValue;
+    setTranslateY(targetValue);
+    setScrollProgress(Math.abs(targetValue) / maxTranslateY);
+    setIsVisible(targetValue === 0);
+
+    // Disable animation flag after CSS transition completes
+    setTimeout(() => setIsAnimating(false), 250);
+  }, [snapToEnds, maxTranslateY, direction]);
 
   useEffect(() => {
     const handleScroll = () => {
-      // Ignorer sur desktop si mobileOnly est true
+      // Don't update during CSS transition
+      if (isAnimating) return;
+
       if (mobileOnly && window.innerWidth >= 1024) {
-        updatePosition(0);
+        if (currentTranslateY.current !== 0) {
+          currentTranslateY.current = 0;
+          setTranslateY(0);
+          setScrollProgress(0);
+          setIsVisible(true);
+        }
         return;
       }
 
       const currentScrollY = window.scrollY;
       const scrollDelta = currentScrollY - lastScrollY.current;
 
-      // En haut de page, toujours visible
+      // At top, always visible
       if (currentScrollY <= 10) {
         updatePosition(0);
         lastScrollY.current = currentScrollY;
         return;
       }
 
-      // Suivi direct du scroll (1:1) pour une fluidité maximale
-      // direction 'up' (header): scroll down = negative translateY (element slides up)
-      // direction 'down' (bottom menu): scroll down = positive translateY (element slides down)
+      // 1:1 scroll tracking
       const newTranslateY = direction === 'up'
         ? currentTranslateY.current - scrollDelta
         : currentTranslateY.current + scrollDelta;
       updatePosition(newTranslateY);
 
-      // Mise à jour de la direction
-      if (scrollDelta > 0) {
-        setScrollDirection('down');
-      } else if (scrollDelta < 0) {
-        setScrollDirection('up');
+      // Update direction (only if changed)
+      const newDirection = scrollDelta > 0 ? 'down' : scrollDelta < 0 ? 'up' : scrollDirection;
+      if (newDirection !== scrollDirection) {
+        setScrollDirection(newDirection);
       }
 
       lastScrollY.current = currentScrollY;
+
+      // Schedule snap
+      if (snapToEnds) {
+        if (snapTimeoutId.current) clearTimeout(snapTimeoutId.current);
+        snapTimeoutId.current = setTimeout(snapToEnd, 150);
+      }
     };
 
     const onScroll = () => {
-      if (rafId.current) {
-        cancelAnimationFrame(rafId.current);
-      }
+      if (rafId.current) cancelAnimationFrame(rafId.current);
       rafId.current = requestAnimationFrame(handleScroll);
     };
 
@@ -110,17 +137,17 @@ export function useDrawerScroll(options: UseDrawerScrollOptions = {}): UseDrawer
 
     return () => {
       window.removeEventListener('scroll', onScroll);
-      if (rafId.current) {
-        cancelAnimationFrame(rafId.current);
-      }
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+      if (snapTimeoutId.current) clearTimeout(snapTimeoutId.current);
     };
-  }, [maxTranslateY, mobileOnly, updatePosition, direction]);
+  }, [maxTranslateY, mobileOnly, updatePosition, direction, snapToEnds, snapToEnd, isAnimating, scrollDirection]);
 
   return {
     translateY,
     isVisible,
     scrollDirection,
-    scrollProgress
+    scrollProgress,
+    isAnimating
   };
 }
 

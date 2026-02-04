@@ -1,4 +1,4 @@
-import React, { useState, forwardRef } from 'react';
+import React, { useState, forwardRef, useRef, useEffect } from 'react';
 import { Search, Plus, Calendar, Settings, ChevronLeft, Moon, Sun } from 'lucide-react';
 import {
   MainView, ShotLayout, InventoryLayout,
@@ -118,6 +118,29 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
   tasks = []
 }, ref) => {
   const { backAction, detailLabel } = useHeaderActions();
+  const headerBottomRef = useRef<HTMLDivElement>(null);
+  const [fadeThreshold, setFadeThreshold] = useState(-90);
+
+  // Measure HeaderBottom height to calculate exact fade transfer threshold
+  useEffect(() => {
+    const measureHeight = () => {
+      if (headerBottomRef.current) {
+        const height = headerBottomRef.current.offsetHeight;
+        // Transfer fade when HeaderBottom is almost fully hidden (95% hidden)
+        setFadeThreshold(-(height * 0.95));
+      }
+    };
+
+    measureHeight();
+
+    // Re-measure on resize
+    const resizeObserver = new ResizeObserver(measureHeight);
+    if (headerBottomRef.current) {
+      resizeObserver.observe(headerBottomRef.current);
+    }
+
+    return () => resizeObserver.disconnect();
+  }, [mainView]); // Re-measure when view changes
 
   // Subtitles map based on screenshots
   const getSubtitle = () => {
@@ -140,7 +163,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
       {/* HeaderTop - Fixed title row (z-[51]) */}
       <header
         ref={ref}
-        className="fixed top-0 left-0 right-0 z-[51] bg-[#F2F2F7] dark:bg-[#141417] transition-colors duration-150"
+        className="fixed top-0 left-0 right-0 z-[51] bg-[#F2F2F7] dark:bg-[#141417] transition-colors duration-150 overflow-visible"
         style={{
           paddingTop: 'calc(env(safe-area-inset-top) + var(--header-padding-top, 12px))',
         }}
@@ -203,11 +226,24 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
             </div>
           </div>
         </div>
+        {/* Fade effect on HeaderTop - only visible when HeaderBottom is hidden */}
+        <div
+          className="absolute left-0 right-0 bottom-0 h-6 pointer-events-none translate-y-full transition-opacity duration-200"
+          style={{
+            background: 'linear-gradient(to bottom, var(--header-fade-color) 0%, transparent 100%)',
+            opacity: filterTranslateY < -5 ? 1 : 0
+          }}
+        />
+        <style>{`
+          :root { --header-fade-color: #F2F2F7; }
+          .dark { --header-fade-color: #141417; }
+        `}</style>
       </header>
 
       {/* HeaderBottom - Fixed filter row (z-[50]) - slides behind HeaderTop */}
       <div
-        className="fixed left-0 right-0 z-[50] will-change-transform bg-[#F2F2F7] dark:bg-[#141417] pt-3"
+        ref={headerBottomRef}
+        className="fixed left-0 right-0 z-[50] will-change-transform bg-[#F2F2F7] dark:bg-[#141417] pt-3 overflow-visible"
         style={{
           top: 'calc(env(safe-area-inset-top) + var(--header-padding-top, 12px) + 50px)',
           transform: `translateY(${filterTranslateY}px)`
@@ -301,6 +337,14 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
             </div>
           </div>
         </div>
+        {/* Fade effect on HeaderBottom - visible when not hidden */}
+        <div
+          className="absolute left-0 right-0 bottom-0 h-6 pointer-events-none translate-y-full transition-opacity duration-200"
+          style={{
+            background: 'linear-gradient(to bottom, var(--header-fade-color) 0%, transparent 100%)',
+            opacity: filterTranslateY >= -5 ? 1 : 0
+          }}
+        />
       </div>
     </>
   );
