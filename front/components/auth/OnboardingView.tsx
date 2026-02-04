@@ -365,7 +365,7 @@ const MockNotes = () => (
          </span>
         </div>
         <div className="p-7 flex-1 flex flex-col">
-         <h4 className="font-semibold text-xl text-gray-900 leading-tight mb-4">Crew catering</h4>
+         <h4 className="font-semibold text-xl text-gray-900 leading-tight mb-4">Catering</h4>
          <p className="text-sm text-gray-500 leading-relaxed font-medium mb-6">
            Confirm vegan options for Friday's night shoot. The runner needs the final count by Thursday morning.
          </p>

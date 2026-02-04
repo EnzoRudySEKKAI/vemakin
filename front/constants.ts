@@ -5,10 +5,7 @@ import {
   PenLine, Scissors, Music, Layers, Palette, Plane,
   Triangle, Activity, CircleDot
 } from 'lucide-react';
-import { Equipment, PostProdTask, Shot, Currency, Note, CrewMember } from './types.ts';
-
-export const PROJECTS: string[] = [];
-export const SHOOT_DATES: string[] = [];
+import { Equipment, PostProdTask, Shot, Currency, Note } from './types.ts';
 
 export const POST_PROD_CATEGORIES = [
   { label: 'Script', icon: PenLine, color: 'text-indigo-500', bg: 'bg-indigo-50', border: 'border-indigo-100', activeBg: 'bg-indigo-600', activeText: 'text-white' },

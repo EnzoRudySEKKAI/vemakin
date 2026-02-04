@@ -1,6 +1,5 @@
-import React, { useState, useMemo, useRef, useCallback } from 'react';
-import { Film, Calendar, MapPin, FileText, Package, Check, Search, AlertCircle, Loader2, ExternalLink, Map as MapIcon } from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
+import React, { useState, useMemo, useCallback } from 'react';
+import { Film, Calendar, MapPin, FileText, Package, Check, Search, AlertCircle } from 'lucide-react';
 import { FormLayout, FormType } from '../organisms/FormLayout';
 import { Text } from '../atoms/Text';
 import { TimeSelector } from '../ui/TimeSelector';
@@ -44,9 +43,6 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
     equipmentIds: [] as string[]
   });
 
-  const [locationSuggestions, setLocationSuggestions] = useState<{ name: string, uri?: string }[]>([]);
-  const [isSearchingLocation, setIsSearchingLocation] = useState(false);
-  const locationSearchTimeout = useRef<any>(null);
   const [shotGearSearch, setShotGearSearch] = useState('');
   const [shotGearCategory, setShotGearCategory] = useState('All');
 
@@ -67,61 +63,6 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
       return (startMins < sEnd && endMins > sStart);
     });
   }, [form.startTime, form.endTime, form.date, existingShots]);
-
-  // Location autocomplete
-  const fetchLocationSuggestions = async (query: string) => {
-    if (!query || query.length < 2) {
-      setLocationSuggestions([]);
-      return;
-    }
-    setIsSearchingLocation(true);
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: `List only 4 real filming locations or addresses matching"${query}". DO NOT include any introductory or concluding sentences. Provide just the names, one per line.`,
-        config: {
-          tools: [{ googleMaps: {} }],
-        }
-      });
-
-      const text = response.text || "";
-      const lines = text.split('\n')
-        .map(l => l.replace(/^\d+\.\s*/, '').trim())
-        .filter(l => l.length > 2 && l.length < 60 && !l.toLowerCase().includes('here are') && !l.toLowerCase().includes('locations:'))
-        .slice(0, 4);
-
-      const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
-      const suggestions = lines.map((name: string) => {
-        const matchingChunk = chunks.find((c: any) => c.maps?.title?.toLowerCase().includes(name.toLowerCase()));
-        return {
-          name,
-          uri: matchingChunk?.maps?.uri
-        };
-      });
-
-      setLocationSuggestions(suggestions);
-    } catch (err) {
-      console.error("Location search failed", err);
-    } finally {
-      setIsSearchingLocation(false);
-    }
-  };
-
-  const handleLocationInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setForm({ ...form, location: val });
-
-    if (locationSearchTimeout.current) clearTimeout(locationSearchTimeout.current);
-    locationSearchTimeout.current = setTimeout(() => {
-      fetchLocationSuggestions(val);
-    }, 500);
-  };
-
-  const selectLocation = (suggestion: { name: string, uri?: string }) => {
-    setForm({ ...form, location: suggestion.name });
-    setLocationSuggestions([]);
-  };
 
   const toggleShotGear = (id: string) => {
     setForm(prev => {
@@ -247,48 +188,18 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
         </div>
 
         {/* Location */}
-        <div className="w-full relative z-20">
+        <div className="w-full">
           <Text variant="subtitle" color="muted" className="dark:text-white mb-3 block text-center sm:text-left">Location</Text>
           
-          <div className="relative">
-            <div className="flex flex-col gap-1 min-w-0">
-              <input
-                type="text"
-                value={form.location}
-                onChange={handleLocationInputChange}
-                className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all text-sm font-semibold placeholder-gray-400 dark:placeholder-gray-500"
-                placeholder="Search filming location..."
-              />
-            </div>
-            {isSearchingLocation && (
-              <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                <Loader2 size={16} className="text-emerald-500 animate-spin" />
-              </div>
-            )}
+          <div className="flex flex-col gap-1 min-w-0">
+            <input
+              type="text"
+              value={form.location}
+              onChange={e => setForm({ ...form, location: e.target.value })}
+              className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all text-sm font-semibold placeholder-gray-400 dark:placeholder-gray-500"
+              placeholder="Enter filming location..."
+            />
           </div>
-
-          {locationSuggestions.length > 0 && (
-            <div className="absolute left-0 right-0 mt-2 bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden">
-              <div className="px-4 py-2.5 border-b border-gray-100 dark:border-white/5 bg-gray-50/80 dark:bg-white/5 flex items-center justify-between">
-                <span className="text-[9px] font-semibold text-gray-400 dark:text-gray-500">Maps suggestions</span>
-                <MapIcon size={12} className="text-emerald-400" />
-              </div>
-              <div className="max-h-48 overflow-y-auto">
-                {locationSuggestions.map((suggestion, i) => (
-                  <button
-                    key={i}
-                    onClick={() => selectLocation(suggestion)}
-                    className="w-full text-left px-4 py-3 hover:bg-blue-50 dark:hover:bg-white/5 flex items-center justify-between transition-colors border-b border-gray-50 dark:border-white/5 last:border-none group/loc"
-                  >
-                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 group-hover/loc:text-blue-600 dark:group-hover/loc:text-indigo-400 transition-colors truncate pr-2">
-                      {suggestion.name}
-                    </span>
-                    {suggestion.uri && <ExternalLink size={12} className="text-gray-300 dark:text-gray-600 shrink-0" />}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Description */}

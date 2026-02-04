@@ -88,17 +88,6 @@ export interface Note {
     attachments: Attachment[];
 }
 
-export interface CrewMember {
-    id: string;
-    name: string;
-    role: string;
-    email?: string;
-    phone?: string;
-    dailyRate?: number;
-    status: 'confirmed' | 'pending' | 'wrapped';
-    avatar?: string;
-}
-
 export interface Equipment {
     id: string;
     name: string;

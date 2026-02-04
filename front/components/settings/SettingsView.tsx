@@ -72,7 +72,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       <div>
        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Vemakin account</h3>
        <p className="text-xs text-gray-500 font-medium max-w-[240px] mx-auto mt-1 leading-relaxed">
-        Sync your productions across devices and collaborate with your crew.
+         Sync your productions across devices.
        </p>
       </div>
       <div className="flex gap-3 w-full mt-2">
