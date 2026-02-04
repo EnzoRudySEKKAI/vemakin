@@ -29,7 +29,7 @@
   --content-padding-offset: 8px;
   --layout-animation-duration: 300ms;
   --layout-animation-easing: cubic-bezier(0.25, 0.1, 0.25, 1);
-  
+
   /* View-specific offsets */
   --view-offset-shots: 8px;
   --view-offset-inventory: 12px;
@@ -51,6 +51,15 @@
   --glass-surface: rgba(20, 20, 23, 0.85);
   --glass-highlight: rgba(255, 255, 255, 0.1);
   color-scheme: dark;
+  background-color: #141417;
+}
+
+html {
+  background-color: #F2F2F7;
+}
+
+.dark html {
+  background-color: #141417;
 }
 
 body {
@@ -58,11 +67,16 @@ body {
   --liquid-accent-2: #3762E3;
   --liquid-dark-accent-2: #4E47DD;
   --liquid-accent-3: #ec4899;
-  border: 1px solid var(--glass-border);
+  background-color: #F2F2F7;
   box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.02),
     0 2px 4px -1px rgba(0, 0, 0, 0.02),
     inset 0 0 20px rgba(255, 255, 255, 0.5);
+  min-height: 100%;
+}
+
+.dark body {
+  background-color: #141417;
 }
 
 .glass-card {
@@ -74,6 +88,7 @@ body {
     0 10px 40px -10px rgba(0, 0, 0, 0.05),
     inset 0 0 2px rgba(255, 255, 255, 0.6);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow: hidden;
 }
 
 .glass-card:active {
@@ -474,7 +489,35 @@ body {
 html {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: none;
+  background-color: #F2F2F7;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y;
+  background-color: #F2F2F7;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+@supports (-webkit-touch-callout: none) {
+  html, body {
+    min-height: -webkit-fill-available;
+  }
+}
+
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid #3762E3;
+  outline-offset: 2px;
 }
 
 /* 
@@ -490,6 +533,7 @@ html {
   will-change: padding-top;
   content-visibility: auto;
   contain-intrinsic-size: auto 500px;
+  min-height: calc(100vh - env(safe-area-inset-top, 0px));
 }
 
 /* Reduce motion for users who prefer it */
@@ -498,7 +542,7 @@ html {
     transition: none;
     will-change: auto;
   }
-  
+
   :root {
     --layout-animation-duration: 0ms;
   }
@@ -507,8 +551,35 @@ html {
 /* Touch optimization for mobile */
 @media (hover: none) and (pointer: coarse) {
   .content-wrapper {
-    /* Disable expensive will-change on touch devices to save battery */
     will-change: auto;
+  }
+
+  body {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .glass-card {
+    border-radius: 12px;
+  }
+
+  html {
+    background-color: #F2F2F7;
+  }
+
+  .dark html {
+    background-color: #141417;
+  }
+
+  .content-wrapper {
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -522,14 +593,46 @@ html {
 }
 
 /* View-specific offset classes */
-.view-shots { --content-padding-offset: var(--view-offset-shots); }
-.view-inventory { --content-padding-offset: var(--view-offset-inventory); }
-.view-notes { --content-padding-offset: var(--view-offset-notes); }
-.view-postprod { --content-padding-offset: var(--view-offset-postprod); }
-.view-overview { --content-padding-offset: var(--view-offset-overview); }
-.view-settings { --content-padding-offset: var(--view-offset-settings); }
-.view-equipment-detail { --content-padding-offset: var(--view-offset-inventory); }
-.view-shot-detail { --content-padding-offset: var(--view-offset-shots); }
-.view-note-detail { --content-padding-offset: var(--view-offset-notes); }
-.view-task-detail { --content-padding-offset: var(--view-offset-postprod); }
-.view-manage-projects { --content-padding-offset: var(--view-offset-settings); }
+.view-shots {
+  --content-padding-offset: var(--view-offset-shots);
+}
+
+.view-inventory {
+  --content-padding-offset: var(--view-offset-inventory);
+}
+
+.view-notes {
+  --content-padding-offset: var(--view-offset-notes);
+}
+
+.view-postprod {
+  --content-padding-offset: var(--view-offset-postprod);
+}
+
+.view-overview {
+  --content-padding-offset: var(--view-offset-overview);
+}
+
+.view-settings {
+  --content-padding-offset: var(--view-offset-settings);
+}
+
+.view-equipment-detail {
+  --content-padding-offset: var(--view-offset-inventory);
+}
+
+.view-shot-detail {
+  --content-padding-offset: var(--view-offset-shots);
+}
+
+.view-note-detail {
+  --content-padding-offset: var(--view-offset-notes);
+}
+
+.view-task-detail {
+  --content-padding-offset: var(--view-offset-postprod);
+}
+
+.view-manage-projects {
+  --content-padding-offset: var(--view-offset-settings);
+}

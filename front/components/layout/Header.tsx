@@ -1,5 +1,4 @@
 import React, { useState, forwardRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, Calendar, Settings, ChevronLeft, Moon, Sun } from 'lucide-react';
 import {
   MainView, ShotLayout, InventoryLayout,
@@ -16,8 +15,7 @@ import { DetailViewHeader } from '../organisms/header/DetailViewHeader';
 import { ProjectSelector } from '../molecules/ProjectSelector';
 
 interface HeaderProps {
-  showHeader: boolean;
-  showControls: boolean;
+  filterTranslateY?: number;
   currentProject: string;
   setCurrentProject: (name: string) => void;
   projects: Record<string, any>;
@@ -77,8 +75,7 @@ interface HeaderProps {
 }
 
 export const Header = forwardRef<HTMLElement, HeaderProps>(({
-  showHeader,
-  showControls,
+  filterTranslateY = 0,
   viewTitle,
   mainView,
   currentProject,
@@ -139,177 +136,173 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
   const showFilterBar = mainView !== 'overview' && !isSettingsView && !isDetailView;
 
   return (
-    <motion.header
-      ref={ref}
-      className="fixed top-0 left-0 right-0 z-50 bg-[#F2F2F7] dark:bg-[#141417] transition-colors duration-150"
-      initial={{ y: 0 }}
-      animate={{ y: showHeader ? 0 : -100 }}
-      transition={{ type: 'spring', damping: 30, stiffness: 400 }}
-    >
-      <div
-        className="transition-all duration-200 ease-in-out px-4 md:px-6 lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(275px+1.5rem)]"
+    <>
+      {/* HeaderTop - Fixed title row (z-[51]) */}
+      <header
+        ref={ref}
+        className="fixed top-0 left-0 right-0 z-[51] bg-[#F2F2F7] dark:bg-[#141417] transition-colors duration-150"
         style={{
-          paddingTop: 'calc(env(safe-area-inset-top) + var(--header-padding-top, 16px))',
-          paddingBottom: 'var(--header-padding-bottom, 4px)'
+          paddingTop: 'calc(env(safe-area-inset-top) + var(--header-padding-top, 12px))',
         }}
       >
-        <div className={`mx-auto w-full ${isWideMode ? 'max-w-[90%]' : 'max-w-7xl'}`}>
-
-          {/* --- ROW 1: Title & Main Actions (Fixed Height for Stability) --- */}
-          <div data-header-row="1" className="flex items-center justify-between min-h-[50px] mb-2">
-
-            {/* Left: Title & Subtitle */}
-            <div className="flex items-center gap-3">
-              {/* Back button for Settings and Manage Projects */}
-              {isSettingsView && (
-                <button
-                  onClick={() => setMainView('overview')}
-                  className="w-10 h-10 rounded-xl bg-white dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-white transition-all hover:bg-gray-100 dark:hover:bg-white/20 shrink-0"
-                >
-                  <ChevronLeft size={20} strokeWidth={2.5} />
-                </button>
-              )}
-              <div className="flex flex-col justify-center leading-none">
-                <h1 className="text-2xl font-semibold text-gray-900 dark:text-white leading-none">
-                  {backAction ? (detailLabel || 'Detail view') : viewTitle}
-                </h1>
-                <div className="flex items-center">
-                  {!backAction && (
-                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-500">
-                      {getSubtitle()}
-                    </span>
-                  )}
+        <div className="px-4 md:px-6 lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(275px+1.5rem)]">
+          <div className={`mx-auto w-full ${isWideMode ? 'max-w-[90%]' : 'max-w-7xl'}`}>
+            {/* --- ROW 1: Title & Main Actions --- */}
+            <div data-header-row="1" className="flex items-center justify-between min-h-[50px] pb-3">
+              {/* Left: Title & Subtitle */}
+              <div className="flex items-center gap-3">
+                {/* Back button for Settings and Manage Projects */}
+                {isSettingsView && (
+                  <button
+                    onClick={() => setMainView('overview')}
+                    className="w-10 h-10 rounded-xl bg-white dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-white transition-all hover:bg-gray-100 dark:hover:bg-white/20 shrink-0"
+                  >
+                    <ChevronLeft size={20} strokeWidth={2.5} />
+                  </button>
+                )}
+                <div className="flex flex-col justify-center leading-none">
+                  <h1 className="text-2xl font-semibold text-gray-900 dark:text-white leading-none">
+                    {backAction ? (detailLabel || 'Detail view') : viewTitle}
+                  </h1>
+                  <div className="flex items-center">
+                    {!backAction && (
+                      <span className="text-xs font-semibold text-gray-500 dark:text-gray-500">
+                        {getSubtitle()}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Right: Actions Group */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={onToggleDarkMode}
-                className="w-9 h-9 rounded-[12px] bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-indigo-400 transition-all hover:scale-105 active:scale-95"
-              >
-                {darkMode ? <Moon size={18} fill="currentColor"/> : <Sun size={18} />}
-              </button>
-
-              {/* Hide settings button when on settings or manage-projects */}
-              {!isSettingsView && (
+              {/* Right: Actions Group */}
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setMainView('settings')}
-                  className="w-9 h-9 rounded-[12px] bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-[#4E47DD] transition-all hover:scale-105 active:scale-95"
+                  onClick={onToggleDarkMode}
+                  className="w-9 h-9 rounded-[12px] bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-indigo-400 transition-all hover:scale-105 active:scale-95"
                 >
-                  <Settings size={18} />
+                  {darkMode ? <Moon size={18} fill="currentColor" /> : <Sun size={18} />}
                 </button>
-              )}
 
-              <button
-                onClick={onAdd}
-                className="w-9 h-9 rounded-[12px] bg-[#3762E3] dark:bg-[#4E47DD] text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95"
-              >
-                <Plus size={20} strokeWidth={2.5} />
-              </button>
+                {/* Hide settings button when on settings or manage-projects */}
+                {!isSettingsView && (
+                  <button
+                    onClick={() => setMainView('settings')}
+                    className="w-9 h-9 rounded-[12px] bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-[#4E47DD] transition-all hover:scale-105 active:scale-95"
+                  >
+                    <Settings size={18} />
+                  </button>
+                )}
+
+                <button
+                  onClick={onAdd}
+                  className="w-9 h-9 rounded-[12px] bg-[#3762E3] dark:bg-[#4E47DD] text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+                >
+                  <Plus size={20} strokeWidth={2.5} />
+                </button>
+              </div>
             </div>
           </div>
+        </div>
+      </header>
 
-          {/* --- ROW 2: Dynamic Controls (Show/Hide on Scroll) --- */}
-          <AnimatePresence>
-            {showControls && (
-              <motion.div
-                data-header-row="2"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="relative z-[60]"
-              >
-                <div className="flex flex-col gap-2">
-                  {/* Detail Mode Controls */}
-                  {isDetailView || backAction ? (
-                    <DetailViewHeader />
-                  ) : (
-                    <>
-                      {/* Project Selector Card */}
-                      {mainView === 'overview' && (
-                        <ProjectSelector
-                          currentProject={currentProject}
-                          projects={projects}
-                          onSelect={setCurrentProject}
-                          onCreate={onAddProject}
-                        />
-                      )}
+      {/* HeaderBottom - Fixed filter row (z-[50]) - slides behind HeaderTop */}
+      <div
+        className="fixed left-0 right-0 z-[50] will-change-transform bg-[#F2F2F7] dark:bg-[#141417] pt-3"
+        style={{
+          top: 'calc(env(safe-area-inset-top) + var(--header-padding-top, 12px) + 50px)',
+          transform: `translateY(${filterTranslateY}px)`
+        }}
+      >
+        <div className="px-4 md:px-6 lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(275px+1.5rem)]">
+          <div className={`mx-auto w-full ${isWideMode ? 'max-w-[90%]' : 'max-w-7xl'}`}>
+            {/* --- ROW 2: Dynamic Controls (Drawer Effect) --- */}
+            <div data-header-row="2">
+              <div className="flex flex-col gap-2">
+                {/* Detail Mode Controls */}
+                {isDetailView || backAction ? (
+                  <DetailViewHeader />
+                ) : (
+                  <>
+                    {/* Project Selector Card */}
+                    {mainView === 'overview' && (
+                      <ProjectSelector
+                        currentProject={currentProject}
+                        projects={projects}
+                        onSelect={setCurrentProject}
+                        onCreate={onAddProject}
+                      />
+                    )}
 
-                      {/* Filter Bars for different views */}
-                      {showFilterBar && (
-                        <>
-                          {mainView === 'shots' && shotLayout && setShotLayout && (
-                            <ShotsFilterBar
-                              searchQuery={shotSearchQuery}
-                              onSearchChange={setShotSearchQuery}
-                              statusFilter={shotStatusFilter}
-                              onStatusChange={setShotStatusFilter}
-                              layout={shotLayout}
-                              onLayoutChange={setShotLayout}
-                              projectProgress={projectProgress}
-                              groupedShots={groupedShots}
-                              activeDate={activeDate}
-                              isDatePickerOpen={isDateSelectorOpen}
-                              onDatePickerToggle={() => setIsDateSelectorOpen(!isDateSelectorOpen)}
-                              onDateSelect={handleDateSelect}
-                            />
-                          )}
+                    {/* Filter Bars for different views */}
+                    {showFilterBar && (
+                      <>
+                        {mainView === 'shots' && shotLayout && setShotLayout && (
+                          <ShotsFilterBar
+                            searchQuery={shotSearchQuery}
+                            onSearchChange={setShotSearchQuery}
+                            statusFilter={shotStatusFilter}
+                            onStatusChange={setShotStatusFilter}
+                            layout={shotLayout}
+                            onLayoutChange={setShotLayout}
+                            projectProgress={projectProgress}
+                            groupedShots={groupedShots}
+                            activeDate={activeDate}
+                            isDatePickerOpen={isDateSelectorOpen}
+                            onDatePickerToggle={() => setIsDateSelectorOpen(!isDateSelectorOpen)}
+                            onDateSelect={handleDateSelect}
+                          />
+                        )}
 
-                          {mainView === 'inventory' && inventoryLayout && setInventoryLayout && (
-                            <InventoryFilterBar
-                              searchQuery={inventoryFilters.query}
-                              onSearchChange={(query) => setInventoryFilters({ ...inventoryFilters, query })}
-                              categoryFilter={inventoryFilters.category}
-                              onCategoryChange={(category) => setInventoryFilters({ ...inventoryFilters, category })}
-                              ownershipFilter={inventoryFilters.ownership}
-                              onOwnershipChange={(ownership) => setInventoryFilters({ ...inventoryFilters, ownership })}
-                              layout={inventoryLayout}
-                              onLayoutChange={setInventoryLayout}
-                              inventory={inventory}
-                            />
-                          )}
+                        {mainView === 'inventory' && inventoryLayout && setInventoryLayout && (
+                          <InventoryFilterBar
+                            searchQuery={inventoryFilters.query}
+                            onSearchChange={(query) => setInventoryFilters({ ...inventoryFilters, query })}
+                            categoryFilter={inventoryFilters.category}
+                            onCategoryChange={(category) => setInventoryFilters({ ...inventoryFilters, category })}
+                            ownershipFilter={inventoryFilters.ownership}
+                            onOwnershipChange={(ownership) => setInventoryFilters({ ...inventoryFilters, ownership })}
+                            layout={inventoryLayout}
+                            onLayoutChange={setInventoryLayout}
+                            inventory={inventory}
+                          />
+                        )}
 
-                          {mainView === 'postprod' && postProdFilters && setPostProdFilters && postProdLayout && setPostProdLayout && (
-                            <PostProdFilterBar
-                              searchQuery={postProdFilters.searchQuery || ''}
-                              onSearchChange={(searchQuery) => setPostProdFilters({ searchQuery })}
-                              filters={postProdFilters}
-                              onFiltersChange={setPostProdFilters}
-                              layout={postProdLayout}
-                              onLayoutChange={setPostProdLayout}
-                              tasks={tasks}
-                              activeDate={activeDate}
-                              isDatePickerOpen={isDateSelectorOpen}
-                              onDatePickerToggle={() => setIsDateSelectorOpen(!isDateSelectorOpen)}
-                              onDateSelect={handleDateSelect}
-                            />
-                          )}
+                        {mainView === 'postprod' && postProdFilters && setPostProdFilters && postProdLayout && setPostProdLayout && (
+                          <PostProdFilterBar
+                            searchQuery={postProdFilters.searchQuery || ''}
+                            onSearchChange={(searchQuery) => setPostProdFilters({ searchQuery })}
+                            filters={postProdFilters}
+                            onFiltersChange={setPostProdFilters}
+                            layout={postProdLayout}
+                            onLayoutChange={setPostProdLayout}
+                            tasks={tasks}
+                            activeDate={activeDate}
+                            isDatePickerOpen={isDateSelectorOpen}
+                            onDatePickerToggle={() => setIsDateSelectorOpen(!isDateSelectorOpen)}
+                            onDateSelect={handleDateSelect}
+                          />
+                        )}
 
-                          {mainView === 'notes' && notesFilters && setNotesFilters && notesLayout && setNotesLayout && (
-                            <NotesFilterBar
-                              searchQuery={notesFilters.query}
-                              onSearchChange={(query) => setNotesFilters({ ...notesFilters, query })}
-                              categoryFilter={notesFilters.category}
-                              onCategoryChange={(category) => setNotesFilters({ ...notesFilters, category })}
-                              layout={notesLayout}
-                              onLayoutChange={setNotesLayout}
-                            />
-                          )}
-                        </>
-                      )}
-                    </>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
+                        {mainView === 'notes' && notesFilters && setNotesFilters && notesLayout && setNotesLayout && (
+                          <NotesFilterBar
+                            searchQuery={notesFilters.query}
+                            onSearchChange={(query) => setNotesFilters({ ...notesFilters, query })}
+                            categoryFilter={notesFilters.category}
+                            onCategoryChange={(category) => setNotesFilters({ ...notesFilters, category })}
+                            layout={notesLayout}
+                            onLayoutChange={setNotesLayout}
+                          />
+                        )}
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div className="absolute -bottom-6 left-0 right-0 h-6 bg-gradient-to-b from-[#F2F2F7] to-transparent dark:from-[#141417] pointer-events-none"/>
-    </motion.header>
+    </>
   );
 });
 

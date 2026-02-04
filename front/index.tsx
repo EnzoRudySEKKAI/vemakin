@@ -33,9 +33,9 @@ import { NewsModal } from './components/modals/NewsModal.tsx';
 import { TutorialModal } from './components/modals/TutorialModal.tsx';
 import { NoProjectsView } from './components/projects/NoProjectsView.tsx';
 import { useProductionStore } from './hooks/useProductionStore.ts';
-import { useHeaderPadding } from './hooks/useHeaderPadding.ts';
 import { LayoutProvider, useLayout } from './context/LayoutContext.tsx';
 import { useSyncLayout } from './hooks/useSyncLayout.ts';
+import { useDrawerScroll } from './hooks/useDrawerScroll.ts';
 
 const CineFlowApp = () => {
   const {
@@ -104,12 +104,38 @@ const CineFlowApp = () => {
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
 
   // Header & View States
-  const [showControls, setShowControls] = useState(true);
   const [isWideMode, setIsWideMode] = useState(false);
-  const lastScrollY = useRef(0);
-  
+
   // Get header ref from LayoutContext for sync system
   const { headerRef } = useLayout();
+
+  // Detect if we're on a detail page or form page (no drawer effect, no navigation)
+  const isDetailPage = mainView.includes('-detail');
+
+  // Pages where bottom navigation should be hidden
+  const hideNavigationViews = [
+    'shot-detail', 'equipment-detail', 'note-detail', 'task-detail',
+    'new-shot', 'new-gear', 'new-task', 'new-note',
+    'settings', 'manage-projects'
+  ];
+  const shouldHideNavigation = hideNavigationViews.includes(mainView);
+
+  // Drawer scroll effect - Header filters slide up, Nav slides down
+  const { translateY: headerTranslateY } = useDrawerScroll({
+    maxTranslateY: 250, // Increased to fully hide filters
+    threshold: 5,
+    mobileOnly: true
+  });
+
+  // Disable drawer effect on detail pages
+  const effectiveHeaderTranslateY = isDetailPage ? 0 : headerTranslateY;
+
+  const { translateY: navTranslateY } = useDrawerScroll({
+    maxTranslateY: 100,
+    threshold: 5,
+    mobileOnly: true,
+    direction: 'down' // Menu slides down when scrolling
+  });
 
   const [isDateSelectorOpen, setIsDateSelectorOpen] = useState(false);
   const [dateFilter, setDateFilter] = useState<string | null>(null);
@@ -144,48 +170,10 @@ const CineFlowApp = () => {
     window.scrollTo(0, 0);
   }, [mainView]);
 
-  // Form views where header should always stay visible
-  const isFormView = ['new-shot', 'new-gear', 'new-task', 'new-note'].includes(mainView);
-
-  // Scroll Handling
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-
-      // Force controls visible on desktop (>= 1024px) or in form views
-      if (window.innerWidth >= 1024 || isFormView) {
-        setShowControls(true);
-        lastScrollY.current = currentScrollY;
-        return;
-      }
-
-      // Optimization: Use requestAnimationFrame to debounce visually
-      requestAnimationFrame(() => {
-        // Increased threshold to 20px to avoid jitter/accidental push effect
-        if (Math.abs(currentScrollY - lastScrollY.current) < 20) return;
-
-        if (currentScrollY <= 50) {
-          setShowControls(true);
-        } else if (currentScrollY > lastScrollY.current) {
-          // Scrolling down -> Hide controls
-          setShowControls(false);
-        } else {
-          // Scrolling up -> Show controls
-          setShowControls(true);
-        }
-        lastScrollY.current = currentScrollY;
-      });
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isFormView]);
-
   // Sync Layout System - Calculates content padding based on header measurements
   const { style: layoutStyle, isReady: isLayoutReady } = useSyncLayout({
     viewType: mainView,
-    animate: true,
-    animationDuration: 300,
+    filterTranslateY: effectiveHeaderTranslateY,
   });
 
   // Sync Dark Mode to HTML/Body for global context (Modals, Scrollbars)
@@ -663,8 +651,7 @@ const CineFlowApp = () => {
       <div className={`min-h-screen bg-[#F2F2F7] dark:bg-[#141417] text-[#1C1C1E] selection:bg-blue-100 dark:text-white transition-colors duration-500 ${darkMode ? 'dark' : ''}`}>
         <Header
           ref={headerRef}
-          showHeader={true}
-          showControls={showControls}
+          filterTranslateY={effectiveHeaderTranslateY}
           currentProject={currentProject}
           setCurrentProject={setCurrentProject}
           projects={projects}
@@ -719,15 +706,19 @@ const CineFlowApp = () => {
           tasks={activePostProdTasks}
         />
 
-        {/* Navigation - Always visible */}
-        <Navigation mainView={mainView} setMainView={handleNavigateToView} onPlusClick={handleMainAddClick} />
+        {/* Navigation - Hidden on form and detail pages */}
+        {!shouldHideNavigation && (
+          <Navigation mainView={mainView} setMainView={handleNavigateToView} onPlusClick={handleMainAddClick} />
+        )}
+
+
 
         {/* Sync Layout System - Content wrapper with dynamic padding */}
         <div
-          className={`content-wrapper px-4 md:px-6 pb-6 lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(275px+1.5rem)] view-${mainView}`}
+          className={`content-wrapper px-4 md:px-6 pb-0 lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(275px+1.5rem)] view-${mainView}`}
           style={mainView === 'settings' || mainView === 'manage-projects' ? { paddingTop: 0 } : layoutStyle}
         >
-          <main className={`mx-auto w-full pb-28 transition-all duration-500 ease-in-out ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`}>
+            <main className={`mx-auto w-full transition-all duration-500 ease-in-out ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`} style={{ paddingBottom: shouldHideNavigation ? '24px' : '120px' }}>
             <AnimatePresence mode="wait">
               <PageTransition key={mainView}>
                 {renderMainContent()}

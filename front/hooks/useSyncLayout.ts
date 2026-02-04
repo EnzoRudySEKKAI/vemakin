@@ -4,6 +4,7 @@ import { useLayout } from '../context/LayoutContext';
 export interface UseSyncLayoutOptions {
   viewType?: string;
   additionalOffset?: number;
+  filterTranslateY?: number; // Dynamic offset from drawer scroll
 }
 
 export interface UseSyncLayoutReturn {
@@ -29,16 +30,18 @@ const VIEW_OFFSETS: Record<string, number> = {
 /**
  * Hook for synchronizing content padding with header layout.
  * Uses per-view max height tracking to prevent padding issues when switching views.
+ * Supports dynamic filter offset from drawer scroll for Airbnb-style effects.
  */
 export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayoutReturn {
-  const { viewType, additionalOffset = 0 } = options;
+  const { viewType, additionalOffset = 0, filterTranslateY = 0 } = options;
   const { headerRef, updateMeasurements } = useLayout();
-  
-  const [padding, setPadding] = useState(160);
+
+  // Base padding is the measured padding WITHOUT filter adjustment
+  const [basePadding, setBasePadding] = useState(160);
   const [isReady, setIsReady] = useState(false);
   const rafIdRef = useRef<number | null>(null);
   const isMeasuringRef = useRef(false);
-  
+
   // Per-view max height tracking - key is viewType, value is max height for that view
   const maxHeightPerViewRef = useRef<Record<string, number>>({});
   const currentViewRef = useRef(viewType);
@@ -68,46 +71,49 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
       isViewChangingRef.current = true;
       currentViewRef.current = viewType;
       setIsReady(false);
-      
+
       // Longer delay to let the header fully render with new content and any animations complete
       const timer = setTimeout(() => {
         isViewChangingRef.current = false;
-        
+
         // Force immediate measurement for the new view
         const header = headerRef.current;
         if (!header) return;
-        
+
         const rect = header.getBoundingClientRect();
         const row1El = header.querySelector('[data-header-row="1"]');
-        const row2El = header.querySelector('[data-header-row="2"]');
-        
+        // Row2 is a sibling div, not inside header - search in document
+        const row2El = document.querySelector('[data-header-row="2"]');
+
         const row1Height = row1El?.getBoundingClientRect().height || 58;
-        const row2Height = row2El?.getBoundingClientRect().height || 0;
-        const totalHeight = rect.bottom;
-        
+        const row2Rect = row2El?.getBoundingClientRect();
+        const row2Height = row2Rect?.height || 0;
+        // Use row2's bottom position as the true total height (when filters are visible)
+        const totalHeight = row2Rect ? row2Rect.bottom : rect.bottom;
+
         // Update max for this specific view
         updateMaxHeightForView(viewType, totalHeight);
         const stableHeight = getMaxHeightForView(viewType);
-        
+
         const viewOffset = viewType ? (VIEW_OFFSETS[viewType] ?? 8) : 8;
-        const newPadding = Math.round(stableHeight + viewOffset + additionalOffset);
-        const clampedPadding = Math.max(80, Math.min(400, newPadding));
-        
-        setPadding(clampedPadding);
+        const newBasePadding = Math.round(stableHeight + viewOffset + additionalOffset);
+        const clampedBasePadding = Math.max(80, Math.min(400, newBasePadding));
+
+        setBasePadding(clampedBasePadding);
         setIsReady(true);
-        
+
         updateMeasurements({
           headerHeight: stableHeight,
           row1Height,
           row2Height,
         });
-      }, 150); // Increased from 50ms to 150ms for more reliable measurements
-      
+      }, 150);
+
       return () => clearTimeout(timer);
     }
   }, [viewType, headerRef, additionalOffset, updateMeasurements, getMaxHeightForView, updateMaxHeightForView]);
 
-  // Calculate padding from header measurements
+  // Calculate padding from header measurements (for resize/initial load)
   const measureAndUpdate = useCallback(() => {
     // Skip if view is changing
     if (isViewChangingRef.current || isMeasuringRef.current) return;
@@ -128,26 +134,29 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
       try {
         const rect = header.getBoundingClientRect();
         const row1El = header.querySelector('[data-header-row="1"]');
-        const row2El = header.querySelector('[data-header-row="2"]');
-        
+        // Row2 is a sibling div, not inside header - search in document
+        const row2El = document.querySelector('[data-header-row="2"]');
+
         const row1Height = row1El?.getBoundingClientRect().height || 58;
-        const row2Height = row2El?.getBoundingClientRect().height || 0;
-        const totalHeight = rect.bottom;
-        
+        const row2Rect = row2El?.getBoundingClientRect();
+        const row2Height = row2Rect?.height || 0;
+        // Use row2's bottom position as the true total height (when filters are visible)
+        const totalHeight = row2Rect ? row2Rect.bottom : rect.bottom;
+
         // Update max height for current view only
         updateMaxHeightForView(viewType, totalHeight);
         const stableHeight = getMaxHeightForView(viewType);
-        
+
         const viewOffset = viewType ? (VIEW_OFFSETS[viewType] ?? 8) : 8;
-        const newPadding = Math.round(stableHeight + viewOffset + additionalOffset);
-        
+        const newBasePadding = Math.round(stableHeight + viewOffset + additionalOffset);
+
         // Clamp values
-        const clampedPadding = Math.max(80, Math.min(400, newPadding));
-        
+        const clampedBasePadding = Math.max(80, Math.min(400, newBasePadding));
+
         // Only update if changed significantly
-        if (Math.abs(clampedPadding - padding) > 2) {
-          setPadding(clampedPadding);
-          
+        if (Math.abs(clampedBasePadding - basePadding) > 2) {
+          setBasePadding(clampedBasePadding);
+
           // Update context occasionally
           if (Math.random() > 0.7) {
             updateMeasurements({
@@ -157,7 +166,7 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
             });
           }
         }
-        
+
         if (!isReady) {
           setIsReady(true);
         }
@@ -165,7 +174,7 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
         isMeasuringRef.current = false;
       }
     });
-  }, [headerRef, viewType, additionalOffset, padding, isReady, updateMeasurements, getMaxHeightForView, updateMaxHeightForView]);
+  }, [headerRef, viewType, additionalOffset, basePadding, isReady, updateMeasurements, getMaxHeightForView, updateMaxHeightForView]);
 
   // Setup ResizeObserver
   useEffect(() => {
@@ -174,7 +183,7 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
 
     // Initial measurement after a longer delay to ensure header is fully rendered
     const initialTimer = setTimeout(measureAndUpdate, 200);
-    
+
     // Secondary measurement to catch any late-rendered content
     const secondaryTimer = setTimeout(measureAndUpdate, 500);
 
@@ -184,7 +193,7 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
     });
 
     resizeObserver.observe(header);
-    
+
     // Also observe row 2 if it exists
     const row2El = header.querySelector('[data-header-row="2"]');
     if (row2El) {
@@ -215,16 +224,20 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
     };
   }, []);
 
-  // Update CSS variable
+  // Use basePadding directly - no dynamic adjustment
+  // Header filters slide over content without pushing it
+
+  // Update CSS variable with padding
   useEffect(() => {
-    document.documentElement.style.setProperty('--content-padding-top', `${padding}px`);
-  }, [padding]);
+    document.documentElement.style.setProperty('--content-padding-top', `${basePadding}px`);
+  }, [basePadding]);
 
   return {
-    style: { paddingTop: `${padding}px` },
+    style: { paddingTop: `${basePadding}px` },
     isReady,
-    padding,
+    padding: basePadding,
   };
 }
 
 export default useSyncLayout;
+
