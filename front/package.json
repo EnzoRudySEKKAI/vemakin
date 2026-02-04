@@ -16,8 +16,6 @@
     "@capacitor/cli": "^8.0.1",
     "@capacitor/core": "^8.0.1",
     "@capacitor/ios": "^8.0.1",
-    "@emotion/is-prop-valid": "^1.4.0",
-    "@google/genai": "latest",
     "axios": "^1.13.4",
     "clsx": "^2.1.1",
     "firebase": "^12.8.0",

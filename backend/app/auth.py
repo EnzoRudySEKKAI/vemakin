@@ -24,7 +24,6 @@ try:
 except Exception as e:
     print(f"Error initializing Firebase Admin: {e}")
 
-import time
 from fastapi.concurrency import run_in_threadpool
 
 security = HTTPBearer()
@@ -35,27 +34,16 @@ async def get_current_user(
     db: Session = Depends(get_db),
 ):
     token = creds.credentials
-    start_time = time.time()
-    print(f"[{start_time:.3f}] DEBUG: Authenticating token...")
 
     try:
         # Verify the ID token - this is a blocking call, run in threadpool
         decoded_token = await run_in_threadpool(auth.verify_id_token, token)
-        verify_time = time.time()
         uid = decoded_token["uid"]
-        print(
-            f"[{verify_time:.3f}] DEBUG: Token verified for UID: {uid} (took {verify_time - start_time:.3f}s)"
-        )
 
         # Check if user exists in DB
-        db_query_start = time.time()
-        print(f"[{db_query_start:.3f}] DEBUG: Querying DB for user {uid}...")
-
-        # db.query is a blocking SQLAlchemy call
         def sync_db_ops():
             db_user = db.query(models.User).filter(models.User.id == uid).first()
             if not db_user:
-                print(f"DEBUG: User {uid} not in DB, creating...")
                 email = decoded_token.get("email")
                 name = (
                     decoded_token.get("name") or email.split("@")[0]
@@ -69,11 +57,7 @@ async def get_current_user(
                 return True
             return False
 
-        created = await run_in_threadpool(sync_db_ops)
-        db_time = time.time()
-        print(
-            f"[{db_time:.3f}] DEBUG: DB user handled (took {db_time - db_query_start:.3f}s)"
-        )
+        await run_in_threadpool(sync_db_ops)
 
         return decoded_token
     except auth.ExpiredIdTokenError:
@@ -121,8 +105,6 @@ async def get_current_user_or_guest(
     """
     # Check if guest mode is requested
     if x_guest_mode and x_guest_mode.lower() == "true":
-        print(f"DEBUG: Guest mode detected - serving mock data")
-
         # Return guest user token format (compatible with existing code)
         return {
             "uid": GUEST_USER_UID,

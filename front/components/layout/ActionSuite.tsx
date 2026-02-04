@@ -4,13 +4,12 @@ import {
   X, Briefcase, Film, Package, Zap, StickyNote,
   ChevronLeft, PenLine, Scissors, Music, Layers, Palette, Hash,
   Save, Calendar, Search, Check, Tag, ChevronDown, Sliders, Info, AlertCircle,
-  MapPin, Loader2, ExternalLink, Map as MapIcon, FileText, Clock, Monitor, Speaker, GitBranch, Activity, Aperture,
+  MapPin, FileText, Clock, Monitor, Speaker, GitBranch, Activity, Aperture,
   BookOpen, Crop, Target, Sparkles, Camera, Eye, Link as LinkIcon, Box, ChevronUp, PlusCircle, ArrowLeft,
   Paperclip, ArrowUpRight, Image as ImageIcon, File, Trash2, CircleDot, Flag, DollarSign
 } from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
 import { PostProdTask, Equipment, Shot, Attachment } from '../../types.ts';
-import { SHOOT_DATES, CATEGORY_ICONS, POST_PROD_CATEGORIES } from '../../constants.ts';
+import { CATEGORY_ICONS, POST_PROD_CATEGORIES } from '../../constants.ts';
 import { timeToMinutes, calculateEndTime } from '../../utils.ts';
 import { TimeSelector } from '../ui/TimeSelector.tsx';
 import { GlassCard } from '../ui/GlassCard.tsx';
@@ -105,11 +104,6 @@ export const ActionSuite: React.FC<ActionSuiteProps> = ({
     category: 'Camera'
   });
 
-  // Location Autocomplete State
-  const [locationSuggestions, setLocationSuggestions] = useState<{ name: string, uri?: string }[]>([]);
-  const [isSearchingLocation, setIsSearchingLocation] = useState(false);
-  const locationSearchTimeout = useRef<any>(null);
-
   // Gear Form (Standalone)
   const [gearForm, setGearForm] = useState({
     name: '',
@@ -167,61 +161,6 @@ export const ActionSuite: React.FC<ActionSuiteProps> = ({
 
 
   // -- HANDLERS --
-
-  // Google Maps Autocomplete Implementation
-  const fetchLocationSuggestions = async (query: string) => {
-    if (!query || query.length < 2) {
-      setLocationSuggestions([]);
-      return;
-    }
-    setIsSearchingLocation(true);
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: `List only 4 real filming locations or addresses matching"${query}". DO NOT include any introductory or concluding sentences. Provide just the names, one per line.`,
-        config: {
-          tools: [{ googleMaps: {} }],
-        }
-      });
-
-      const text = response.text || "";
-      const lines = text.split('\n')
-        .map(l => l.replace(/^\d+\.\s*/, '').trim())
-        .filter(l => l.length > 2 && l.length < 60 && !l.toLowerCase().includes('here are') && !l.toLowerCase().includes('locations:'))
-        .slice(0, 4);
-
-      const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
-      const suggestions = lines.map((name: string) => {
-        const matchingChunk = chunks.find((c: any) => c.maps?.title?.toLowerCase().includes(name.toLowerCase()));
-        return {
-          name,
-          uri: matchingChunk?.maps?.uri
-        };
-      });
-
-      setLocationSuggestions(suggestions);
-    } catch (err) {
-      console.error("Location search failed", err);
-    } finally {
-      setIsSearchingLocation(false);
-    }
-  };
-
-  const handleLocationInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setShotForm({ ...shotForm, location: val });
-
-    if (locationSearchTimeout.current) clearTimeout(locationSearchTimeout.current);
-    locationSearchTimeout.current = setTimeout(() => {
-      fetchLocationSuggestions(val);
-    }, 500);
-  };
-
-  const selectLocation = (suggestion: { name: string, uri?: string }) => {
-    setShotForm({ ...shotForm, location: suggestion.name });
-    setLocationSuggestions([]);
-  };
 
   const handleCommitProject = () => {
     if (!projectForm.name.trim()) return;
@@ -517,7 +456,7 @@ export const ActionSuite: React.FC<ActionSuiteProps> = ({
                 </div>
 
                 {/* SECTION 3: Location */}
-                <div className="rounded-[24px] p-5 bg-white/60 dark:bg-white/5 backdrop-blur-xl border border-white/40 dark:border-white/10 relative z-20">
+                <div className="rounded-[24px] p-5 bg-white/60 dark:bg-white/5 backdrop-blur-xl border border-white/40 dark:border-white/10">
                   <div className="flex items-center gap-2 mb-4">
                     <div className="p-2 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl">
                       <MapPin size={16} className="text-emerald-600 dark:text-emerald-400" />
@@ -525,43 +464,13 @@ export const ActionSuite: React.FC<ActionSuiteProps> = ({
                     <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Location</span>
                   </div>
 
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={shotForm.location}
-                      onChange={handleLocationInputChange}
-                      className="w-full bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 rounded-2xl px-4 py-3.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-yellow-400/20 transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
-                      placeholder="Search filming location..."
-                    />
-                    {isSearchingLocation && (
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                        <Loader2 size={16} className="text-emerald-500 animate-spin" />
-                      </div>
-                    )}
-                  </div>
-
-                  {locationSuggestions.length > 0 && (
-                    <div className="absolute left-0 right-0 mt-2 mx-5 bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                      <div className="px-4 py-2.5 border-b border-gray-100 dark:border-white/5 bg-gray-50/80 dark:bg-white/5 flex items-center justify-between">
-                        <span className="text-[9px] font-semibold text-gray-400 dark:text-gray-500">Maps suggestions</span>
-                        <MapIcon size={12} className="text-emerald-400" />
-                      </div>
-                      <div className="max-h-48 overflow-y-auto">
-                        {locationSuggestions.map((suggestion, i) => (
-                          <button
-                            key={i}
-                            onClick={() => selectLocation(suggestion)}
-                            className="w-full text-left px-4 py-3 hover:bg-blue-50 dark:hover:bg-white/5 flex items-center justify-between transition-colors border-b border-gray-50 dark:border-white/5 last:border-none group/loc"
-                          >
-                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 group-hover/loc:text-blue-600 dark:text-indigo-600 dark:group-hover/loc:text-yellow-400 transition-colors truncate pr-2">
-                              {suggestion.name}
-                            </span>
-                            {suggestion.uri && <ExternalLink size={12} className="text-gray-300 dark:text-gray-600 shrink-0" />}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <input
+                    type="text"
+                    value={shotForm.location}
+                    onChange={e => setShotForm({ ...shotForm, location: e.target.value })}
+                    className="w-full bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 rounded-2xl px-4 py-3.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-yellow-400/20 transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                    placeholder="Enter filming location..."
+                  />
                 </div>
 
                 {/* SECTION 4: Details */}

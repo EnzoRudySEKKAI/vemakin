@@ -1,7 +1,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { MainView, Shot, ShotLayout, Equipment, Note, PostProdTask, CrewMember, PostProdFilters, NotesFilters, User, CatalogCategory, CatalogBrand, CatalogItem } from '../types.ts';
-import { PROJECTS, SHOOT_DATES } from '../constants.ts';
+import { MainView, Shot, ShotLayout, Equipment, Note, PostProdTask, PostProdFilters, NotesFilters, User, CatalogCategory, CatalogBrand, CatalogItem } from '../types.ts';
+
 import { timeToMinutes } from '../utils.ts';
 import { auth } from '../firebase';
 import { onAuthStateChanged, signOut, User as FirebaseUser } from 'firebase/auth';
@@ -12,7 +12,6 @@ export interface ProjectState {
   shots: Shot[];
   notes: Note[];
   tasks: PostProdTask[];
-  crew: CrewMember[];
 }
 
 export const useProductionStore = () => {
@@ -70,8 +69,7 @@ export const useProductionStore = () => {
                     id: p.id,
                     shots: [],
                     notes: [],
-                    tasks: [],
-                    crew: []
+                    tasks: []
                   };
                 }
               });
@@ -149,8 +147,7 @@ export const useProductionStore = () => {
                     id: p.id,
                     shots: [],
                     notes: [],
-                    tasks: [],
-                    crew: []
+                    tasks: []
                   };
                 }
               });
@@ -257,7 +254,7 @@ export const useProductionStore = () => {
 
   const [projectData, setProjectData] = useState<Record<string, ProjectState>>({});
 
-  const activeData = useMemo(() => projectData[currentProject] || { shots: [], notes: [], tasks: [], crew: [] }, [projectData, currentProject]);
+  const activeData = useMemo(() => projectData[currentProject] || { shots: [], notes: [], tasks: [] }, [projectData, currentProject]);
 
   const updateActiveProjectData = useCallback((updates: Partial<ProjectState>) => {
     setProjectData(prev => ({ ...prev, [currentProject]: { ...prev[currentProject], ...updates } }));
@@ -378,7 +375,6 @@ export const useProductionStore = () => {
           shots: [],
           notes: [],
           tasks: [],
-          crew: [],
           ...data
         } as ProjectState
       }));
@@ -626,7 +622,7 @@ export const useProductionStore = () => {
   }, [activeData.shots]);
 
   const dynamicDates = useMemo(() => {
-    const allDates = Array.from(new Set([...SHOOT_DATES, ...activeData.shots.map(s => s.date)]));
+    const allDates = Array.from(new Set(activeData.shots.map(s => s.date)));
     return allDates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
   }, [activeData.shots]);
 

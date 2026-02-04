@@ -5,7 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { InventoryFilters, Currency, InventoryLayout, PostProdFilters, Shot, MainView } from './types.ts';
 import { AnimatePresence } from 'framer-motion';
 import { PageTransition } from './components/layout/PageTransition.tsx';
-import { CURRENCIES, SHOOT_DATES } from './constants.ts';
+import { CURRENCIES } from './constants.ts';
 import { ShotsView } from './components/shots/ShotsView.tsx';
 import { InventoryView } from './components/inventory/InventoryView.tsx';
 import { NotesView } from './components/notes/NotesView.tsx';

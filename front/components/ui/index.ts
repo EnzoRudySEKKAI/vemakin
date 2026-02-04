@@ -7,4 +7,3 @@ export * from './GearTransition.tsx';
 export * from './TimeSelector.tsx';
 
 export * from './EmptyState.tsx';
-export * from './SectionCard.tsx';
