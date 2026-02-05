@@ -1,6 +1,7 @@
 import React from 'react'
 import { Search, Calendar, X } from 'lucide-react'
-import { DatePicker } from '../ui/DatePicker'
+import { DatePicker } from '@/components/ui/DatePicker'
+import { Input, Button } from '@/components/atoms'
 
 export type SearchView = 'shots' | 'inventory' | 'postprod' | 'notes' | 'default'
 
@@ -50,32 +51,37 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   return (
     <div className={`cf-input-wrapper h-[48px] ${className}`}>
-      <Search className="cf-input-icon" size={18} />
-      <input
+      <Input
         type="text"
         placeholder={placeholders[view] || placeholders.default}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="cf-input text-sm shadow-none"
+        fullWidth
+        leftIcon={<Search size={18} strokeWidth={2.5} className="text-gray-400" />}
+        className="text-sm shadow-none"
         style={{ paddingRight: showDatePicker ? 48 : 16 }}
       />
       {value && (
-        <button
+        <Button
           onClick={() => onChange('')}
-          className="absolute right-12 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 text-gray-400"
+          variant="ghost"
+          size="sm"
+          className="absolute right-12 top-1/2 -translate-y-1/2 p-1"
         >
-          <X size={14} />
-        </button>
+          <X size={14} strokeWidth={2.5} />
+        </Button>
       )}
       {showDatePicker && (
         <>
-          <button
+          <Button
             className="cf-input-action-right"
             onClick={onDatePickerToggle}
             title="Filter by date"
+            variant="ghost"
+            size="sm"
           >
-            <Calendar size={16} />
-          </button>
+            <Calendar size={16} strokeWidth={2.5} />
+          </Button>
           {isDatePickerOpen && onDateSelect && (
             <DatePicker
               isOpen={isDatePickerOpen}

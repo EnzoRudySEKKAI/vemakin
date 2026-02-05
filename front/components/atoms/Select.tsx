@@ -1,20 +1,27 @@
 import React from 'react'
+import { ChevronDown } from 'lucide-react'
 import { typography } from '../../design-system'
 
-export type InputSize = 'sm' | 'md' | 'lg'
+export type SelectSize = 'sm' | 'md' | 'lg'
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  size?: InputSize
+export interface SelectOption {
+  value: string
+  label: string
+}
+
+export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'size'> {
+  size?: SelectSize
   error?: string
   label?: string
-  leftIcon?: React.ReactNode
-  rightIcon?: React.ReactNode
+  options: SelectOption[]
   fullWidth?: boolean
   /** If true, label is treated as a sentence (only first word capitalized) */
   sentenceLabel?: boolean
+  /** Placeholder option shown when no value selected */
+  placeholder?: string
 }
 
-const sizeStyles: Record<InputSize, { height: string; padding: string }> = {
+const sizeStyles: Record<SelectSize, { height: string; padding: string }> = {
   sm: { height: 'h-10', padding: 'py-2' },
   md: { height: 'h-12', padding: 'py-3' },
   lg: { height: 'h-14', padding: 'py-4' },
@@ -35,49 +42,43 @@ function formatLabel(text: string, isSentence: boolean): string {
     .join(' ')
 }
 
-export const Input: React.FC<InputProps> = ({
+export const Select: React.FC<SelectProps> = ({
   size = 'md',
   error,
   label,
-  leftIcon,
-  rightIcon,
-  fullWidth = false,
+  options,
+  fullWidth = true,
   className = '',
   id,
   sentenceLabel = false,
+  placeholder,
   ...props
 }) => {
-  const inputId = id || label?.toLowerCase().replace(/\s+/g, '-')
-  const widthStyles = fullWidth ? 'w-full' : ''
+  const selectId = id || label?.toLowerCase().replace(/\s+/g, '-')
   const sizeClasses = sizeStyles[size]
 
   return (
     <div className={`${fullWidth ? 'w-full' : ''} ${className}`}>
       {label && (
         <label
-          htmlFor={inputId}
+          htmlFor={selectId}
           className={`block mb-2 ${typography.size.xs} ${typography.weight.semibold} text-gray-500 dark:text-gray-400`}
         >
           {formatLabel(label, sentenceLabel)}
         </label>
       )}
       <div className="relative">
-        {leftIcon && (
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">
-            {leftIcon}
-          </div>
-        )}
-        <input
-          id={inputId}
+        <select
+          id={selectId}
           className={`
-            ${widthStyles}
+            w-full
             ${sizeClasses.height}
             ${sizeClasses.padding}
             bg-transparent
             border-0 border-b-2 border-gray-200 dark:border-white/10
             text-lg font-semibold
             text-gray-900 dark:text-white
-            placeholder:text-gray-400 dark:placeholder:text-gray-500
+            appearance-none
             focus:outline-none
             focus:border-blue-500 dark:focus:border-indigo-400
             focus:bg-transparent
@@ -89,20 +90,28 @@ export const Input: React.FC<InputProps> = ({
             tap-highlight-color: transparent
             autofill:bg-transparent
             autofill:text-inherit
-            ${leftIcon ? 'pl-8' : ''}
-            ${rightIcon ? 'pr-8' : ''}
+            transition-all duration-200
+            cursor-pointer
           `}
           style={{
             WebkitTapHighlightColor: 'transparent',
-            caretColor: 'currentColor'
           }}
           {...props}
-        />
-        {rightIcon && (
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">
-            {rightIcon}
-          </div>
-        )}
+        >
+          {placeholder && (
+            <option value="" disabled>
+              {placeholder}
+            </option>
+          )}
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 dark:text-gray-500">
+          <ChevronDown size={20} strokeWidth={2.5} />
+        </div>
       </div>
       {error && (
         <p className={`mt-1.5 ${typography.size.xs} ${typography.weight.semibold} text-red-500`}>

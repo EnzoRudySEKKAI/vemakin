@@ -1,77 +1,80 @@
-import React, { useState, forwardRef, useRef, useEffect } from 'react';
-import { Search, Plus, Calendar, Settings, ChevronLeft, Moon, Sun } from 'lucide-react';
+import React, { useState, forwardRef, useRef, useEffect } from 'react'
+import { Search, Plus, Calendar, Settings, ChevronLeft, Moon, Sun } from 'lucide-react'
 import {
   MainView, ShotLayout, InventoryLayout,
   InventoryFilters, PostProdFilters, NotesFilters, Currency, Equipment, PostProdTask
-} from '../../types';
-import { useHeaderActions } from '../../context/HeaderActionsContext';
+} from '@/types'
+import { useHeaderActions } from '@/context/HeaderActionsContext'
+import { Button } from '@/components/atoms/Button'
+import { Text } from '@/components/atoms/Text'
+import { IconContainer } from '@/components/atoms/IconContainer'
 
 // Atomic components
-import { ShotsFilterBar } from '../organisms/header/ShotsFilterBar';
-import { InventoryFilterBar } from '../organisms/header/InventoryFilterBar';
-import { PostProdFilterBar } from '../organisms/header/PostProdFilterBar';
-import { NotesFilterBar } from '../organisms/header/NotesFilterBar';
-import { DetailViewHeader } from '../organisms/header/DetailViewHeader';
-import { ProjectSelector } from '../molecules/ProjectSelector';
+import { ShotsFilterBar } from '@/components/organisms/header/ShotsFilterBar'
+import { InventoryFilterBar } from '@/components/organisms/header/InventoryFilterBar'
+import { PostProdFilterBar } from '@/components/organisms/header/PostProdFilterBar'
+import { NotesFilterBar } from '@/components/organisms/header/NotesFilterBar'
+import { DetailViewHeader } from '@/components/organisms/header/DetailViewHeader'
+import { ProjectSelector } from '@/components/molecules/ProjectSelector'
 
 interface HeaderProps {
-  filterTranslateY?: number;
-  currentProject: string;
-  setCurrentProject: (name: string) => void;
-  projects: Record<string, any>;
-  onAddProject: (name: string) => void;
-  viewTitle: string;
-  mainView: MainView;
-  setMainView: (view: MainView) => void;
-  projectProgress: number;
-  activeDate: string;
-  shotLayout?: ShotLayout;
-  setShotLayout?: (layout: ShotLayout) => void;
-  isDateSelectorOpen: boolean;
-  setIsDateSelectorOpen: (isOpen: boolean) => void;
-  handleDateSelect: (date: string | null) => void;
-  inventoryFilters: InventoryFilters;
-  setInventoryFilters: (filters: InventoryFilters) => void;
-  dates: string[];
-  groupedShots: Record<string, Shot[]>;
-  currency: Currency;
-  setCurrency: (currency: Currency) => void;
+  filterTranslateY?: number
+  currentProject: string
+  setCurrentProject: (name: string) => void
+  projects: Record<string, any>
+  onAddProject: (name: string) => void
+  viewTitle: string
+  mainView: MainView
+  setMainView: (view: MainView) => void
+  projectProgress: number
+  activeDate: string
+  shotLayout?: ShotLayout
+  setShotLayout?: (layout: ShotLayout) => void
+  isDateSelectorOpen: boolean
+  setIsDateSelectorOpen: (isOpen: boolean) => void
+  handleDateSelect: (date: string | null) => void
+  inventoryFilters: InventoryFilters
+  setInventoryFilters: (filters: InventoryFilters) => void
+  dates: string[]
+  groupedShots: Record<string, any[]>
+  currency: Currency
+  setCurrency: (currency: Currency) => void
 
   // Shots Props
-  shotSearchQuery: string;
-  setShotSearchQuery: (query: string) => void;
-  shotStatusFilter: 'all' | 'pending' | 'done';
-  setShotStatusFilter: (status: 'all' | 'pending' | 'done') => void;
+  shotSearchQuery: string
+  setShotSearchQuery: (query: string) => void
+  shotStatusFilter: 'all' | 'pending' | 'done'
+  setShotStatusFilter: (status: 'all' | 'pending' | 'done') => void
 
   // PostProd Props
-  postProdFilters?: PostProdFilters;
-  setPostProdFilters?: (filters: Partial<PostProdFilters>) => void;
-  onAddPostProdTask?: () => void;
-  postProdLayout?: 'grid' | 'list';
-  setPostProdLayout?: (layout: 'grid' | 'list') => void;
+  postProdFilters?: PostProdFilters
+  setPostProdFilters?: (filters: Partial<PostProdFilters>) => void
+  onAddPostProdTask?: () => void
+  postProdLayout?: 'grid' | 'list'
+  setPostProdLayout?: (layout: 'grid' | 'list') => void
 
   // Inventory Layout
-  inventoryLayout?: InventoryLayout;
-  setInventoryLayout?: (layout: InventoryLayout) => void;
+  inventoryLayout?: InventoryLayout
+  setInventoryLayout?: (layout: InventoryLayout) => void
 
   // Notes Props
-  notesFilters?: NotesFilters;
-  setNotesFilters?: (filters: NotesFilters) => void;
-  notesLayout?: 'grid' | 'list';
-  setNotesLayout?: (layout: 'grid' | 'list') => void;
+  notesFilters?: NotesFilters
+  setNotesFilters?: (filters: NotesFilters) => void
+  notesLayout?: 'grid' | 'list'
+  setNotesLayout?: (layout: 'grid' | 'list') => void
 
   // Wide Mode
-  isWideMode: boolean;
-  onToggleWideMode: () => void;
+  isWideMode: boolean
+  onToggleWideMode: () => void
 
   // Dark Mode
-  darkMode: boolean;
-  onToggleDarkMode: () => void;
+  darkMode: boolean
+  onToggleDarkMode: () => void
 
   // Add Action
-  onAdd: () => void;
-  inventory?: Equipment[];
-  tasks?: PostProdTask[];
+  onAdd: () => void
+  inventory?: Equipment[]
+  tasks?: PostProdTask[]
 }
 
 export const Header = forwardRef<HTMLElement, HeaderProps>(({
@@ -117,46 +120,46 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
   inventory = [],
   tasks = []
 }, ref) => {
-  const { backAction, detailLabel } = useHeaderActions();
-  const headerBottomRef = useRef<HTMLDivElement>(null);
-  const [fadeThreshold, setFadeThreshold] = useState(-90);
+  const { backAction, detailLabel } = useHeaderActions()
+  const headerBottomRef = useRef<HTMLDivElement>(null)
+  const [fadeThreshold, setFadeThreshold] = useState(-90)
 
   // Measure HeaderBottom height to calculate exact fade transfer threshold
   useEffect(() => {
     const measureHeight = () => {
       if (headerBottomRef.current) {
-        const height = headerBottomRef.current.offsetHeight;
+        const height = headerBottomRef.current.offsetHeight
         // Transfer fade when HeaderBottom is almost fully hidden (95% hidden)
-        setFadeThreshold(-(height * 0.95));
+        setFadeThreshold(-(height * 0.95))
       }
-    };
-
-    measureHeight();
-
-    // Re-measure on resize
-    const resizeObserver = new ResizeObserver(measureHeight);
-    if (headerBottomRef.current) {
-      resizeObserver.observe(headerBottomRef.current);
     }
 
-    return () => resizeObserver.disconnect();
-  }, [mainView]); // Re-measure when view changes
+    measureHeight()
+
+    // Re-measure on resize
+    const resizeObserver = new ResizeObserver(measureHeight)
+    if (headerBottomRef.current) {
+      resizeObserver.observe(headerBottomRef.current)
+    }
+
+    return () => resizeObserver.disconnect()
+  }, [mainView])
 
   // Subtitles map based on screenshots
   const getSubtitle = () => {
     switch (mainView) {
-      case 'overview': return 'Production hub';
-      case 'shots': return 'Production schedule';
-      case 'inventory': return 'Equipment management';
-      case 'postprod': return 'Post-production tasks';
-      case 'notes': return 'Production knowledge base';
-      default: return '';
+      case 'overview': return 'Production Hub'
+      case 'shots': return 'Production Schedule'
+      case 'inventory': return 'Equipment Management'
+      case 'postprod': return 'Post-production Tasks'
+      case 'notes': return 'Production Knowledge Base'
+      default: return ''
     }
-  };
+  }
 
-  const isDetailView = mainView === 'shot-detail' || mainView === 'task-detail' || mainView === 'note-detail' || mainView === 'equipment-detail';
-  const isSettingsView = mainView === 'settings' || mainView === 'manage-projects';
-  const showFilterBar = mainView !== 'overview' && !isSettingsView && !isDetailView;
+  const isDetailView = mainView === 'shot-detail' || mainView === 'task-detail' || mainView === 'note-detail' || mainView === 'equipment-detail'
+  const isSettingsView = mainView === 'settings' || mainView === 'manage-projects'
+  const showFilterBar = mainView !== 'overview' && !isSettingsView && !isDetailView
 
   return (
     <>
@@ -176,22 +179,23 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
               <div className="flex items-center gap-3">
                 {/* Back button for Settings and Manage Projects */}
                 {isSettingsView && (
-                  <button
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() => setMainView('overview')}
-                    className="w-10 h-10 rounded-xl bg-white dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-white transition-all hover:bg-gray-100 dark:hover:bg-white/20 shrink-0"
-                  >
-                    <ChevronLeft size={20} strokeWidth={2.5} />
-                  </button>
+                    leftIcon={<ChevronLeft size={20} strokeWidth={2.5} />}
+                    className="shrink-0"
+                  />
                 )}
                 <div className="flex flex-col justify-center leading-none">
-                  <h1 className="text-2xl font-semibold text-gray-900 dark:text-white leading-none">
-                    {backAction ? (detailLabel || 'Detail view') : viewTitle}
-                  </h1>
+                  <Text variant="h2" className="text-gray-900 dark:text-white">
+                    {backAction ? (detailLabel || 'Detail View') : viewTitle}
+                  </Text>
                   <div className="flex items-center">
                     {!backAction && (
-                      <span className="text-xs font-semibold text-gray-500 dark:text-gray-500">
+                      <Text variant="caption" color="muted">
                         {getSubtitle()}
-                      </span>
+                      </Text>
                     )}
                   </div>
                 </div>
@@ -199,29 +203,29 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
 
               {/* Right: Actions Group */}
               <div className="flex items-center gap-2">
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={onToggleDarkMode}
-                  className="w-9 h-9 rounded-[12px] bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-indigo-400 transition-all hover:scale-105 active:scale-95"
-                >
-                  {darkMode ? <Moon size={18} fill="currentColor" /> : <Sun size={18} />}
-                </button>
+                  leftIcon={darkMode ? <Moon size={18} fill="currentColor" strokeWidth={2.5} /> : <Sun size={18} strokeWidth={2.5} />}
+                />
 
                 {/* Hide settings button when on settings or manage-projects */}
                 {!isSettingsView && (
-                  <button
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() => setMainView('settings')}
-                    className="w-9 h-9 rounded-[12px] bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-[#4E47DD] transition-all hover:scale-105 active:scale-95"
-                  >
-                    <Settings size={18} />
-                  </button>
+                    leftIcon={<Settings size={18} strokeWidth={2.5} />}
+                  />
                 )}
 
-                <button
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={onAdd}
-                  className="w-9 h-9 rounded-[12px] bg-[#3762E3] dark:bg-[#4E47DD] text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95"
-                >
-                  <Plus size={20} strokeWidth={2.5} />
-                </button>
+                  leftIcon={<Plus size={20} strokeWidth={2.5} />}
+                />
               </div>
             </div>
           </div>
@@ -347,7 +351,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
         />
       </div>
     </>
-  );
-});
+  )
+})
 
-Header.displayName = 'Header';
+Header.displayName = 'Header'

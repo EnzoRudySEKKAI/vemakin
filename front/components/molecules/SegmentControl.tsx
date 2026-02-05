@@ -1,5 +1,7 @@
 import React from 'react'
 import { LayoutGrid, List as ListIcon } from 'lucide-react'
+import { Button } from '@/components/atoms/Button'
+import { radius, typography } from '@/design-system'
 
 export type SegmentOption = {
   value: string
@@ -29,19 +31,20 @@ export const SegmentControl: React.FC<SegmentControlProps> = ({
         const isActive = value === option.value
         
         return (
-          <button
+          <Button
             key={option.value}
             onClick={() => onChange(option.value)}
+            variant={isActive ? 'primary' : 'ghost'}
+            size="sm"
             className={`
               cf-segment-item
-              ${isActive ? 'active' : ''}
               ${variant === 'icon-only' || (!option.label && Icon) ? 'icon-only' : ''}
             `}
             style={variant === 'default' && option.label ? { padding: '0 16px' } : undefined}
           >
-            {Icon && <Icon size={variant === 'icon-only' ? 22 : 18} />}
+            {Icon && <Icon size={variant === 'icon-only' ? 22 : 18} strokeWidth={2.5} />}
             {option.label && <span>{option.label}</span>}
-          </button>
+          </Button>
         )
       })}
     </div>

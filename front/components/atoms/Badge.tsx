@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 export type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'ghost'
 export type BadgeSize = 'sm' | 'md'
 
-interface BadgeProps {
+export interface BadgeProps {
   children: React.ReactNode
   variant?: BadgeVariant
   size?: BadgeSize

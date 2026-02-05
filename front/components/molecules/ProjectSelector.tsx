@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Folder, ChevronDown, Check, Plus } from 'lucide-react'
+import { Button, Text, IconContainer, Card } from '@/components/atoms'
+import { radius, typography } from '@/design-system'
 
 interface ProjectSelectorProps {
   currentProject: string
@@ -21,22 +23,24 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
 
   return (
     <div className={`relative ${className}`}>
-      <button
+      <Button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-white/5 p-3 rounded-2xl flex items-center justify-between group active:scale-[0.99] transition-all"
+        variant="secondary"
+        size="lg"
+        fullWidth
+        className="flex items-center justify-between group active:scale-[0.99] h-20 py-5"
       >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-500/10 dark:bg-indigo-500/10 flex items-center justify-center text-blue-500 dark:text-indigo-500">
-            <Folder size={20} fill="currentColor" className="opacity-80" />
-          </div>
-          <div className="flex flex-col items-start">
-            <span className="text-[9px] font-semibold text-gray-500">Current production</span>
-            <span className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              {currentProject} <ChevronDown size={14} className="text-gray-500" />
-            </span>
+        <div className="flex items-center gap-4">
+          <IconContainer icon={Folder} size="lg" variant="accent" />
+          <div className="flex flex-col items-start gap-1">
+            <Text variant="label" color="muted">Current Production</Text>
+            <div className="flex items-center gap-2">
+              <Text variant="h2">{currentProject}</Text>
+              <ChevronDown size={16} strokeWidth={2.5} className="text-gray-500" />
+            </div>
           </div>
         </div>
-      </button>
+      </Button>
 
       <AnimatePresence>
         {isOpen && (
@@ -62,21 +66,22 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
                       }
                     `}
                   >
-                    <span className="font-semibold">{projectName}</span>
-                    {currentProject === projectName && <Check size={16} />}
+                    <Text variant="body">{projectName}</Text>
+                    {currentProject === projectName && <Check size={16} strokeWidth={2.5} />}
                   </button>
                 ))}
               </div>
               <div className="h-px bg-gray-100 dark:bg-white/5 my-2" />
-              <button
+              <Button
                 onClick={() => { onCreate("New Project"); setIsOpen(false); }}
-                className="w-full flex items-center gap-3 p-4 rounded-2xl text-gray-900 dark:text-white font-semibold hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+                variant="ghost"
+                size="md"
+                fullWidth
+                leftIcon={<div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center"><Plus size={16} strokeWidth={2.5} /></div>}
+                className="justify-start"
               >
-                <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center">
-                  <Plus size={16} />
-                </div>
-                Create new project
-              </button>
+                Create New Project
+              </Button>
             </motion.div>
           </>
         )}

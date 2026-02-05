@@ -5,8 +5,7 @@ import { POST_PROD_CATEGORIES } from '../../constants'
 import { useDetailView } from '../../hooks/useDetailView'
 import { DetailViewLayout } from '../../components/organisms/DetailViewLayout'
 import { ActionButtonGroup } from '../../components/molecules/ActionButton'
-import { Text } from '../../components/atoms/Text'
-import { Input } from '../../components/atoms/Input'
+import { Text, Input, Textarea, Select } from '../../components/atoms'
 
 import { ConfirmModal } from '../ui/ConfirmModal'
 
@@ -113,29 +112,27 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
     return (
       <div key={field.key}>
         <Text variant="subtitle" color="muted" className="mb-1.5 block">{field.label}</Text>
-        <div className="relative">
-          <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={12} />
-          {field.type === 'select' ? (
-            <select
-              value={value}
-              onChange={(e) => updateMetadata(field.key, e.target.value)}
-              className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl pl-8 pr-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-blue-500 appearance-none dark:text-white"
-            >
-              <option value="">Select...</option>
-              {field.options?.map(opt => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
-          ) : (
-            <input
-              type="text"
-              value={value}
-              onChange={(e) => updateMetadata(field.key, e.target.value)}
-              className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl pl-8 pr-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white"
-              placeholder={`e.g. ${field.key === 'scene' ? '12A' : field.key === 'duration' ? '2m 30s' : '4K'}`}
-            />
-          )}
-        </div>
+        {field.type === 'select' ? (
+          <Select
+            value={value}
+            onChange={(e) => updateMetadata(field.key, e.target.value)}
+            options={[
+              { value: '', label: 'Select...' },
+              ...(field.options?.map(opt => ({ value: opt, label: opt })) || [])
+            ]}
+            leftIcon={<Icon size={14} strokeWidth={2.5} className="text-gray-400" />}
+            fullWidth
+          />
+        ) : (
+          <Input
+            type="text"
+            value={value}
+            onChange={(e) => updateMetadata(field.key, e.target.value)}
+            placeholder={`e.g. ${field.key === 'scene' ? '12A' : field.key === 'duration' ? '2m 30s' : '4K'}`}
+            leftIcon={<Icon size={14} strokeWidth={2.5} className="text-gray-400" />}
+            fullWidth
+          />
+        )}
       </div>
     )
   }
@@ -217,23 +214,24 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
 
               <div className="flex flex-col gap-1 min-w-0">
                 <Text variant="subtitle" color="muted" className="dark:text-white">Due date</Text>
-                <input
+                <Input
                   type="date"
                   value={editedItem.dueDate || ''}
                   onChange={(e) => setEditedItem({ ...editedItem, dueDate: e.target.value })}
-                  className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD]"
+                  variant="underline"
+                  fullWidth
                 />
               </div>
             </div>
 
             <div className="flex flex-col gap-1 min-w-0">
               <Text variant="subtitle" color="muted" className="dark:text-white">Description</Text>
-              <textarea
+              <Textarea
                 value={editedItem.description || ''}
                 onChange={(e) => setEditedItem({ ...editedItem, description: e.target.value })}
                 placeholder="Add description..."
+                size="md"
                 rows={4}
-                className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] resize-none"
               />
             </div>
 

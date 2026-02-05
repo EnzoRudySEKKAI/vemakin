@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, ArrowUpDown } from 'lucide-react'
+import { Button, Text, Card } from '@/components/atoms'
+import { radius, typography } from '@/design-system'
 
 export interface FilterOption {
   value: string
@@ -37,18 +39,22 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
 
   return (
     <div className={`flex-1 relative min-w-0 ${className}`}>
-      <button
+      <Button
         onClick={() => setIsOpen(!isOpen)}
+        variant="ghost"
+        size="sm"
+        fullWidth
+        rightIcon={<ChevronDown 
+          size={18} 
+          strokeWidth={2.5}
+          className={`shrink-0 transition-transform duration-100 ${isOpen ? 'rotate-180' : ''}`} 
+        />}
         className={`cf-control cf-btn-fluid ${isOpen ? 'active' : ''}`}
       >
         <span className={`truncate ${isActive ? 'text-[#3762E3] dark:text-[#4E47DD]' : 'text-gray-500 dark:text-gray-300'}`}>
           {selectedOption?.label || label}
         </span>
-        <ChevronDown 
-          size={18} 
-          className={`shrink-0 transition-transform duration-100 ${isOpen ? 'rotate-180' : ''}`} 
-        />
-      </button>
+      </Button>
 
       <AnimatePresence>
         {isOpen && (
@@ -89,12 +95,13 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
                     `}
                   >
                     <span className="flex items-center gap-2">
-                      {Icon && <Icon size={14} />}
+                      {Icon && <Icon size={14} strokeWidth={2.5} />}
                       {option.label}
                     </span>
                     {showDirectionToggle && isSelected && (
                       <ArrowUpDown 
                         size={14} 
+                        strokeWidth={2.5}
                         className={direction === 'desc' ? 'rotate-180' : ''} 
                       />
                     )}

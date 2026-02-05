@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import { Paperclip, ArrowUpRight, Image as ImageIcon, File, Trash2, Link as LinkIcon, ChevronDown } from 'lucide-react';
 import { FormLayout, FormType } from '../organisms/FormLayout';
 import { Text } from '../atoms/Text';
+import { Input } from '../atoms/Input';
+import { Textarea } from '../atoms/Textarea';
 import { Shot, PostProdTask, Attachment } from '../../types';
 
 interface NoteFormPageProps {
@@ -80,30 +82,27 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
         <div className="w-full">
           <Text variant="subtitle" color="muted" className="dark:text-white mb-3 block text-center sm:text-left">Title</Text>
           
-          <div className="flex flex-col gap-1 min-w-0">
-            <input
-              type="text"
-              value={form.title}
-              onChange={e => setForm({ ...form, title: e.target.value })}
-              className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all text-sm font-semibold placeholder-gray-400 dark:placeholder-gray-500"
-              placeholder="Idea title"
-            />
-          </div>
+          <Input
+            type="text"
+            value={form.title}
+            onChange={e => setForm({ ...form, title: e.target.value })}
+            placeholder="Idea title"
+            variant="underline"
+            fullWidth
+          />
         </div>
 
         {/* Content */}
         <div className="w-full">
           <Text variant="subtitle" color="muted" className="dark:text-white mb-3 block text-center sm:text-left">Content</Text>
           
-          <div className="flex flex-col gap-1 min-w-0">
-            <textarea
-              value={form.content}
-              onChange={e => setForm({ ...form, content: e.target.value })}
-              className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all resize-none text-sm font-medium"
-              rows={6}
-              placeholder="Write your note..."
-            />
-          </div>
+          <Textarea
+            value={form.content}
+            onChange={e => setForm({ ...form, content: e.target.value })}
+            placeholder="Write your note..."
+            size="md"
+            rows={6}
+          />
         </div>
 
         {/* Context Link */}

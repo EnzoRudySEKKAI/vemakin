@@ -1,6 +1,8 @@
 import React from 'react'
-import { Input, InputProps } from '../atoms/Input'
-import { Text } from '../atoms/Text'
+import { Input, InputProps } from '@/components/atoms/Input'
+import { Textarea } from '@/components/atoms/Textarea'
+import { Text } from '@/components/atoms/Text'
+import { radius, typography } from '@/design-system'
 
 interface FormFieldProps extends InputProps {
   label: string
@@ -68,18 +70,9 @@ export const FormTextarea: React.FC<FormTextareaProps> = ({
         )}
       </div>
       
-      <textarea
+      <Textarea
         rows={rows}
-        className={`
-          w-full px-4 py-3 rounded-2xl
-          bg-white dark:bg-[#1C1C1E]
-          border ${error ? 'border-red-500' : 'border-gray-200 dark:border-white/10'}
-          text-sm font-semibold text-gray-900 dark:text-white
-          placeholder:text-gray-400
-          focus:outline-none focus:ring-2 focus:ring-[#3762E3]/20
-          transition-all duration-200 resize-none
-          ${className}
-        `}
+        className={className}
         {...props}
       />
       

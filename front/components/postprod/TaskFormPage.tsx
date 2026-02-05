@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { PenLine, Scissors, Music, Layers, Palette, Calendar, Flag, ChevronDown, Clock, Crop, Hash } from 'lucide-react';
 import { FormLayout, FormType } from '../organisms/FormLayout';
 import { Text } from '../atoms/Text';
+import { Input } from '../atoms/Input';
+import { Textarea } from '../atoms/Textarea';
 import { PostProdTask } from '../../types';
 
 interface TaskFormPageProps {
@@ -104,41 +106,39 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
         <div className="w-full">
           <Text variant="subtitle" color="muted" className="dark:text-white mb-3 block text-center sm:text-left">Task title</Text>
           
-          <div className="flex flex-col gap-1 min-w-0">
-            <input
-              type="text"
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all text-base font-semibold placeholder-gray-400 dark:placeholder-gray-500"
-              placeholder="e.g. Master Grade Assembly"
-            />
-          </div>
+          <Input
+            type="text"
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            placeholder="e.g. Master Grade Assembly"
+            variant="underline"
+            fullWidth
+          />
         </div>
 
         {/* Description */}
         <div className="w-full">
           <Text variant="subtitle" color="muted" className="dark:text-white mb-3 block text-center sm:text-left">Description</Text>
           
-          <div className="flex flex-col gap-1 min-w-0">
-            <textarea
-              value={form.description || ''}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all resize-none text-sm font-medium"
-              rows={6}
-              placeholder="Add specific instructions or context..."
-            />
-          </div>
+          <Textarea
+            value={form.description || ''}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            placeholder="Add specific instructions or context..."
+            size="md"
+            rows={6}
+          />
         </div>
 
         {/* Due Date & Priority */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
           <div className="flex flex-col gap-1 min-w-0">
             <Text variant="subtitle" color="muted" className="dark:text-white">Due date</Text>
-            <input
+            <Input
               type="date"
               value={form.dueDate}
               onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
-              className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all text-sm font-semibold cursor-pointer"
+              variant="underline"
+              fullWidth
             />
           </div>
 
@@ -171,32 +171,30 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
           {form.category === 'Script' && (
             <div className="flex flex-col gap-1 min-w-0">
               <Text variant="subtitle" color="muted" className="dark:text-white">Scene reference</Text>
-              <div className="relative">
-                <Hash className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={16} />
-                <input
-                  type="text"
-                  value={form.metadata['scene'] as string || ''}
-                  onChange={(e) => setForm({ ...form, metadata: { ...form.metadata, scene: e.target.value } })}
-                  placeholder="e.g. 14B"
-                  className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 pl-8 pr-4 py-2 text-sm font-semibold focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
-                />
-              </div>
+              <Input
+                type="text"
+                value={form.metadata['scene'] as string || ''}
+                onChange={(e) => setForm({ ...form, metadata: { ...form.metadata, scene: e.target.value } })}
+                placeholder="e.g. 14B"
+                leftIcon={<Hash size={16} className="text-gray-400 dark:text-gray-500" />}
+                variant="underline"
+                fullWidth
+              />
             </div>
           )}
           {form.category === 'Editing' && (
             <>
               <div className="flex flex-col gap-1 min-w-0">
                 <Text variant="subtitle" color="muted" className="dark:text-white">Target duration</Text>
-                <div className="relative">
-                  <Clock className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={16} />
-                  <input
-                    type="text"
-                    value={form.metadata['duration'] as string || ''}
-                    onChange={(e) => setForm({ ...form, metadata: { ...form.metadata, duration: e.target.value } })}
-                    placeholder="e.g. 2m 30s"
-                    className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 pl-8 pr-4 py-2 text-sm font-semibold focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
-                  />
-                </div>
+                <Input
+                  type="text"
+                  value={form.metadata['duration'] as string || ''}
+                  onChange={(e) => setForm({ ...form, metadata: { ...form.metadata, duration: e.target.value } })}
+                  placeholder="e.g. 2m 30s"
+                  leftIcon={<Clock size={16} className="text-gray-400 dark:text-gray-500" />}
+                  variant="underline"
+                  fullWidth
+                />
               </div>
               <div className="flex flex-col gap-1 min-w-0">
                 <Text variant="subtitle" color="muted" className="dark:text-white">Aspect ratio</Text>

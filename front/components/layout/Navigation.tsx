@@ -1,39 +1,39 @@
-
-import React from 'react';
-import { LayoutDashboard, Zap, Package, StickyNote, Plus, Film } from 'lucide-react';
-import { MainView } from '../../types.ts';
-import { GlassCard } from '../ui/GlassCard.tsx';
-import { IconButton } from '../ui/IconButton.tsx';
+import React from 'react'
+import { LayoutDashboard, Zap, Package, StickyNote, Plus, Film } from 'lucide-react'
+import { MainView } from '@/types'
+import { GlassCard } from '@/components/ui/GlassCard'
+import { Button } from '@/components/atoms/Button'
+import { Text } from '@/components/atoms/Text'
+import { IconContainer } from '@/components/atoms/IconContainer'
 
 interface NavigationProps {
-  mainView: MainView;
-  setMainView: (view: MainView) => void;
-  onPlusClick: () => void;
-  scale?: number; // 1 = full size, 0 = minimized
-  isAnimating?: boolean; // True during snap animation - enables CSS transition
+  mainView: MainView
+  setMainView: (view: MainView) => void
+  onPlusClick: () => void
+  scale?: number
+  isAnimating?: boolean
 }
 
 export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, setMainView, onPlusClick, scale = 1, isAnimating = false }) => {
   const NavItem = ({ view, icon: Icon, label, onClick }: { view?: MainView, icon: any, label: string, onClick: () => void }) => {
-    const isActive = view ? mainView === view : false;
+    const isActive = view ? mainView === view : false
     return (
       <button
         onClick={onClick}
-        className={`flex items-center lg:justify-center xl:justify-start gap-4 px-4 lg:px-2 xl:px-4 py-3 rounded-2xl text-xl font-medium transition-all duration-200 group w-full xl:w-auto
-     ${isActive
-            ? 'font-semibold text-black dark:text-white'
+        className={`flex items-center lg:justify-center xl:justify-start gap-4 px-4 lg:px-2 xl:px-4 py-3 rounded-2xl text-xl font-semibold transition-all duration-200 group w-full xl:w-auto
+          ${isActive
+            ? 'text-black dark:text-white'
             : 'text-gray-700 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-white/10'
           }`}
       >
         <div className="relative p-2">
-          <Icon size={26} strokeWidth={isActive ? 3 : 2} />
-          {/* Dot for active state - optional, can remove if text boldness is enough */}
+          <Icon size={26} strokeWidth={isActive ? 2.5 : 2} />
           {isActive && <div className="absolute top-1 right-0 w-2 h-2 bg-blue-600 dark:bg-indigo-600 rounded-full" />}
         </div>
         <span className="hidden xl:inline">{label}</span>
       </button>
-    );
-  };
+    )
+  }
 
   const MobileNavItem = ({ icon: Icon, label, active, onClick }: { icon: any, label: string, active: boolean, onClick: () => void }) => (
     <button
@@ -43,12 +43,12 @@ export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, set
       <div className={`p-1.5 rounded-2xl transition-all duration-300 ${active ? 'bg-blue-50 dark:bg-indigo-500/10 scale-105 shadow-sm' : ''}`}>
         <Icon size={22} strokeWidth={active ? 2.5 : 2} />
       </div>
-      <span className={`text-[9px] font-semibold transition-all duration-300 ${active ? 'opacity-100' : 'opacity-70'}`}>{label}</span>
+      <Text variant="label" className={`transition-all duration-300 ${active ? 'opacity-100' : 'opacity-70'}`}>{label}</Text>
     </button>
-  );
+  )
 
   // Disable pointer events when mostly minimized
-  const isInteractive = scale > 0.3;
+  const isInteractive = scale > 0.3
 
   return (
     <>
@@ -66,7 +66,6 @@ export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, set
             transform: `scale(${scale})`,
             transformOrigin: 'bottom center',
             opacity: Math.max(0.3, scale),
-            // GPU optimization: will-change only during animation, CSS transition only during snap
             willChange: isAnimating ? 'transform, opacity' : 'auto',
             transition: isAnimating ? 'transform 250ms cubic-bezier(0.33, 1, 0.68, 1), opacity 250ms cubic-bezier(0.33, 1, 0.68, 1)' : 'none'
           }}
@@ -87,10 +86,8 @@ export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, set
         <div className="flex flex-col gap-2 w-full">
           {/* Logo Area */}
           <div className="px-4 lg:px-2 xl:px-4 py-2 mb-6 xl:mb-8 flex items-center lg:justify-center xl:justify-start gap-3">
-            <div className="w-10 h-10 bg-black dark:bg-white rounded-xl flex items-center justify-center shadow-lg shadow-black/20 dark:shadow-white/10 shrink-0">
-              <Film className="text-white dark:text-black" size={20} fill="currentColor" />
-            </div>
-            <span className="hidden xl:block text-xl font-semibold text-gray-900 dark:text-white">Shotdeck</span>
+            <IconContainer icon={Film} size="md" variant="default" className="bg-black dark:bg-white text-white dark:text-black" />
+            <Text variant="h2" className="hidden xl:block text-gray-900 dark:text-white">Shotdeck</Text>
           </div>
 
           <NavItem view="overview" icon={LayoutDashboard} label="Home" onClick={() => setMainView('overview')} />
@@ -99,17 +96,19 @@ export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, set
           <NavItem view="postprod" icon={Zap} label="Pipeline" onClick={() => setMainView('postprod')} />
           <NavItem view="notes" icon={StickyNote} label="Notes" onClick={() => setMainView('notes')} />
 
-          <button
+          <Button
+            variant="primary"
+            size="lg"
             onClick={onPlusClick}
-            className="mt-8 mx-auto xl:mx-0 w-12 h-12 xl:w-full xl:h-auto xl:px-4 xl:py-3 rounded-2xl bg-blue-600 dark:bg-indigo-600 text-white transition-colors hover:bg-blue-700 dark:hover:bg-indigo-500 flex items-center justify-center"
+            leftIcon={<Plus size={24} strokeWidth={2.5} />}
+            className="mt-8 mx-auto xl:mx-0 w-12 h-12 xl:w-full xl:h-auto xl:px-4 xl:py-3"
           >
-            <Plus size={24} strokeWidth={3} />
-            <span className="hidden xl:inline ml-2 font-semibold text-xl">New</span>
-          </button>
+            <span className="hidden xl:inline ml-2">New</span>
+          </Button>
         </div>
       </nav>
     </>
-  );
-});
+  )
+})
 
-Navigation.displayName = 'Navigation';
+Navigation.displayName = 'Navigation'

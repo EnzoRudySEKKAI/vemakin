@@ -1,6 +1,8 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Text } from '../atoms/Text'
+import { Text } from '@/components/atoms/Text'
+import { Button } from '@/components/atoms/Button'
+import { radius, typography } from '@/design-system'
 
 interface DetailSectionProps {
   title: string
@@ -28,7 +30,7 @@ export const DetailSection: React.FC<DetailSectionProps> = ({
       `}
     >
       <div className="flex items-center justify-between mb-8">
-        <Text variant="subtitle" color="muted">
+        <Text variant="h3" color="muted">
           {title}
         </Text>
         {action}
@@ -59,7 +61,7 @@ export const DetailMetadataItem: React.FC<DetailMetadataItemProps> = ({
   
   return (
     <div className={`flex flex-col gap-3 min-w-0 ${className}`}>
-      <Text variant="subtitle" color="muted">
+      <Text variant="label" color="muted">
         {label}
       </Text>
       <Content
@@ -76,7 +78,7 @@ export const DetailMetadataItem: React.FC<DetailMetadataItemProps> = ({
           ${isLink ? 'cursor-pointer group' : ''}
         `}
       >
-        <Text variant="title" className="block mb-0.5">
+        <Text variant="h3" className="block mb-0.5">
           {value}
         </Text>
         {subValue && (

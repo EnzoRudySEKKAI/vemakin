@@ -50,9 +50,36 @@
   background-color: #141417;
 }
 
+/* 
+ * Prevent white box flash on input focus
+ * Fixes browser autofill and tap highlight issues
+ */
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+  tap-highlight-color: transparent;
+}
+
+/* Prevent autofill background color */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  -webkit-text-fill-color: inherit !important;
+  box-shadow: 0 0 0 1000px transparent inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: currentColor;
+}
+
 html {
   background-color: #F2F2F7;
-  overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -71,7 +98,6 @@ body {
     0 2px 4px -1px rgba(0, 0, 0, 0.02),
     inset 0 0 20px rgba(255, 255, 255, 0.5);
   min-height: 100%;
-  overscroll-behavior-y: contain;
 }
 
 .dark body {
@@ -472,18 +498,19 @@ body {
  -----------------------------------------
 */
 
-/* Hide scrollbar for Chrome, Safari and Opera */
-*::-webkit-scrollbar {
+/* Hide scrollbar for Chrome, Safari and Opera - Only on html/body */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
   display: none;
 }
 
-/* Hide scrollbar for IE, Edge and Firefox */
-* {
+/* Hide scrollbar for IE, Edge and Firefox - Only on html/body */
+html,
+body {
   -ms-overflow-style: none;
   /* IE and Edge */
   scrollbar-width: none;
   /* Firefox */
-  overscroll-behavior: contain;
 }
 
 /* Custom scrollbar with overscroll containment */
@@ -514,11 +541,12 @@ body {
   background-color: #F2F2F7;
   overflow-x: hidden;
   overflow-y: auto;
-  overscroll-behavior-y: contain;
 }
 
 @supports (-webkit-touch-callout: none) {
-  html, body {
+
+  html,
+  body {
     min-height: -webkit-fill-available;
   }
 }
@@ -546,7 +574,6 @@ body {
   content-visibility: auto;
   contain-intrinsic-size: auto 500px;
   min-height: calc(100vh - env(safe-area-inset-top, 0px));
-  overscroll-behavior: contain;
   overflow-y: auto;
 }
 
@@ -574,7 +601,9 @@ body {
 }
 
 @media (max-width: 768px) {
-  html, body {
+
+  html,
+  body {
     overflow-x: hidden;
     overflow-y: auto;
     position: relative;

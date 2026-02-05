@@ -37,7 +37,8 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
   const { headerRef, updateMeasurements } = useLayout();
 
   // Base padding is the measured padding WITHOUT filter adjustment
-  const [basePadding, setBasePadding] = useState(160);
+  // Increased to 200 to account for taller ProjectSelector (h-20 = 80px)
+  const [basePadding, setBasePadding] = useState(200);
   const [isReady, setIsReady] = useState(false);
   const rafIdRef = useRef<number | null>(null);
   const isMeasuringRef = useRef(false);
@@ -48,10 +49,11 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
   const isViewChangingRef = useRef(false);
 
   // Get or initialize max height for current view
+  // Initialized to 200 to account for taller ProjectSelector
   const getMaxHeightForView = useCallback((view: string | undefined) => {
     const key = view || 'default';
     if (!(key in maxHeightPerViewRef.current)) {
-      maxHeightPerViewRef.current[key] = 160;
+      maxHeightPerViewRef.current[key] = 200;
     }
     return maxHeightPerViewRef.current[key];
   }, []);

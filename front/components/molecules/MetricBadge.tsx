@@ -1,4 +1,6 @@
 import React from 'react'
+import { Text } from '@/components/atoms/Text'
+import { typography } from '@/design-system'
 
 interface MetricBadgeProps {
   label: string
@@ -23,10 +25,10 @@ export const MetricBadge: React.FC<MetricBadgeProps> = ({
 }) => {
   return (
     <div className={`flex flex-col items-center ${className}`}>
-      <span className="text-[10px] font-semibold text-gray-400 leading-none mb-0.5">
+      <Text variant="label" color="muted" className="leading-none mb-0.5">
         {label}
-      </span>
-      <span className={`text-base font-semibold leading-none ${colorStyles[color]}`}>
+      </Text>
+      <span className={`${typography.size.lg} ${typography.weight.semibold} leading-none ${colorStyles[color]}`}>
         {value}
       </span>
     </div>

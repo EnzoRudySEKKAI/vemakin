@@ -1,29 +1,29 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { Film, Calendar, MapPin, FileText, Package, Check, Search, AlertCircle } from 'lucide-react';
-import { FormLayout, FormType } from '../organisms/FormLayout';
-import { Text } from '../atoms/Text';
-import { TimeSelector } from '../ui/TimeSelector';
-import { CATEGORY_ICONS } from '../../constants';
-import { Shot, Equipment } from '../../types';
-import { timeToMinutes, calculateEndTime } from '../../utils';
+import React, { useState, useMemo, useCallback } from 'react'
+import { Film, Calendar, MapPin, FileText, Package, Check, Search, AlertCircle } from 'lucide-react'
+import { FormLayout, FormType } from '@/components/organisms/FormLayout'
+import { Text, Input, Button, IconContainer, Card, Textarea } from '@/components/atoms'
+import { TimeSelector } from '@/components/ui/TimeSelector'
+import { CATEGORY_ICONS } from '@/constants'
+import { Shot, Equipment } from '@/types'
+import { timeToMinutes, calculateEndTime } from '@/utils'
 
 interface ShotFormPageProps {
-  onClose: () => void;
-  onSwitchForm: (type: FormType) => void;
-  onSubmit: (shot: Shot) => void;
-  inventory: Equipment[];
-  existingShots: Shot[];
+  onClose: () => void
+  onSwitchForm: (type: FormType) => void
+  onSubmit: (shot: Shot) => void
+  inventory: Equipment[]
+  existingShots: Shot[]
 }
 
 const toISODate = (dateStr: string) => {
-  const d = new Date(dateStr);
-  return isNaN(d.getTime()) ? new Date().toISOString().split('T')[0] : d.toISOString().split('T')[0];
-};
+  const d = new Date(dateStr)
+  return isNaN(d.getTime()) ? new Date().toISOString().split('T')[0] : d.toISOString().split('T')[0]
+}
 
 const fromISODate = (isoStr: string) => {
-  if (!isoStr) return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  return new Date(isoStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-};
+  if (!isoStr) return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  return new Date(isoStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
 
 export const ShotFormPage: React.FC<ShotFormPageProps> = ({
   onClose,
@@ -41,49 +41,49 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
     endTime: '10:00',
     description: '',
     equipmentIds: [] as string[]
-  });
+  })
 
-  const [shotGearSearch, setShotGearSearch] = useState('');
-  const [shotGearCategory, setShotGearCategory] = useState('All');
+  const [shotGearSearch, setShotGearSearch] = useState('')
+  const [shotGearCategory, setShotGearCategory] = useState('All')
 
   // Shot conflict detection
   const shotConflict = useMemo(() => {
-    if (!form.startTime || !form.endTime) return null;
+    if (!form.startTime || !form.endTime) return null
 
-    const startMins = timeToMinutes(form.startTime);
-    let endMins = timeToMinutes(form.endTime);
-    if (endMins < startMins) endMins += 1440;
+    const startMins = timeToMinutes(form.startTime)
+    let endMins = timeToMinutes(form.endTime)
+    if (endMins < startMins) endMins += 1440
 
-    const formattedDate = fromISODate(form.date);
+    const formattedDate = fromISODate(form.date)
 
     return existingShots.find(s => {
-      if (s.date !== formattedDate) return false;
-      const sStart = timeToMinutes(s.startTime);
-      const sEnd = timeToMinutes(calculateEndTime(s.startTime, s.duration));
-      return (startMins < sEnd && endMins > sStart);
-    });
-  }, [form.startTime, form.endTime, form.date, existingShots]);
+      if (s.date !== formattedDate) return false
+      const sStart = timeToMinutes(s.startTime)
+      const sEnd = timeToMinutes(calculateEndTime(s.startTime, s.duration))
+      return (startMins < sEnd && endMins > sStart)
+    })
+  }, [form.startTime, form.endTime, form.date, existingShots])
 
   const toggleShotGear = (id: string) => {
     setForm(prev => {
-      const exists = prev.equipmentIds.includes(id);
+      const exists = prev.equipmentIds.includes(id)
       return {
         ...prev,
         equipmentIds: exists
           ? prev.equipmentIds.filter(x => x !== id)
           : [...prev.equipmentIds, id]
-      };
-    });
-  };
+      }
+    })
+  }
 
   const handleSubmit = () => {
-    if (!form.title.trim() || shotConflict) return;
+    if (!form.title.trim() || shotConflict) return
 
-    const startMins = timeToMinutes(form.startTime);
-    let endMins = timeToMinutes(form.endTime);
-    if (endMins < startMins) endMins += 1440;
-    const diffHours = (endMins - startMins) / 60;
-    const duration = `${diffHours.toFixed(1).replace('.0', '')}h`;
+    const startMins = timeToMinutes(form.startTime)
+    let endMins = timeToMinutes(form.endTime)
+    if (endMins < startMins) endMins += 1440
+    const diffHours = (endMins - startMins) / 60
+    const duration = `${diffHours.toFixed(1).replace('.0', '')}h`
 
     const newShot: Shot = {
       id: `shot-${Date.now()}`,
@@ -98,25 +98,25 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
       status: 'pending',
       equipmentIds: form.equipmentIds,
       preparedEquipmentIds: []
-    };
+    }
 
-    onSubmit(newShot);
-    onClose();
-  };
+    onSubmit(newShot)
+    onClose()
+  }
 
   const availableGear = inventory.filter(item => {
-    const matchesSearch = (item.customName || item.name).toLowerCase().includes(shotGearSearch.toLowerCase());
-    const matchesCat = shotGearCategory === 'All' || item.category === shotGearCategory;
-    return matchesSearch && matchesCat;
-  });
+    const matchesSearch = (item.customName || item.name).toLowerCase().includes(shotGearSearch.toLowerCase())
+    const matchesCat = shotGearCategory === 'All' || item.category === shotGearCategory
+    return matchesSearch && matchesCat
+  })
 
-  const isValid = form.title.trim() && !shotConflict;
+  const isValid = form.title.trim() && !shotConflict
 
   return (
     <FormLayout
       title="New Scene"
       subtitle="Schedule a new shot"
-      detailLabel="Create new"
+      detailLabel="Create New"
       formType="shot"
       onBack={onClose}
       onSwitchForm={onSwitchForm}
@@ -127,51 +127,43 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
       <div className="flex flex-col gap-8 mb-12 pb-10 border-b border-gray-100 dark:border-white/5">
         {/* Scene Identity */}
         <div className="w-full">
-          <Text variant="subtitle" color="muted" className="dark:text-white mb-3 block text-center sm:text-left">Scene identity</Text>
+          <Text variant="h3" color="muted" className="mb-3 block text-center sm:text-left">Scene Identity</Text>
           
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div className="sm:col-span-3">
-              <div className="flex flex-col gap-1 min-w-0">
-                <input
-                  type="text"
-                  value={form.title}
-                  onChange={e => setForm({ ...form, title: e.target.value })}
-                  className={`w-full bg-transparent border-b py-2 text-gray-900 dark:text-white focus:outline-none transition-all placeholder-gray-400 dark:placeholder-gray-500 ${!form.title.trim() ? 'border-red-200 dark:border-red-500/30' : 'border-gray-200 dark:border-white/10 focus:border-[#3762E3] dark:focus:border-[#4E47DD]'}`}
-                  placeholder="Scene title..."
-                />
-              </div>
+              <Input
+                type="text"
+                value={form.title}
+                onChange={e => setForm({ ...form, title: e.target.value })}
+                placeholder="Scene title..."
+                fullWidth
+              />
             </div>
             <div>
-              <div className="flex flex-col gap-1 min-w-0">
-                <div className="flex items-center gap-2 bg-transparent border-b border-gray-200 dark:border-white/10 py-2">
-                  <span className="px-2 py-0.5 bg-black/5 dark:bg-white/10 rounded-md text-[10px] font-semibold text-gray-500 dark:text-gray-400">SC</span>
-                  <input
-                    type="text"
-                    value={form.sceneNumber}
-                    onChange={e => setForm({ ...form, sceneNumber: e.target.value })}
-                    className="flex-1 bg-transparent text-base font-semibold focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 min-w-0"
-                    placeholder="4C"
-                  />
-                </div>
-              </div>
+              <Input
+                type="text"
+                value={form.sceneNumber}
+                onChange={e => setForm({ ...form, sceneNumber: e.target.value })}
+                placeholder="Scene number (e.g. 4C)"
+                leftIcon={<span className="text-xs font-semibold text-gray-400">SC</span>}
+                fullWidth
+              />
             </div>
           </div>
         </div>
 
         {/* Schedule */}
         <div className="w-full">
-          <Text variant="subtitle" color="muted" className="dark:text-white mb-3 block text-center sm:text-left">Schedule</Text>
+          <Text variant="h3" color="muted" className="mb-3 block text-center sm:text-left">Schedule</Text>
           
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="relative">
-              <div className="flex flex-col gap-1 min-w-0">
-                <input
-                  type="date"
-                  value={form.date}
-                  onChange={e => setForm({ ...form, date: e.target.value })}
-                  className={`w-full bg-transparent border-b py-2 text-gray-900 dark:text-white focus:outline-none transition-all cursor-pointer text-sm font-semibold ${shotConflict ? 'border-red-200 dark:border-red-500/30' : 'border-gray-200 dark:border-white/10 focus:border-[#3762E3] dark:focus:border-[#4E47DD]'}`}
-                />
-              </div>
+              <Input
+                type="date"
+                value={form.date}
+                onChange={e => setForm({ ...form, date: e.target.value })}
+                fullWidth
+              />
             </div>
             <TimeSelector label="" value={form.startTime} onChange={(v) => setForm({ ...form, startTime: v })} />
             <TimeSelector label="" value={form.endTime} onChange={(v) => setForm({ ...form, endTime: v })} />
@@ -179,78 +171,69 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
 
           {shotConflict && (
             <div className="flex items-center gap-2 p-3 mt-3 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-xl">
-              <AlertCircle className="text-red-500 dark:text-red-400 shrink-0" size={14} strokeWidth={3} />
-              <p className="text-[10px] font-semibold text-red-600 dark:text-red-400 leading-tight">
+              <AlertCircle className="text-red-500 dark:text-red-400 shrink-0" size={14} strokeWidth={2.5} />
+              <Text variant="label" color="danger">
                 Conflict: This slot is already taken by "{shotConflict.title}"
-              </p>
+              </Text>
             </div>
           )}
         </div>
 
         {/* Location */}
         <div className="w-full">
-          <Text variant="subtitle" color="muted" className="dark:text-white mb-3 block text-center sm:text-left">Location</Text>
+          <Text variant="h3" color="muted" className="mb-3 block text-center sm:text-left">Location</Text>
           
-          <div className="flex flex-col gap-1 min-w-0">
-            <input
-              type="text"
-              value={form.location}
-              onChange={e => setForm({ ...form, location: e.target.value })}
-              className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all text-sm font-semibold placeholder-gray-400 dark:placeholder-gray-500"
-              placeholder="Enter filming location..."
-            />
-          </div>
+          <Input
+            type="text"
+            value={form.location}
+            onChange={e => setForm({ ...form, location: e.target.value })}
+            placeholder="Enter filming location..."
+            fullWidth
+          />
         </div>
 
         {/* Description */}
         <div className="w-full">
-          <Text variant="subtitle" color="muted" className="dark:text-white mb-3 block text-center sm:text-left">Description</Text>
+          <Text variant="h3" color="muted" className="mb-3 block text-center sm:text-left">Description</Text>
           
-          <div className="flex flex-col gap-1 min-w-0">
-            <textarea
-              value={form.description}
-              onChange={e => setForm({ ...form, description: e.target.value })}
-              className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all resize-none text-sm font-medium"
-              rows={6}
-              placeholder="Describe the action, atmosphere, and key visual elements..."
-            />
-          </div>
+          <Textarea
+            value={form.description}
+            onChange={e => setForm({ ...form, description: e.target.value })}
+            placeholder="Describe the action, atmosphere, and key visual elements..."
+            size="lg"
+          />
         </div>
       </div>
 
       {/* Equipment Section */}
       <section>
         <div className="flex items-center justify-between mb-6">
-          <Text variant="subtitle" color="muted" className="dark:text-white">Equipment</Text>
-          <span className="bg-blue-50 dark:bg-indigo-500/10 text-blue-600 dark:text-indigo-400 px-2.5 py-1 rounded-lg text-[10px] font-semibold">
+          <Text variant="h3" color="muted">Equipment</Text>
+          <span className="bg-blue-50 dark:bg-indigo-500/10 text-blue-600 dark:text-indigo-400 px-2.5 py-1 rounded-lg text-xs font-semibold">
             {form.equipmentIds.length} Selected
           </span>
         </div>
 
         {/* Search & Filter */}
         <div className="space-y-4 mb-6">
-          <div className="relative">
-            <Search size={16} className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
-            <input
-              type="text"
-              value={shotGearSearch}
-              onChange={(e) => setShotGearSearch(e.target.value)}
-              placeholder="Search inventory..."
-              className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 pl-8 pr-4 py-2 text-sm font-semibold text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all"
-            />
-          </div>
+          <Input
+            type="text"
+            value={shotGearSearch}
+            onChange={(e) => setShotGearSearch(e.target.value)}
+            placeholder="Search inventory..."
+            leftIcon={<Search size={16} strokeWidth={2.5} className="text-gray-400" />}
+            fullWidth
+          />
           <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
             {['All', 'Camera', 'Lens', 'Light', 'Filter', 'Support', 'Grip', 'Monitoring', 'Audio', 'Wireless', 'Drone', 'Props'].map(cat => (
-              <button
+              <Button
                 key={cat}
+                variant={shotGearCategory === cat ? 'primary' : 'secondary'}
+                size="sm"
                 onClick={() => setShotGearCategory(cat)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${shotGearCategory === cat
-                  ? 'bg-blue-600 dark:bg-indigo-500 text-white'
-                  : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10'
-                  }`}
               >
                 {cat}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -258,8 +241,8 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
         {/* Equipment List */}
         <div className="space-y-1 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
           {availableGear.map(item => {
-            const isSelected = form.equipmentIds.includes(item.id);
-            const Icon = (CATEGORY_ICONS as any)[item.category] || Package;
+            const isSelected = form.equipmentIds.includes(item.id)
+            const Icon = (CATEGORY_ICONS as any)[item.category] || Package
 
             return (
               <button
@@ -268,18 +251,16 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
                 className="w-full flex items-center justify-between py-4 text-left border-b border-gray-50 dark:border-white/[0.02] last:border-0"
               >
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                    isSelected ? 'text-blue-600 dark:text-indigo-400' : 'text-gray-400'
-                  }`}>
-                    <Icon size={20} />
-                  </div>
+                  <IconContainer 
+                    icon={Icon} 
+                    size="md" 
+                    variant={isSelected ? 'accent' : 'default'}
+                  />
                   <div className="min-w-0">
-                    <p className={`text-base font-semibold truncate ${
-                      isSelected ? 'text-blue-900 dark:text-indigo-400' : 'text-gray-900 dark:text-gray-100'
-                    }`}>
+                    <Text variant="body" className={isSelected ? 'text-blue-900 dark:text-indigo-400' : ''}>
                       {item.customName || item.name}
-                    </p>
-                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">{item.category}</p>
+                    </Text>
+                    <Text variant="caption" color="muted">{item.category}</Text>
                   </div>
                 </div>
                 <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${
@@ -287,13 +268,13 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
                     ? 'bg-blue-600 dark:bg-indigo-500 text-white shadow-lg shadow-blue-600/20 dark:shadow-indigo-500/20'
                     : 'bg-gray-100 dark:bg-white/5 text-gray-300'
                 }`}>
-                  <Check size={18} strokeWidth={3} />
+                  <Check size={18} strokeWidth={2.5} />
                 </div>
               </button>
-            );
+            )
           })}
         </div>
       </section>
     </FormLayout>
-  );
-};
+  )
+}

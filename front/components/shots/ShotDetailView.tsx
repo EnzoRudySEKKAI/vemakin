@@ -1,18 +1,16 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { Plus, Search, Package, Check, ExternalLink } from 'lucide-react'
-import { Shot, Note, Equipment } from '../../types'
-import { calculateEndTime, formatDateToNumeric, timeToMinutes } from '../../utils'
-import { CATEGORY_ICONS } from '../../constants'
-import { useDetailView } from '../../hooks/useDetailView'
-import { DetailViewLayout } from '../../components/organisms/DetailViewLayout'
-import { ActionButton, ActionButtonGroup } from '../../components/molecules/ActionButton'
-import { StatusToggle } from '../../components/molecules/StatusToggle'
-import { DetailSection } from '../../components/molecules/DetailSection'
-import { Text } from '../../components/atoms/Text'
-import { Input } from '../../components/atoms/Input'
-import { ConfirmModal } from '../ui/ConfirmModal'
-import { TimeSelector } from '../ui/TimeSelector'
-
+import { Shot, Note, Equipment } from '@/types'
+import { calculateEndTime, formatDateToNumeric, timeToMinutes } from '@/utils'
+import { CATEGORY_ICONS } from '@/constants'
+import { useDetailView } from '@/hooks/useDetailView'
+import { DetailViewLayout } from '@/components/organisms/DetailViewLayout'
+import { ActionButton, ActionButtonGroup } from '@/components/molecules/ActionButton'
+import { StatusToggle } from '@/components/molecules/StatusToggle'
+import { DetailSection } from '@/components/molecules/DetailSection'
+import { Text, Input, Button, IconContainer, Textarea } from '@/components/atoms'
+import { ConfirmModal } from '@/components/ui/ConfirmModal'
+import { TimeSelector } from '@/components/ui/TimeSelector'
 
 interface ShotDetailViewProps {
   selectedShot: Shot
@@ -162,11 +160,11 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
       sidebar={
         <div className="p-2">
           <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100 dark:border-white/5">
-            <Text variant="title">Gear</Text>
+            <Text variant="h3">Gear</Text>
             {!isEditing && (
               <div className="flex flex-col items-end">
                 <Text variant="caption" color="muted">Checklist</Text>
-                <Text variant="subtitle" color="primary">
+                <Text variant="body" color="primary">
                   {selectedShot.preparedEquipmentIds.length}/{selectedShot.equipmentIds.length} ready
                 </Text>
               </div>
@@ -193,7 +191,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                     : 'border-transparent text-gray-400'
                 }`}
               >
-                Browse pool
+                Browse Pool
               </button>
             </div>
           )}
@@ -213,18 +211,16 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                         className="py-4 transition-all flex items-center justify-between group border-b border-gray-50 dark:border-white/[0.02] last:border-0"
                       >
                         <div className="flex items-center gap-4 min-w-0">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
-                            isReady ? 'text-green-600' : 'text-gray-400 group-hover:text-blue-500'
-                          }`}>
-                            <Icon size={20} />
-                          </div>
+                          <IconContainer 
+                            icon={Icon} 
+                            size="md" 
+                            variant={isReady ? 'success' : 'default'}
+                          />
                           <div className="min-w-0">
-                            <p className={`text-base font-semibold truncate ${
-                              isReady ? 'text-green-700 dark:text-green-300' : 'text-gray-900 dark:text-gray-100'
-                            }`}>
+                            <Text variant="body" className={isReady ? 'text-green-700 dark:text-green-300' : ''}>
                               {item ? (item.customName || item.name) : 'Unknown'}
-                            </p>
-                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">{item?.category}</p>
+                            </Text>
+                            <Text variant="caption" color="muted">{item?.category}</Text>
                           </div>
                         </div>
                         {isEditing ? (
@@ -243,7 +239,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                                 : 'bg-gray-100 dark:bg-white/5 text-gray-300 hover:bg-green-500/10 hover:text-green-500'
                             }`}
                           >
-                            <Check size={18} strokeWidth={3} />
+                            <Check size={18} strokeWidth={2.5} />
                           </button>
                         )}
                       </div>
@@ -252,7 +248,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                 </div>
               ) : (
                 <div className="py-12 text-center">
-                  <Package size={32} className="text-gray-200 mx-auto mb-3"/>
+                  <IconContainer icon={Package} size="xl" variant="muted" className="mx-auto mb-3" />
                   <Text variant="caption" color="muted">No gear assigned.</Text>
                 </div>
               )
@@ -265,7 +261,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                   value={gearSearchQuery}
                   onChange={(e) => setGearSearchQuery(e.target.value)}
                   placeholder="Search pool..."
-                  leftIcon={<Search size={16} className="text-gray-400" />}
+                  leftIcon={<Search size={16} className="text-gray-400" strokeWidth={2.5} />}
                   variant="default"
                   fullWidth
                 />
@@ -279,12 +275,12 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                         className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all text-left"
                       >
                         <div className="flex items-center gap-4 min-w-0">
-                          <Icon size={16} className="text-gray-400"/>
-                          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 truncate">
+                          <IconContainer icon={Icon} size="sm" variant="default" />
+                          <Text variant="body" className="text-gray-700 dark:text-gray-300 truncate">
                             {gear.customName || gear.name}
-                          </span>
+                          </Text>
                         </div>
-                        <Plus size={16} className="text-blue-500"/>
+                        <Plus size={16} className="text-blue-500" strokeWidth={2.5} />
                       </button>
                     )
                   }) : (
@@ -299,32 +295,35 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
     >
       {isRetaking && (
         <div className="mb-8 p-4 bg-orange-500/10 rounded-2xl border border-orange-500/20 flex flex-wrap items-center gap-4">
-          <Text variant="subtitle" color="warning">Schedule retake:</Text>
-          <input 
+          <Text variant="body" color="warning">Schedule Retake:</Text>
+          <Input 
             type="date" 
             value={retakeDate} 
             onChange={e => setRetakeDate(e.target.value)} 
-            className="bg-transparent border border-orange-500/30 rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-700 dark:text-white"
+            variant="default"
+            className="w-auto"
           />
-          <input 
+          <Input 
             type="time" 
             value={retakeTime} 
             onChange={e => setRetakeTime(e.target.value)} 
-            className="bg-transparent border border-orange-500/30 rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-700 dark:text-white"
+            variant="default"
+            className="w-auto"
           />
-          <button 
-            onClick={() => setShowRetakeConfirm(true)} 
-            className="px-4 py-1.5 bg-orange-500 text-white rounded-lg font-semibold text-xs hover:bg-orange-600"
+          <Button 
+            variant="primary" 
+            size="sm"
+            onClick={() => setShowRetakeConfirm(true)}
           >
             Confirm
-          </button>
+          </Button>
         </div>
       )}
 
       <div className="flex flex-col gap-8 mb-12 pb-10">
         {!isEditing && (
           <div className="w-full">
-            <Text variant="subtitle" color="muted" className="mb-3 block text-center sm:text-left">Current status</Text>
+            <Text variant="h3" color="muted" className="mb-3 block text-center sm:text-left">Current Status</Text>
             <StatusToggle 
               status={selectedShot.status as any} 
               onToggle={() => onToggleStatus(selectedShot.id)} 
@@ -336,49 +335,41 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
           <>
             {/* Scene Identity */}
             <div className="w-full">
-              <Text variant="subtitle" color="muted" className="dark:text-white mb-3 block text-center sm:text-left">Scene identity</Text>
+              <Text variant="h3" color="muted" className="mb-3 block text-center sm:text-left">Scene Identity</Text>
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                 <div className="sm:col-span-3">
-                  <div className="flex flex-col gap-1 min-w-0">
-                    <input
-                      type="text"
-                      value={editedItem.title}
-                      onChange={e => setEditedItem({ ...editedItem, title: e.target.value })}
-                      className="w-full bg-transparent border-b py-2 text-gray-900 dark:text-white focus:outline-none transition-all placeholder-gray-400 dark:placeholder-gray-500 border-gray-200 dark:border-white/10 focus:border-[#3762E3] dark:focus:border-[#4E47DD]"
-                      placeholder="Scene title..."
-                    />
-                  </div>
+                  <Input
+                    type="text"
+                    value={editedItem.title}
+                    onChange={e => setEditedItem({ ...editedItem, title: e.target.value })}
+                    placeholder="Scene title..."
+                    fullWidth
+                  />
                 </div>
                 <div>
-                  <div className="flex flex-col gap-1 min-w-0">
-                    <div className="flex items-center gap-2 bg-transparent border-b border-gray-200 dark:border-white/10 py-2">
-                      <span className="px-2 py-0.5 bg-black/5 dark:bg-white/10 rounded-md text-[10px] font-semibold text-gray-500 dark:text-gray-400">SC</span>
-                      <input
-                        type="text"
-                        value={editedItem.sceneNumber}
-                        onChange={e => setEditedItem({ ...editedItem, sceneNumber: e.target.value })}
-                        className="flex-1 bg-transparent text-base font-semibold focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 min-w-0"
-                        placeholder="4C"
-                      />
-                    </div>
-                  </div>
+                  <Input
+                    type="text"
+                    value={editedItem.sceneNumber}
+                    onChange={e => setEditedItem({ ...editedItem, sceneNumber: e.target.value })}
+                    placeholder="Scene number (e.g. 4C)"
+                    leftIcon={<span className="text-xs font-semibold text-gray-400">SC</span>}
+                    fullWidth
+                  />
                 </div>
               </div>
             </div>
 
             {/* Schedule */}
             <div className="w-full">
-              <Text variant="subtitle" color="muted" className="dark:text-white mb-3 block text-center sm:text-left">Schedule</Text>
+              <Text variant="h3" color="muted" className="mb-3 block text-center sm:text-left">Schedule</Text>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="relative">
-                  <div className="flex flex-col gap-1 min-w-0">
-                    <input
-                      type="date"
-                      value={editedItem.date}
-                      onChange={e => setEditedItem({ ...editedItem, date: e.target.value })}
-                      className="w-full bg-transparent border-b py-2 text-gray-900 dark:text-white focus:outline-none transition-all cursor-pointer text-sm font-semibold border-gray-200 dark:border-white/10 focus:border-[#3762E3] dark:focus:border-[#4E47DD]"
-                    />
-                  </div>
+                  <Input
+                    type="date"
+                    value={editedItem.date}
+                    onChange={e => setEditedItem({ ...editedItem, date: e.target.value })}
+                    fullWidth
+                  />
                 </div>
                 <TimeSelector label="" value={editedItem.startTime} onChange={v => setEditedItem({ ...editedItem, startTime: v })} />
                 <TimeSelector label="" value={currentEndTime} onChange={handleEndTimeChange} />
@@ -387,40 +378,33 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
 
             {/* Location */}
             <div className="w-full relative z-20">
-              <Text variant="subtitle" color="muted" className="dark:text-white mb-3 block text-center sm:text-left">Location</Text>
-              <div className="relative">
-                <div className="flex flex-col gap-1 min-w-0">
-                  <input
-                    type="text"
-                    value={editedItem.location}
-                    onChange={e => setEditedItem({ ...editedItem, location: e.target.value })}
-                    className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all text-sm font-semibold placeholder-gray-400 dark:placeholder-gray-500"
-                    placeholder="Search filming location..."
-                  />
-                </div>
-              </div>
+              <Text variant="h3" color="muted" className="mb-3 block text-center sm:text-left">Location</Text>
+              <Input
+                type="text"
+                value={editedItem.location}
+                onChange={e => setEditedItem({ ...editedItem, location: e.target.value })}
+                placeholder="Search filming location..."
+                fullWidth
+              />
             </div>
 
             {/* Description */}
             <div className="w-full">
-              <Text variant="subtitle" color="muted" className="dark:text-white mb-3 block text-center sm:text-left">Description</Text>
-              <div className="flex flex-col gap-1 min-w-0">
-                <textarea
-                  value={editedItem.description}
-                  onChange={e => setEditedItem({ ...editedItem, description: e.target.value })}
-                  className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all resize-none text-sm font-medium"
-                  rows={6}
-                  placeholder="Describe the action, atmosphere, and key visual elements..."
-                />
-              </div>
+              <Text variant="h3" color="muted" className="mb-3 block text-center sm:text-left">Description</Text>
+              <Textarea
+                value={editedItem.description}
+                onChange={e => setEditedItem({ ...editedItem, description: e.target.value })}
+                placeholder="Describe the action, atmosphere, and key visual elements..."
+                size="lg"
+              />
             </div>
           </>
         ) : (
           <div className="grid grid-cols-2 lg:flex lg:flex-wrap items-start gap-x-8 lg:gap-x-16 gap-y-8">
             <div className="flex flex-col gap-1 min-w-0">
-              <Text variant="subtitle" color="muted" className="dark:text-white">Schedule</Text>
+              <Text variant="h3" color="muted">Schedule</Text>
               <div className="flex flex-col group">
-                <Text variant="title" className="block leading-tight py-1.5">
+                <Text variant="h2" className="block leading-tight py-1.5">
                   {formatDateToNumeric(selectedShot.date)}
                 </Text>
                 <Text variant="caption" color="muted">
@@ -430,16 +414,16 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
             </div>
 
             <div className="flex flex-col gap-1 min-w-0 lg:flex-1">
-              <Text variant="subtitle" color="muted" className="dark:text-white">Location</Text>
+              <Text variant="h3" color="muted">Location</Text>
               <div
                 className="flex flex-col group cursor-pointer"
                 onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedShot.location)}`, '_blank')}
               >
-                <Text variant="title" className="block leading-tight py-1.5 truncate w-full">
+                <Text variant="h2" className="block leading-tight py-1.5 truncate w-full">
                   {selectedShot.location}
                 </Text>
                 <Text variant="caption" color="success" className="flex items-center gap-1.5 normal-case">
-                  View on Google Maps <ExternalLink size={12} />
+                  View on Google Maps <ExternalLink size={12} strokeWidth={2.5} />
                 </Text>
               </div>
             </div>
@@ -451,7 +435,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
         {!isEditing && (
           <section>
             <div className="flex flex-col gap-1 min-w-0">
-              <Text variant="subtitle" color="muted" className="dark:text-white">Brief</Text>
+              <Text variant="h3" color="muted">Brief</Text>
               <Text variant="body" color="secondary" className="whitespace-pre-wrap max-w-3xl py-1.5">
                 {selectedShot.description || "No specific instructions provided for this shot."}
               </Text>
@@ -462,35 +446,37 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
         <DetailSection
           title={`Notes (${associatedNotes.length})`}
           action={
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => onAddNote({ title: '', content: '', shotId: selectedShot.id, attachments: [] })}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500/5 text-blue-600 dark:text-indigo-400 text-xs font-semibold hover:bg-blue-500/10 transition-all"
+              leftIcon={<Plus size={14} strokeWidth={2.5} />}
             >
-              <Plus size={14} /> Add note
-            </button>
+              Add Note
+            </Button>
           }
           border={!isEditing}
         >
-           {associatedNotes.length > 0 ? (
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               {associatedNotes.map(note => (
-                 <div
-                   key={note.id}
-                   onClick={() => onOpenNote?.(note.id)}
-                   className="p-6 bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/5 rounded-3xl cursor-pointer hover:border-blue-500/30 transition-all group shadow-sm hover:shadow-md"
-                 >
-                   <h4 className="font-semibold text-gray-900 dark:text-white text-lg mb-2 group-hover:text-blue-600 transition-colors">
-                     {note.title || "Untitled note"}
-                   </h4>
-                   <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-3 leading-relaxed">{note.content}</p>
-                 </div>
-               ))}
-             </div>
-           ) : (
-             <div className="py-8 flex items-center text-gray-500 dark:text-gray-400">
-               <span className="text-sm">No notes</span>
-             </div>
-           )}
+          {associatedNotes.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {associatedNotes.map(note => (
+                <div
+                  key={note.id}
+                  onClick={() => onOpenNote?.(note.id)}
+                  className="p-6 bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/5 rounded-3xl cursor-pointer hover:border-blue-500/30 transition-all group shadow-sm hover:shadow-md"
+                >
+                  <Text variant="h3" className="mb-2 group-hover:text-blue-600 transition-colors">
+                    {note.title || "Untitled note"}
+                  </Text>
+                  <Text variant="caption" color="secondary" className="line-clamp-3">{note.content}</Text>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 flex items-center text-gray-500 dark:text-gray-400">
+              <Text variant="body">No notes</Text>
+            </div>
+          )}
         </DetailSection>
       </div>
 
