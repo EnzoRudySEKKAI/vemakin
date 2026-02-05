@@ -1,234 +1,122 @@
-
-import { useState, useMemo, useCallback, useEffect } from 'react';
-import { MainView, Shot, ShotLayout, Equipment, Note, PostProdTask, PostProdFilters, NotesFilters, User, CatalogCategory, CatalogBrand, CatalogItem } from '../types.ts';
-
+import { create } from 'zustand';
+import {
+  MainView, Shot, ShotLayout, Equipment, Note, PostProdTask,
+  PostProdFilters, NotesFilters, User, CatalogCategory,
+  CatalogBrand, CatalogItem
+} from '../types.ts';
 import { timeToMinutes } from '../utils.ts';
 import { auth } from '../firebase';
 import { onAuthStateChanged, signOut, User as FirebaseUser } from 'firebase/auth';
 import api from '../api/client';
 
 export interface ProjectState {
-  id?: string; // Backend ID (UUID)
+  id?: string;
   shots: Shot[];
   notes: Note[];
   tasks: PostProdTask[];
 }
 
-export const useProductionStore = () => {
-  const [mainView, setMainView] = useState<MainView>('overview');
-  const [shotLayout, setShotLayout] = useState<ShotLayout>('timeline');
-  const [shotStatusFilter, setShotStatusFilter] = useState<'all' | 'pending' | 'done'>('all');
-  const [projects, setProjects] = useState<string[]>([]);
-  const [currentProject, setCurrentProject] = useState('');
-  const [allInventory, setAllInventory] = useState<Equipment[]>([]);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isGuest, setIsGuest] = useState(() => {
-    return localStorage.getItem('vemakin_guest_mode') === 'true';
-  });
-  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+interface ProductionStore {
+  // State
+  mainView: MainView;
+  shotLayout: ShotLayout;
+  shotStatusFilter: 'all' | 'pending' | 'done';
+  projects: string[];
+  currentProject: string;
+  allInventory: Equipment[];
+  currentUser: User | null;
+  isGuest: boolean;
+  isLoadingAuth: boolean;
 
-  // Catalog State
-  const [catalogCategories, setCatalogCategories] = useState<CatalogCategory[]>([]);
-  const [catalogBrands, setCatalogBrands] = useState<CatalogBrand[]>([]);
-  const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
-  const [hasFetchedCatalog, setHasFetchedCatalog] = useState(false);
+  catalogCategories: CatalogCategory[];
+  catalogBrands: CatalogBrand[];
+  catalogItems: CatalogItem[];
+  hasFetchedCatalog: boolean;
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user: FirebaseUser | null) => {
-      if (user) {
-        setCurrentUser({
-          name: user.displayName || user.email?.split('@')[0] || 'User',
-          email: user.email || ''
-        });
-        setIsGuest(false);
+  postProdFilters: PostProdFilters;
+  notesFilters: NotesFilters;
+  notesLayout: 'grid' | 'list';
+  darkMode: boolean;
+  projectData: Record<string, ProjectState>;
+  fetchedProjectIds: Set<string>;
+  authPromise: Promise<void> | null;
+  resolveAuth: (() => void) | null;
 
-        // Fetch Data from Backend in Parallel
-        try {
-          // Fetch Projects and Inventory in parallel for faster loading
-          const [projectsRes, invRes] = await Promise.all([
-            api.get('/projects'),
-            api.get('/inventory').catch(err => {
-              console.error("Failed to fetch inventory:", err);
-              return { data: [] };
-            })
-          ]);
+  // Actions
+  setMainView: (view: MainView) => void;
+  setShotLayout: (layout: ShotLayout) => void;
+  setShotStatusFilter: (filter: 'all' | 'pending' | 'done') => void;
+  setProjects: (projects: string[]) => void;
+  setCurrentProject: (projectName: string) => void;
+  setAllInventory: (inventory: Equipment[]) => void;
+  setPostProdFilters: (updater: (prev: PostProdFilters) => PostProdFilters) => void;
+  setNotesFilters: (updater: (prev: NotesFilters) => NotesFilters) => void;
+  setNotesLayout: (layout: 'grid' | 'list') => void;
+  toggleDarkMode: () => void;
 
-          const fetchedProjects = projectsRes.data;
+  // Auth Actions
+  initAuth: () => () => void;
+  enterGuest: () => void;
+  logout: () => Promise<void>;
+  login: (name: string, email: string) => void;
 
-          if (fetchedProjects.length > 0) {
-            const projectNames = fetchedProjects.map((p: any) => p.name);
-            setProjects(projectNames);
+  // Data Actions
+  fetchInitialData: () => Promise<void>;
+  fetchProjectData: (projectName: string) => Promise<void>;
+  addProject: (name: string, data: Partial<ProjectState>) => Promise<void>;
+  deleteProject: (name: string) => Promise<void>;
+  renameProject: (oldName: string, newName: string) => void;
 
-            setProjectData(prev => {
-              const newData = { ...prev };
-              fetchedProjects.forEach((p: any) => {
-                if (newData[p.name]) {
-                  newData[p.name] = { ...newData[p.name], id: p.id };
-                } else {
-                  newData[p.name] = {
-                    id: p.id,
-                    shots: [],
-                    notes: [],
-                    tasks: []
-                  };
-                }
-              });
-              return newData;
-            });
+  addShot: (shot: Shot) => Promise<void>;
+  updateShot: (shot: Shot) => Promise<void>;
+  deleteShot: (id: string) => Promise<void>;
 
-            // Process inventory data
-            const fetchedInv: Equipment[] = invRes.data.map((i: any) => ({
-              id: i.id,
-              name: i.name,
-              catalogItemId: i.catalogItemId,
-              customName: i.customName,
-              serialNumber: i.serialNumber,
-              category: i.category,
-              pricePerDay: i.pricePerDay,
-              rentalPrice: i.rentalPrice,
-              rentalFrequency: i.rentalFrequency,
-              quantity: i.quantity,
-              isOwned: i.isOwned,
-              status: i.status,
-              specs: i.specs || {}
-            }));
-            setAllInventory(fetchedInv);
+  addTask: (task: PostProdTask) => Promise<void>;
+  updateTask: (task: PostProdTask) => Promise<void>;
+  deleteTask: (id: string) => Promise<void>;
 
-            setCurrentProject(prev => projectNames.includes(prev) ? prev : projectNames[0]);
-          } else {
-            setProjects([]);
-            setProjectData({});
-            setCurrentProject('');
-          }
-        } catch (err) {
-          console.error("Backend fetch failed:", err);
-          setProjects([]);
-        }
+  addGear: (gear: Equipment) => Promise<void>;
+  updateGear: (gear: Equipment) => Promise<void>;
+  deleteGear: (id: string) => Promise<void>;
 
-      } else {
-        setCurrentUser(null);
-      }
-      setIsLoadingAuth(false);
-    });
+  addNote: (note: Note) => Promise<void>;
+  updateNote: (note: Note) => Promise<void>;
+  deleteNote: (id: string) => Promise<void>;
 
-    return () => unsubscribe();
-  }, []);
+  toggleShotStatus: (id: string) => void;
+  toggleEquipmentStatus: (shotId: string, equipmentId: string) => void;
 
-  // Guest Mode: Fetch mock data when in guest mode
-  useEffect(() => {
-    if (isGuest) {
-      // Fetch mock data for guest user
-      const fetchGuestData = async () => {
-        try {
-          // Fetch mock projects and inventory in parallel
-          const [projectsRes, invRes] = await Promise.all([
-            api.get('/projects'),
-            api.get('/inventory').catch(err => {
-              console.error("Failed to fetch inventory in guest mode:", err);
-              return { data: [] };
-            })
-          ]);
+  // Catalog Actions
+  fetchCatalogCategories: () => Promise<void>;
+  fetchBrands: (categoryId: string) => Promise<void>;
+  fetchCatalogItems: (categoryId: string, brandId: string) => Promise<void>;
+  fetchItemSpecs: (itemId: string) => Promise<any>;
 
-          const fetchedProjects = projectsRes.data;
-          console.log('[Guest Mode] Fetched projects:', fetchedProjects);
-          console.log('[Guest Mode] Fetched inventory:', invRes.data);
+  refreshProjectData: () => void;
 
-          if (fetchedProjects.length > 0) {
-            const projectNames = fetchedProjects.map((p: any) => p.name);
-            setProjects(projectNames);
+  // Utility
+  exportProject: (name: string) => void;
+  importProject: (file: File) => Promise<void>;
+}
 
-            setProjectData(prev => {
-              const newData = { ...prev };
-              fetchedProjects.forEach((p: any) => {
-                if (newData[p.name]) {
-                  newData[p.name] = { ...newData[p.name], id: p.id };
-                } else {
-                  newData[p.name] = {
-                    id: p.id,
-                    shots: [],
-                    notes: [],
-                    tasks: []
-                  };
-                }
-              });
-              return newData;
-            });
+export const useStore = create<ProductionStore>((set, get) => ({
+  // Initial State
+  mainView: 'overview',
+  shotLayout: 'timeline',
+  shotStatusFilter: 'all',
+  projects: [],
+  currentProject: '',
+  allInventory: [],
+  currentUser: null,
+  isGuest: localStorage.getItem('vemakin_guest_mode') === 'true',
+  isLoadingAuth: true,
 
-            // Process inventory data
-            const fetchedInv: Equipment[] = invRes.data.map((i: any) => ({
-              id: i.id,
-              name: i.name,
-              catalogItemId: i.catalogItemId,
-              customName: i.customName,
-              serialNumber: i.serialNumber,
-              category: i.category,
-              pricePerDay: i.pricePerDay,
-              rentalPrice: i.rentalPrice,
-              rentalFrequency: i.rentalFrequency,
-              quantity: i.quantity,
-              isOwned: i.isOwned,
-              status: i.status,
-              specs: i.specs || {}
-            }));
-            setAllInventory(fetchedInv);
+  catalogCategories: [],
+  catalogBrands: [],
+  catalogItems: [],
+  hasFetchedCatalog: false,
 
-            setCurrentProject(prev => projectNames.includes(prev) ? prev : projectNames[0]);
-          }
-        } catch (err) {
-          console.error("Guest mode data fetch failed:", err);
-        }
-        setIsLoadingAuth(false);
-      };
-
-      fetchGuestData();
-    }
-  }, [isGuest]);
-
-  // Lazy load catalog categories only when needed
-  const fetchCatalogCategories = useCallback(async () => {
-    if (hasFetchedCatalog && catalogCategories.length > 0) {
-      return; // Already fetched, skip
-    }
-    try {
-      const res = await api.get('/catalog/categories');
-      setCatalogCategories(res.data);
-      setHasFetchedCatalog(true);
-    } catch (err) {
-      console.error("Failed to fetch catalog categories:", err);
-    }
-  }, [hasFetchedCatalog, catalogCategories.length]);
-
-  const fetchBrands = useCallback(async (categoryId: string) => {
-    try {
-      const res = await api.get(`/catalog/brands?category_id=${categoryId}`);
-      setCatalogBrands(res.data);
-    } catch (err) {
-      console.error("Failed to fetch catalog brands:", err);
-    }
-  }, []);
-
-  const fetchCatalogItems = useCallback(async (categoryId: string, brandId: string) => {
-    try {
-      const res = await api.get(`/catalog/items?category_id=${categoryId}&brand_id=${brandId}`);
-      setCatalogItems(res.data);
-    } catch (err) {
-      console.error("Failed to fetch catalog items:", err);
-    }
-  }, []);
-
-  const fetchItemSpecs = useCallback(async (itemId: string) => {
-    try {
-      const res = await api.get(`/catalog/items/${itemId}/specs`);
-      return res.data;
-    } catch (err) {
-      console.error("Failed to fetch item specs:", err);
-      return {};
-    }
-  }, []);
-
-
-  // PostProd View State
-  const [postProdFilters, setPostProdFilters] = useState<PostProdFilters>({
+  postProdFilters: {
     category: 'All',
     searchQuery: '',
     status: 'All',
@@ -236,203 +124,573 @@ export const useProductionStore = () => {
     date: 'All',
     sortBy: 'status',
     sortDirection: 'asc'
-  });
-
-  // Notes View State
-  const [notesFilters, setNotesFilters] = useState<NotesFilters>({
+  },
+  notesFilters: {
     query: '',
     category: 'All',
     date: 'All',
     sortBy: 'updated',
     sortDirection: 'desc'
-  });
+  },
+  notesLayout: 'grid',
+  darkMode: true,
+  projectData: {},
+  fetchedProjectIds: new Set(),
+  authPromise: null,
+  resolveAuth: null,
 
-  const [notesLayout, setNotesLayout] = useState<'grid' | 'list'>('grid');
+  // Simple Setters
+  setMainView: (view) => set({ mainView: view }),
+  setShotLayout: (layout) => set({ shotLayout: layout }),
+  setShotStatusFilter: (filter) => set({ shotStatusFilter: filter }),
+  setProjects: (projects) => set({ projects }),
+  setCurrentProject: (projectName) => {
+    set({ currentProject: projectName });
+    get().fetchProjectData(projectName);
+  },
+  setAllInventory: (inventory) => set({ allInventory: inventory }),
+  setPostProdFilters: (updater) => set((state) => ({ postProdFilters: updater(state.postProdFilters) })),
+  setNotesFilters: (updater) => set((state) => ({ notesFilters: updater(state.notesFilters) })),
+  setNotesLayout: (layout) => set({ notesLayout: layout }),
+  toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
 
-  // Theme State
-  const [darkMode, setDarkMode] = useState(true); // Default to dark mode as requested for implementation
+  // Auth Initialization
+  initAuth: () => {
+    // Return early if already initialized, but typically called once in RootLayout
+    if (get().authPromise) return () => { };
 
-  const [projectData, setProjectData] = useState<Record<string, ProjectState>>({});
+    let resolver: () => void;
+    const promise = new Promise<void>((resolve) => {
+      resolver = resolve;
+    });
 
-  const activeData = useMemo(() => projectData[currentProject] || { shots: [], notes: [], tasks: [] }, [projectData, currentProject]);
+    set({ authPromise: promise, resolveAuth: () => resolver() });
 
-  const updateActiveProjectData = useCallback((updates: Partial<ProjectState>) => {
-    setProjectData(prev => ({ ...prev, [currentProject]: { ...prev[currentProject], ...updates } }));
-  }, [currentProject]);
+    const unsubscribe = onAuthStateChanged(auth, async (user: FirebaseUser | null) => {
+      if (user) {
+        set({
+          currentUser: {
+            name: user.displayName || user.email?.split('@')[0] || 'User',
+            email: user.email || ''
+          },
+          isGuest: false,
+          isLoadingAuth: false
+        });
+      } else if (get().isGuest) {
+        set({ isLoadingAuth: false });
+      } else {
+        set({ currentUser: null, isLoadingAuth: false });
+      }
 
-  // Track fetched projects to avoid refetching
-  const [fetchedProjectIds, setFetchedProjectIds] = useState<Set<string>>(new Set());
+      // Fetch initial data after auth state is determined
+      if (user || get().isGuest) {
+        await get().fetchInitialData();
+      }
 
-  // Fetch Project Data when currentProject changes - Parallel fetching for faster loading
-  useEffect(() => {
-    const fetchProjectData = async () => {
-      const projectState = projectData[currentProject];
-      if (!projectState?.id || (!currentUser && !isGuest)) return;
-      
-      // Skip if already fetched this session
-      if (fetchedProjectIds.has(projectState.id)) return;
+      // Resolve the promise so loaders can proceed
+      const { resolveAuth } = get();
+      if (resolveAuth) resolveAuth();
+    });
+    return unsubscribe;
+  },
 
-      try {
-        // Fetch Shots, Notes, and Tasks in parallel for faster loading
-        const [shotsRes, notesRes, tasksRes] = await Promise.all([
-          api.get(`/shots?project_id=${projectState.id}`),
-          api.get(`/notes?project_id=${projectState.id}`),
-          api.get(`/postprod?project_id=${projectState.id}`)
-        ]);
+  enterGuest: async () => {
+    localStorage.setItem('vemakin_guest_mode', 'true');
+    set({ isGuest: true, currentUser: null, mainView: 'overview' });
+    await get().fetchInitialData();
 
-        const fetchedShots: Shot[] = shotsRes.data.map((s: any) => ({
-          id: s.id,
-          title: s.title,
-          description: s.description,
-          status: s.status,
-          startTime: s.startTime || s.start_time,
-          duration: s.duration,
-          location: s.location,
-          remarks: s.remarks,
-          date: s.date,
-          sceneNumber: s.sceneNumber || s.scene_number,
-          equipmentIds: s.equipment_ids || [],
-          preparedEquipmentIds: s.prepared_equipment_ids || []
+    // Resolve promise if anyone is waiting
+    const { resolveAuth } = get();
+    if (resolveAuth) resolveAuth();
+  },
+
+  logout: async () => {
+    try {
+      await signOut(auth);
+      localStorage.removeItem('vemakin_guest_mode');
+      set({ isGuest: false, currentUser: null, projects: [], projectData: {}, currentProject: '', fetchedProjectIds: new Set() });
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  },
+
+  login: (name, email) => {
+    set({ mainView: 'overview' });
+  },
+
+  fetchInitialData: async () => {
+    try {
+      const [projectsRes, invRes] = await Promise.all([
+        api.get('/projects'),
+        api.get('/inventory').catch(err => {
+          console.error("Failed to fetch inventory:", err);
+          return { data: [] };
+        })
+      ]);
+
+      const fetchedProjects = projectsRes.data;
+      if (fetchedProjects.length > 0) {
+        const projectNames = fetchedProjects.map((p: any) => p.name);
+        const newProjectData: Record<string, ProjectState> = {};
+
+        fetchedProjects.forEach((p: any) => {
+          newProjectData[p.name] = {
+            id: p.id,
+            shots: [],
+            notes: [],
+            tasks: []
+          };
+        });
+
+        const fetchedInv: Equipment[] = invRes.data.map((i: any) => ({
+          id: i.id,
+          name: i.name,
+          catalogItemId: i.catalogItemId,
+          customName: i.customName,
+          serialNumber: i.serialNumber,
+          category: i.category,
+          pricePerDay: i.pricePerDay,
+          rentalPrice: i.rentalPrice,
+          rentalFrequency: i.rentalFrequency,
+          quantity: i.quantity,
+          isOwned: i.isOwned,
+          status: i.status,
+          specs: i.specs || {}
         }));
 
-        const fetchedNotes: Note[] = notesRes.data.map((n: any) => ({
-          id: n.id,
-          title: n.title,
-          content: n.content,
-          date: n.updated_at,
-          shotId: n.shot_id,
-          taskId: n.task_id
+        set((state) => ({
+          projects: projectNames,
+          projectData: { ...state.projectData, ...newProjectData },
+          allInventory: fetchedInv,
+          currentProject: state.currentProject || projectNames[0]
         }));
 
-        const fetchedTasks: PostProdTask[] = tasksRes.data.map((t: any) => ({
-          id: t.id,
-          category: t.category,
-          title: t.title,
-          status: t.status,
-          priority: t.priority,
-          dueDate: t.due_date,
-          description: t.description
-        }));
+        if (get().currentProject) {
+          get().fetchProjectData(get().currentProject);
+        }
+      }
+    } catch (err) {
+      console.error("Initial fetch failed:", err);
+    }
+  },
 
-        setProjectData(prev => ({
-          ...prev,
-          [currentProject]: {
-            ...prev[currentProject],
+  fetchProjectData: async (projectName) => {
+    const state = get();
+    const projectState = state.projectData[projectName];
+    if (!projectState?.id || (!state.currentUser && !state.isGuest)) return;
+    if (state.fetchedProjectIds.has(projectState.id)) return;
+
+    try {
+      const [shotsRes, notesRes, tasksRes] = await Promise.all([
+        api.get(`/shots?project_id=${projectState.id}`),
+        api.get(`/notes?project_id=${projectState.id}`),
+        api.get(`/postprod?project_id=${projectState.id}`)
+      ]);
+
+      const fetchedShots: Shot[] = shotsRes.data.map((s: any) => ({
+        id: s.id,
+        title: s.title,
+        description: s.description,
+        status: s.status,
+        startTime: s.startTime || s.start_time,
+        duration: s.duration,
+        location: s.location,
+        remarks: s.remarks,
+        date: s.date,
+        sceneNumber: s.sceneNumber || s.scene_number,
+        equipmentIds: s.equipment_ids || [],
+        preparedEquipmentIds: s.prepared_equipment_ids || []
+      }));
+
+      const fetchedNotes: Note[] = notesRes.data.map((n: any) => ({
+        id: n.id,
+        title: n.title,
+        content: n.content,
+        date: n.updated_at,
+        shotId: n.shot_id,
+        taskId: n.task_id
+      }));
+
+      const fetchedTasks: PostProdTask[] = tasksRes.data.map((t: any) => ({
+        id: t.id,
+        category: t.category,
+        title: t.title,
+        status: t.status,
+        priority: t.priority,
+        dueDate: t.due_date,
+        description: t.description
+      }));
+
+      set((s) => ({
+        projectData: {
+          ...s.projectData,
+          [projectName]: {
+            ...s.projectData[projectName],
             shots: fetchedShots,
             notes: fetchedNotes,
             tasks: fetchedTasks
           }
-        }));
-
-        // Mark as fetched
-        setFetchedProjectIds(prev => new Set(prev).add(projectState.id));
-
-      } catch (err) {
-        console.error("Failed to fetch project data:", err);
-      }
-    };
-
-    fetchProjectData();
-  }, [currentProject, projectData[currentProject]?.id, currentUser, isGuest, fetchedProjectIds]);
-
-  const login = useCallback((name: string, email: string) => {
-    // Deprecated: Authentication is handled by Firebase Auth and onAuthStateChanged.
-    // This function is kept to satisfy interface if needed, but UI should call firebase directly.
-    setMainView('overview');
-  }, []);
-
-  const enterGuest = useCallback(() => {
-    setIsGuest(true);
-    localStorage.setItem('vemakin_guest_mode', 'true');
-    setCurrentUser(null);
-    setMainView('overview');
-  }, []);
-
-  const logout = useCallback(async () => {
-    try {
-      await signOut(auth);
-      localStorage.removeItem('vemakin_guest_mode');
-      setIsGuest(false);
-      // State updates via onAuthStateChanged
-    } catch (error) {
-      console.error("Logout failed", error);
+        },
+        fetchedProjectIds: new Set(s.fetchedProjectIds).add(projectState.id!)
+      }));
+    } catch (err) {
+      console.error("Failed to fetch project data:", err);
     }
-  }, []);
+  },
 
-  const addProject = useCallback(async (name: string, data: Partial<ProjectState>) => {
+  addProject: async (name, data) => {
     const newProjectName = name.trim();
-    if (projects.includes(newProjectName) || !newProjectName) return;
+    if (get().projects.includes(newProjectName) || !newProjectName) return;
 
     try {
       const res = await api.post('/projects', { name: newProjectName });
       const newProject = res.data;
 
-      setProjects(prev => [newProjectName, ...prev]);
-      setProjectData(prev => ({
-        ...prev,
-        [newProjectName]: {
-          id: newProject.id,
-          shots: [],
-          notes: [],
-          tasks: [],
-          ...data
-        } as ProjectState
+      set((state) => ({
+        projects: [newProjectName, ...state.projects],
+        projectData: {
+          ...state.projectData,
+          [newProjectName]: {
+            id: newProject.id,
+            shots: [],
+            notes: [],
+            tasks: [],
+            ...data
+          }
+        },
+        currentProject: newProjectName,
+        mainView: 'shots'
       }));
-      setCurrentProject(newProjectName);
-      setMainView('shots');
     } catch (e) {
       console.error("Failed to create project", e);
-      // Optional: Show error
     }
-  }, [projects]);
+  },
 
-  const deleteProject = useCallback(async (name: string) => {
-    if (projects.length <= 1) return; // Prevent deleting last project
-
-    const projectState = projectData[name];
+  deleteProject: async (name) => {
+    if (get().projects.length <= 1) return;
+    const projectState = get().projectData[name];
     if (projectState?.id) {
       try {
         await api.delete(`/projects/${projectState.id}`);
-
-        setProjects(prev => prev.filter(p => p !== name));
-        setProjectData(prev => {
-          const newData = { ...prev };
+        set((state) => {
+          const newProjects = state.projects.filter(p => p !== name);
+          const newData = { ...state.projectData };
           delete newData[name];
-          return newData;
-        });
+          const newProjectIds = new Set(state.fetchedProjectIds);
+          newProjectIds.delete(projectState.id!);
 
-        if (currentProject === name) {
-          setCurrentProject(projects.find(p => p !== name) || projects[0]);
-        }
+          return {
+            projects: newProjects,
+            projectData: newData,
+            fetchedProjectIds: newProjectIds,
+            currentProject: state.currentProject === name ? newProjects[0] : state.currentProject
+          };
+        });
       } catch (e) {
         console.error("Failed to delete project", e);
       }
     }
-  }, [projects, currentProject, projectData]);
+  },
 
-  const renameProject = useCallback((oldName: string, newName: string) => {
-    if (oldName === newName || projects.includes(newName)) return;
-
-    // NOTE: Rename is not yet supported by Backend API (Requires PUT /projects/{id})
-    // For now, valid locally only if not sync? But app implies sync.
-    // TODO: Implement Rename API
-
-    setProjects(prev => prev.map(p => p === oldName ? newName : p));
-    setProjectData(prev => {
-      const newData = { ...prev };
+  renameProject: (oldName, newName) => {
+    if (oldName === newName || get().projects.includes(newName)) return;
+    set((state) => {
+      const newData = { ...state.projectData };
       newData[newName] = newData[oldName];
       delete newData[oldName];
-      return newData;
+      return {
+        projects: state.projects.map(p => p === oldName ? newName : p),
+        projectData: newData,
+        currentProject: state.currentProject === oldName ? newName : state.currentProject
+      };
     });
+  },
 
-    if (currentProject === oldName) {
-      setCurrentProject(newName);
+  addShot: async (shot) => {
+    const pid = get().projectData[get().currentProject]?.id;
+    if (pid) {
+      try {
+        await api.post(`/shots?project_id=${pid}`, shot);
+        set((state) => ({
+          projectData: {
+            ...state.projectData,
+            [state.currentProject]: {
+              ...state.projectData[state.currentProject],
+              shots: [...state.projectData[state.currentProject].shots, shot]
+            }
+          }
+        }));
+      } catch (e) {
+        console.error("Failed to add shot", e);
+      }
     }
-  }, [projects, currentProject]);
+  },
 
-  // Export/Import Stubs
-  const exportProject = useCallback((name: string) => {
-    const data = projectData[name];
+  updateShot: async (shot) => {
+    try {
+      await api.patch(`/shots/${shot.id}`, shot);
+      set((state) => ({
+        projectData: {
+          ...state.projectData,
+          [state.currentProject]: {
+            ...state.projectData[state.currentProject],
+            shots: state.projectData[state.currentProject].shots.map(s => s.id === shot.id ? shot : s)
+          }
+        }
+      }));
+    } catch (e) {
+      console.error("Failed to update shot", e);
+    }
+  },
+
+  deleteShot: async (shotId) => {
+    try {
+      await api.delete(`/shots/${shotId}`);
+      set((state) => ({
+        projectData: {
+          ...state.projectData,
+          [state.currentProject]: {
+            ...state.projectData[state.currentProject],
+            shots: state.projectData[state.currentProject].shots.filter(s => s.id !== shotId)
+          }
+        }
+      }));
+    } catch (e) {
+      console.error("Failed to delete shot", e);
+    }
+  },
+
+  addTask: async (task) => {
+    const pid = get().projectData[get().currentProject]?.id;
+    if (pid) {
+      try {
+        await api.post(`/postprod?project_id=${pid}`, task);
+        set((state) => ({
+          projectData: {
+            ...state.projectData,
+            [state.currentProject]: {
+              ...state.projectData[state.currentProject],
+              tasks: [...state.projectData[state.currentProject].tasks, task]
+            }
+          }
+        }));
+      } catch (e) {
+        console.error("Failed to add task", e);
+      }
+    }
+  },
+
+  updateTask: async (task) => {
+    try {
+      await api.patch(`/postprod/${task.id}`, task);
+      set((state) => ({
+        projectData: {
+          ...state.projectData,
+          [state.currentProject]: {
+            ...state.projectData[state.currentProject],
+            tasks: state.projectData[state.currentProject].tasks.map(t => t.id === task.id ? task : t)
+          }
+        }
+      }));
+    } catch (e) {
+      console.error("Failed to update task", e);
+    }
+  },
+
+  deleteTask: async (taskId) => {
+    try {
+      await api.delete(`/postprod/${taskId}`);
+      set((state) => ({
+        projectData: {
+          ...state.projectData,
+          [state.currentProject]: {
+            ...state.projectData[state.currentProject],
+            tasks: state.projectData[state.currentProject].tasks.filter(t => t.id !== taskId)
+          }
+        }
+      }));
+    } catch (e) {
+      console.error("Failed to delete task", e);
+    }
+  },
+
+  addGear: async (gear) => {
+    try {
+      const resp = await api.post('/inventory', gear);
+      set((state) => ({ allInventory: [resp.data, ...state.allInventory] }));
+    } catch (e) {
+      console.error("Failed to add gear", e);
+    }
+  },
+
+  updateGear: async (gear) => {
+    try {
+      const resp = await api.patch(`/inventory/${gear.id}`, gear);
+      set((state) => ({
+        allInventory: state.allInventory.map(item => item.id === gear.id ? resp.data : item)
+      }));
+    } catch (e) {
+      console.error("Failed to update gear", e);
+    }
+  },
+
+  deleteGear: async (id) => {
+    try {
+      await api.delete(`/inventory/${id}`);
+      set((state) => ({ allInventory: state.allInventory.filter(item => item.id !== id) }));
+    } catch (e) {
+      console.error("Failed to delete gear", e);
+    }
+  },
+
+  addNote: async (note) => {
+    const pid = get().projectData[get().currentProject]?.id;
+    if (pid) {
+      try {
+        await api.post(`/notes?project_id=${pid}`, note);
+        set((state) => ({
+          projectData: {
+            ...state.projectData,
+            [state.currentProject]: {
+              ...state.projectData[state.currentProject],
+              notes: [note, ...state.projectData[state.currentProject].notes]
+            }
+          }
+        }));
+      } catch (e) {
+        console.error("Failed to add note", e);
+      }
+    }
+  },
+
+  updateNote: async (note) => {
+    try {
+      await api.patch(`/notes/${note.id}`, note);
+      set((state) => ({
+        projectData: {
+          ...state.projectData,
+          [state.currentProject]: {
+            ...state.projectData[state.currentProject],
+            notes: state.projectData[state.currentProject].notes.map(n => n.id === note.id ? note : n)
+          }
+        }
+      }));
+    } catch (e) {
+      console.error("Failed to update note", e);
+    }
+  },
+
+  deleteNote: async (noteId) => {
+    try {
+      await api.delete(`/notes/${noteId}`);
+      set((state) => ({
+        projectData: {
+          ...state.projectData,
+          [state.currentProject]: {
+            ...state.projectData[state.currentProject],
+            notes: state.projectData[state.currentProject].notes.filter(n => n.id !== noteId)
+          }
+        }
+      }));
+    } catch (e) {
+      console.error("Failed to delete note", e);
+    }
+  },
+
+  toggleShotStatus: (id) => {
+    set((state) => {
+      const project = state.projectData[state.currentProject];
+      if (!project) return state;
+      return {
+        projectData: {
+          ...state.projectData,
+          [state.currentProject]: {
+            ...project,
+            shots: project.shots.map(s => s.id === id ? { ...s, status: s.status === 'done' ? 'pending' : 'done' } : s)
+          }
+        }
+      };
+    });
+  },
+
+  toggleEquipmentStatus: (shotId, equipmentId) => {
+    set((state) => {
+      const project = state.projectData[state.currentProject];
+      if (!project) return state;
+      return {
+        projectData: {
+          ...state.projectData,
+          [state.currentProject]: {
+            ...project,
+            shots: project.shots.map(s => {
+              if (s.id !== shotId) return s;
+              const isPrepared = s.preparedEquipmentIds.includes(equipmentId);
+              return {
+                ...s,
+                preparedEquipmentIds: isPrepared
+                  ? s.preparedEquipmentIds.filter(id => id !== equipmentId)
+                  : [...s.preparedEquipmentIds, equipmentId]
+              };
+            })
+          }
+        }
+      };
+    });
+  },
+
+  fetchCatalogCategories: async () => {
+    if (get().hasFetchedCatalog && get().catalogCategories.length > 0) return;
+    try {
+      const res = await api.get('/catalog/categories');
+      set({ catalogCategories: res.data, hasFetchedCatalog: true });
+    } catch (err) {
+      console.error("Failed to fetch catalog categories:", err);
+    }
+  },
+
+  fetchBrands: async (categoryId) => {
+    try {
+      const res = await api.get(`/catalog/brands?category_id=${categoryId}`);
+      set({ catalogBrands: res.data });
+    } catch (err) {
+      console.error("Failed to fetch catalog brands:", err);
+    }
+  },
+
+  fetchCatalogItems: async (categoryId, brandId) => {
+    try {
+      const res = await api.get(`/catalog/items?category_id=${categoryId}&brand_id=${brandId}`);
+      set({ catalogItems: res.data });
+    } catch (err) {
+      console.error("Failed to fetch catalog items:", err);
+    }
+  },
+
+  fetchItemSpecs: async (itemId) => {
+    try {
+      const res = await api.get(`/catalog/items/${itemId}/specs`);
+      return res.data;
+    } catch (err) {
+      console.error("Failed to fetch item specs:", err);
+      return {};
+    }
+  },
+
+  refreshProjectData: () => {
+    const { currentProject, projectData } = get();
+    const projectState = projectData[currentProject];
+    if (projectState?.id) {
+      set((state) => {
+        const newIds = new Set(state.fetchedProjectIds);
+        newIds.delete(projectState.id!);
+        return { fetchedProjectIds: newIds };
+      });
+      get().fetchProjectData(currentProject);
+    }
+  },
+
+  exportProject: (name) => {
+    const data = get().projectData[name];
     if (!data) return;
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -443,259 +701,71 @@ export const useProductionStore = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }, [projectData]);
+  },
 
-  const importProject = useCallback(async (file: File) => {
+  importProject: async (file) => {
     try {
       const text = await file.text();
       const json = JSON.parse(text);
       if (json.shots && json.tasks) {
         const name = file.name.replace('.json', '').replace(/_export$/, '');
-        addProject(name, json);
+        get().addProject(name, json);
       }
     } catch (e) {
       console.error("Import failed", e);
     }
-  }, [addProject]);
+  }
+}));
 
-  const addShot = useCallback(async (shot: Shot) => {
-    const projectState = activeData;
-    // We access ID from projectState (which comes from projectData[currentProject])
-    // The activeData returned by useMemo doesn't have ID typed explicitly in earlier step?
-    // Wait, activeData is derived. state has ID.
-    // We should get ID from projectData[currentProject].id directly to be safe.
-    const pid = projectData[currentProject]?.id;
+// Selectors for derived state
+export const useActiveData = () => {
+  const currentProject = useStore(state => state.currentProject);
+  const projectData = useStore(state => state.projectData);
+  return projectData[currentProject] || { shots: [], notes: [], tasks: [] };
+};
 
-    if (pid) {
-      try {
-        await api.post(`/shots?project_id=${pid}`, shot);
-        updateActiveProjectData({ shots: [...activeData.shots, shot] });
-      } catch (e) {
-        console.error("Failed to add shot", e);
-      }
-    } else {
-      // Fallback or error
-      console.warn("Project has no ID, cannot save shot to backend");
-      updateActiveProjectData({ shots: [...activeData.shots, shot] });
-    }
-  }, [activeData.shots, currentProject, projectData, updateActiveProjectData]);
+export const useGroupedShots = () => {
+  const activeData = useActiveData();
+  const groups = activeData.shots.reduce((acc, shot) => {
+    const date = shot.date;
+    if (!acc[date]) acc[date] = [];
+    acc[date].push(shot);
+    return acc;
+  }, {} as Record<string, Shot[]>);
 
-  const deleteShot = useCallback(async (shotId: string) => {
-    try {
-      await api.delete(`/shots/${shotId}`);
-      updateActiveProjectData({ shots: activeData.shots.filter(s => s.id !== shotId) });
-    } catch (e) {
-      console.error("Failed to delete shot", e);
-    }
-  }, [activeData.shots, updateActiveProjectData]);
+  Object.keys(groups).forEach(date => {
+    groups[date].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+  });
 
-  const updateShot = useCallback(async (shot: Shot) => {
-    try {
-      await api.patch(`/shots/${shot.id}`, shot);
-      updateActiveProjectData({ shots: activeData.shots.map(s => s.id === shot.id ? shot : s) });
-    } catch (e) {
-      console.error("Failed to update shot", e);
-    }
-  }, [activeData.shots, updateActiveProjectData]);
+  return groups;
+};
 
-  const addTask = useCallback(async (task: PostProdTask) => {
-    const pid = projectData[currentProject]?.id;
-    if (pid) {
-      try {
-        await api.post(`/postprod?project_id=${pid}`, task);
-        updateActiveProjectData({ tasks: [...activeData.tasks, task] });
-      } catch (e) {
-        console.error("Failed to add task", e);
-      }
-    }
-  }, [activeData.tasks, currentProject, projectData, updateActiveProjectData]);
+export const useDynamicDates = () => {
+  const activeData = useActiveData();
+  const allDates = Array.from(new Set(activeData.shots.map(s => s.date)));
+  return allDates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+};
 
-  const deleteTask = useCallback(async (taskId: string) => {
-    try {
-      await api.delete(`/postprod/${taskId}`);
-      updateActiveProjectData({ tasks: activeData.tasks.filter(t => t.id !== taskId) });
-    } catch (e) {
-      console.error("Failed to delete task", e);
-    }
-  }, [activeData.tasks, updateActiveProjectData]);
+export const useProjectProgress = () => {
+  const activeData = useActiveData();
+  if (activeData.shots.length === 0) return 0;
+  const done = activeData.shots.filter(s => s.status === 'done').length;
+  return Math.round((done / activeData.shots.length) * 100);
+};
 
-  const updateTask = useCallback(async (task: PostProdTask) => {
-    try {
-      await api.patch(`/postprod/${task.id}`, task);
-      updateActiveProjectData({ tasks: activeData.tasks.map(t => t.id === task.id ? task : t) });
-    } catch (e) {
-      console.error("Failed to update task", e);
-    }
-  }, [activeData.tasks, updateActiveProjectData]);
-
-  const addGear = useCallback(async (gear: Equipment) => {
-    try {
-      const response = await api.post('/inventory', gear);
-      setAllInventory(prev => [response.data, ...prev]);
-    } catch (e) {
-      console.error("Failed to add gear", e);
-    }
-  }, []);
-
-  const deleteGear = useCallback(async (id: string) => {
-    try {
-      await api.delete(`/inventory/${id}`);
-      setAllInventory(prev => prev.filter(item => item.id !== id));
-    } catch (e) {
-      console.error("Failed to delete gear", e);
-    }
-  }, []);
-
-  const updateGear = useCallback(async (gear: Equipment) => {
-    try {
-      const response = await api.patch(`/inventory/${gear.id}`, gear);
-      setAllInventory(prev => prev.map(item => item.id === gear.id ? response.data : item));
-    } catch (e) {
-      console.error("Failed to update gear", e);
-    }
-  }, []);
-
-  const addNote = useCallback(async (note: Note) => {
-    const pid = projectData[currentProject]?.id;
-    if (pid) {
-      try {
-        await api.post(`/notes?project_id=${pid}`, note);
-        updateActiveProjectData({ notes: [note, ...activeData.notes] });
-      } catch (e) {
-        console.error("Failed to add note", e);
-      }
-    }
-  }, [activeData.notes, currentProject, projectData, updateActiveProjectData]);
-
-  const updateNote = useCallback(async (note: Note) => {
-    try {
-      await api.patch(`/notes/${note.id}`, note);
-      updateActiveProjectData({ notes: activeData.notes.map(n => n.id === note.id ? note : n) });
-    } catch (e) {
-      console.error("Failed to update note", e);
-    }
-  }, [activeData.notes, updateActiveProjectData]);
-
-  const deleteNote = useCallback(async (noteId: string) => {
-    try {
-      await api.delete(`/notes/${noteId}`);
-      updateActiveProjectData({ notes: activeData.notes.filter(n => n.id !== noteId) });
-    } catch (e) {
-      console.error("Failed to delete note", e);
-    }
-  }, [activeData.notes, updateActiveProjectData]);
-
-  const toggleShotStatus = useCallback((id: string) => {
-    const updatedShots = activeData.shots.map(s =>
-      s.id === id
-        ? { ...s, status: (s.status === 'done' ? 'pending' : 'done') as Shot['status'] }
-        : s
-    );
-    updateActiveProjectData({ shots: updatedShots });
-  }, [activeData.shots]);
-
-  const toggleEquipmentStatus = useCallback((shotId: string, equipmentId: string) => {
-    const updatedShots = activeData.shots.map(s => {
-      if (s.id !== shotId) return s;
-      const isPrepared = s.preparedEquipmentIds.includes(equipmentId);
-      const newPrepared = isPrepared
-        ? s.preparedEquipmentIds.filter(id => id !== equipmentId)
-        : [...s.preparedEquipmentIds, equipmentId];
-      return { ...s, preparedEquipmentIds: newPrepared };
-    });
-    updateActiveProjectData({ shots: updatedShots });
-  }, [activeData.shots]);
-
-  const groupedShots = useMemo(() => {
-    const groups = activeData.shots.reduce((acc, shot) => {
-      const date = shot.date;
-      if (!acc[date]) acc[date] = [];
-      acc[date].push(shot);
-      return acc;
-    }, {} as Record<string, Shot[]>);
-
-    Object.keys(groups).forEach(date => {
-      groups[date].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
-    });
-
-    return groups;
-  }, [activeData.shots]);
-
-  const dynamicDates = useMemo(() => {
-    const allDates = Array.from(new Set(activeData.shots.map(s => s.date)));
-    return allDates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-  }, [activeData.shots]);
-
-  const projectProgress = useMemo(() => {
-    if (activeData.shots.length === 0) return 0;
-    const done = activeData.shots.filter(s => s.status === 'done').length;
-    return Math.round((done / activeData.shots.length) * 100);
-  }, [activeData.shots]);
-
-  const toggleDarkMode = useCallback(() => setDarkMode(prev => !prev), []);
+// Original hook name maintained for compatibility but now powered by Zustand
+export const useProductionStore = () => {
+  const store = useStore();
+  const activeData = useActiveData();
+  const groupedShots = useGroupedShots();
+  const dynamicDates = useDynamicDates();
+  const projectProgress = useProjectProgress();
 
   return {
-    mainView, setMainView,
-    shotLayout, setShotLayout,
-    shotStatusFilter, setShotStatusFilter,
-    projects, setProjects,
-    currentProject, setCurrentProject,
-    allInventory, setAllInventory,
-    currentUser,
-    isGuest,
-    isLoadingAuth,
-    login,
-    enterGuest,
-    logout,
-    projectData, setProjectData,
+    ...store,
     activeData,
-    updateActiveProjectData,
     groupedShots,
     dynamicDates,
-    projectProgress,
-    toggleShotStatus,
-    toggleEquipmentStatus,
-    addProject,
-    deleteProject,
-    renameProject,
-    addShot,
-    updateShot,
-    deleteShot,
-    addTask,
-    updateTask,
-    deleteTask,
-    addGear,
-    updateGear,
-    deleteGear,
-    addNote,
-    updateNote,
-    deleteNote,
-    postProdFilters,
-    setPostProdFilters,
-    notesFilters,
-    setNotesFilters,
-    notesLayout,
-    setNotesLayout,
-    darkMode,
-    toggleDarkMode,
-    exportProject,
-    importProject,
-    catalogCategories,
-    catalogBrands,
-    catalogItems,
-    fetchCatalogCategories,
-    fetchBrands,
-    fetchCatalogItems,
-    fetchItemSpecs,
-    refreshProjectData: () => {
-      const projectState = projectData[currentProject];
-      if (projectState?.id) {
-        setFetchedProjectIds(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(projectState.id);
-          return newSet;
-        });
-      }
-    }
+    projectProgress
   };
 };
