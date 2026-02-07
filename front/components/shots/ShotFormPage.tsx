@@ -94,7 +94,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
       startTime: form.startTime,
       duration: duration,
       description: form.description,
-      remarks: '',
+      remarks: form.description,
       status: 'pending',
       equipmentIds: form.equipmentIds,
       preparedEquipmentIds: []

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ChevronDown, ChevronUp, PenLine, Hash, Tag, Box,
   Package, Info, DollarSign, Aperture
@@ -12,9 +12,12 @@ export interface GearFormData {
   name: string
   serialNumber: string
   category: string
+  categoryName: string
   brand: string
+  brandName: string
   mount: string
   model: string
+  modelName: string
   isOwned: boolean
   price: number
   frequency: 'hour' | 'day' | 'week' | 'month' | 'year'
@@ -46,33 +49,58 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
 
   const [showSpecsInForm, setShowSpecsInForm] = useState(false)
   const [currentModelSpecs, setCurrentModelSpecs] = useState<any>(null)
+  const pendingModelId = useRef<string | null>(null)
 
   const handleCategoryChange = (catId: string) => {
     const cat = catalogCategories.find(c => c.id === catId)
-    setForm({ ...form, category: catId, brand: '', model: '', mount: '' })
+    setForm(prev => ({
+      ...prev,
+      category: catId,
+      categoryName: cat?.name || '',
+      brand: '',
+      brandName: '',
+      model: '',
+      modelName: '',
+      mount: ''
+    }))
     if (catId) fetchBrands(catId)
   }
 
   const handleBrandChange = (brandId: string) => {
-    setForm({ ...form, brand: brandId, model: '', mount: '' })
+    const brand = catalogBrands.find(b => b.id === brandId)
+    setForm(prev => ({
+      ...prev,
+      brand: brandId,
+      brandName: brand?.name || '',
+      model: '',
+      modelName: '',
+      mount: ''
+    }))
     if (brandId && form.category) fetchCatalogItems(form.category, brandId)
   }
 
   const handleModelChange = async (itemId: string) => {
-    if (itemId) {
-      const item = catalogItems.find(i => i.id === itemId)
-      let specs = item?.specs
+    pendingModelId.current = itemId || null
+    setCurrentModelSpecs(null)
 
-      if (!specs) {
-        specs = await fetchItemSpecs(itemId)
-      }
-
-      setCurrentModelSpecs(specs)
-      setForm(prev => ({ ...prev, model: itemId, specs: specs || {} }))
-    } else {
-      setCurrentModelSpecs(null)
-      setForm(prev => ({ ...prev, model: itemId, specs: {} }))
+    if (!itemId) {
+      setForm(prev => ({ ...prev, model: '', modelName: '', specs: {} }))
+      return
     }
+
+    const item = catalogItems.find(i => i.id === itemId)
+    const resolvedModelName = item?.name || ''
+    setForm(prev => ({ ...prev, model: itemId, modelName: resolvedModelName, specs: {} }))
+    let specs = item?.specs
+
+    if (!specs) {
+      specs = await fetchItemSpecs(itemId)
+    }
+
+    if (pendingModelId.current !== itemId) return
+
+    setCurrentModelSpecs(specs)
+    setForm(prev => ({ ...prev, model: itemId, modelName: resolvedModelName, specs: specs || {} }))
   }
 
   const isValid = form.category && (form.category === 'Other' || form.brand || catalogBrands.length === 0)
@@ -88,7 +116,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
               <Input
                 type="text"
                 value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
                 fullWidth
                 placeholder="E.g. A-Cam, Unit 1..."
               />
@@ -100,7 +128,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
               <Input
                 type="text"
                 value={form.serialNumber}
-                onChange={(e) => setForm({ ...form, serialNumber: e.target.value })}
+                onChange={(e) => setForm(prev => ({ ...prev, serialNumber: e.target.value }))}
                 fullWidth
                 placeholder="S/N: 12345..."
               />
@@ -209,7 +237,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
         <div className="space-y-4">
           <div className={`p-1.5 ${radius.lg} flex gap-1`}>
             <Button
-              onClick={() => setForm({ ...form, isOwned: true })}
+              onClick={() => setForm(prev => ({ ...prev, isOwned: true }))}
               variant={form.isOwned ? 'primary' : 'ghost'}
               size="sm"
               fullWidth
@@ -217,7 +245,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
               Owned Asset
             </Button>
             <Button
-              onClick={() => setForm({ ...form, isOwned: false })}
+              onClick={() => setForm(prev => ({ ...prev, isOwned: false }))}
               variant={!form.isOwned ? 'primary' : 'ghost'}
               size="sm"
               fullWidth
@@ -234,7 +262,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
                   <Input
                     type="number"
                     value={form.price || ''}
-                    onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) })}
+                    onChange={(e) => setForm(prev => ({ ...prev, price: parseFloat(e.target.value) }))}
                     fullWidth
                     placeholder="0.00"
                   />
@@ -246,7 +274,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
                   <div className="relative">
                     <select
                       value={form.frequency}
-                      onChange={(e) => setForm({ ...form, frequency: e.target.value as any })}
+                      onChange={(e) => setForm(prev => ({ ...prev, frequency: e.target.value as any }))}
                       className="w-full appearance-none bg-transparent border-b border-gray-200 dark:border-white/10 py-2 pr-10 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all cursor-pointer text-sm font-semibold"
                     >
                       <option value="hour">Hourly</option>

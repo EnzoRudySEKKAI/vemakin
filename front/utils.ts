@@ -1,7 +1,8 @@
 
 import { TransportMode } from './types.ts';
 
-export const calculateEndTime = (startTime: string, duration: string) => {
+export const calculateEndTime = (startTime: string | null | undefined, duration: string) => {
+ if (!startTime) return '00:00';
  const [hours, minutes] = startTime.split(':').map(Number);
  const durHours = parseFloat(duration.replace('h', ''));
  const totalMinutes = hours * 60 + minutes + Math.round(durHours * 60);
@@ -10,7 +11,8 @@ export const calculateEndTime = (startTime: string, duration: string) => {
  return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
 };
 
-export const timeToMinutes = (timeStr: string) => {
+export const timeToMinutes = (timeStr: string | null | undefined) => {
+ if (!timeStr) return 0;
  const [h, m] = timeStr.split(':').map(Number);
  return h * 60 + m;
 };

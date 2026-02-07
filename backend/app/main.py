@@ -1,11 +1,16 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from .database import get_db, engine
 from .auth import get_current_user
 from .routers import projects, shots, inventory, notes, postprod, catalog
 from .models import models
+import time
+import logging
+
+logger = logging.getLogger(__name__)
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -37,6 +42,76 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# HTTP Caching Middleware
+class CacheControlMiddleware(BaseHTTPMiddleware):
+    """Add appropriate Cache-Control headers based on route and method."""
+
+    # Cache durations in seconds
+    CACHE_CONFIG = {
+        # Catalog data changes rarely
+        "/catalog": 3600,  # 1 hour
+        # Project data can be cached briefly
+        "/projects": 60,  # 1 minute
+        "/shots": 30,  # 30 seconds
+        "/notes": 30,  # 30 seconds
+        "/postprod": 30,  # 30 seconds
+        "/inventory": 60,  # 1 minute
+    }
+
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+
+        # Only cache GET requests
+        if request.method != "GET":
+            response.headers["Cache-Control"] = "no-store"
+            return response
+
+        # Check if route matches any cache config
+        path = request.url.path
+        max_age = None
+
+        for route_prefix, duration in self.CACHE_CONFIG.items():
+            if path.startswith(route_prefix):
+                max_age = duration
+                break
+
+        if max_age:
+            # Add cache headers
+            response.headers["Cache-Control"] = f"private, max-age={max_age}"
+            response.headers["Vary"] = "Authorization"
+        else:
+            # Default: no caching for unmatched routes
+            response.headers["Cache-Control"] = "no-store"
+
+        return response
+
+
+app.add_middleware(CacheControlMiddleware)
+
+
+# Request timing middleware for performance monitoring
+@app.middleware("http")
+async def request_timing_middleware(request: Request, call_next):
+    """Log slow requests for performance monitoring."""
+    start_time = time.time()
+    response = await call_next(request)
+    duration = time.time() - start_time
+
+    # Log slow requests (> 1 second)
+    if duration > 1.0:
+        logger.warning(
+            f"Slow request: {request.method} {request.url.path} took {duration:.2f}s"
+        )
+
+    # Add timing header in development
+    if "X-Request-Time" not in response.headers:
+        response.headers["X-Request-Time"] = f"{duration:.3f}s"
+
+    return response
+
+
 app.include_router(projects.router)
 app.include_router(shots.router)
 app.include_router(inventory.router)

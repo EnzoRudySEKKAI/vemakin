@@ -8,6 +8,8 @@ from sqlalchemy import (
     Text,
     JSON,
     Float,
+    Index,
+    desc,
 )
 from sqlalchemy.orm import relationship
 from .base import Base
@@ -31,9 +33,9 @@ class Project(Base):
     __tablename__ = "projects"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    name = Column(String, index=True)
-    user_id = Column(String(128), ForeignKey("users.id"), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    name = Column(String, nullable=False, index=True)
+    user_id = Column(String(128), ForeignKey("users.id"), nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
 
     owner = relationship("User", back_populates="projects")
     shots = relationship("Shot", back_populates="project", cascade="all, delete-orphan")
@@ -41,6 +43,8 @@ class Project(Base):
     tasks = relationship(
         "PostProdTask", back_populates="project", cascade="all, delete-orphan"
     )
+
+    __table_args__ = (Index("ix_projects_user_created", "user_id", desc("created_at")),)
 
 
 class Shot(Base):
@@ -53,15 +57,17 @@ class Shot(Base):
         UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False, index=True
     )
 
-    title = Column(String)
-    description = Column(Text)
-    status = Column(String)  # 'pending', 'done'
-    start_time = Column(String)  # '08:00'
-    duration = Column(String)  # '2h'
-    location = Column(String)
-    remarks = Column(Text)
-    date = Column(String)
-    scene_number = Column(String)
+    title = Column(String, nullable=False)
+    description = Column(Text, default="")
+    status = Column(
+        String, nullable=False, default="pending", index=True
+    )  # 'pending', 'done'
+    start_time = Column(String, nullable=True)  # '08:00'
+    duration = Column(String, default="1h")  # '2h'
+    location = Column(String, default="")
+    remarks = Column(Text, default="")
+    date = Column(String, nullable=True, index=True)
+    scene_number = Column(String, nullable=True)
 
     # Store lists as simple JSON for simplicity in MVP
     equipment_ids = Column(JSON, default=list)  # List of strings
@@ -70,6 +76,10 @@ class Shot(Base):
     project = relationship("Project", back_populates="shots")
     # Relation to notes if needed, or link via ID
 
+    __table_args__ = (
+        Index("ix_notes_project_updated", "project_id", desc("updated_at")),
+    )
+
 
 class Equipment(Base):
     __tablename__ = "user_inventory"  # Matching the existing table name hint
@@ -77,21 +87,27 @@ class Equipment(Base):
     id = Column(String, primary_key=True, index=True)
     user_id = Column(String(128), ForeignKey("users.id"), nullable=False, index=True)
 
-    name = Column(String)
+    name = Column(String, nullable=False)
     catalog_item_id = Column(
         UUID(as_uuid=True), ForeignKey("gear_catalog.id"), nullable=True, index=True
     )
     custom_name = Column(String, nullable=True)
-    category = Column(String)
+    category = Column(String, nullable=False, default="Other", index=True)
     serial_number = Column(String, nullable=True)
-    price_per_day = Column(Float)
+    price_per_day = Column(Float, default=0.0)
     rental_price = Column(Float, nullable=True)
     rental_frequency = Column(String, nullable=True)
-    quantity = Column(Integer)
+    quantity = Column(Integer, default=1)
     is_owned = Column(Boolean, default=True)
-    status = Column(String)  # 'operational', 'maintenance'
+    status = Column(
+        String, default="operational", index=True
+    )  # 'operational', 'maintenance'
 
     owner = relationship("User", back_populates="inventory")
+
+    __table_args__ = (
+        Index("ix_equipment_user_status_category", "user_id", "status", "category"),
+    )
 
 
 class Note(Base):
@@ -102,15 +118,25 @@ class Note(Base):
         UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False, index=True
     )
 
-    title = Column(String)
-    content = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    title = Column(String, nullable=False)
+    content = Column(Text, default="")
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False,
+        index=True,
+    )
 
-    shot_id = Column(String, nullable=True)  # Optional link to shot
-    task_id = Column(String, nullable=True)  # Optional link to task
+    shot_id = Column(String, nullable=True, index=True)  # Optional link to shot
+    task_id = Column(String, nullable=True, index=True)  # Optional link to task
 
     project = relationship("Project", back_populates="notes")
+
+    __table_args__ = (
+        Index("ix_notes_project_updated", "project_id", desc("updated_at")),
+    )
 
 
 class PostProdTask(Base):
@@ -121,16 +147,32 @@ class PostProdTask(Base):
         UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False, index=True
     )
 
-    category = Column(String)
-    title = Column(String)
-    status = Column(String)
-    priority = Column(String)
-    due_date = Column(String)
+    category = Column(String, default="Editing")
+    title = Column(String, nullable=False)
+    status = Column(
+        String, default="todo", index=True
+    )  # 'todo', 'progress', 'review', 'done'
+    priority = Column(
+        String, default="medium", index=True
+    )  # 'low', 'medium', 'high', 'critical'
+    due_date = Column(String, nullable=True, index=True)
     description = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
 
     project = relationship("Project", back_populates="tasks")
+
+    __table_args__ = (
+        Index(
+            "ix_tasks_project_status_priority",
+            "project_id",
+            "status",
+            "priority",
+            "due_date",
+        ),
+    )
 
 
 # --- Catalog ---
@@ -158,10 +200,14 @@ class GearCatalog(Base):
     category_id = Column(
         UUID(as_uuid=True), ForeignKey("categories.id"), nullable=False, index=True
     )
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False, index=True)
     description = Column(Text)
     image_url = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    __table_args__ = (
+        Index("ix_gear_catalog_category_brand", "category_id", "brand_id"),
+    )
 
     # Individual spec relationships
     camera_specs = relationship(

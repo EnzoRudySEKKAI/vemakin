@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import select, func
 from typing import List
 from ..database import get_db
 from ..models import models
@@ -10,7 +11,7 @@ from ..mock_data import get_mock_db
 router = APIRouter(prefix="/notes", tags=["notes"])
 
 
-@router.get("")
+@router.get("", response_model=schemas.PaginatedNoteResponse)
 def read_notes(
     project_id: str,
     skip: int = 0,
@@ -18,56 +19,73 @@ def read_notes(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
-    # Check if guest mode
+    """Get notes with pagination."""
+    # Guest mode
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
-        # Verify project exists (mock project)
         project = mock_db.get_project(project_id)
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
-        # Return mock notes for the project
         notes = mock_db.list_notes(project_id)
-        return notes[skip : skip + limit]
+        total = len(notes) if notes else 0
+        paginated_notes = notes[skip : skip + limit] if notes else []
+        return {
+            "items": paginated_notes,
+            "total": total,
+            "page": skip // limit + 1 if limit > 0 else 1,
+            "limit": limit,
+            "has_more": skip + limit < total,
+        }
 
-    # Verify project ownership with single query
-    project = (
-        db.query(models.Project)
-        .filter(
-            models.Project.id == project_id,
-            models.Project.user_id == current_user["uid"],
-        )
-        .first()
+    # SQLAlchemy 2.0: Verify project ownership
+    project_stmt = select(models.Project).where(
+        models.Project.id == project_id,
+        models.Project.user_id == current_user["uid"],
     )
-
-    if not project:
+    if not db.execute(project_stmt).scalar_one_or_none():
         raise HTTPException(status_code=404, detail="Project not found")
 
-    notes = (
-        db.query(models.Note)
-        .filter(models.Note.project_id == project_id)
+    # Optimized count using indexed columns
+    count_stmt = (
+        select(func.count())
+        .select_from(models.Note)
+        .where(models.Note.project_id == project_id)
+    )
+    total = db.execute(count_stmt).scalar()
+
+    # Get notes ordered by most recently updated
+    notes_stmt = (
+        select(models.Note)
+        .where(models.Note.project_id == project_id)
+        .order_by(models.Note.updated_at.desc())
         .offset(skip)
         .limit(limit)
-        .all()
     )
+    notes = db.execute(notes_stmt).scalars().all()
 
-    return notes
+    return {
+        "items": notes,
+        "total": total,
+        "page": skip // limit + 1 if limit > 0 else 1,
+        "limit": limit,
+        "has_more": skip + limit < total,
+    }
 
 
-@router.post("")
+@router.post("", response_model=schemas.Note)
 def create_note(
     note: schemas.NoteCreate,
     project_id: str,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
-    # Check if guest mode
+    """Create a new note."""
+    # Guest mode
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
-        # Verify project exists (mock project)
         project = mock_db.get_project(project_id)
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
-        # Create note in mock database
         note_data = {
             "id": note.id,
             "project_id": project_id,
@@ -78,17 +96,12 @@ def create_note(
         }
         return mock_db.create_note(note_data)
 
-    # Verify project ownership
-    project = (
-        db.query(models.Project)
-        .filter(
-            models.Project.id == project_id,
-            models.Project.user_id == current_user["uid"],
-        )
-        .first()
+    # SQLAlchemy 2.0: Verify project ownership
+    project_stmt = select(models.Project).where(
+        models.Project.id == project_id,
+        models.Project.user_id == current_user["uid"],
     )
-
-    if not project:
+    if not db.execute(project_stmt).scalar_one_or_none():
         raise HTTPException(status_code=404, detail="Project not found")
 
     db_note = models.Note(
@@ -112,31 +125,33 @@ def update_note(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
-    # Check if guest mode
+    """Update a note with ownership verification."""
+    # Guest mode
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
-        # Update note in mock database
         update_data = {
             "title": note_update.title,
             "content": note_update.content,
             "shot_id": note_update.shotId,
             "task_id": note_update.taskId,
         }
-        # Remove None values
         update_data = {k: v for k, v in update_data.items() if v is not None}
         updated_note = mock_db.update_note(note_id, update_data)
         if not updated_note:
             raise HTTPException(status_code=404, detail="Note not found")
         return updated_note
 
-    note = (
-        db.query(models.Note)
+    # SQLAlchemy 2.0: JOIN for ownership verification
+    stmt = (
+        select(models.Note)
         .join(models.Project)
-        .filter(
-            models.Note.id == note_id, models.Project.user_id == current_user["uid"]
+        .where(
+            models.Note.id == note_id,
+            models.Project.user_id == current_user["uid"],
         )
-        .first()
     )
+    result = db.execute(stmt)
+    note = result.scalar_one_or_none()
 
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")
@@ -157,23 +172,26 @@ def delete_note(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
-    # Check if guest mode
+    """Delete a note with ownership verification."""
+    # Guest mode
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
-        # Delete note from mock database
         deleted = mock_db.delete_note(note_id)
         if not deleted:
             raise HTTPException(status_code=404, detail="Note not found")
         return None
 
-    note = (
-        db.query(models.Note)
+    # SQLAlchemy 2.0: JOIN for ownership verification
+    stmt = (
+        select(models.Note)
         .join(models.Project)
-        .filter(
-            models.Note.id == note_id, models.Project.user_id == current_user["uid"]
+        .where(
+            models.Note.id == note_id,
+            models.Project.user_id == current_user["uid"],
         )
-        .first()
     )
+    result = db.execute(stmt)
+    note = result.scalar_one_or_none()
 
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")

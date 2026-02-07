@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import select, func, over
 from typing import List
 from ..database import get_db
 from ..models import models
@@ -14,7 +15,7 @@ router = APIRouter(
 )
 
 
-@router.get("")
+@router.get("", response_model=schemas.PaginatedShotResponse)
 def read_shots(
     project_id: str,
     skip: int = 0,
@@ -22,43 +23,67 @@ def read_shots(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
+    """Get shots with pagination and ownership verification."""
     # Guest mode: return mock shots
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
         shots = mock_db.list_shots(project_id)
-        return shots[skip : skip + limit] if shots else []
+        total = len(shots) if shots else 0
+        paginated_shots = shots[skip : skip + limit] if shots else []
+        return {
+            "items": paginated_shots,
+            "total": total,
+            "page": skip // limit + 1 if limit > 0 else 1,
+            "limit": limit,
+            "has_more": skip + limit < total,
+        }
 
-    # Normal mode: verify project ownership and query database
-    project_exists = (
-        db.query(models.Project)
-        .filter(
-            models.Project.id == project_id,
-            models.Project.user_id == current_user["uid"],
-        )
-        .first()
+    # SQLAlchemy 2.0: Verify project ownership with single query
+    project_stmt = select(models.Project).where(
+        models.Project.id == project_id,
+        models.Project.user_id == current_user["uid"],
     )
-
-    if not project_exists:
+    project_result = db.execute(project_stmt)
+    if not project_result.scalar_one_or_none():
         raise HTTPException(status_code=404, detail="Project not found")
 
-    shots = (
-        db.query(models.Shot)
-        .filter(models.Shot.project_id == project_id)
+    # Optimized: Get total count and shots in efficient queries
+    # Using indexed columns for fast counting
+    count_stmt = (
+        select(func.count())
+        .select_from(models.Shot)
+        .where(models.Shot.project_id == project_id)
+    )
+    total = db.execute(count_stmt).scalar()
+
+    # Get shots with ordering for consistent results
+    shots_stmt = (
+        select(models.Shot)
+        .where(models.Shot.project_id == project_id)
+        .order_by(models.Shot.date.desc(), models.Shot.start_time.asc())
         .offset(skip)
         .limit(limit)
-        .all()
     )
+    shots_result = db.execute(shots_stmt)
+    shots = shots_result.scalars().all()
 
-    return shots
+    return {
+        "items": shots,
+        "total": total,
+        "page": skip // limit + 1 if limit > 0 else 1,
+        "limit": limit,
+        "has_more": skip + limit < total,
+    }
 
 
-@router.post("")
+@router.post("", response_model=schemas.Shot)
 def create_shot(
     shot: schemas.ShotCreate,
     project_id: str,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
+    """Create a new shot."""
     # Guest mode: create in mock database
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -76,17 +101,13 @@ def create_shot(
         new_shot = mock_db.create_shot(shot_data)
         return new_shot
 
-    # Normal mode: verify project ownership
-    project = (
-        db.query(models.Project)
-        .filter(
-            models.Project.id == project_id,
-            models.Project.user_id == current_user["uid"],
-        )
-        .first()
+    # SQLAlchemy 2.0: Verify project ownership
+    project_stmt = select(models.Project).where(
+        models.Project.id == project_id,
+        models.Project.user_id == current_user["uid"],
     )
-
-    if not project:
+    project_result = db.execute(project_stmt)
+    if not project_result.scalar_one_or_none():
         raise HTTPException(status_code=404, detail="Project not found")
 
     db_shot = models.Shot(
@@ -117,6 +138,7 @@ def update_shot(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
+    """Update a shot with ownership verification via JOIN."""
     # Guest mode: update in mock database
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -134,15 +156,17 @@ def update_shot(
             raise HTTPException(status_code=404, detail="Shot not found")
         return updated
 
-    # Normal mode: update real database
-    shot = (
-        db.query(models.Shot)
+    # SQLAlchemy 2.0: JOIN for ownership verification in single query
+    stmt = (
+        select(models.Shot)
         .join(models.Project)
-        .filter(
-            models.Shot.id == shot_id, models.Project.user_id == current_user["uid"]
+        .where(
+            models.Shot.id == shot_id,
+            models.Project.user_id == current_user["uid"],
         )
-        .first()
     )
+    result = db.execute(stmt)
+    shot = result.scalar_one_or_none()
 
     if not shot:
         raise HTTPException(status_code=404, detail="Shot not found")
@@ -170,6 +194,7 @@ def delete_shot(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
+    """Delete a shot with ownership verification via JOIN."""
     # Guest mode: delete from mock database
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -178,15 +203,17 @@ def delete_shot(
             raise HTTPException(status_code=404, detail="Shot not found")
         return None
 
-    # Normal mode: delete from real database
-    shot = (
-        db.query(models.Shot)
+    # SQLAlchemy 2.0: JOIN for ownership verification in single query
+    stmt = (
+        select(models.Shot)
         .join(models.Project)
-        .filter(
-            models.Shot.id == shot_id, models.Project.user_id == current_user["uid"]
+        .where(
+            models.Shot.id == shot_id,
+            models.Project.user_id == current_user["uid"],
         )
-        .first()
     )
+    result = db.execute(stmt)
+    shot = result.scalar_one_or_none()
 
     if not shot:
         raise HTTPException(status_code=404, detail="Shot not found")

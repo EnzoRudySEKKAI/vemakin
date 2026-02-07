@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import select, func
 from typing import List
 from ..database import get_db
 from ..models import models
@@ -21,20 +22,23 @@ def read_projects(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
+    """Get list of projects with pagination."""
     # Guest mode: return mock project
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
         projects = mock_db.list_projects()
         return projects[skip : skip + limit] if projects else []
 
-    # Normal mode: query real database
-    projects = (
-        db.query(models.Project)
-        .filter(models.Project.user_id == current_user["uid"])
+    # Normal mode: query real database with SQLAlchemy 2.0 style
+    stmt = (
+        select(models.Project)
+        .where(models.Project.user_id == current_user["uid"])
+        .order_by(models.Project.created_at.desc())
         .offset(skip)
         .limit(limit)
-        .all()
     )
+    result = db.execute(stmt)
+    projects = result.scalars().all()
     return projects
 
 
@@ -44,6 +48,7 @@ def create_project(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
+    """Create a new project."""
     # Guest mode: update mock project name (only one project in guest mode)
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -72,6 +77,7 @@ def update_project(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
+    """Update a project."""
     # Guest mode: update mock project
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -80,15 +86,14 @@ def update_project(
             raise HTTPException(status_code=404, detail="Project not found")
         return updated
 
-    # Normal mode: update real database
-    project = (
-        db.query(models.Project)
-        .filter(
-            models.Project.id == project_id,
-            models.Project.user_id == current_user["uid"],
-        )
-        .first()
+    # Normal mode: update real database with SQLAlchemy 2.0 style
+    stmt = select(models.Project).where(
+        models.Project.id == project_id,
+        models.Project.user_id == current_user["uid"],
     )
+    result = db.execute(stmt)
+    project = result.scalar_one_or_none()
+
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
@@ -104,6 +109,7 @@ def delete_project(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
+    """Delete a project."""
     # Guest mode: reset mock project (can't really delete the only project)
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -111,15 +117,14 @@ def delete_project(
         mock_db.update_project(project_id, {"name": "Mon Premier Film"})
         return None
 
-    # Normal mode: delete from real database
-    project = (
-        db.query(models.Project)
-        .filter(
-            models.Project.id == project_id,
-            models.Project.user_id == current_user["uid"],
-        )
-        .first()
+    # Normal mode: delete from real database with SQLAlchemy 2.0 style
+    stmt = select(models.Project).where(
+        models.Project.id == project_id,
+        models.Project.user_id == current_user["uid"],
     )
+    result = db.execute(stmt)
+    project = result.scalar_one_or_none()
+
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 

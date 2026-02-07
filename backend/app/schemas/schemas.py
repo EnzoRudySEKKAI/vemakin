@@ -3,18 +3,23 @@ from typing import List, Optional, Any, Dict
 from datetime import datetime
 import uuid
 
+
 # --- User ---
 class UserBase(BaseModel):
     email: str
     name: Optional[str] = None
 
+
 class UserCreate(UserBase):
-    id: str # UID from Firebase
+    id: str  # UID from Firebase
+
 
 class User(UserBase):
     id: str
+
     class Config:
         from_attributes = True
+
 
 # --- Equipment ---
 class EquipmentBase(BaseModel):
@@ -31,12 +36,15 @@ class EquipmentBase(BaseModel):
     isOwned: bool
     status: str
 
+
 class EquipmentCreate(EquipmentBase):
     pass
+
 
 class Equipment(EquipmentBase):
     class Config:
         from_attributes = True
+
 
 # --- Shot ---
 class ShotBase(BaseModel):
@@ -44,22 +52,26 @@ class ShotBase(BaseModel):
     title: str
     description: str
     status: str
-    startTime: str
+    startTime: Optional[str] = None
     duration: str
     location: str
     remarks: Optional[str] = None
     date: str
-    sceneNumber: str
+    sceneNumber: Optional[str] = None
     equipmentIds: List[str] = []
     preparedEquipmentIds: List[str] = []
+
 
 class ShotCreate(ShotBase):
     pass
 
+
 class Shot(ShotBase):
     project_id: uuid.UUID
+
     class Config:
         from_attributes = True
+
 
 # --- PostProdTask ---
 class PostProdTaskBase(BaseModel):
@@ -71,23 +83,28 @@ class PostProdTaskBase(BaseModel):
     dueDate: Optional[str] = None
     description: Optional[str] = None
 
+
 class PostProdTaskCreate(PostProdTaskBase):
     pass
+
 
 class PostProdTask(PostProdTaskBase):
     project_id: uuid.UUID
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
+
 
 # --- Project ---
 class ProjectBase(BaseModel):
     name: str
 
+
 class ProjectCreate(ProjectBase):
     pass
+
 
 class Project(ProjectBase):
     id: uuid.UUID
@@ -96,9 +113,10 @@ class Project(ProjectBase):
     shots: List[Shot] = []
     # notes: List[Note] = []
     # tasks: List[PostProdTask] = []
-    
+
     class Config:
         from_attributes = True
+
 
 # --- Note ---
 class NoteBase(BaseModel):
@@ -108,35 +126,45 @@ class NoteBase(BaseModel):
     shotId: Optional[str] = None
     taskId: Optional[str] = None
 
+
 class NoteCreate(NoteBase):
     pass
+
 
 class Note(NoteBase):
     project_id: uuid.UUID
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 
+
 # --- Catalog ---
+
 
 class BrandBase(BaseModel):
     name: str
 
+
 class Brand(BrandBase):
     id: uuid.UUID
+
     class Config:
         from_attributes = True
+
 
 class CategoryBase(BaseModel):
     name: str
     slug: str
 
+
 class Category(CategoryBase):
     id: uuid.UUID
+
     class Config:
         from_attributes = True
+
 
 class GearCatalogBase(BaseModel):
     brand_id: uuid.UUID
@@ -146,8 +174,46 @@ class GearCatalogBase(BaseModel):
     image_url: Optional[str] = None
     specs: Dict[str, Any] = {}
 
+
 class GearCatalog(GearCatalogBase):
     id: uuid.UUID
     created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# --- Pagination ---
+
+
+class PaginatedShotResponse(BaseModel):
+    items: List[Shot]
+    total: int
+    page: int
+    limit: int
+    has_more: bool
+
+    class Config:
+        from_attributes = True
+
+
+class PaginatedNoteResponse(BaseModel):
+    items: List[Note]
+    total: int
+    page: int
+    limit: int
+    has_more: bool
+
+    class Config:
+        from_attributes = True
+
+
+class PaginatedTaskResponse(BaseModel):
+    items: List[PostProdTask]
+    total: int
+    page: int
+    limit: int
+    has_more: bool
+
     class Config:
         from_attributes = True

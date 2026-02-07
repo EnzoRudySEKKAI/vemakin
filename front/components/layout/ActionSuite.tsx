@@ -113,9 +113,12 @@ export const ActionSuite: React.FC<ActionSuiteProps> = ({
     name: '',
     serialNumber: '',
     category: '',
+    categoryName: '',
     brand: '',
+    brandName: '',
     mount: '',
     model: '',
+    modelName: '',
     isOwned: true,
     price: 0,
     frequency: 'day' as 'hour' | 'day' | 'week' | 'month' | 'year',
@@ -208,7 +211,7 @@ export const ActionSuite: React.FC<ActionSuiteProps> = ({
 
   const handleCommitGear = () => {
     const newId = `e-${Date.now()}`
-    const modelName = gearForm.model || gearForm.brand || gearForm.category || 'New Equipment'
+    const modelName = gearForm.modelName || gearForm.brandName || gearForm.categoryName || 'New Equipment'
 
     const newEquipment: Equipment = {
       id: newId,

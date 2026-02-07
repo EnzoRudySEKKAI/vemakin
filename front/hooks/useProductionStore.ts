@@ -9,6 +9,37 @@ import { auth } from '../firebase';
 import { onAuthStateChanged, signOut, User as FirebaseUser } from 'firebase/auth';
 import api from '../api/client';
 
+const toNullableString = (value?: string | null) => {
+  if (value === undefined || value === null) return null
+  const trimmed = typeof value === 'string' ? value.trim() : value
+  return trimmed ? trimmed : null
+}
+
+const toNullableUuid = (value?: string | null) => {
+  if (!value) return null
+  const trimmed = value.trim()
+  if (!trimmed) return null
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)
+    ? trimmed
+    : null
+}
+
+const buildEquipmentPayload = (gear: Equipment) => ({
+  id: gear.id,
+  name: gear.name,
+  catalogItemId: toNullableUuid(gear.catalogItemId || null),
+  customName: toNullableString(gear.customName),
+  serialNumber: toNullableString(gear.serialNumber),
+  category: gear.category,
+  pricePerDay: gear.pricePerDay,
+  rentalPrice: gear.rentalPrice ?? null,
+  rentalFrequency: toNullableString(gear.rentalFrequency),
+  quantity: gear.quantity,
+  isOwned: gear.isOwned,
+  status: gear.status || 'operational',
+  specs: gear.specs || {}
+})
+
 export interface ProjectState {
   id?: string;
   shots: Shot[];
@@ -287,7 +318,12 @@ export const useStore = create<ProductionStore>((set, get) => ({
         api.get(`/postprod?project_id=${projectState.id}`)
       ]);
 
-      const fetchedShots: Shot[] = shotsRes.data.map((s: any) => ({
+      // Handle paginated responses - extract items array
+      const shotsData = shotsRes.data.items || shotsRes.data;
+      const notesData = notesRes.data.items || notesRes.data;
+      const tasksData = tasksRes.data.items || tasksRes.data;
+
+      const fetchedShots: Shot[] = shotsData.map((s: any) => ({
         id: s.id,
         title: s.title,
         description: s.description,
@@ -302,7 +338,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
         preparedEquipmentIds: s.prepared_equipment_ids || []
       }));
 
-      const fetchedNotes: Note[] = notesRes.data.map((n: any) => ({
+      const fetchedNotes: Note[] = notesData.map((n: any) => ({
         id: n.id,
         title: n.title,
         content: n.content,
@@ -311,7 +347,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
         taskId: n.task_id
       }));
 
-      const fetchedTasks: PostProdTask[] = tasksRes.data.map((t: any) => ({
+      const fetchedTasks: PostProdTask[] = tasksData.map((t: any) => ({
         id: t.id,
         category: t.category,
         title: t.title,
@@ -516,21 +552,21 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
   addGear: async (gear) => {
     try {
-      const resp = await api.post('/inventory', gear);
-      set((state) => ({ allInventory: [resp.data, ...state.allInventory] }));
+      const resp = await api.post('/inventory', buildEquipmentPayload(gear))
+      set((state) => ({ allInventory: [resp.data, ...state.allInventory] }))
     } catch (e) {
-      console.error("Failed to add gear", e);
+      console.error("Failed to add gear", e)
     }
   },
 
   updateGear: async (gear) => {
     try {
-      const resp = await api.patch(`/inventory/${gear.id}`, gear);
+      const resp = await api.patch(`/inventory/${gear.id}`, buildEquipmentPayload(gear))
       set((state) => ({
         allInventory: state.allInventory.map(item => item.id === gear.id ? resp.data : item)
-      }));
+      }))
     } catch (e) {
-      console.error("Failed to update gear", e);
+      console.error("Failed to update gear", e)
     }
   },
 

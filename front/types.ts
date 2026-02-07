@@ -175,3 +175,27 @@ export interface CatalogItem {
     image_url?: string;
     specs?: Record<string, any>;
 }
+
+// Pagination types
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+  cursor?: string;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+  nextCursor?: string;
+}
+
+// Project type
+export interface Project {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}

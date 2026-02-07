@@ -16,16 +16,21 @@ export const GearFormPage: React.FC<GearFormPageProps> = ({
   onSubmit
 }) => {
   const {
-    fetchCatalogCategories
+    fetchCatalogCategories,
+    catalogBrands,
+    catalogItems
   } = useProductionStore();
 
   const [form, setForm] = useState<GearFormData>({
     name: '',
     serialNumber: '',
     category: '',
+    categoryName: '',
     brand: '',
+    brandName: '',
     mount: '',
     model: '',
+    modelName: '',
     isOwned: true,
     price: 0,
     frequency: 'day',
@@ -40,7 +45,7 @@ export const GearFormPage: React.FC<GearFormPageProps> = ({
 
   const handleSubmit = () => {
     const newId = `e-${Date.now()}`;
-    const modelName = form.model || form.brand || form.category || 'New Equipment';
+    const modelName = form.modelName || form.brandName || form.categoryName || 'New Equipment';
 
     const newEquipment: Equipment = {
       id: newId,
@@ -62,7 +67,8 @@ export const GearFormPage: React.FC<GearFormPageProps> = ({
     onClose();
   };
 
-  const isValid = form.category && (form.category === 'Other' || form.brand);
+  const requiresModel = form.category !== 'Other' && !!form.brand && catalogItems.length > 0
+  const isValid = !!form.category && (form.category === 'Other' || form.brand || catalogBrands.length === 0) && (!requiresModel || !!form.model)
 
   return (
     <FormLayout
