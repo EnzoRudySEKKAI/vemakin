@@ -526,13 +526,13 @@ MOCK_POSTPROD_TASKS = [
 # =============================================================================
 
 MOCK_CATALOG_CATEGORIES = [
-    {"id": "cat-001", "name": "Camera", "icon": "camera"},
-    {"id": "cat-002", "name": "Lens", "icon": "aperture"},
-    {"id": "cat-003", "name": "Audio", "icon": "mic"},
-    {"id": "cat-004", "name": "Lighting", "icon": "light"},
-    {"id": "cat-005", "name": "Stabilizer", "icon": "gimbal"},
-    {"id": "cat-006", "name": "Drone", "icon": "drone"},
-    {"id": "cat-007", "name": "Accessories", "icon": "package"},
+    {"id": "cat-001", "name": "Camera", "slug": "camera", "icon": "camera"},
+    {"id": "cat-002", "name": "Lens", "slug": "lens", "icon": "aperture"},
+    {"id": "cat-003", "name": "Audio", "slug": "audio", "icon": "mic"},
+    {"id": "cat-004", "name": "Lighting", "slug": "lighting", "icon": "light"},
+    {"id": "cat-005", "name": "Stabilizer", "slug": "stabilizer", "icon": "gimbal"},
+    {"id": "cat-006", "name": "Drone", "slug": "drone", "icon": "drone"},
+    {"id": "cat-007", "name": "Accessories", "slug": "accessories", "icon": "package"},
 ]
 
 MOCK_CATALOG_BRANDS = [

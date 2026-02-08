@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional, Any, Dict
+from typing import List, Optional, Any, Dict, Union
 from datetime import datetime
 import uuid
 
@@ -148,7 +148,7 @@ class BrandBase(BaseModel):
 
 
 class Brand(BrandBase):
-    id: uuid.UUID
+    id: Union[str, uuid.UUID]
 
     class Config:
         from_attributes = True
@@ -160,15 +160,15 @@ class CategoryBase(BaseModel):
 
 
 class Category(CategoryBase):
-    id: uuid.UUID
+    id: Union[str, uuid.UUID]
 
     class Config:
         from_attributes = True
 
 
 class GearCatalogBase(BaseModel):
-    brand_id: uuid.UUID
-    category_id: uuid.UUID
+    brand_id: Union[str, uuid.UUID]
+    category_id: Union[str, uuid.UUID]
     name: str
     description: Optional[str] = None
     image_url: Optional[str] = None
@@ -176,7 +176,7 @@ class GearCatalogBase(BaseModel):
 
 
 class GearCatalog(GearCatalogBase):
-    id: uuid.UUID
+    id: Union[str, uuid.UUID]
     created_at: datetime
 
     class Config:
