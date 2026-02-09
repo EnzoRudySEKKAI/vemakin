@@ -27,18 +27,18 @@ export const EquipmentDetailRoute = () => {
     return (
         <EquipmentDetailView
             item={item}
-            onClose={() => ctx.navigate('/inventory')}
+            onClose={() => ctx.navigate('/dashboard/inventory')}
             projectData={ctx.projectData}
             involvedProjects={involvedProjects}
             onNavigateToShot={(projectName, shotId) => {
                 ctx.setCurrentProject(projectName)
-                ctx.navigate(`/shots/${shotId}`)
+                ctx.navigate(`/dashboard/shots/${shotId}`)
             }}
             currency={ctx.currency}
             onUpdate={ctx.updateGear}
             onDelete={(id) => {
                 ctx.deleteGear(id)
-                ctx.navigate('/inventory')
+                ctx.navigate('/dashboard/inventory')
             }}
         />
     )

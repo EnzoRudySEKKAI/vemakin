@@ -12,10 +12,10 @@ export const ShotsRoute = () => {
             shotLayout={ctx.shotLayout}
             searchQuery={ctx.shotSearchQuery}
             statusFilter={ctx.shotStatusFilter as any}
-            onShotClick={(s) => ctx.navigate(`/shots/${s.id}`)}
+            onShotClick={(s) => ctx.navigate(`/dashboard/shots/${s.id}`)}
             onToggleStatus={ctx.toggleShotStatus}
             onToggleEquipment={ctx.toggleEquipmentStatus}
-            onAddShot={() => ctx.navigate('/shots/new')}
+            onAddShot={() => ctx.navigate('/dashboard/shots/new')}
             onDateInView={ctx.setActiveDate}
             inventory={ctx.allInventory}
         />

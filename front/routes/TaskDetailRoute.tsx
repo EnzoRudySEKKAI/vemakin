@@ -21,14 +21,14 @@ export const TaskDetailRoute = () => {
         <TaskDetailView
             task={task}
             notes={ctx.activeData.notes}
-            onClose={() => ctx.navigate('/pipeline')}
+            onClose={() => ctx.navigate('/dashboard/pipeline')}
             onUpdateTask={ctx.updateTask}
             onDeleteTask={(id) => {
                 ctx.deleteTask(id)
-                ctx.navigate('/pipeline')
+                ctx.navigate('/dashboard/pipeline')
             }}
             onAddNote={() => ctx.handleOpenActionSuite({ view: 'note', link: { type: 'task', id: id! } })}
-            onOpenNote={(noteId) => ctx.navigate(`/notes/${noteId}`)}
+            onOpenNote={(noteId) => ctx.navigate(`/dashboard/notes/${noteId}`)}
         />
     )
 }

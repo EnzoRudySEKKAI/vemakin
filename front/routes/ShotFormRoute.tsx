@@ -7,17 +7,17 @@ export const ShotFormRoute = () => {
 
     const handleSwitchForm = (formType: 'gear' | 'shot' | 'task' | 'note') => {
         const paths = {
-            gear: '/inventory/new',
-            shot: '/shots/new',
-            task: '/pipeline/new',
-            note: '/notes/new'
+            gear: '/dashboard/inventory/new',
+            shot: '/dashboard/shots/new',
+            task: '/dashboard/pipeline/new',
+            note: '/dashboard/notes/new'
         }
         ctx.navigate(paths[formType])
     }
 
     return (
         <ShotFormPage
-            onClose={() => ctx.navigate('/shots')}
+            onClose={() => ctx.navigate('/dashboard/shots')}
             onSwitchForm={handleSwitchForm}
             onSubmit={ctx.addShot}
             inventory={ctx.allInventory}

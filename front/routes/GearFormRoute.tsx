@@ -7,17 +7,17 @@ export const GearFormRoute = () => {
 
     const handleSwitchForm = (formType: 'gear' | 'shot' | 'task' | 'note') => {
         const paths = {
-            gear: '/inventory/new',
-            shot: '/shots/new',
-            task: '/pipeline/new',
-            note: '/notes/new'
+            gear: '/dashboard/inventory/new',
+            shot: '/dashboard/shots/new',
+            task: '/dashboard/pipeline/new',
+            note: '/dashboard/notes/new'
         }
         ctx.navigate(paths[formType])
     }
 
     return (
         <GearFormPage
-            onClose={() => ctx.navigate('/inventory')}
+            onClose={() => ctx.navigate('/dashboard/inventory')}
             onSwitchForm={handleSwitchForm}
             onSubmit={ctx.addGear}
         />

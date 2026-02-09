@@ -9,11 +9,11 @@ export const InventoryRoute = () => {
         <InventoryView
             inventory={ctx.allInventory}
             shots={ctx.activeData.shots}
-            onEquipmentClick={(id) => ctx.navigate(`/inventory/${id}`)}
+            onEquipmentClick={(id) => ctx.navigate(`/dashboard/inventory/${id}`)}
             filters={ctx.inventoryFilters}
             currency={ctx.currency}
             layout={ctx.inventoryLayout}
-            onAddEquipment={() => ctx.navigate('/inventory/new')}
+            onAddEquipment={() => ctx.navigate('/dashboard/inventory/new')}
         />
     )
 }

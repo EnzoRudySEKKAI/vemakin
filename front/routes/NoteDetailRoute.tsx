@@ -22,14 +22,14 @@ export const NoteDetailRoute = () => {
             note={note}
             shots={ctx.activeData.shots}
             tasks={ctx.activeData.tasks}
-            onClose={() => ctx.navigate('/notes')}
+            onClose={() => ctx.navigate('/dashboard/notes')}
             onUpdateNote={ctx.updateNote}
             onDeleteNote={(id) => {
                 ctx.deleteNote(id)
-                ctx.navigate('/notes')
+                ctx.navigate('/dashboard/notes')
             }}
-            onNavigateToShot={(shotId) => ctx.navigate(`/shots/${shotId}`)}
-            onNavigateToTask={(taskId) => ctx.navigate(`/pipeline/${taskId}`)}
+            onNavigateToShot={(shotId) => ctx.navigate(`/dashboard/shots/${shotId}`)}
+            onNavigateToTask={(taskId) => ctx.navigate(`/dashboard/pipeline/${taskId}`)}
         />
     )
 }

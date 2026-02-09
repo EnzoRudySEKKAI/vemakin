@@ -199,13 +199,13 @@ const RootLayoutInner = () => {
         if (mainView === 'settings' || mainView === 'manage-projects') {
             handleOpenActionSuite({ view: 'project' })
         } else if (mainView === 'inventory' || mainView === 'equipment-detail') {
-            navigate('/inventory/new')
+            navigate('/dashboard/inventory/new')
         } else if (mainView === 'postprod' || mainView === 'task-detail') {
-            navigate('/pipeline/new')
+            navigate('/dashboard/pipeline/new')
         } else if (mainView === 'notes' || mainView === 'note-detail') {
-            navigate('/notes/new')
+            navigate('/dashboard/notes/new')
         } else {
-            navigate('/shots/new')
+            navigate('/dashboard/shots/new')
         }
     }, [mainView, handleOpenActionSuite, navigate])
 

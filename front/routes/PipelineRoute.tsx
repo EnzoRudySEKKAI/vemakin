@@ -8,9 +8,9 @@ export const PipelineRoute = () => {
     return (
         <PostProdView
             tasks={ctx.activePostProdTasks}
-            onAddTask={() => ctx.navigate('/pipeline/new')}
+            onAddTask={() => ctx.navigate('/dashboard/pipeline/new')}
             onUpdateTask={ctx.updateTask}
-            onSelectTask={(id) => ctx.navigate(`/pipeline/${id}`)}
+            onSelectTask={(id) => ctx.navigate(`/dashboard/pipeline/${id}`)}
             filters={ctx.postProdFilters}
             layout={ctx.postProdLayout}
         />

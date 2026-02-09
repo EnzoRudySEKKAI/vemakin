@@ -20,15 +20,15 @@ export const OverviewRoute = () => {
             onAddClick={() => ctx.handleOpenActionSuite({ view: 'shot' })}
             onNavigateToShot={(s) => {
                 ctx.setActiveDate(s.date)
-                ctx.navigate(`/shots/${s.id}`)
+                ctx.navigate(`/dashboard/shots/${s.id}`)
             }}
-            onNavigateToShotsView={() => ctx.navigate('/shots')}
-            onNavigateToInventory={() => ctx.navigate('/inventory')}
-            onNavigateToPostProd={() => ctx.navigate('/pipeline')}
-            onNavigateToNotes={() => ctx.navigate('/notes')}
-            onNavigateToSettings={() => ctx.navigate('/settings')}
-            onSelectTask={(id) => ctx.navigate(`/pipeline/${id}`)}
-            onSelectNote={(id) => ctx.navigate(`/notes/${id}`)}
+            onNavigateToShotsView={() => ctx.navigate('/dashboard/shots')}
+            onNavigateToInventory={() => ctx.navigate('/dashboard/inventory')}
+            onNavigateToPostProd={() => ctx.navigate('/dashboard/pipeline')}
+            onNavigateToNotes={() => ctx.navigate('/dashboard/notes')}
+            onNavigateToSettings={() => ctx.navigate('/dashboard/settings')}
+            onSelectTask={(id) => ctx.navigate(`/dashboard/pipeline/${id}`)}
+            onSelectNote={(id) => ctx.navigate(`/dashboard/notes/${id}`)}
         />
     )
 }

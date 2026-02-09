@@ -22,13 +22,13 @@ export const ShotDetailRoute = () => {
             selectedShot={selectedShot}
             allShots={ctx.activeData.shots}
             notes={ctx.activeData.notes}
-            onClose={() => ctx.navigate('/shots')}
+            onClose={() => ctx.navigate('/dashboard/shots')}
             onToggleStatus={ctx.toggleShotStatus}
             onToggleEquipment={ctx.toggleEquipmentStatus}
             onUpdateShot={ctx.updateShot}
             onDeleteShot={(id) => {
                 ctx.deleteShot(id)
-                ctx.navigate('/shots')
+                ctx.navigate('/dashboard/shots')
             }}
             onRetakeShot={(id, newDate, newTime) => {
                 const original = ctx.activeData.shots.find(s => s.id === id)
@@ -49,7 +49,7 @@ export const ShotDetailRoute = () => {
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             } as any)}
-            onOpenNote={(noteId) => ctx.navigate(`/notes/${noteId}`)}
+            onOpenNote={(noteId) => ctx.navigate(`/dashboard/notes/${noteId}`)}
             inventory={ctx.allInventory}
             currency={ctx.currency}
         />

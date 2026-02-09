@@ -11,13 +11,13 @@ export const NotesRoute = () => {
             notes={ctx.activeData.notes}
             tasks={ctx.activeData.tasks}
             isAdding={false}
-            setIsAdding={() => ctx.navigate('/notes/new')}
+            setIsAdding={() => ctx.navigate('/dashboard/notes/new')}
             onAddNote={() => { }}
             onUpdateNote={ctx.updateNote}
             onDeleteNote={ctx.deleteNote}
-            onSelectShot={(id) => ctx.navigate(`/shots/${id}`)}
-            onSelectNote={(id) => ctx.navigate(`/notes/${id}`)}
-            onSelectTask={(id) => ctx.navigate(`/pipeline/${id}`)}
+            onSelectShot={(id) => ctx.navigate(`/dashboard/shots/${id}`)}
+            onSelectNote={(id) => ctx.navigate(`/dashboard/notes/${id}`)}
+            onSelectTask={(id) => ctx.navigate(`/dashboard/pipeline/${id}`)}
             filters={ctx.notesFilters}
             layout={ctx.notesLayout}
         />

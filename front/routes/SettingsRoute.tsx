@@ -10,7 +10,7 @@ export const SettingsRoute = () => {
             user={ctx.currentUser}
             onLogin={() => { }} // Handled by auth flow
             onLogout={ctx.logout}
-            onNavigateToProjects={() => ctx.navigate('/projects')}
+            onNavigateToProjects={() => ctx.navigate('/dashboard/projects')}
             onOpenNews={ctx.showNews}
             onOpenTutorial={ctx.showTutorial}
         />
