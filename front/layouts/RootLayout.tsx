@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, Suspense } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { InventoryFilters, Currency, InventoryLayout, PostProdFilters, MainView } from '@/types'
+import { InventoryFilters, Currency, InventoryLayout, PostProdFilters, MainView, NotesFilters } from '@/types'
 import { CURRENCIES } from '@/constants'
 import { Header } from '@/components/layout/Header'
 import { Navigation } from '@/components/layout/Navigation'
@@ -125,8 +125,8 @@ const RootLayoutInner = () => {
     // Detect if we're on a detail page or form page
     const isDetailPage = mainView.includes('-detail')
     const hideNavigationViews = [
-        'shot-detail', 'equipment-detail', 'note-detail', 'task-detail',
-        'new-shot', 'new-gear', 'new-task', 'new-note',
+        // 'shot-detail', 'equipment-detail', 'note-detail', 'task-detail',
+        // 'new-shot', 'new-gear', 'new-task', 'new-note',
         'settings', 'manage-projects'
     ]
     const shouldHideNavigation = hideNavigationViews.includes(mainView)
@@ -218,6 +218,29 @@ const RootLayoutInner = () => {
         setPostProdFilters(prev => ({ ...prev, ...filters }))
     }, [setPostProdFilters])
 
+    const handleSetNotesFilters = useCallback((filters: Partial<NotesFilters>) => {
+        setNotesFilters(prev => ({ ...prev, ...filters }))
+    }, [setNotesFilters])
+
+    const handleToggleNotesSort = useCallback(() => {
+        setNotesFilters(prev => {
+            const sorts: NotesFilters['sortBy'][] = ['updated', 'created', 'alpha']
+            const currentIndex = sorts.indexOf(prev.sortBy || 'updated')
+            const nextIndex = (currentIndex + 1) % sorts.length
+            const nextSort = sorts[nextIndex]
+
+            // Also toggle direction if it's the same sort, but for now we just cycle sorts
+            // and default to desc for dates and asc for alpha
+            const nextDir = nextSort === 'alpha' ? 'asc' : 'desc'
+
+            return {
+                ...prev,
+                sortBy: nextSort,
+                sortDirection: nextDir
+            }
+        })
+    }, [setNotesFilters])
+
     const handleAddPostProdTask = useCallback(() => {
         handleOpenActionSuite({ view: 'task' })
     }, [handleOpenActionSuite])
@@ -250,7 +273,7 @@ const RootLayoutInner = () => {
     }
 
     if (isLoadingAuth) {
-        return <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#141417] flex items-center justify-center text-[#1C1C1E] dark:text-white">Loading...</div>
+        return <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#0A0A0A] flex items-center justify-center text-[#1C1C1E] dark:text-white">Loading...</div>
     }
 
     if (currentUser && !isGuest && projects.length === 0) {
@@ -259,7 +282,7 @@ const RootLayoutInner = () => {
 
     return (
         <HeaderActionsProvider>
-            <div className={`min-h-screen bg-[#F2F2F7] dark:bg-[#141417] text-[#1C1C1E] selection:bg-blue-100 dark:text-white transition-colors duration-500 ${darkMode ? 'dark' : ''}`}>
+            <div className={`min-h-screen bg-[#F2F2F7] dark:bg-[#0A0A0A] text-[#1C1C1E] selection:bg-blue-100 dark:text-white transition-colors duration-500 ${darkMode ? 'dark' : ''}`}>
                 <Header
                     ref={headerRef}
                     filterTranslateY={effectiveHeaderTranslateY}
@@ -298,7 +321,8 @@ const RootLayoutInner = () => {
                     inventoryLayout={inventoryLayout}
                     setInventoryLayout={setInventoryLayout}
                     notesFilters={notesFilters}
-                    setNotesFilters={setNotesFilters}
+                    setNotesFilters={handleSetNotesFilters}
+                    onSortNotes={handleToggleNotesSort}
                     notesLayout={notesLayout}
                     setNotesLayout={setNotesLayout}
                     isWideMode={isWideMode}
@@ -321,7 +345,7 @@ const RootLayoutInner = () => {
                 )}
 
                 <div
-                    className={`content-wrapper px-4 md:px-6 pb-0 lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(275px+1.5rem)] view-${mainView}`}
+                    className={`content-wrapper px-4 md:px-6 pb-0 lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(240px+1.5rem)] view-${mainView}`}
                     style={mainView === 'settings' || mainView === 'manage-projects' ? { paddingTop: 0 } : layoutStyle}
                 >
                     <main className={`mx-auto w-full transition-all duration-500 ease-in-out ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`} style={{ paddingBottom: shouldHideNavigation ? '24px' : '120px' }}>

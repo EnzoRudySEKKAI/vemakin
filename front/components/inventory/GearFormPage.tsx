@@ -44,7 +44,7 @@ export const GearFormPage: React.FC<GearFormPageProps> = ({
   }, [fetchCatalogCategories]);
 
   const handleSubmit = () => {
-    const newId = `e-${Date.now()}`;
+    const newId = crypto.randomUUID();
     const modelName = form.modelName || form.brandName || form.categoryName || 'New Equipment';
 
     const newEquipment: Equipment = {

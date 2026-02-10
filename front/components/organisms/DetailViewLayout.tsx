@@ -64,27 +64,24 @@ export const DetailViewLayout: React.FC<DetailViewLayoutProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
       className={`
-        flex flex-col h-full 
-        bg-transparent dark:bg-[#141417] 
-        min-h-0
+        flex flex-col 
+        bg-[#F2F2F7] dark:bg-[#0A0A0A] 
         ${className}
       `}
     >
-      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-        <div className={`${sizeClasses[size]} mx-auto p-4 md:p-8 pt-3`}>
-          {sidebar ? (
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-12">
-              <div className="xl:col-span-8 space-y-12">
-                {children}
-              </div>
-              <aside className="xl:col-span-4 lg:sticky lg:top-8 self-start">
-                {sidebar}
-              </aside>
+      <div className={`${sizeClasses[size]} w-full mx-auto p-4 md:p-8 pt-3`}>
+        {sidebar ? (
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-12">
+            <div className="xl:col-span-8 space-y-12">
+              {children}
             </div>
-          ) : (
-            children
-          )}
-        </div>
+            <aside className="xl:col-span-4 lg:sticky lg:top-8 self-start">
+              {sidebar}
+            </aside>
+          </div>
+        ) : (
+          children
+        )}
       </div>
     </motion.div>
   )
@@ -103,7 +100,6 @@ export const DetailViewContextBar: React.FC<DetailViewContextBarProps> = ({
     <div className={`
       flex flex-col gap-8 
       mb-12 pb-10 
-      border-b border-gray-100 dark:border-white/5
       ${className}
     `}>
       {children}

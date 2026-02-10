@@ -76,16 +76,20 @@ class MockDatabase:
 
     def create_shot(self, data: Dict[str, Any]) -> Dict[str, Any]:
         shot = {
-            "id": data.get("id", f"shot-{uuid.uuid4().hex[:8]}"),
+            "id": data.get("id") or str(uuid.uuid4()),
             "project_id": data.get("project_id", self.project["id"]),
             "user_id": GUEST_USER_UID,
             "title": data.get("title", "Nouveau plan"),
             "description": data.get("description", ""),
             "date": data.get("date", datetime.now().strftime("%Y-%m-%d")),
-            "start_time": data.get("start_time", "12:00"),
-            "status": data.get("status", "todo"),
+            "start_time": data.get("start_time"),
+            "duration": data.get("duration", "1h"),
+            "status": data.get("status", "pending"),
             "location": data.get("location", ""),
+            "remarks": data.get("remarks", ""),
+            "scene_number": data.get("scene_number", ""),
             "equipment_ids": data.get("equipment_ids", []),
+            "prepared_equipment_ids": data.get("prepared_equipment_ids", []),
             "created_at": datetime.now().isoformat(),
             "updated_at": datetime.now().isoformat(),
         }
@@ -124,7 +128,7 @@ class MockDatabase:
 
     def create_inventory_item(self, data: Dict[str, Any]) -> Dict[str, Any]:
         item = {
-            "id": data.get("id", f"gear-{uuid.uuid4().hex[:8]}"),
+            "id": data.get("id") or str(uuid.uuid4()),
             "user_id": GUEST_USER_UID,
             "name": data.get("name", "Nouvel équipement"),
             "category": data.get("category", "Accessories"),
@@ -134,8 +138,15 @@ class MockDatabase:
             "purchase_date": data.get("purchase_date"),
             "purchase_price": data.get("purchase_price", 0),
             "currency": data.get("currency", "EUR"),
+            "price_per_day": data.get("price_per_day", 0),
+            "rental_price": data.get("rental_price"),
+            "rental_frequency": data.get("rental_frequency"),
+            "quantity": data.get("quantity", 1),
+            "is_owned": data.get("is_owned", True),
             "status": data.get("status", "available"),
             "notes": data.get("notes", ""),
+            "catalog_item_id": data.get("catalog_item_id"),
+            "custom_name": data.get("custom_name"),
             "created_at": datetime.now().isoformat(),
             "updated_at": datetime.now().isoformat(),
         }
@@ -177,7 +188,7 @@ class MockDatabase:
 
     def create_note(self, data: Dict[str, Any]) -> Dict[str, Any]:
         note = {
-            "id": data.get("id", f"note-{uuid.uuid4().hex[:8]}"),
+            "id": data.get("id", str(uuid.uuid4())),
             "project_id": data.get("project_id", self.project["id"]),
             "user_id": GUEST_USER_UID,
             "title": data.get("title", "Nouvelle note"),
@@ -223,7 +234,7 @@ class MockDatabase:
 
     def create_task(self, data: Dict[str, Any]) -> Dict[str, Any]:
         task = {
-            "id": data.get("id", f"task-{uuid.uuid4().hex[:8]}"),
+            "id": data.get("id", str(uuid.uuid4())),
             "project_id": data.get("project_id", self.project["id"]),
             "user_id": GUEST_USER_UID,
             "title": data.get("title", "Nouvelle tâche"),

@@ -7,6 +7,7 @@ import { ActionButtonGroup } from '../../components/molecules/ActionButton'
 import { Text } from '../../components/atoms/Text'
 import { Input } from '../../components/atoms/Input'
 import { Textarea } from '../../components/atoms/Textarea'
+import { Card, SimpleCard, ListItem } from '../ui/Card'
 
 import { ConfirmModal } from '../ui/ConfirmModal'
 
@@ -110,8 +111,8 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
   const linkedShot = useMemo(() => shots.find(s => s.id === note.shotId), [note.shotId, shots])
   const linkedTask = useMemo(() => tasks.find(t => t.id === note.taskId), [note.taskId, tasks])
 
-  const dateString = note.updatedAt 
-    ? new Date(note.updatedAt).toLocaleDateString() 
+  const dateString = note.updatedAt
+    ? new Date(note.updatedAt).toLocaleDateString()
     : (note.createdAt ? new Date(note.createdAt).toLocaleDateString() : '')
 
   const headerActions = (
@@ -135,157 +136,166 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
       actions={headerActions}
       size="wide"
       sidebar={
-        <div className="p-2">
-          <div className="mb-10">
-            <Text variant="title" className="mb-2">Linked context</Text>
-          </div>
-
-          <div className="space-y-4">
-            {linkedShot && (
-              <button 
-                onClick={() => onNavigateToShot(linkedShot.id)} 
-                className="w-full p-4 rounded-2xl border border-gray-100 dark:border-white/5 flex items-center justify-between group transition-all hover:scale-[1.02] active:scale-[0.98] hover:bg-gray-50 dark:hover:bg-white/5"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
-                    <Film size={20} />
+        <div className="space-y-4">
+          <Card title="Linked context">
+            <div className="p-2 space-y-1">
+              {linkedShot && (
+                <button
+                  onClick={() => onNavigateToShot(linkedShot.id)}
+                  className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all group"
+                >
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+                      <Film size={16} />
+                    </div>
+                    <div className="text-left min-w-0">
+                      <p className="text-[10px] text-white/40 font-medium">Sequence</p>
+                      <p className="text-sm text-white/50 font-medium truncate group-hover:text-white transition-colors">
+                        {linkedShot.title}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-left">
-                    <Text variant="caption" color="muted">Sequence</Text>
-                    <Text variant="body" className="group-hover:text-blue-600 transition-colors line-clamp-1">
-                      Sc {linkedShot.sceneNumber} • {linkedShot.title}
-                    </Text>
+                  <ArrowUpRight size={12} className="text-white/10 group-hover:text-indigo-400 transition-colors" />
+                </button>
+              )}
+              {linkedTask && (
+                <button
+                  onClick={() => onNavigateToTask(linkedTask.id)}
+                  className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all group"
+                >
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="p-2 rounded-lg bg-orange-500/10 text-orange-400">
+                      <Briefcase size={16} />
+                    </div>
+                    <div className="text-left min-w-0">
+                      <p className="text-[10px] text-white/40 font-medium">Task</p>
+                      <p className="text-sm text-white/50 font-medium truncate group-hover:text-white transition-colors">
+                        {linkedTask.title}
+                      </p>
+                    </div>
                   </div>
+                  <ArrowUpRight size={12} className="text-white/10 group-hover:text-orange-400 transition-colors" />
+                </button>
+              )}
+              {!linkedShot && !linkedTask && (
+                <div className="py-12 flex flex-col items-center justify-center text-center opacity-10">
+                  <ExternalLink size={24} className="mb-2" />
+                  <span className="text-[10px] font-medium">Unlinked</span>
                 </div>
-                <ArrowUpRight size={18} className="text-gray-300 group-hover:text-blue-500 transition-colors"/>
-              </button>
-            )}
-            {linkedTask && (
-              <button 
-                onClick={() => onNavigateToTask(linkedTask.id)} 
-                className="w-full p-4 rounded-2xl border border-gray-100 dark:border-white/5 flex items-center justify-between group transition-all hover:scale-[1.02] active:scale-[0.98] hover:bg-gray-50 dark:hover:bg-white/5"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500">
-                    <Briefcase size={20} />
-                  </div>
-                  <div className="text-left">
-                    <Text variant="caption" color="muted">Task</Text>
-                    <Text variant="body" className="group-hover:text-orange-500 transition-colors line-clamp-1">
-                      {linkedTask.title}
-                    </Text>
-                  </div>
-                </div>
-                <ArrowUpRight size={18} className="text-gray-300 group-hover:text-orange-500 transition-colors"/>
-              </button>
-            )}
-            {!linkedShot && !linkedTask && (
-              <div className="py-12 flex flex-col items-center justify-center text-center">
-                <ExternalLink size={32} className="text-gray-300 mb-3"/>
-                <Text variant="caption" color="muted">No linked items</Text>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          </Card>
 
-          <div className="mt-10 pt-10 border-t border-gray-100 dark:border-white/5">
-            <Text variant="title" className="mb-6">Metadata</Text>
-            <div className="grid grid-cols-1 gap-6">
+          <Card title="Note details">
+            <div className="p-4 space-y-6">
               <div className="flex flex-col gap-1">
-                <Text variant="subtitle" color="muted" className="dark:text-white">Last modified</Text>
-                <Text variant="title" className="block leading-tight py-1.5">
+                <span className="text-[10px] text-white/40 font-medium">Last modified</span>
+                <div className="text-sm text-white/50 font-medium tracking-tight">
                   {new Date(note.updatedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                </Text>
+                </div>
               </div>
               <div className="flex flex-col gap-1">
-                <Text variant="subtitle" color="muted" className="dark:text-white">Created</Text>
-                <Text variant="title" className="block leading-tight py-1.5">
+                <span className="text-[10px] text-white/40 font-medium">Timestamp</span>
+                <div className="text-sm text-white/50 font-medium tracking-tight">
                   {new Date(note.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                </Text>
+                </div>
               </div>
             </div>
-          </div>
+          </Card>
         </div>
       }
     >
-      <div className="flex flex-col gap-8 mb-12 pb-10 border-b border-gray-100 dark:border-white/5">
-        <div className="flex flex-col gap-1 min-w-0">
-          <Text variant="subtitle" color="muted" className="dark:text-white">Title</Text>
-          {isEditing ? (
-            <Input
-              type="text"
-              value={editedItem.title}
-              onChange={(e) => setEditedItem({ ...editedItem, title: e.target.value })}
-              placeholder="Note title"
-              variant="underline"
-              fullWidth
-              className="text-2xl"
-            />
-          ) : (
-            <Text variant="title" className="block leading-tight py-1.5">
-              {note.title || 'Untitled note'}
-            </Text>
-          )}
-        </div>
+      <Card title="Core content" className="mb-8">
+        <div className="p-6 space-y-10">
+          <div className="flex flex-col gap-1 min-w-0">
+            <span className="text-[10px] text-white/40 font-medium mb-2">Note title</span>
+            {isEditing ? (
+              <Input
+                type="text"
+                value={editedItem.title}
+                onChange={(e) => setEditedItem({ ...editedItem, title: e.target.value })}
+                placeholder="Name your note..."
+                variant="underline"
+                fullWidth
+                className="text-2xl"
+              />
+            ) : (
+              <div className="text-2xl text-white font-semibold leading-tight">
+                {note.title || 'Untitled note'}
+              </div>
+            )}
+          </div>
 
-        <div className="flex flex-col gap-1 min-w-0">
-          <Text variant="subtitle" color="muted" className="dark:text-white">Content</Text>
-          {isEditing ? (
-            <Textarea
-              value={editedItem.content}
-              onChange={(e) => setEditedItem({ ...editedItem, content: e.target.value })}
-              placeholder="Write something..."
-              size="lg"
-              rows={8}
-            />
-          ) : (
-            <Text variant="body" color="secondary" className="whitespace-pre-wrap max-w-3xl py-1.5">
-              {note.content || 'No content provided.'}
-            </Text>
-          )}
+          <div className="flex flex-col gap-1 min-w-0">
+            <span className="text-[10px] text-white/40 font-medium mb-2">Remarks & observations</span>
+            {isEditing ? (
+              <Textarea
+                value={editedItem.content}
+                onChange={(e) => setEditedItem({ ...editedItem, content: e.target.value })}
+                placeholder="Share your thoughts or observations..."
+                className="min-h-[250px]"
+              />
+            ) : (
+              <div className="text-sm text-white/70 whitespace-pre-wrap leading-relaxed font-medium">
+                {note.content || 'No specific content has been added to this note yet.'}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      </Card>
 
-      <section>
-        <div className="flex items-center justify-between mb-6">
-          <Text variant="subtitle" color="muted">Attachments ({editedItem.attachments?.length || 0})</Text>
+      <Card title="Production assets"
+        subtitle={
+          <span className="text-white/40">
+            {editedItem.attachments?.length || 0} Files Attached
+          </span>
+        }
+        headerRight={
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500/5 text-blue-600 dark:text-indigo-400 text-xs font-semibold hover:bg-blue-500/10 transition-all"
+            className="flex items-center gap-2 text-[10px] font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
           >
-            <Plus size={14} /> Add file
+            <Plus size={12} strokeWidth={3} />
+            Append File
           </button>
+        }
+      >
+        <div className="p-6">
           <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} />
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {editedItem.attachments && editedItem.attachments.length > 0 ? (
-            editedItem.attachments.map(att => (
-              <div 
-                key={att.id} 
-                className="group relative bg-white dark:bg-[#1C1C1E] p-4 rounded-2xl border border-gray-100 dark:border-white/5 hover:border-blue-200 dark:hover:border-indigo-500/30 transition-all flex items-center gap-4 shadow-sm"
-              >
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gray-50 dark:bg-white/5">
-                  {att.type === 'image' ? <ImageIcon size={20} className="text-blue-500"/> : <File size={20} className="text-gray-400"/>}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <Text variant="caption" className="truncate">{att.name}</Text>
-                  <Text variant="caption" color="muted">{att.size || 'N/A'}</Text>
-                </div>
-                <button
-                  onClick={() => removeAttachment(att.id)}
-                  className="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {editedItem.attachments && editedItem.attachments.length > 0 ? (
+              editedItem.attachments.map(att => (
+                <div
+                  key={att.id}
+                  className="group relative bg-white/5 p-4 rounded-xl border border-white/5 hover:border-indigo-500/30 transition-all flex items-center gap-4"
                 >
-                  <Trash2 size={14} />
-                </button>
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-white/5 text-white/20 group-hover:text-indigo-400 group-hover:bg-indigo-400/10 transition-all">
+                    {att.type === 'image' ? <ImageIcon size={18} /> : <File size={18} />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-white/80 group-hover:text-white transition-colors truncate">{att.name}</p>
+                    <p className="text-[10px] text-white/40 font-medium">{att.size || 'N/A'}</p>
+                  </div>
+                  <button
+                    onClick={() => removeAttachment(att.id)}
+                    className="p-2 text-white/5 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full py-16 flex flex-col items-center justify-center text-center opacity-10">
+                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-4">
+                  <File size={24} />
+                </div>
+                <span className="text-[10px] font-medium">No documentation attached</span>
               </div>
-            ))
-          ) : (
-            <div className="col-span-full py-12 bg-gray-50/50 dark:bg-white/[0.02] rounded-[32px] border border-dashed border-gray-200 dark:border-white/10 flex flex-col items-center justify-center text-center">
-              <Text variant="caption" color="muted">No attachments for this note yet.</Text>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </section>
+      </Card>
 
       <ConfirmModal
         isOpen={showDeleteConfirm}

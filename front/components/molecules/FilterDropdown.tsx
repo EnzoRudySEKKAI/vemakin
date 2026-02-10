@@ -1,8 +1,6 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, ArrowUpDown } from 'lucide-react'
-import { Button, Text, Card } from '@/components/atoms'
-import { radius, typography } from '@/design-system'
 
 export interface FilterOption {
   value: string
@@ -38,23 +36,23 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
   const isActive = activeColor && value && value !== 'All'
 
   return (
-    <div className={`flex-1 relative min-w-0 ${className}`}>
-      <Button
+    <div className={`relative ${className}`}>
+      <button
         onClick={() => setIsOpen(!isOpen)}
-        variant="ghost"
-        size="sm"
-        fullWidth
-        rightIcon={<ChevronDown 
-          size={18} 
-          strokeWidth={2.5}
-          className={`shrink-0 transition-transform duration-100 ${isOpen ? 'rotate-180' : ''}`} 
-        />}
-        className={`cf-control cf-btn-fluid ${isOpen ? 'active' : ''}`}
+        className={`
+          w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium transition-all
+          bg-[#0D0D0F] border border-white/[0.05]
+          ${isOpen ? 'border-white/[0.1]' : ''}
+          ${isActive ? 'text-white' : 'text-white/50 hover:text-white/70'}
+        `}
       >
-        <span className={`truncate ${isActive ? 'text-[#3762E3] dark:text-[#4E47DD]' : 'text-gray-500 dark:text-gray-300'}`}>
-          {selectedOption?.label || label}
-        </span>
-      </Button>
+        <span>{selectedOption?.label || label}</span>
+        <ChevronDown 
+          size={16} 
+          strokeWidth={2}
+          className={`transition-transform duration-100 ${isOpen ? 'rotate-180' : ''}`} 
+        />
+      </button>
 
       <AnimatePresence>
         {isOpen && (
@@ -64,11 +62,11 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
               onClick={() => setIsOpen(false)} 
             />
             <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              transition={{ duration: 0.1 }}
-              className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#252529] rounded-2xl p-2 border border-gray-200 dark:border-white/10 shadow-2xl z-[70] overflow-hidden"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.15 }}
+              className="absolute top-full left-0 right-0 mt-2 bg-[#0D0D0F] border border-white/[0.08] rounded-xl p-1.5 z-[70] overflow-hidden"
             >
               {options.map((option) => {
                 const Icon = option.icon
@@ -86,22 +84,21 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
                       setIsOpen(false)
                     }}
                     className={`
-                      w-full text-left px-4 py-3 rounded-xl text-xs font-semibold transition-colors
-                      flex items-center justify-between
+                      w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all
                       ${isSelected 
-                        ? 'bg-[#3762E3] dark:bg-[#4E47DD] text-white' 
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'
+                        ? 'bg-indigo-500 text-white' 
+                        : 'text-white/50 hover:text-white hover:bg-white/5'
                       }
                     `}
                   >
                     <span className="flex items-center gap-2">
-                      {Icon && <Icon size={14} strokeWidth={2.5} />}
+                      {Icon && <Icon size={14} strokeWidth={2} />}
                       {option.label}
                     </span>
                     {showDirectionToggle && isSelected && (
                       <ArrowUpDown 
                         size={14} 
-                        strokeWidth={2.5}
+                        strokeWidth={2}
                         className={direction === 'desc' ? 'rotate-180' : ''} 
                       />
                     )}
@@ -115,3 +112,5 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
     </div>
   )
 }
+
+export default FilterDropdown

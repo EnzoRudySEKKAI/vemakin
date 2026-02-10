@@ -15,6 +15,25 @@ router = APIRouter(
 )
 
 
+def map_shot_to_response(shot: dict) -> dict:
+    """Helper to map snake_case mock data to camelCase schema fields."""
+    return {
+        "id": shot["id"],
+        "project_id": shot["project_id"],
+        "title": shot["title"],
+        "description": shot.get("description", ""),
+        "status": shot.get("status", "pending"),
+        "startTime": shot.get("start_time"),
+        "duration": shot.get("duration", "1h"),
+        "location": shot.get("location", ""),
+        "remarks": shot.get("remarks"),
+        "date": shot.get("date", ""),
+        "sceneNumber": shot.get("scene_number"),
+        "equipmentIds": shot.get("equipment_ids", []),
+        "preparedEquipmentIds": shot.get("prepared_equipment_ids", []),
+    }
+
+
 @router.get("", response_model=schemas.PaginatedShotResponse)
 def read_shots(
     project_id: str,
@@ -30,8 +49,9 @@ def read_shots(
         shots = mock_db.list_shots(project_id)
         total = len(shots) if shots else 0
         paginated_shots = shots[skip : skip + limit] if shots else []
+        items = [map_shot_to_response(s) for s in paginated_shots]
         return {
-            "items": paginated_shots,
+            "items": items,
             "total": total,
             "page": skip // limit + 1 if limit > 0 else 1,
             "limit": limit,
@@ -94,12 +114,16 @@ def create_shot(
             "description": shot.description,
             "status": shot.status,
             "start_time": shot.startTime,
-            "date": shot.date,
+            "duration": shot.duration,
             "location": shot.location,
+            "remarks": shot.remarks,
+            "date": shot.date,
+            "scene_number": shot.sceneNumber,
             "equipment_ids": shot.equipmentIds,
+            "prepared_equipment_ids": shot.preparedEquipmentIds,
         }
         new_shot = mock_db.create_shot(shot_data)
-        return new_shot
+        return map_shot_to_response(new_shot)
 
     # SQLAlchemy 2.0: Verify project ownership
     project_stmt = select(models.Project).where(

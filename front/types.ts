@@ -100,59 +100,10 @@ export interface Equipment {
     rentalFrequency?: 'hour' | 'day' | 'week' | 'month' | 'year';
     quantity: number;
     isOwned: boolean;
-    status?: 'operational' | 'maintenance' | 'broken';
-    specs: {
-        // Shared
-        weight?: string;
-        // Camera
-        sensorSize?: string;
-        dynamicRange?: string;
-        nativeISO?: string;
-        mount?: string;
-        operatingHours?: string;
-        // Lens
-        focalLength?: string;
-        aperture?: string;
-        frontDiameter?: string;
-        minFocus?: string;
-        imageCircle?: string;
-        // Filter
-        density?: string;
-        size?: string;
-        type?: string;
-        strength?: string;
-        // Light
-        powerDraw?: string;
-        colorTemp?: string;
-        cri?: string;
-        control?: string;
-        // Audio
-        channels?: string;
-        phantomPower?: string;
-        batteryType?: string;
-        // Tripod & Stabilizer
-        maxPayload?: string;
-        bowlSize?: string;
-        material?: string;
-        travelDistance?: string; // for sliders
-        maxHeight?: string;
-        minHeight?: string;
-        // Monitoring
-        brightness?: string;
-        resolution?: string;
-        inputs?: string;
-        // Wireless
-        range?: string;
-        latency?: string;
-        // Drone
-        maxFlightTime?: string;
-        maxSpeed?: string;
-        transmissionRange?: string;
-        // Props
-        era?: string;
-        fragility?: string;
-        [key: string]: string | undefined;
-    };
+    status: 'operational' | 'maintenance' | 'broken' | 'lost' | 'sold';
+    brandName?: string;
+    modelName?: string;
+    specs: Record<string, any>;
 }
 
 export interface CatalogCategory {
@@ -178,24 +129,24 @@ export interface CatalogItem {
 
 // Pagination types
 export interface PaginationParams {
-  page?: number;
-  limit?: number;
-  cursor?: string;
+    page?: number;
+    limit?: number;
+    cursor?: string;
 }
 
 export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  limit: number;
-  hasMore: boolean;
-  nextCursor?: string;
+    items: T[];
+    total: number;
+    page: number;
+    limit: number;
+    hasMore: boolean;
+    nextCursor?: string;
 }
 
 // Project type
 export interface Project {
-  id: string;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
 }

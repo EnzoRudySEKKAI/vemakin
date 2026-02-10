@@ -53,11 +53,10 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
             <button
               key={ft.id}
               onClick={() => onSwitchForm(ft.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                isActive
-                  ? 'bg-blue-600 dark:bg-indigo-600 text-white shadow-sm'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-              }`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${isActive
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
             >
               <Icon size={14} strokeWidth={2.5} />
               <span className="hidden sm:inline">{ft.label}</span>
@@ -70,11 +69,10 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
       <button
         onClick={onSubmit}
         disabled={submitDisabled}
-        className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-          submitDisabled
-            ? 'bg-gray-200 dark:bg-white/10 text-gray-400 cursor-not-allowed'
-            : 'bg-blue-600 dark:bg-indigo-600 text-white hover:bg-blue-700 dark:hover:bg-indigo-500 shadow-sm'
-        }`}
+        className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${submitDisabled
+          ? 'bg-gray-200 dark:bg-white/10 text-gray-400 cursor-not-allowed'
+          : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-sm'
+          }`}
       >
         {submitLabel}
       </button>
@@ -107,16 +105,13 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
       className={`
-        flex flex-col h-full 
-        bg-transparent dark:bg-[#141417] 
-        min-h-0
+        flex flex-col 
+        bg-[#F2F2F7] dark:bg-[#0A0A0A] 
         ${className}
       `}
     >
-      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-        <div className="max-w-7xl mx-auto p-4 md:p-8 pt-3 pb-32">
-          {children}
-        </div>
+      <div className="max-w-3xl w-full mx-auto p-4 md:p-8 pt-6 pb-32">
+        {children}
       </div>
     </motion.div>
   )
@@ -135,7 +130,6 @@ export const FormSection: React.FC<FormSectionProps> = ({
     <div className={`
       flex flex-col gap-8 
       mb-12 pb-10 
-      border-b border-gray-100 dark:border-white/5
       ${className}
     `}>
       {children}

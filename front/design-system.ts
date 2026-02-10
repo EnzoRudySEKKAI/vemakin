@@ -17,29 +17,39 @@ export const colors = {
     lightHover: '#2952D1',
     darkHover: '#3F39D1',
   },
-  
-  // Background Colors
+
+  // Traffic Light Colors (macOS style)
+  trafficLights: {
+    red: '#FF5F56',
+    yellow: '#FFBD2E',
+    green: '#27CA40',
+  },
+
+  // Background Colors - Pure black theme
   background: {
     light: '#F2F2F7',
-    dark: '#141417',
+    dark: '#0A0A0A',      // Pure black background
+    darker: '#050505',    // Even darker for contrast
   },
-  
+
   // Surface/Card Colors
   surface: {
     light: '#FFFFFF',
     lightGlass: 'rgba(255, 255, 255, 0.8)',
-    dark: '#1A1A1D',
-    darkGlass: 'rgba(26, 26, 29, 0.9)',
+    dark: '#0D0D0F',      // Slightly lighter than pure black for cards
+    darker: '#0A0A0A',    // For nested elements
+    darkGlass: 'rgba(13, 13, 15, 0.95)',
   },
-  
+
   // Border Colors
   border: {
     light: '#E5E5E5',
     lightGlass: 'rgba(255, 255, 255, 0.2)',
-    dark: 'rgba(255, 255, 255, 0.1)',
-    darkGlass: 'rgba(255, 255, 255, 0.05)',
+    dark: 'rgba(255, 255, 255, 0.08)',      // Subtle borders
+    darkGlass: 'rgba(255, 255, 255, 0.05)', // Very subtle
+    darkHover: 'rgba(255, 255, 255, 0.12)', // Hover state
   },
-  
+
   // Text Colors
   text: {
     primary: {
@@ -59,23 +69,30 @@ export const colors = {
       dark: '#6B7280', // gray-500
     },
   },
-  
+
   // Semantic Colors
   success: {
     light: '#22C55E',
-    dark: '#4ADE80',
+    dark: '#27CA40',      // Match traffic light green
   },
   warning: {
     light: '#F97316',
-    dark: '#FB923C',
+    dark: '#FFBD2E',      // Match traffic light yellow
   },
   danger: {
     light: '#EF4444',
-    dark: '#F87171',
+    dark: '#FF5F56',      // Match traffic light red
   },
   info: {
     light: '#3B82F6',
-    dark: '#60A5FA',
+    dark: '#4E47DD',
+  },
+
+  // Timeline Status Colors
+  timeline: {
+    done: '#27CA40',      // Green for completed
+    current: '#4E47DD',   // Indigo for current/active
+    pending: '#3A3A3C',   // Gray for pending
   },
 } as const
 
@@ -450,7 +467,7 @@ export function inputClasses(variant: 'default' | 'glass' = 'default'): string {
  * Build card classes
  */
 export function cardClasses(
-  variant: 'default' | 'glass' | 'hover' | 'flat' = 'default',
+  variant: 'default' | 'glass' | 'hover' | 'flat' | 'window' = 'default',
   size: 'sm' | 'md' | 'lg' = 'md'
 ): string {
   const sizes = {
@@ -458,13 +475,13 @@ export function cardClasses(
     md: componentTokens.card.padding.md,
     lg: componentTokens.card.padding.lg,
   }
-  
+
   const base = `
     ${radius.xl}
     ${sizes[size]}
     transition-all ${animations.duration.normal}
   `.trim().replace(/\s+/g, ' ')
-  
+
   switch (variant) {
     case 'glass':
       return `${base} ${glassClasses('light')} dark:${glassClasses('dark')}`
@@ -472,8 +489,66 @@ export function cardClasses(
       return `${base} ${glassClasses('light')} dark:${glassClasses('dark')} hover:scale-[1.02] hover:shadow-lg cursor-pointer`
     case 'flat':
       return `${base} bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5`
+    case 'window':
+      return `${base} bg-[#0D0D0F] border border-white/[0.08] overflow-hidden`
     default:
       return `${base} bg-white dark:bg-[#1A1A1D] border border-gray-200 dark:border-white/10`
+  }
+}
+
+/**
+ * Build window card header classes
+ */
+export function windowCardHeaderClasses(): string {
+  return `
+    flex items-center justify-between
+    px-4 py-3
+    border-b border-white/[0.08]
+    bg-[#0D0D0F]
+  `.trim().replace(/\s+/g, ' ')
+}
+
+/**
+ * Build window card content classes
+ */
+export function windowCardContentClasses(): string {
+  return `
+    p-4
+    bg-[#0A0A0A]
+  `.trim().replace(/\s+/g, ' ')
+}
+
+/**
+ * Build timeline item classes
+ */
+export function timelineItemClasses(status: 'done' | 'current' | 'pending' = 'pending'): string {
+  const barColors = {
+    done: 'bg-[#27CA40]',
+    current: 'bg-[#4E47DD]',
+    pending: 'bg-[#3A3A3C]',
+  }
+
+  return `
+    flex items-center gap-3
+    p-3 rounded-xl
+    bg-[#0D0D0F] border border-white/[0.05]
+    transition-all duration-200
+    hover:border-white/[0.12]
+    group
+  `.trim().replace(/\s+/g, ' ')
+}
+
+/**
+ * Get timeline bar color class
+ */
+export function timelineBarColor(status: 'done' | 'current' | 'pending'): string {
+  switch (status) {
+    case 'done':
+      return 'bg-[#27CA40]'
+    case 'current':
+      return 'bg-[#4E47DD]'
+    default:
+      return 'bg-[#3A3A3C]'
   }
 }
 

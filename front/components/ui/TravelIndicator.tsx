@@ -38,7 +38,7 @@ export const TravelIndicator: React.FC<TravelIndicatorProps> = ({
   const ModeIcon = getModeIcon(mode)
 
   return (
-    <div className="animate-in fade-in zoom-in-95 duration-300 w-[300px] lg:w-auto lg:flex-1">
+    <div className="animate-in fade-in zoom-in-95 duration-300 flex-1 lg:flex-1">
       <button
         onClick={(e) => {
           e.stopPropagation()

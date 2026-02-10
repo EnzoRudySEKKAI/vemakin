@@ -286,6 +286,8 @@ export const useStore = create<ProductionStore>((set, get) => ({
           quantity: i.quantity,
           isOwned: i.isOwned,
           status: i.status,
+          brandName: i.brandName,
+          modelName: i.modelName,
           specs: i.specs || {}
         }));
 
@@ -328,8 +330,8 @@ export const useStore = create<ProductionStore>((set, get) => ({
         title: s.title,
         description: s.description,
         status: s.status,
-        startTime: s.startTime || s.start_time,
-        duration: s.duration,
+        startTime: s.startTime || s.start_time || '00:00',
+        duration: s.duration || '1h',
         location: s.location,
         remarks: s.remarks,
         date: s.date,
@@ -342,9 +344,9 @@ export const useStore = create<ProductionStore>((set, get) => ({
         id: n.id,
         title: n.title,
         content: n.content,
-        date: n.updated_at,
-        shotId: n.shot_id,
-        taskId: n.task_id
+        date: n.updated_at || n.updatedAt,
+        shotId: n.shot_id || n.shotId,
+        taskId: n.task_id || n.taskId
       }));
 
       const fetchedTasks: PostProdTask[] = tasksData.map((t: any) => ({
@@ -446,13 +448,14 @@ export const useStore = create<ProductionStore>((set, get) => ({
     const pid = get().projectData[get().currentProject]?.id;
     if (pid) {
       try {
-        await api.post(`/shots?project_id=${pid}`, shot);
+        const res = await api.post(`/shots?project_id=${pid}`, shot);
+        const newShot = res.data;
         set((state) => ({
           projectData: {
             ...state.projectData,
             [state.currentProject]: {
               ...state.projectData[state.currentProject],
-              shots: [...state.projectData[state.currentProject].shots, shot]
+              shots: [...state.projectData[state.currentProject].shots, newShot]
             }
           }
         }));
@@ -500,13 +503,14 @@ export const useStore = create<ProductionStore>((set, get) => ({
     const pid = get().projectData[get().currentProject]?.id;
     if (pid) {
       try {
-        await api.post(`/postprod?project_id=${pid}`, task);
+        const res = await api.post(`/postprod?project_id=${pid}`, task);
+        const newTask = res.data;
         set((state) => ({
           projectData: {
             ...state.projectData,
             [state.currentProject]: {
               ...state.projectData[state.currentProject],
-              tasks: [...state.projectData[state.currentProject].tasks, task]
+              tasks: [...state.projectData[state.currentProject].tasks, newTask]
             }
           }
         }));
@@ -583,13 +587,14 @@ export const useStore = create<ProductionStore>((set, get) => ({
     const pid = get().projectData[get().currentProject]?.id;
     if (pid) {
       try {
-        await api.post(`/notes?project_id=${pid}`, note);
+        const res = await api.post(`/notes?project_id=${pid}`, note);
+        const newNote = res.data;
         set((state) => ({
           projectData: {
             ...state.projectData,
             [state.currentProject]: {
               ...state.projectData[state.currentProject],
-              notes: [note, ...state.projectData[state.currentProject].notes]
+              notes: [newNote, ...state.projectData[state.currentProject].notes]
             }
           }
         }));

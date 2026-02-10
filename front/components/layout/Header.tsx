@@ -1,13 +1,10 @@
 import React, { useState, forwardRef, useRef, useEffect } from 'react'
-import { Search, Plus, Calendar, Settings, ChevronLeft, Moon, Sun } from 'lucide-react'
+import { Plus, Settings, ChevronLeft, Moon, Sun } from 'lucide-react'
 import {
   MainView, ShotLayout, InventoryLayout,
   InventoryFilters, PostProdFilters, NotesFilters, Currency, Equipment, PostProdTask
 } from '@/types'
 import { useHeaderActions } from '@/context/HeaderActionsContext'
-import { Button } from '@/components/atoms/Button'
-import { Text } from '@/components/atoms/Text'
-import { IconContainer } from '@/components/atoms/IconContainer'
 
 // Atomic components
 import { ShotsFilterBar } from '@/components/organisms/header/ShotsFilterBar'
@@ -59,7 +56,8 @@ interface HeaderProps {
 
   // Notes Props
   notesFilters?: NotesFilters
-  setNotesFilters?: (filters: NotesFilters) => void
+  setNotesFilters?: (filters: Partial<NotesFilters>) => void
+  onSortNotes?: () => void
   notesLayout?: 'grid' | 'list'
   setNotesLayout?: (layout: 'grid' | 'list') => void
 
@@ -85,15 +83,12 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
   setCurrentProject,
   projects,
   onAddProject,
-  // Helper props
   projectProgress,
   groupedShots,
-  // Actions
   onToggleDarkMode,
   darkMode,
   onAdd,
   setMainView,
-  // Filters & State
   shotSearchQuery,
   setShotSearchQuery,
   shotStatusFilter,
@@ -110,6 +105,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
   setPostProdLayout,
   notesFilters,
   setNotesFilters,
+  onSortNotes,
   notesLayout,
   setNotesLayout,
   isWideMode,
@@ -122,37 +118,14 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
 }, ref) => {
   const { backAction, detailLabel } = useHeaderActions()
   const headerBottomRef = useRef<HTMLDivElement>(null)
-  const [fadeThreshold, setFadeThreshold] = useState(-90)
 
-  // Measure HeaderBottom height to calculate exact fade transfer threshold
-  useEffect(() => {
-    const measureHeight = () => {
-      if (headerBottomRef.current) {
-        const height = headerBottomRef.current.offsetHeight
-        // Transfer fade when HeaderBottom is almost fully hidden (95% hidden)
-        setFadeThreshold(-(height * 0.95))
-      }
-    }
-
-    measureHeight()
-
-    // Re-measure on resize
-    const resizeObserver = new ResizeObserver(measureHeight)
-    if (headerBottomRef.current) {
-      resizeObserver.observe(headerBottomRef.current)
-    }
-
-    return () => resizeObserver.disconnect()
-  }, [mainView])
-
-  // Subtitles map based on screenshots
   const getSubtitle = () => {
     switch (mainView) {
       case 'overview': return 'Production Hub'
       case 'shots': return 'Production Schedule'
-      case 'inventory': return 'Equipment Management'
-      case 'postprod': return 'Post-production Tasks'
-      case 'notes': return 'Production Knowledge Base'
+      case 'inventory': return 'Equipment management'
+      case 'postprod': return 'Post-production tasks'
+      case 'notes': return 'Production knowledge base'
       default: return ''
     }
   }
@@ -163,192 +136,163 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
 
   return (
     <>
-      {/* HeaderTop - Fixed title row (z-[51]) */}
+      {/* HeaderTop - Fixed title row */}
       <header
         ref={ref}
-        className="fixed top-0 left-0 right-0 z-[51] bg-[#F2F2F7] dark:bg-[#141417] transition-colors duration-150 overflow-visible"
+        data-header-row="1"
+        className="fixed top-0 left-0 right-0 z-[51] bg-[#0A0A0A]"
         style={{
-          paddingTop: 'calc(env(safe-area-inset-top) + var(--header-padding-top, 12px))',
+          paddingTop: 'calc(env(safe-area-inset-top) + 12px)',
         }}
       >
-        <div className="px-4 md:px-6 lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(275px+1.5rem)]">
-          <div className={`mx-auto w-full ${isWideMode ? 'max-w-[90%]' : 'max-w-7xl'}`}>
-            {/* --- ROW 1: Title & Main Actions --- */}
-            <div data-header-row="1" className="flex items-center justify-between min-h-[50px] pb-3">
+        <div className="px-4 md:px-6 lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(240px+1.5rem)]">
+          <div className={`mx-auto w-full ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`}>
+            <div className="flex items-center justify-between h-14">
               {/* Left: Title & Subtitle */}
               <div className="flex items-center gap-3">
-                {/* Back button for Settings and Manage Projects */}
                 {isSettingsView && (
-                  <Button
-                    variant="secondary"
-                    size="sm"
+                  <button
                     onClick={() => setMainView('overview')}
-                    leftIcon={<ChevronLeft size={20} strokeWidth={2.5} />}
-                    className="shrink-0"
-                  />
+                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white/70 transition-colors"
+                  >
+                    <ChevronLeft size={20} strokeWidth={2} />
+                  </button>
                 )}
-                <div className="flex flex-col justify-center leading-none">
-                  <Text variant="h2" className="text-gray-900 dark:text-white">
+                <div className="flex flex-col justify-center">
+                  <h1 className="text-lg font-semibold text-white">
                     {backAction ? (detailLabel || 'Detail View') : viewTitle}
-                  </Text>
-                  <div className="flex items-center">
-                    {!backAction && (
-                      <Text variant="caption" color="muted">
-                        {getSubtitle()}
-                      </Text>
-                    )}
-                  </div>
+                  </h1>
+                  {!backAction && (
+                    <span className="text-xs text-white/40">
+                      {getSubtitle()}
+                    </span>
+                  )}
                 </div>
               </div>
 
               {/* Right: Actions Group */}
               <div className="flex items-center gap-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
+                <button
                   onClick={onToggleDarkMode}
-                  leftIcon={darkMode ? <Moon size={18} fill="currentColor" strokeWidth={2.5} /> : <Sun size={18} strokeWidth={2.5} />}
-                />
+                  className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white/70 transition-colors"
+                >
+                  {darkMode ? <Moon size={18} /> : <Sun size={18} />}
+                </button>
 
-                {/* Hide settings button when on settings or manage-projects */}
                 {!isSettingsView && (
-                  <Button
-                    variant="secondary"
-                    size="sm"
+                  <button
                     onClick={() => setMainView('settings')}
-                    leftIcon={<Settings size={18} strokeWidth={2.5} />}
-                  />
+                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white/70 transition-colors"
+                  >
+                    <Settings size={18} />
+                  </button>
                 )}
 
-                <Button
-                  variant="primary"
-                  size="sm"
+                <button
                   onClick={onAdd}
-                  leftIcon={<Plus size={20} strokeWidth={2.5} />}
-                />
+                  className="w-9 h-9 flex items-center justify-center rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white transition-colors"
+                >
+                  <Plus size={20} strokeWidth={2.5} />
+                </button>
               </div>
             </div>
           </div>
         </div>
-        {/* Fade effect on HeaderTop - only visible when HeaderBottom is hidden */}
-        <div
-          className="absolute left-0 right-0 bottom-0 h-6 pointer-events-none translate-y-full transition-opacity duration-200"
-          style={{
-            background: 'linear-gradient(to bottom, var(--header-fade-color) 0%, transparent 100%)',
-            opacity: filterTranslateY < -5 ? 1 : 0
-          }}
-        />
-        <style>{`
-          :root { --header-fade-color: #F2F2F7; }
-          .dark { --header-fade-color: #141417; }
-        `}</style>
       </header>
 
-      {/* HeaderBottom - Fixed filter row (z-[50]) - slides behind HeaderTop */}
+      {/* HeaderBottom - Fixed filter row */}
       <div
         ref={headerBottomRef}
-        className="fixed left-0 right-0 z-[50] will-change-transform bg-[#F2F2F7] dark:bg-[#141417] pt-3 overflow-visible"
+        data-header-row="2"
+        className="fixed left-0 right-0 z-[50] bg-[#0A0A0A] pt-2 overflow-visible"
         style={{
-          top: 'calc(env(safe-area-inset-top) + var(--header-padding-top, 12px) + 50px)',
+          top: 'calc(env(safe-area-inset-top) + 68px)',
           transform: `translateY(${filterTranslateY}px)`
         }}
       >
-        <div className="px-4 md:px-6 lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(275px+1.5rem)]">
-          <div className={`mx-auto w-full ${isWideMode ? 'max-w-[90%]' : 'max-w-7xl'}`}>
-            {/* --- ROW 2: Dynamic Controls (Drawer Effect) --- */}
-            <div data-header-row="2">
-              <div className="flex flex-col gap-2">
-                {/* Detail Mode Controls */}
-                {isDetailView || backAction ? (
-                  <DetailViewHeader />
-                ) : (
-                  <>
-                    {/* Project Selector Card */}
-                    {mainView === 'overview' && (
-                      <ProjectSelector
-                        currentProject={currentProject}
-                        projects={projects}
-                        onSelect={setCurrentProject}
-                        onCreate={onAddProject}
-                      />
-                    )}
+        <div className="px-4 md:px-6 lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(240px+1.5rem)]">
+          <div className={`mx-auto w-full ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`}>
+            <div className="flex flex-col gap-2 pb-3">
+              {isDetailView || backAction ? (
+                <DetailViewHeader />
+              ) : (
+                <>
+                  {mainView === 'overview' && (
+                    <ProjectSelector
+                      currentProject={currentProject}
+                      projects={projects}
+                      onSelect={setCurrentProject}
+                      onCreate={onAddProject}
+                    />
+                  )}
 
-                    {/* Filter Bars for different views */}
-                    {showFilterBar && (
-                      <>
-                        {mainView === 'shots' && shotLayout && setShotLayout && (
-                          <ShotsFilterBar
-                            searchQuery={shotSearchQuery}
-                            onSearchChange={setShotSearchQuery}
-                            statusFilter={shotStatusFilter}
-                            onStatusChange={setShotStatusFilter}
-                            layout={shotLayout}
-                            onLayoutChange={setShotLayout}
-                            projectProgress={projectProgress}
-                            groupedShots={groupedShots}
-                            activeDate={activeDate}
-                            isDatePickerOpen={isDateSelectorOpen}
-                            onDatePickerToggle={() => setIsDateSelectorOpen(!isDateSelectorOpen)}
-                            onDateSelect={handleDateSelect}
-                          />
-                        )}
+                  {showFilterBar && (
+                    <>
+                      {mainView === 'shots' && shotLayout && setShotLayout && (
+                        <ShotsFilterBar
+                          searchQuery={shotSearchQuery}
+                          onSearchChange={setShotSearchQuery}
+                          statusFilter={shotStatusFilter}
+                          onStatusChange={setShotStatusFilter}
+                          layout={shotLayout}
+                          onLayoutChange={setShotLayout}
+                          groupedShots={groupedShots}
+                          activeDate={activeDate}
+                          isDatePickerOpen={isDateSelectorOpen}
+                          onDatePickerToggle={() => setIsDateSelectorOpen(!isDateSelectorOpen)}
+                          onDateSelect={handleDateSelect}
+                        />
+                      )}
 
-                        {mainView === 'inventory' && inventoryLayout && setInventoryLayout && (
-                          <InventoryFilterBar
-                            searchQuery={inventoryFilters.query}
-                            onSearchChange={(query) => setInventoryFilters({ ...inventoryFilters, query })}
-                            categoryFilter={inventoryFilters.category}
-                            onCategoryChange={(category) => setInventoryFilters({ ...inventoryFilters, category })}
-                            ownershipFilter={inventoryFilters.ownership}
-                            onOwnershipChange={(ownership) => setInventoryFilters({ ...inventoryFilters, ownership })}
-                            layout={inventoryLayout}
-                            onLayoutChange={setInventoryLayout}
-                            inventory={inventory}
-                          />
-                        )}
+                      {mainView === 'inventory' && inventoryLayout && setInventoryLayout && (
+                        <InventoryFilterBar
+                          searchQuery={inventoryFilters.query}
+                          onSearchChange={(query) => setInventoryFilters({ ...inventoryFilters, query })}
+                          categoryFilter={inventoryFilters.category}
+                          onCategoryChange={(category) => setInventoryFilters({ ...inventoryFilters, category })}
+                          ownershipFilter={inventoryFilters.ownership}
+                          onOwnershipChange={(ownership) => setInventoryFilters({ ...inventoryFilters, ownership })}
+                          layout={inventoryLayout}
+                          onLayoutChange={setInventoryLayout}
+                          inventory={inventory}
+                        />
+                      )}
 
-                        {mainView === 'postprod' && postProdFilters && setPostProdFilters && postProdLayout && setPostProdLayout && (
-                          <PostProdFilterBar
-                            searchQuery={postProdFilters.searchQuery || ''}
-                            onSearchChange={(searchQuery) => setPostProdFilters({ searchQuery })}
-                            filters={postProdFilters}
-                            onFiltersChange={setPostProdFilters}
-                            layout={postProdLayout}
-                            onLayoutChange={setPostProdLayout}
-                            tasks={tasks}
-                            activeDate={activeDate}
-                            isDatePickerOpen={isDateSelectorOpen}
-                            onDatePickerToggle={() => setIsDateSelectorOpen(!isDateSelectorOpen)}
-                            onDateSelect={handleDateSelect}
-                          />
-                        )}
+                      {mainView === 'postprod' && postProdFilters && setPostProdFilters && postProdLayout && setPostProdLayout && (
+                        <PostProdFilterBar
+                          searchQuery={postProdFilters.searchQuery || ''}
+                          onSearchChange={(searchQuery) => setPostProdFilters({ searchQuery })}
+                          filters={postProdFilters}
+                          onFiltersChange={setPostProdFilters}
+                          layout={postProdLayout}
+                          onLayoutChange={setPostProdLayout}
+                          tasks={tasks}
+                          activeDate={activeDate}
+                          isDatePickerOpen={isDateSelectorOpen}
+                          onDatePickerToggle={() => setIsDateSelectorOpen(!isDateSelectorOpen)}
+                          onDateSelect={handleDateSelect}
+                        />
+                      )}
 
-                        {mainView === 'notes' && notesFilters && setNotesFilters && notesLayout && setNotesLayout && (
-                          <NotesFilterBar
-                            searchQuery={notesFilters.query}
-                            onSearchChange={(query) => setNotesFilters({ ...notesFilters, query })}
-                            categoryFilter={notesFilters.category}
-                            onCategoryChange={(category) => setNotesFilters({ ...notesFilters, category })}
-                            layout={notesLayout}
-                            onLayoutChange={setNotesLayout}
-                          />
-                        )}
-                      </>
-                    )}
-                  </>
-                )}
-              </div>
+                      {mainView === 'notes' && notesFilters && setNotesFilters && notesLayout && setNotesLayout && (
+                        <NotesFilterBar
+                          searchQuery={notesFilters.query}
+                          onSearchChange={(query) => setNotesFilters({ query })}
+                          categoryFilter={notesFilters.category}
+                          onCategoryChange={(category) => setNotesFilters({ category })}
+                          filters={notesFilters}
+                          layout={notesLayout}
+                          onLayoutChange={setNotesLayout}
+                          onSort={onSortNotes}
+                        />
+                      )}
+                    </>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
-        {/* Fade effect on HeaderBottom - visible when not hidden */}
-        <div
-          className="absolute left-0 right-0 bottom-0 h-6 pointer-events-none translate-y-full transition-opacity duration-200"
-          style={{
-            background: 'linear-gradient(to bottom, var(--header-fade-color) 0%, transparent 100%)',
-            opacity: filterTranslateY >= -5 ? 1 : 0
-          }}
-        />
       </div>
     </>
   )

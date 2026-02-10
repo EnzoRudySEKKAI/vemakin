@@ -89,8 +89,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           {/* Workflow Section */}
           <section>
             <Text variant="caption" color="muted" className="mb-3 px-2 block">Production Workflow</Text>
-            <Card 
-              variant="hover" 
+            <Card
+              variant="hover"
               className="p-4 flex items-center justify-between cursor-pointer"
               onClick={onNavigateToProjects}
             >
@@ -133,7 +133,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   <div>
                     <Text variant="body" className="text-gray-900 dark:text-white">iCloud Backup</Text>
                     <div className="flex items-center gap-1.5 mt-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"/>
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                       <Text variant="label" color="muted">Last synced: 2m ago</Text>
                     </div>
                   </div>
@@ -147,7 +147,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               </div>
 
               <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/5">
-                <Shield size={14} className="text-gray-400" strokeWidth={2.5}/>
+                <Shield size={14} className="text-gray-400" strokeWidth={2.5} />
                 <Text variant="label" color="muted">Your data is automatically encrypted and stored securely in your private iCloud container.</Text>
               </div>
             </Card>
@@ -187,7 +187,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                     <option value="French">Français</option>
                     <option value="Spanish">Español</option>
                   </select>
-                  <ChevronRight size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none rotate-90"/>
+                  <ChevronRight size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none rotate-90" />
                 </div>
               </div>
             </Card>
@@ -197,8 +197,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           <section>
             <Text variant="caption" color="muted" className="mb-3 px-2 block">Resources</Text>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Card 
-                variant="hover" 
+              <Card
+                variant="hover"
                 className="p-4 flex items-center gap-4 cursor-pointer"
                 onClick={onOpenNews}
               >
@@ -209,8 +209,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 </div>
               </Card>
 
-              <Card 
-                variant="hover" 
+              <Card
+                variant="hover"
                 className="p-4 flex items-center gap-4 cursor-pointer"
                 onClick={onOpenTutorial}
               >

@@ -1,7 +1,6 @@
 import React from 'react'
 import { Search, Calendar, X } from 'lucide-react'
 import { DatePicker } from '@/components/ui/DatePicker'
-import { Input, Button } from '@/components/atoms'
 
 export type SearchView = 'shots' | 'inventory' | 'postprod' | 'notes' | 'default'
 
@@ -38,7 +37,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   const handleDateSelect = (date: string | null) => {
     onDateSelect?.(date)
-    // Scroll to element after selection
     if (date) {
       setTimeout(() => {
         const element = document.getElementById(date)
@@ -50,38 +48,34 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   }
 
   return (
-    <div className={`cf-input-wrapper h-[48px] ${className}`}>
-      <Input
+    <div className={`relative h-12 ${className}`}>
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30">
+        <Search size={18} strokeWidth={2} />
+      </div>
+      <input
         type="text"
         placeholder={placeholders[view] || placeholders.default}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        fullWidth
-        leftIcon={<Search size={18} strokeWidth={2.5} className="text-gray-400" />}
-        className="text-sm shadow-none"
-        style={{ paddingRight: showDatePicker ? 48 : 16 }}
+        className="w-full h-full bg-[#0D0D0F] border border-white/[0.05] rounded-xl pl-11 pr-12 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/[0.1] transition-colors"
       />
       {value && (
-        <Button
+        <button
           onClick={() => onChange('')}
-          variant="ghost"
-          size="sm"
-          className="absolute right-12 top-1/2 -translate-y-1/2 p-1"
+          className="absolute right-12 top-1/2 -translate-y-1/2 p-1 text-white/30 hover:text-white/50 transition-colors"
         >
-          <X size={14} strokeWidth={2.5} />
-        </Button>
+          <X size={16} strokeWidth={2} />
+        </button>
       )}
       {showDatePicker && (
         <>
-          <Button
-            className="cf-input-action-right"
+          <button
             onClick={onDatePickerToggle}
             title="Filter by date"
-            variant="ghost"
-            size="sm"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-white/30 hover:text-white/50 transition-colors"
           >
-            <Calendar size={16} strokeWidth={2.5} />
-          </Button>
+            <Calendar size={16} strokeWidth={2} />
+          </button>
           {isDatePickerOpen && onDateSelect && (
             <DatePicker
               isOpen={isDatePickerOpen}
@@ -95,3 +89,5 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     </div>
   )
 }
+
+export default SearchBar

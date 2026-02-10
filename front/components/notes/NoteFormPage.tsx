@@ -5,6 +5,8 @@ import { Text } from '../atoms/Text';
 import { Input } from '../atoms/Input';
 import { Textarea } from '../atoms/Textarea';
 import { Shot, PostProdTask, Attachment } from '../../types';
+import { Card } from '../ui/Card';
+import { Plus } from 'lucide-react';
 
 interface NoteFormPageProps {
   onClose: () => void;
@@ -77,120 +79,138 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
       submitDisabled={!isValid}
       submitLabel="Save Note"
     >
-      <div className="flex flex-col gap-8 mb-12 pb-10 border-b border-gray-100 dark:border-white/5">
-        {/* Title */}
-        <div className="w-full">
-          <Text variant="subtitle" color="muted" className="dark:text-white mb-3 block text-center sm:text-left">Title</Text>
-          
-          <Input
-            type="text"
-            value={form.title}
-            onChange={e => setForm({ ...form, title: e.target.value })}
-            placeholder="Idea title"
-            variant="underline"
-            fullWidth
-          />
-        </div>
-
-        {/* Content */}
-        <div className="w-full">
-          <Text variant="subtitle" color="muted" className="dark:text-white mb-3 block text-center sm:text-left">Content</Text>
-          
-          <Textarea
-            value={form.content}
-            onChange={e => setForm({ ...form, content: e.target.value })}
-            placeholder="Write your note..."
-            size="md"
-            rows={6}
-          />
-        </div>
-
-        {/* Context Link */}
-        <div className="w-full">
-          <span className="detail-subtitle dark:text-white mb-3 block text-center sm:text-left">Context link</span>
-          
-          <div className="flex gap-2 mb-3">
-            <button
-              onClick={() => setForm({ ...form, linkType: 'none', linkedId: '' })}
-              className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all ${form.linkType === 'none' ? 'bg-gray-900 border-gray-900 text-white dark:bg-white dark:border-white dark:text-black' : 'bg-white dark:bg-[#2C2C30] border-gray-100 dark:border-white/5 text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5'}`}
-            >
-              General
-            </button>
-            <button
-              onClick={() => setForm({ ...form, linkType: 'shot', linkedId: '' })}
-              className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all ${form.linkType === 'shot' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-[#2C2C30] border-gray-100 dark:border-white/5 text-gray-400 dark:text-gray-500 hover:bg-blue-50 dark:hover:bg-blue-500/10'}`}
-            >
-              Shot
-            </button>
-            <button
-              onClick={() => setForm({ ...form, linkType: 'task', linkedId: '' })}
-              className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all ${form.linkType === 'task' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white dark:bg-[#2C2C30] border-gray-100 dark:border-white/5 text-gray-400 dark:text-gray-500 hover:bg-orange-50 dark:hover:bg-orange-500/10'}`}
-            >
-              Task
-            </button>
+      <Card title="Note details" className="mb-8">
+        <div className="p-6 space-y-10">
+          {/* Title */}
+          <div className="w-full">
+            <span className="text-[10px] text-white/40 font-medium mb-2 block">Note title</span>
+            <Input
+              type="text"
+              value={form.title}
+              onChange={e => setForm({ ...form, title: e.target.value })}
+              placeholder="Idea title..."
+              variant="underline"
+              fullWidth
+            />
           </div>
 
-          {form.linkType !== 'none' && (
-            <div className="relative animate-in slide-in-from-top-1">
-              <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500" size={16} />
-              <select
-                value={form.linkedId}
-                onChange={e => setForm({ ...form, linkedId: e.target.value })}
-                className="w-full appearance-none bg-transparent border-b border-gray-200 dark:border-white/10 pl-12 pr-10 py-4 text-sm font-semibold focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all cursor-pointer text-gray-900 dark:text-white"
+          {/* Content */}
+          <div className="w-full">
+            <span className="text-[10px] text-white/40 font-medium mb-2 block">Remarks & observations</span>
+            <Textarea
+              value={form.content}
+              onChange={e => setForm({ ...form, content: e.target.value })}
+              placeholder="What are you thinking? Describe your thoughts or observations..."
+              className="min-h-[200px]"
+            />
+          </div>
+
+          {/* Context Link */}
+          <div className="w-full">
+            <span className="text-[10px] text-white/40 font-medium mb-4 block">Context association</span>
+
+            <div className="flex p-1 bg-white/5 rounded-2xl border border-white/5 mb-6">
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, linkType: 'none', linkedId: '' })}
+                className={`flex-1 py-2.5 rounded-xl text-[10px] font-medium transition-all ${form.linkType === 'none' ? 'bg-white/10 text-white shadow-xl' : 'text-white/30 hover:text-white/50'}`}
               >
-                <option value="">Select reference...</option>
-                {form.linkType === 'shot' && existingShots.map(s => (
-                  <option key={s.id} value={s.id}>Scene {s.sceneNumber}: {s.title}</option>
-                ))}
-                {form.linkType === 'task' && existingTasks.map(t => (
-                  <option key={t.id} value={t.id}>[{t.category}] {t.title}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" size={16} />
+                Standalone
+              </button>
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, linkType: 'shot', linkedId: '' })}
+                className={`flex-1 py-2.5 rounded-xl text-[10px] font-medium transition-all ${form.linkType === 'shot' ? 'bg-indigo-500/20 text-indigo-400 shadow-xl' : 'text-white/30 hover:text-indigo-400/50'}`}
+              >
+                Link Shot
+              </button>
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, linkType: 'task', linkedId: '' })}
+                className={`flex-1 py-2.5 rounded-xl text-[10px] font-medium transition-all ${form.linkType === 'task' ? 'bg-orange-500/20 text-orange-400 shadow-xl' : 'text-white/30 hover:text-orange-400/50'}`}
+              >
+                Link Task
+              </button>
             </div>
-          )}
-        </div>
-      </div>
 
-      {/* Attachments */}
-      <section>
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <Paperclip size={14} className="text-gray-400"/>
-            <span className="detail-subtitle dark:text-white">Attachments</span>
-            <span className="bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full text-xs font-semibold">{form.attachments.length}</span>
-          </div>
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
-          >
-            <ArrowUpRight size={10} /> Add file
-          </button>
-          <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} />
-        </div>
-
-        {form.attachments.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {form.attachments.map(att => (
-              <div key={att.id} className="group relative bg-white dark:bg-[#1C1C1E] p-4 rounded-2xl border border-gray-100 dark:border-white/5 hover:border-blue-200 dark:hover:border-blue-500/30 transition-all flex items-center gap-4 shadow-sm">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gray-50 dark:bg-white/5">
-                  {att.type === 'image' ? <ImageIcon size={20} className="text-blue-500"/> : <File size={20} className="text-gray-400"/>}
+            {form.linkType !== 'none' && (
+              <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-white/20">
+                  <LinkIcon size={16} />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <span className="text-sm font-semibold text-gray-900 dark:text-white block truncate">{att.name}</span>
-                  <span className="text-xs text-gray-400">{att.size || 'N/A'}</span>
-                </div>
-                <button
-                  onClick={() => removeAttachment(att.id)}
-                  className="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
+                <select
+                  value={form.linkedId}
+                  onChange={e => setForm({ ...form, linkedId: e.target.value })}
+                  className="w-full appearance-none bg-transparent border-b border-white/5 pl-10 pr-10 py-4 text-sm font-bold focus:outline-none focus:border-indigo-500/50 transition-all cursor-pointer text-white/80"
                 >
-                  <Trash2 size={14} />
-                </button>
+                  <option value="" className="bg-[#0A0A0A]">Choose a reference point...</option>
+                  {form.linkType === 'shot' && existingShots.map(s => (
+                    <option key={s.id} value={s.id} className="bg-[#0A0A0A]">SCENE {s.sceneNumber}: {s.title}</option>
+                  ))}
+                  {form.linkType === 'task' && existingTasks.map(t => (
+                    <option key={t.id} value={t.id} className="bg-[#0A0A0A]">[{t.category}] {t.title}</option>
+                  ))}
+                </select>
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-white/20 pointer-events-none">
+                  <ChevronDown size={16} />
+                </div>
               </div>
-            ))}
+            )}
           </div>
-        )}
-      </section>
+        </div>
+      </Card>
+
+      <Card title="Reference assets"
+        subtitle={
+          <span className="text-white/40">
+            {form.attachments.length} Required
+          </span>
+        }
+        headerRight={
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2 text-[10px] font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+          >
+            <Plus size={12} strokeWidth={3} />
+            Add Image/PDF
+          </button>
+        }
+      >
+        <div className="p-6">
+          <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {form.attachments.length > 0 ? (
+              form.attachments.map(att => (
+                <div key={att.id} className="group relative bg-white/5 p-4 rounded-xl border border-white/5 hover:border-indigo-500/30 transition-all flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-white/5 text-white/20 group-hover:text-indigo-400 transition-all">
+                    {att.type === 'image' ? <ImageIcon size={18} /> : <File size={18} />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-bold text-white/80 group-hover:text-white block truncate">{att.name}</span>
+                    <span className="text-[10px] text-white/40 font-medium">{att.size || 'N/A'}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeAttachment(att.id)}
+                    className="p-2 text-white/5 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full py-16 flex flex-col items-center justify-center text-center opacity-10">
+                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-4">
+                  <Paperclip size={24} />
+                </div>
+                <span className="text-[10px] font-medium">No documentation attached</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </Card>
     </FormLayout>
   );
 };

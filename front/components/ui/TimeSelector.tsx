@@ -8,11 +8,12 @@ interface TimeSelectorProps {
   onChange: (val: string) => void
 }
 
-export const TimeSelector: React.FC<TimeSelectorProps> = ({ label, value, onChange }) => {
-  const [h, m] = value.split(':')
+export const TimeSelector: React.FC<TimeSelectorProps> = ({ label, value = '00:00', onChange }) => {
+  const safeValue = (value && value.includes(':')) ? value : '00:00'
+  const [h, m] = safeValue.split(':')
 
-  const setHours = (newH: string) => onChange(`${newH}:${m}`)
-  const setMinutes = (newM: string) => onChange(`${h}:${newM}`)
+  const setHours = (newH: string) => onChange(`${newH}:${m || '00'}`)
+  const setMinutes = (newM: string) => onChange(`${h || '00'}:${newM}`)
 
   return (
     <div className="w-full">

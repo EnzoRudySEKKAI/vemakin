@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useCallback } from 'react'
 import { Film, Calendar, MapPin, FileText, Package, Check, Search, AlertCircle } from 'lucide-react'
 import { FormLayout, FormType } from '@/components/organisms/FormLayout'
-import { Text, Input, Button, IconContainer, Card, Textarea } from '@/components/atoms'
+import { Text, Input, Button, IconContainer, Textarea } from '@/components/atoms'
+import { Card } from '@/components/ui/Card'
 import { TimeSelector } from '@/components/ui/TimeSelector'
 import { CATEGORY_ICONS } from '@/constants'
 import { Shot, Equipment } from '@/types'
@@ -86,7 +87,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
     const duration = `${diffHours.toFixed(1).replace('.0', '')}h`
 
     const newShot: Shot = {
-      id: `shot-${Date.now()}`,
+      id: crypto.randomUUID(),
       title: form.title,
       sceneNumber: form.sceneNumber || `${existingShots.length + 1}X`,
       location: form.location || 'Location TBD',
@@ -124,157 +125,204 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
       submitDisabled={!isValid}
       submitLabel="Schedule Scene"
     >
-      <div className="flex flex-col gap-8 mb-12 pb-10 border-b border-gray-100 dark:border-white/5">
-        {/* Scene Identity */}
-        <div className="w-full">
-          <Text variant="h3" color="muted" className="mb-3 block text-center sm:text-left">Scene Identity</Text>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+      <Card title="Scene identity" className="mb-8">
+        <div className="p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-8">
             <div className="sm:col-span-3">
+              <span className="text-[10px] text-white/40 font-medium mb-2 block">Scene title</span>
               <Input
                 type="text"
                 value={form.title}
                 onChange={e => setForm({ ...form, title: e.target.value })}
-                placeholder="Scene title..."
+                placeholder="e.g. THE EXTERIOR CHASE"
                 fullWidth
+                variant="underline"
+                className="text-lg font-bold tracking-tight"
               />
             </div>
             <div>
+              <span className="text-[10px] text-white/40 font-medium mb-2 block">Number</span>
               <Input
                 type="text"
                 value={form.sceneNumber}
                 onChange={e => setForm({ ...form, sceneNumber: e.target.value })}
-                placeholder="Scene number (e.g. 4C)"
-                leftIcon={<span className="text-xs font-semibold text-gray-400">SC</span>}
+                placeholder="4C"
+                leftIcon={<span className="text-[10px] font-bold text-white/20">SC</span>}
                 fullWidth
+                variant="underline"
+                className="font-mono text-indigo-300"
               />
             </div>
           </div>
         </div>
+      </Card>
 
-        {/* Schedule */}
-        <div className="w-full">
-          <Text variant="h3" color="muted" className="mb-3 block text-center sm:text-left">Schedule</Text>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <Card title="Schedule & location" className="mb-8">
+        <div className="p-6 space-y-10">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-12">
             <div className="relative">
+              <span className="text-[10px] text-white/40 font-medium mb-2 block">Filming date</span>
               <Input
                 type="date"
                 value={form.date}
                 onChange={e => setForm({ ...form, date: e.target.value })}
                 fullWidth
+                variant="underline"
               />
             </div>
-            <TimeSelector label="" value={form.startTime} onChange={(v) => setForm({ ...form, startTime: v })} />
-            <TimeSelector label="" value={form.endTime} onChange={(v) => setForm({ ...form, endTime: v })} />
+            <div>
+              <span className="text-[10px] text-white/40 font-medium mb-2 block">Start time</span>
+              <TimeSelector label="" value={form.startTime} onChange={(v) => setForm({ ...form, startTime: v })} />
+            </div>
+            <div>
+              <span className="text-[10px] text-white/40 font-medium mb-2 block">Estimated end</span>
+              <TimeSelector label="" value={form.endTime} onChange={(v) => setForm({ ...form, endTime: v })} />
+            </div>
           </div>
 
           {shotConflict && (
-            <div className="flex items-center gap-2 p-3 mt-3 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-xl">
-              <AlertCircle className="text-red-500 dark:text-red-400 shrink-0" size={14} strokeWidth={2.5} />
-              <Text variant="label" color="danger">
-                Conflict: This slot is already taken by "{shotConflict.title}"
-              </Text>
+            <div className="flex items-center gap-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl animate-in fade-in slide-in-from-top-2">
+              <div className="p-2 bg-red-500/20 rounded-lg text-red-400">
+                <AlertCircle size={20} strokeWidth={2.5} />
+              </div>
+              <div>
+                <span className="text-[10px] font-medium text-red-400 block mb-0.5">
+                  Schedule Conflict
+                </span>
+                <span className="text-sm text-white/70">
+                  This slot overlaps with "<span className="text-white font-medium">{shotConflict.title}</span>"
+                </span>
+              </div>
             </div>
           )}
-        </div>
 
-        {/* Location */}
-        <div className="w-full">
-          <Text variant="h3" color="muted" className="mb-3 block text-center sm:text-left">Location</Text>
-          
-          <Input
-            type="text"
-            value={form.location}
-            onChange={e => setForm({ ...form, location: e.target.value })}
-            placeholder="Enter filming location..."
-            fullWidth
-          />
+          <div className="w-full">
+            <span className="text-[10px] text-white/40 font-medium mb-2 block">Location</span>
+            <div className="relative group">
+              <Input
+                type="text"
+                value={form.location}
+                onChange={e => setForm({ ...form, location: e.target.value })}
+                placeholder="Enter filming location..."
+                fullWidth
+                variant="underline"
+                leftIcon={<MapPin size={14} className="text-white/20 group-focus-within:text-indigo-400 transition-colors" />}
+              />
+            </div>
+          </div>
         </div>
+      </Card>
 
-        {/* Description */}
-        <div className="w-full">
-          <Text variant="h3" color="muted" className="mb-3 block text-center sm:text-left">Description</Text>
-          
+      <Card title="Action brief" className="mb-8">
+        <div className="p-6">
           <Textarea
             value={form.description}
             onChange={e => setForm({ ...form, description: e.target.value })}
             placeholder="Describe the action, atmosphere, and key visual elements..."
-            size="lg"
+            className="min-h-[120px]"
           />
         </div>
-      </div>
+      </Card>
 
-      {/* Equipment Section */}
-      <section>
-        <div className="flex items-center justify-between mb-6">
-          <Text variant="h3" color="muted">Equipment</Text>
-          <span className="bg-blue-50 dark:bg-indigo-500/10 text-blue-600 dark:text-indigo-400 px-2.5 py-1 rounded-lg text-xs font-semibold">
-            {form.equipmentIds.length} Selected
+      <Card
+        title="Equipment assignment"
+        headerRight={
+          <span className="text-indigo-400 font-medium text-xs">
+            {form.equipmentIds.length} items selected
           </span>
-        </div>
+        }
+      >
+        <div className="p-6 space-y-6">
+          <div className="space-y-4">
+            <div className="relative">
+              <Input
+                type="text"
+                value={shotGearSearch}
+                onChange={(e) => setShotGearSearch(e.target.value)}
+                placeholder="Search gear inventory..."
+                variant="underline"
+                fullWidth
+                leftIcon={<Search size={14} className="text-white/20" />}
+              />
+            </div>
 
-        {/* Search & Filter */}
-        <div className="space-y-4 mb-6">
-          <Input
-            type="text"
-            value={shotGearSearch}
-            onChange={(e) => setShotGearSearch(e.target.value)}
-            placeholder="Search inventory..."
-            leftIcon={<Search size={16} strokeWidth={2.5} className="text-gray-400" />}
-            fullWidth
-          />
-          <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-            {['All', 'Camera', 'Lens', 'Light', 'Filter', 'Support', 'Grip', 'Monitoring', 'Audio', 'Wireless', 'Drone', 'Props'].map(cat => (
-              <Button
-                key={cat}
-                variant={shotGearCategory === cat ? 'primary' : 'secondary'}
-                size="sm"
-                onClick={() => setShotGearCategory(cat)}
-              >
-                {cat}
-              </Button>
-            ))}
+            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar mask-linear-fade">
+              {['All', 'Camera', 'Lens', 'Light', 'Filter', 'Support', 'Grip', 'Monitoring', 'Audio', 'Wireless', 'Drone', 'Props'].map(cat => {
+                const isActive = shotGearCategory === cat
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setShotGearCategory(cat)}
+                    className={`px-4 py-2 rounded-xl text-[10px] font-medium transition-all border whitespace-nowrap ${isActive
+                      ? 'bg-indigo-500 text-white border-indigo-500 shadow-[0_0_15px_rgba(78,71,221,0.3)]'
+                      : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10 hover:text-white/70 hover:border-white/10'
+                      }`}
+                  >
+                    {cat}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="space-y-1 max-h-[400px] overflow-y-auto custom-scrollbar pr-1">
+            {availableGear.length > 0 ? availableGear.map(item => {
+              const isSelected = form.equipmentIds.includes(item.id)
+              const Icon = (CATEGORY_ICONS as any)[item.category] || Package
+
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => toggleShotGear(item.id)}
+                  className={`w-full flex items-center justify-between p-3 rounded-xl transition-all group border ${isSelected
+                    ? 'bg-indigo-500/10 border-indigo-500/20 shadow-[0_0_10px_rgba(78,71,221,0.05)]'
+                    : 'bg-transparent border-transparent hover:bg-white/5'
+                    }`}
+                >
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className={`p-2.5 rounded-xl transition-all ${isSelected
+                      ? 'bg-indigo-500/20 text-indigo-400'
+                      : 'bg-white/5 text-white/20 group-hover:bg-white/10 group-hover:text-white/40'
+                      }`}>
+                      <Icon size={18} strokeWidth={2} />
+                    </div>
+                    <div className="min-w-0 text-left">
+                      <p className={`text-sm font-medium truncate transition-colors ${isSelected ? 'text-indigo-100' : 'text-white/60 group-hover:text-white'}`}>
+                        {item.customName || item.name}
+                      </p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[10px] font-medium text-white/30">
+                          {item.category}
+                        </span>
+                        {item.status !== 'available' && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/30 font-medium">
+                            {item.status}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 ${isSelected
+                    ? 'bg-indigo-500 text-white shadow-[0_0_10px_rgba(78,71,221,0.4)] scale-100'
+                    : 'bg-white/5 text-white/5 scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100'
+                    }`}>
+                    <Check size={14} strokeWidth={3} />
+                  </div>
+                </button>
+              )
+            }) : (
+              <div className="py-16 flex flex-col items-center justify-center text-center">
+                <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-4 text-white/20">
+                  <Package size={32} strokeWidth={1.5} />
+                </div>
+                <h3 className="text-white/40 font-medium text-sm">No items found</h3>
+                <p className="text-white/20 text-xs mt-1">Try adjusting your search or category</p>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Equipment List */}
-        <div className="space-y-1 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
-          {availableGear.map(item => {
-            const isSelected = form.equipmentIds.includes(item.id)
-            const Icon = (CATEGORY_ICONS as any)[item.category] || Package
-
-            return (
-              <button
-                key={item.id}
-                onClick={() => toggleShotGear(item.id)}
-                className="w-full flex items-center justify-between py-4 text-left border-b border-gray-50 dark:border-white/[0.02] last:border-0"
-              >
-                <div className="flex items-center gap-4 min-w-0">
-                  <IconContainer 
-                    icon={Icon} 
-                    size="md" 
-                    variant={isSelected ? 'accent' : 'default'}
-                  />
-                  <div className="min-w-0">
-                    <Text variant="body" className={isSelected ? 'text-blue-900 dark:text-indigo-400' : ''}>
-                      {item.customName || item.name}
-                    </Text>
-                    <Text variant="caption" color="muted">{item.category}</Text>
-                  </div>
-                </div>
-                <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${
-                  isSelected
-                    ? 'bg-blue-600 dark:bg-indigo-500 text-white shadow-lg shadow-blue-600/20 dark:shadow-indigo-500/20'
-                    : 'bg-gray-100 dark:bg-white/5 text-gray-300'
-                }`}>
-                  <Check size={18} strokeWidth={2.5} />
-                </div>
-              </button>
-            )
-          })}
-        </div>
-      </section>
+      </Card>
     </FormLayout>
   )
 }

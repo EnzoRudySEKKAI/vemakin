@@ -27,6 +27,21 @@ const VIEW_OFFSETS: Record<string, number> = {
   'manage-projects': 8,
 };
 
+const DEFAULT_HEIGHTS: Record<string, number> = {
+  overview: 162,
+  shots: 194,
+  inventory: 252,
+  postprod: 252,
+  notes: 252,
+  default: 160,
+};
+
+const getInitialPadding = (view: string | undefined, offset: number = 0) => {
+  const height = DEFAULT_HEIGHTS[view || 'overview'] || DEFAULT_HEIGHTS.default;
+  const viewOffset = view ? (VIEW_OFFSETS[view] ?? 8) : 8;
+  return Math.round(height + viewOffset + offset);
+};
+
 /**
  * Hook for synchronizing content padding with header layout.
  * Uses per-view max height tracking to prevent padding issues when switching views.
@@ -37,8 +52,8 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
   const { headerRef, updateMeasurements } = useLayout();
 
   // Base padding is the measured padding WITHOUT filter adjustment
-  // Increased to 200 to account for taller ProjectSelector (h-20 = 80px)
-  const [basePadding, setBasePadding] = useState(200);
+  // Use measured default for the current viewType to prevent flicker
+  const [basePadding, setBasePadding] = useState(() => getInitialPadding(viewType, additionalOffset));
   const [isReady, setIsReady] = useState(false);
   const rafIdRef = useRef<number | null>(null);
   const isMeasuringRef = useRef(false);
@@ -49,11 +64,10 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
   const isViewChangingRef = useRef(false);
 
   // Get or initialize max height for current view
-  // Initialized to 200 to account for taller ProjectSelector
   const getMaxHeightForView = useCallback((view: string | undefined) => {
     const key = view || 'default';
     if (!(key in maxHeightPerViewRef.current)) {
-      maxHeightPerViewRef.current[key] = 200;
+      maxHeightPerViewRef.current[key] = DEFAULT_HEIGHTS[key] || DEFAULT_HEIGHTS.default;
     }
     return maxHeightPerViewRef.current[key];
   }, []);
@@ -61,8 +75,10 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
   // Update max height for current view
   const updateMaxHeightForView = useCallback((view: string | undefined, height: number) => {
     const key = view || 'default';
-    const currentMax = maxHeightPerViewRef.current[key] || 160;
-    if (height > currentMax) {
+    // If we're just starting or the height is significantly different, update it
+    const currentMax = maxHeightPerViewRef.current[key];
+    const initialDefault = DEFAULT_HEIGHTS[key] || DEFAULT_HEIGHTS.default;
+    if (currentMax === initialDefault || height > currentMax || Math.abs(height - currentMax) > 5) {
       maxHeightPerViewRef.current[key] = height;
     }
   }, []);
@@ -73,6 +89,9 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
       isViewChangingRef.current = true;
       currentViewRef.current = viewType;
       setIsReady(false);
+
+      // Immediately set initial padding for the new view to avoid jump
+      setBasePadding(getInitialPadding(viewType, additionalOffset));
 
       // Longer delay to let the header fully render with new content and any animations complete
       const timer = setTimeout(() => {
@@ -142,11 +161,10 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
         const row1Height = row1El?.getBoundingClientRect().height || 58;
         const row2Rect = row2El?.getBoundingClientRect();
         const row2Height = row2Rect?.height || 0;
-        // Use row2's bottom position as the true total height (when filters are visible)
-        const totalHeight = row2Rect ? row2Rect.bottom : rect.bottom;
-
         // Update max height for current view only
-        updateMaxHeightForView(viewType, totalHeight);
+        // Fallback to rect.bottom if rows aren't found
+        const measuredHeight = (row2Rect ? row2Rect.bottom : rect.bottom) || 160;
+        updateMaxHeightForView(viewType, measuredHeight);
         const stableHeight = getMaxHeightForView(viewType);
 
         const viewOffset = viewType ? (VIEW_OFFSETS[viewType] ?? 8) : 8;
@@ -183,8 +201,10 @@ export function useSyncLayout(options: UseSyncLayoutOptions = {}): UseSyncLayout
     const header = headerRef.current;
     if (!header) return;
 
-    // Initial measurement after a longer delay to ensure header is fully rendered
-    const initialTimer = setTimeout(measureAndUpdate, 200);
+    // Initial measurement immediately if header is already in DOM
+    // Otherwise use a short delay
+    const initialDelay = headerRef.current ? 50 : 200;
+    const initialTimer = setTimeout(measureAndUpdate, initialDelay);
 
     // Secondary measurement to catch any late-rendered content
     const secondaryTimer = setTimeout(measureAndUpdate, 500);

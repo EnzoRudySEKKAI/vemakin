@@ -1,15 +1,12 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Film, Plus, Sun, Moon } from 'lucide-react'
+import { Film, Plus, Sun, Moon, Clock, MapPin, Check, Package, ChevronUp, ChevronDown } from 'lucide-react'
 import { Shot, ShotLayout, Equipment } from '@/types'
-import { calculateEndTime, timeToMinutes, getSunTimes } from '@/utils'
-import { pageVariants } from '@/utils/animations'
+import { calculateEndTime, timeToMinutes, getSunTimes, formatDateWithDay } from '@/utils'
+import { Card } from '@/components/ui/Card'
 import { TravelIndicator } from '@/components/ui/TravelIndicator'
 import { GearTransition } from '@/components/ui/GearTransition'
-import { ShotCard } from './ShotCard'
 import { Button } from '@/components/atoms/Button'
-import { Text } from '@/components/atoms/Text'
-import { IconContainer } from '@/components/atoms/IconContainer'
 
 interface ShotsViewProps {
   groupedShots: Record<string, Shot[]>
@@ -23,6 +20,11 @@ interface ShotsViewProps {
   inventory: Equipment[]
   searchQuery?: string
   statusFilter?: 'all' | 'pending' | 'done'
+}
+
+const getTimelineStatus = (shot: Shot): 'done' | 'current' | 'pending' => {
+  if (shot.status === 'done') return 'done'
+  return 'pending'
 }
 
 export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
@@ -42,13 +44,11 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
   const observerRef = useRef<IntersectionObserver | null>(null)
 
   const filteredGroupedShots = useMemo(() => {
-    // Start with all shots
     const filtered: Record<string, Shot[]> = {}
 
     Object.keys(groupedShots).forEach(date => {
       let shots = groupedShots[date]
 
-      // 1. Apply Search Filter
       if (searchQuery) {
         const lowerQuery = searchQuery.toLowerCase()
         shots = shots.filter(s =>
@@ -58,12 +58,10 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
         )
       }
 
-      // 2. Apply Status Filter
       if (statusFilter !== 'all') {
         shots = shots.filter(s => s.status === statusFilter)
       }
 
-      // Only add date group if it has matching shots
       if (shots.length > 0) {
         filtered[date] = shots
       }
@@ -80,7 +78,6 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
 
     observerRef.current = new IntersectionObserver((entries) => {
       const activeEntry = entries.find(entry => entry.isIntersecting)
-
       if (activeEntry && activeEntry.target.id) {
         onDateInView(activeEntry.target.id)
       }
@@ -107,14 +104,16 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
   if (totalShots === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-220px)] w-full overflow-hidden px-6 select-none">
-        <IconContainer icon={Film} size="2xl" variant="default" className="mb-8" />
+        <div className="w-14 h-14 bg-[#0D0D0F] rounded-xl flex items-center justify-center mb-6 border border-white/[0.05]">
+          <Film size={24} className="text-white/40" />
+        </div>
         <div className="text-center max-w-sm">
-          <Text variant="h2" className="text-gray-900 dark:text-white mb-2">
+          <h2 className="text-xl font-semibold text-white mb-2">
             {searchQuery || statusFilter !== 'all' ? "No Matches Found" : "Empty Timeline"}
-          </Text>
-          <Text variant="caption" color="muted" className="mb-8">
-            {searchQuery || statusFilter !== 'all' ? "Try adjusting your filters to find the scene you're looking for." : "The set is quiet. Begin your production by scheduling the first scene for your project."}
-          </Text>
+          </h2>
+          <p className="text-white/30 mb-8 text-sm">
+            {searchQuery || statusFilter !== 'all' ? "Try adjusting your filters." : "Begin your production by scheduling the first scene."}
+          </p>
           <Button
             variant="primary"
             size="lg"
@@ -129,7 +128,7 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
   }
 
   return (
-    <div>
+    <div className="space-y-4">
       {dates.map((dateString) => {
         const dayShots = filteredGroupedShots[dateString]
         if (!dayShots?.length) return null
@@ -140,67 +139,164 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
           <div
             key={dateString}
             id={dateString}
-            className="date-section mb-8 last:mb-0 scroll-mt-[180px]"
+            className="date-section scroll-mt-[180px]"
           >
-            <div className="flex items-center gap-3 px-2 py-2 mb-4">
-              <div className="h-px flex-1 bg-gray-300/50 dark:bg-white/10"/>
-              <div className="flex items-center gap-6">
-                <Text variant="body" className="text-gray-600 dark:text-gray-300">{dateString}</Text>
+            <Card
+              title={formatDateWithDay(dateString)}
+              headerRight={
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-orange-500 dark:text-orange-400">
-                    <Sun size={16} strokeWidth={2.5} /> {sunrise}
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-orange-400/60">
+                    <Sun size={14} strokeWidth={2} /> {sunrise}
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-500 dark:text-indigo-500">
-                    <Moon size={16} strokeWidth={2.5} /> {sunset}
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-indigo-400/60">
+                    <Moon size={14} strokeWidth={2} /> {sunset}
                   </div>
                 </div>
-              </div>
-              <div className="h-px flex-1 bg-gray-300/50 dark:bg-white/10"/>
-            </div>
+              }
+            >
+              <div className="p-4 space-y-3">
+                {/* Shots List */}
 
-            <div className={`relative ${shotLayout === 'list' ? 'space-y-2' : 'space-y-2'}`}>
-              {dayShots.map((shot, idx) => {
-                let availableMinutes = undefined
-                // Only calculate travel if we are looking at the full list (no search filter affecting order heavily)
-                if (idx > 0 && !searchQuery && statusFilter === 'all') {
-                  const prevShot = dayShots[idx - 1]
-                  const prevEndTime = calculateEndTime(prevShot.startTime, prevShot.duration)
-                  availableMinutes = timeToMinutes(shot.startTime) - timeToMinutes(prevEndTime)
-                }
+                <div className="space-y-2">
+                  {dayShots.map((shot, idx) => {
+                    let availableMinutes = undefined
+                    if (idx > 0 && !searchQuery && statusFilter === 'all') {
+                      const prevShot = dayShots[idx - 1]
+                      const prevEndTime = calculateEndTime(prevShot.startTime, prevShot.duration)
+                      availableMinutes = timeToMinutes(shot.startTime) - timeToMinutes(prevEndTime)
+                    }
 
-                return (
-                  <div
-                    key={`${shot.id}`}
-                  >
-                    {idx > 0 && shotLayout !== 'list' && !searchQuery && statusFilter === 'all' && (
-                      <div className="w-full max-w-5xl mx-auto flex flex-col lg:flex-row items-center justify-center gap-2 lg:gap-4 mt-4 mb-4">
-                        <TravelIndicator
-                          from={dayShots[idx - 1].location}
-                          to={shot.location}
-                          availableMinutes={availableMinutes}
-                        />
-                        <GearTransition
-                          prevShot={dayShots[idx - 1]}
-                          nextShot={shot}
-                          inventory={inventory}
-                        />
+                    const status = getTimelineStatus(shot)
+                    const barColor = status === 'done' ? 'bg-emerald-500' : status === 'current' ? 'bg-indigo-500' : 'bg-white/20'
+                    const isChecklistOpen = expandedChecklist === shot.id
+
+                    return (
+                      <div key={shot.id}>
+                        {shotLayout === 'timeline' && idx > 0 && !searchQuery && statusFilter === 'all' && (
+                          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-center gap-3 lg:gap-4 my-4 px-2">
+                            <TravelIndicator
+                              from={dayShots[idx - 1].location}
+                              to={shot.location}
+                              availableMinutes={availableMinutes}
+                            />
+                            <GearTransition
+                              prevShot={dayShots[idx - 1]}
+                              nextShot={shot}
+                              inventory={inventory}
+                            />
+                          </div>
+                        )}
+
+                        <div
+                          className="group cursor-pointer rounded-xl transition-all duration-200 bg-[#0D0D0F] border border-white/[0.05] hover:border-white/[0.1]"
+                        >
+                          <div className={shotLayout === 'list' ? "p-3" : "p-4"} onClick={() => onShotClick(shot)}>
+                            <div className={shotLayout === 'list' ? "flex flex-col gap-2" : "flex flex-col gap-4"}>
+                              <div className="flex items-start gap-3">
+                                <div className="flex items-center gap-2 min-w-[70px] pt-1">
+                                  <div className={`w-1 ${shotLayout === 'list' ? 'h-6' : 'h-10'} rounded-full ${barColor}`} />
+                                  <div className="text-xs">
+                                    <div className="text-white/50 font-mono">{shot.startTime}</div>
+                                    {shotLayout === 'timeline' && (
+                                      <div className="text-white/20 text-[10px]">{shot.duration}</div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="flex-1 min-w-0">
+                                  <div className={`${shotLayout === 'list' ? 'text-xs' : 'text-sm'} text-white font-medium truncate`}>{shot.title}</div>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <span className="text-[10px] text-white/20 uppercase tracking-wider shrink-0">Sc {shot.sceneNumber}</span>
+                                    <span className="text-white/5">|</span>
+                                    <div className="flex items-center gap-1 text-[11px] text-white/20 truncate">
+                                      <MapPin size={10} className="shrink-0" />
+                                      <span className="truncate">{shot.location}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {shotLayout !== 'list' && (
+                                <div className="flex items-center justify-between gap-3">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleToggleChecklist(shot.id)
+                                    }}
+                                    className={`h-7 px-2.5 rounded-lg flex items-center gap-1.5 text-[10px] font-semibold border transition-all ${isChecklistOpen
+                                      ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30'
+                                      : 'bg-white/5 text-white/40 border-white/10 hover:border-white/20 hover:bg-white/10'
+                                      }`}
+                                  >
+                                    <Package size={12} />
+                                    <span className={shotLayout === 'list' ? 'hidden sm:inline' : ''}>Check Gear</span>
+                                    <div className="flex items-center gap-1 ml-1 px-1.5 py-0.5 rounded-md bg-white/5 border border-white/5 text-[9px]">
+                                      {shot.preparedEquipmentIds.length}/{shot.equipmentIds.length}
+                                    </div>
+                                    {isChecklistOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                                  </button>
+
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); onToggleStatus(shot.id) }}
+                                    className={`${shotLayout === 'list' ? 'w-7 h-7' : 'w-8 h-8'} rounded-lg flex items-center justify-center border transition-all ${shot.status === 'done'
+                                      ? 'bg-emerald-500 text-white border-transparent'
+                                      : 'bg-transparent text-white/30 border-white/[0.08] hover:border-white/20'
+                                      }`}
+                                  >
+                                    <Check size={14} strokeWidth={3} />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <AnimatePresence>
+                            {isChecklistOpen && shot.equipmentIds.length > 0 && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="px-4 pb-4 pt-0">
+                                  <div className="pt-3 border-t border-white/[0.05]">
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                      {shot.equipmentIds.map(eId => {
+                                        const equip = inventory.find(e => e.id === eId)
+                                        const isPrepared = shot.preparedEquipmentIds.includes(eId)
+                                        return (
+                                          <button
+                                            key={eId}
+                                            onClick={(e) => { e.stopPropagation(); onToggleEquipment(shot.id, eId) }}
+                                            className={`flex items-center justify-between p-2.5 rounded-lg text-xs font-medium border text-left transition-all ${isPrepared
+                                              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                                              : 'bg-[#0A0A0A] border-white/[0.05] text-white/40 hover:border-white/10'
+                                              }`}
+                                          >
+                                            <span className="truncate mr-2">{equip?.customName || equip?.name || 'Unknown Item'}</span>
+                                            <div className={`w-4 h-4 rounded-full flex items-center justify-center border ${isPrepared
+                                              ? 'bg-emerald-500 border-emerald-500 text-white'
+                                              : 'border-white/20'
+                                              }`}>
+                                              {isPrepared && <Check size={10} strokeWidth={4} />}
+                                            </div>
+                                          </button>
+                                        )
+                                      })}
+                                    </div>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
                       </div>
-                    )}
-
-                    <ShotCard
-                      shot={shot}
-                      shotLayout={shotLayout}
-                      isChecklistOpen={expandedChecklist === shot.id}
-                      onShotClick={onShotClick}
-                      onToggleStatus={onToggleStatus}
-                      onToggleChecklist={handleToggleChecklist}
-                      onToggleEquipment={onToggleEquipment}
-                      inventory={inventory}
-                    />
-                  </div>
-                )
-              })}
-            </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </Card>
           </div>
         )
       })}

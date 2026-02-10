@@ -94,6 +94,13 @@ def enrich_single_equipment(db: Session, item: models.Equipment) -> dict:
         except (ValueError, TypeError):
             display_name = display_category
 
+    brand_name = None
+    if catalog_item and catalog_item.brand_id:
+        brand_stmt = select(models.Brand).where(models.Brand.id == catalog_item.brand_id)
+        brand = db.execute(brand_stmt).scalar_one_or_none()
+        if brand:
+            brand_name = brand.name
+
     return {
         "id": item.id,
         "name": display_name,
@@ -108,6 +115,28 @@ def enrich_single_equipment(db: Session, item: models.Equipment) -> dict:
         "isOwned": bool(item.is_owned) if item.is_owned is not None else True,
         "status": item.status,
         "specs": specs,
+        "brandName": brand_name,
+        "modelName": display_name if catalog_item_id else None,
+    }
+
+
+def map_equipment_to_response(item: dict) -> dict:
+    """Helper to map snake_case mock data to camelCase schema fields."""
+    return {
+        "id": item["id"],
+        "name": item.get("name", "New Equipment"),
+        "catalogItemId": item.get("catalog_item_id"),
+        "customName": item.get("custom_name"),
+        "serialNumber": item.get("serial_number"),
+        "category": item.get("category", "Accessories"),
+        "pricePerDay": item.get("price_per_day", 0),
+        "rentalPrice": item.get("rental_price"),
+        "rentalFrequency": item.get("rental_frequency"),
+        "quantity": item.get("quantity", 1),
+        "isOwned": item.get("is_owned", True),
+        "status": item.get("status", "available"),
+        "brandName": item.get("brand"),
+        "modelName": item.get("model"),
     }
 
 
@@ -155,6 +184,14 @@ def batch_enrich_equipment(db: Session, items: List[models.Equipment]) -> List[d
         )
         catalog_results = db.execute(catalog_stmt).scalars().all()
         catalog_items = {str(c.id): c for c in catalog_results}
+
+    # Batch fetch all brands
+    brands = {}
+    brand_ids = {c.brand_id for c in catalog_items.values() if c.brand_id}
+    if brand_ids:
+        brand_stmt = select(models.Brand).where(models.Brand.id.in_(brand_ids))
+        brand_results = db.execute(brand_stmt).scalars().all()
+        brands = {str(b.id): b for b in brand_results}
 
     # Group items by category for efficient specs fetching
     category_to_gear_ids = {}
@@ -255,7 +292,16 @@ def batch_enrich_equipment(db: Session, items: List[models.Equipment]) -> List[d
             "isOwned": bool(item.is_owned) if item.is_owned is not None else True,
             "status": item.status,
             "specs": specs,
+            "brandName": None,
+            "modelName": None,
         }
+
+        if catalog_item_id_str and catalog_item_id_str in catalog_items:
+            cat_item = catalog_items[catalog_item_id_str]
+            item_dict["modelName"] = cat_item.name
+            if str(cat_item.brand_id) in brands:
+                item_dict["brandName"] = brands[str(cat_item.brand_id)].name
+
         result.append(item_dict)
 
     elapsed = time.time() - start_time
@@ -279,28 +325,7 @@ def read_inventory(
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
         inventory = mock_db.list_inventory()
-        converted_inventory = []
-        for item in inventory:
-            converted_item = {
-                "id": item["id"],
-                "name": item["name"],
-                "category": item["category"],
-                "brand": item.get("brand", ""),
-                "model": item.get("model", ""),
-                "serialNumber": item.get("serial_number", ""),
-                "purchaseDate": item.get("purchase_date"),
-                "purchasePrice": item.get("purchase_price", 0),
-                "currency": item.get("currency", "EUR"),
-                "pricePerDay": item.get("price_per_day", 0),
-                "rentalPrice": item.get("rental_price"),
-                "rentalFrequency": item.get("rental_frequency"),
-                "quantity": item.get("quantity", 1),
-                "isOwned": item.get("is_owned", True),
-                "status": item.get("status", "operational"),
-                "notes": item.get("notes", ""),
-                "specs": item.get("specs", {}),
-            }
-            converted_inventory.append(converted_item)
+        converted_inventory = [map_equipment_to_response(item) for item in inventory]
         return converted_inventory[skip : skip + limit]
 
     total_start = time.time()
@@ -343,28 +368,38 @@ def create_equipment(
             "id": equipment.id,
             "name": equipment.name,
             "category": equipment.category,
-            "serial_number": equipment.serialNumber,
+            "price_per_day": equipment.price_per_day,
+            "rental_price": equipment.rental_price,
+            "rental_frequency": equipment.rental_frequency,
+            "quantity": equipment.quantity,
+            "is_owned": equipment.is_owned,
+            "serial_number": equipment.serial_number,
             "status": equipment.status or "available",
+            "catalog_item_id": equipment.catalog_item_id,
+            "custom_name": equipment.custom_name,
+            "brand": equipment.brand_name,
+            "model": equipment.model_name,
         }
-        return mock_db.create_inventory_item(item_data)
+        new_item = mock_db.create_inventory_item(item_data)
+        return map_equipment_to_response(new_item)
 
     start_time = time.time()
 
     # Manually map CamelCase from Schema to SnakeCase for Model
-    catalog_item_id = equipment.catalogItemId
+    catalog_item_id = equipment.catalog_item_id
     db_equipment = models.Equipment(
         id=equipment.id,
         user_id=current_user["uid"],
         name=equipment.name,
         catalog_item_id=catalog_item_id,
-        custom_name=equipment.customName,
-        serial_number=equipment.serialNumber,
+        custom_name=equipment.custom_name,
+        serial_number=equipment.serial_number,
         category=equipment.category,
-        price_per_day=equipment.pricePerDay,
-        rental_price=equipment.rentalPrice,
-        rental_frequency=equipment.rentalFrequency,
+        price_per_day=equipment.price_per_day,
+        rental_price=equipment.rental_price,
+        rental_frequency=equipment.rental_frequency,
         quantity=equipment.quantity,
-        is_owned=equipment.isOwned,
+        is_owned=equipment.is_owned,
         status=equipment.status,
     )
     db.add(db_equipment)
@@ -405,7 +440,7 @@ def update_equipment(
         update_data = {
             "name": equipment_update.name,
             "category": equipment_update.category,
-            "serial_number": equipment_update.serialNumber,
+            "serial_number": equipment_update.serial_number,
             "status": equipment_update.status,
         }
         update_data = {k: v for k, v in update_data.items() if v is not None}
@@ -426,15 +461,15 @@ def update_equipment(
         raise HTTPException(status_code=404, detail="Equipment not found")
 
     item.name = equipment_update.name
-    item.catalog_item_id = equipment_update.catalogItemId
-    item.custom_name = equipment_update.customName
-    item.serial_number = equipment_update.serialNumber
+    item.catalog_item_id = equipment_update.catalog_item_id
+    item.custom_name = equipment_update.custom_name
+    item.serial_number = equipment_update.serial_number
     item.category = equipment_update.category
-    item.price_per_day = equipment_update.pricePerDay
-    item.rental_price = equipment_update.rentalPrice
-    item.rental_frequency = equipment_update.rentalFrequency
+    item.price_per_day = equipment_update.price_per_day
+    item.rental_price = equipment_update.rental_price
+    item.rental_frequency = equipment_update.rental_frequency
     item.quantity = equipment_update.quantity
-    item.is_owned = equipment_update.isOwned
+    item.is_owned = equipment_update.is_owned
     item.status = equipment_update.status
 
     db.commit()

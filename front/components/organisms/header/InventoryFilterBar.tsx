@@ -32,21 +32,16 @@ export const InventoryFilterBar: React.FC<InventoryFilterBarProps> = ({
   inventory,
   className = ''
 }) => {
-  const ownedCount = inventory.filter(i => i.isOwned).length
-  const rentedCount = inventory.filter(i => !i.isOwned).length
-
   return (
-    <div className={`flex flex-col gap-2 ${className}`}>
-      {/* Search Bar */}
+    <div className={`flex flex-col gap-3 ${className}`}>
       <SearchBar
         view="inventory"
         value={searchQuery}
         onChange={onSearchChange}
       />
 
-      {/* Filters Row */}
-      <div className="h-[48px] flex items-center w-full gap-4">
-        <div className="flex-1 min-w-0">
+      <div className="flex items-center gap-3">
+        <div className="flex-1 min-w-0 overflow-x-auto no-scrollbar">
           <FilterPills
             options={INVENTORY_CATEGORIES}
             value={categoryFilter}
@@ -54,40 +49,29 @@ export const InventoryFilterBar: React.FC<InventoryFilterBarProps> = ({
             scrollKey="inventory"
           />
         </div>
-
-        {/* Metrics - Pinned Right */}
-        <MetricsGroup
-          metrics={[
-            { label: 'Total Gear', value: inventory.length },
-            { label: 'Owned', value: ownedCount, color: 'primary' },
-            { label: 'Rented', value: rentedCount, color: 'warning' }
-          ]}
-          className="hidden sm:flex shrink-0"
-        />
       </div>
 
-      {/* Secondary Row */}
-      <div className="h-[48px] flex items-center gap-2 w-full">
-        <div className="flex w-full gap-2">
-          <div className="flex-1 cf-segment-container">
-            <SegmentControl
-              options={[
-                { value: 'all', label: 'All' },
-                { value: 'owned', label: 'Own' },
-                { value: 'rented', label: 'Rent' }
-              ]}
-              value={ownershipFilter}
-              onChange={(v) => onOwnershipChange(v as any)}
-              variant="fluid"
-            />
-          </div>
-
-          <LayoutToggle
-            value={layout}
-            onChange={onLayoutChange}
+      <div className="flex items-center gap-3">
+        <div className="flex-1 flex items-center gap-2 min-w-0">
+          <SegmentControl
+            options={[
+              { value: 'all', label: 'All' },
+              { value: 'owned', label: 'Own' },
+              { value: 'rented', label: 'Rent' }
+            ]}
+            value={ownershipFilter}
+            onChange={(v) => onOwnershipChange(v as any)}
+            variant="fluid"
           />
         </div>
+
+        <LayoutToggle
+          value={layout}
+          onChange={onLayoutChange}
+        />
       </div>
     </div>
   )
 }
+
+export default InventoryFilterBar

@@ -11,6 +11,22 @@ from ..mock_data import get_mock_db
 router = APIRouter(prefix="/postprod", tags=["postprod"])
 
 
+def map_task_to_response(task: dict) -> dict:
+    """Helper to map snake_case mock data to camelCase schema fields."""
+    return {
+        "id": task["id"],
+        "project_id": task["project_id"],
+        "category": task.get("category", "Editing"),
+        "title": task.get("title", "New Task"),
+        "status": task.get("status", "todo"),
+        "priority": task.get("priority", "medium"),
+        "dueDate": task.get("due_date"),
+        "description": task.get("description"),
+        "created_at": task.get("created_at"),
+        "updated_at": task.get("updated_at"),
+    }
+
+
 @router.get("", response_model=schemas.PaginatedTaskResponse)
 def read_tasks(
     project_id: str,
@@ -29,8 +45,9 @@ def read_tasks(
         tasks = mock_db.list_tasks(project_id)
         total = len(tasks) if tasks else 0
         paginated_tasks = tasks[skip : skip + limit] if tasks else []
+        items = [map_task_to_response(t) for t in paginated_tasks]
         return {
-            "items": paginated_tasks,
+            "items": items,
             "total": total,
             "page": skip // limit + 1 if limit > 0 else 1,
             "limit": limit,
@@ -100,7 +117,8 @@ def create_task(
             "due_date": task.dueDate,
             "description": task.description,
         }
-        return mock_db.create_task(task_data)
+        new_task = mock_db.create_task(task_data)
+        return map_task_to_response(new_task)
 
     # SQLAlchemy 2.0: Verify project ownership
     project_stmt = select(models.Project).where(

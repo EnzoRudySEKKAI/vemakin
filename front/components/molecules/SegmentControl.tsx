@@ -1,7 +1,5 @@
 import React from 'react'
 import { LayoutGrid, List as ListIcon } from 'lucide-react'
-import { Button } from '@/components/atoms/Button'
-import { radius, typography } from '@/design-system'
 
 export type SegmentOption = {
   value: string
@@ -25,46 +23,59 @@ export const SegmentControl: React.FC<SegmentControlProps> = ({
   className = ''
 }) => {
   return (
-    <div className={`cf-segment-container ${variant === 'fluid' ? 'flex-1' : ''} ${className}`}>
+    <div className={`flex items-center gap-1 p-1 bg-[#0D0D0F] border border-white/[0.05] rounded-xl ${variant === 'fluid' ? 'flex-1' : ''} ${className}`}>
       {options.map((option) => {
         const Icon = option.icon
         const isActive = value === option.value
-        
+
         return (
-          <Button
+          <button
             key={option.value}
             onClick={() => onChange(option.value)}
-            variant={isActive ? 'primary' : 'ghost'}
-            size="sm"
             className={`
-              cf-segment-item
-              ${variant === 'icon-only' || (!option.label && Icon) ? 'icon-only' : ''}
+              flex items-center justify-center gap-2 px-2.5 md:px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap
+              ${isActive
+                ? 'bg-indigo-500 text-white'
+                : 'text-white/50 hover:text-white/70 hover:bg-white/5'
+              }
+              ${variant === 'icon-only' || (!option.label && Icon) ? 'w-10 px-0' : 'flex-1'}
             `}
-            style={variant === 'default' && option.label ? { padding: '0 16px' } : undefined}
           >
-            {Icon && <Icon size={variant === 'icon-only' ? 22 : 18} strokeWidth={2.5} />}
+            {Icon && <Icon size={18} strokeWidth={2} />}
             {option.label && <span>{option.label}</span>}
-          </Button>
+          </button>
         )
       })}
     </div>
   )
 }
 
-// Presets pour les layouts
+// Layout Toggle Preset
 export const LayoutToggle: React.FC<{
   value: 'grid' | 'list'
   onChange: (value: 'grid' | 'list') => void
   className?: string
 }> = ({ value, onChange, className }) => (
-  <SegmentControl
-    options={[
-      { value: 'grid', icon: LayoutGrid },
-      { value: 'list', icon: ListIcon }
-    ]}
-    value={value}
-    onChange={(v) => onChange(v as 'grid' | 'list')}
-    variant="icon-only"
-    className={className}
-  />
+  <div className={`flex items-center gap-1 p-1 bg-[#0D0D0F] border border-white/[0.05] rounded-xl ${className}`}>
+    <button
+      onClick={() => onChange('grid')}
+      className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all ${value === 'grid'
+          ? 'bg-indigo-500 text-white'
+          : 'text-white/50 hover:text-white/70 hover:bg-white/5'
+        }`}
+    >
+      <LayoutGrid size={18} strokeWidth={2} />
+    </button>
+    <button
+      onClick={() => onChange('list')}
+      className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all ${value === 'list'
+          ? 'bg-indigo-500 text-white'
+          : 'text-white/50 hover:text-white/70 hover:bg-white/5'
+        }`}
+    >
+      <ListIcon size={18} strokeWidth={2} />
+    </button>
+  </div>
 )
+
+export default SegmentControl

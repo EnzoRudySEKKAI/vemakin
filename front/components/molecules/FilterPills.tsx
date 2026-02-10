@@ -1,6 +1,5 @@
 import React from 'react'
 import { ScrollFade } from '@/components/ui/ScrollFade'
-import { Button } from '@/components/atoms/Button'
 
 interface FilterPillsProps {
   options: string[]
@@ -19,17 +18,26 @@ export const FilterPills: React.FC<FilterPillsProps> = ({
 }) => {
   return (
     <ScrollFade className={`flex gap-2 py-0.5 w-full ${className}`} scrollKey={scrollKey}>
-      {options.map(option => (
-        <Button
-          key={option}
-          onClick={() => onChange(option)}
-          variant={value === option ? 'primary' : 'secondary'}
-          size="sm"
-          className="cf-control cf-pill"
-        >
-          {option}
-        </Button>
-      ))}
+      {options.map(option => {
+        const isActive = value === option
+        return (
+          <button
+            key={option}
+            onClick={() => onChange(option)}
+            className={`
+              px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all
+              ${isActive 
+                ? 'bg-indigo-500 text-white' 
+                : 'bg-[#0D0D0F] text-white/50 border border-white/[0.05] hover:border-white/[0.1] hover:text-white/70'
+              }
+            `}
+          >
+            {option}
+          </button>
+        )
+      })}
     </ScrollFade>
   )
 }
+
+export default FilterPills

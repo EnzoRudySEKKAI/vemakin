@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   ChevronDown, ChevronUp, PenLine, Hash, Tag, Box,
   Package, Info, DollarSign, Aperture
 } from 'lucide-react'
-import { Text, Input, Button, Card, IconContainer } from '@/components/atoms'
+import { Text, Input, Button, IconContainer } from '@/components/atoms'
+import { Card } from '@/components/ui/Card'
 import { Equipment, CatalogCategory, CatalogBrand, CatalogItem } from '@/types'
 import { useProductionStore } from '@/hooks/useProductionStore'
 import { radius, typography } from '@/design-system'
@@ -106,190 +108,189 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
   const isValid = form.category && (form.category === 'Other' || form.brand || catalogBrands.length === 0)
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="grid grid-cols-1 gap-6">
-        {/* Custom Name & Serial */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="sm:col-span-2">
-            <div className="flex flex-col gap-1 min-w-0">
-              <Text variant="label" color="muted">Custom Name / Label</Text>
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <Card title="Identity & registry" className="mb-8">
+        <div className="p-6 space-y-10">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-10">
+            <div className="sm:col-span-2">
+              <span className="text-[10px] text-white/40 font-medium mb-2 block">Custom name</span>
               <Input
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
                 fullWidth
                 placeholder="E.g. A-Cam, Unit 1..."
+                variant="underline"
               />
             </div>
-          </div>
-          <div>
-            <div className="flex flex-col gap-1 min-w-0">
-              <Text variant="label" color="muted">Serial Number</Text>
+            <div>
+              <span className="text-[10px] text-white/40 font-medium mb-2 block">Serial registry ID</span>
               <Input
                 type="text"
                 value={form.serialNumber}
                 onChange={(e) => setForm(prev => ({ ...prev, serialNumber: e.target.value }))}
                 fullWidth
                 placeholder="S/N: 12345..."
+                variant="underline"
               />
             </div>
           </div>
         </div>
+      </Card>
 
-        {/* Category & Brand */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <div className="flex flex-col gap-1 min-w-0">
-              <Text variant="label" color="muted">Category</Text>
-              <div className="relative">
+      <Card title="Categorization & model" className="mb-8">
+        <div className="p-6 space-y-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+            <div>
+              <span className="text-[10px] text-white/40 font-medium mb-3 block">Deployment type</span>
+              <div className="relative group">
                 <select
                   value={form.category}
                   onChange={(e) => handleCategoryChange(e.target.value)}
-                  className="w-full appearance-none bg-transparent border-b border-gray-200 dark:border-white/10 py-2 pr-10 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all cursor-pointer text-sm font-semibold"
+                  className="w-full appearance-none bg-transparent border-b border-white/10 py-3 pr-10 text-white/80 focus:text-white focus:outline-none focus:border-indigo-500 transition-all cursor-pointer text-sm font-bold tracking-tight"
                 >
-                  <option value="">Select Category</option>
+                  <option value="" className="bg-[#0A0A0A]">Select Category</option>
                   {catalogCategories.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    <option key={cat.id} value={cat.id} className="bg-[#0A0A0A]">{cat.name}</option>
                   ))}
-                  <option value="Other">Other</option>
+                  <option value="Other" className="bg-[#0A0A0A]">Other</option>
                 </select>
-                <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none" size={16} strokeWidth={2.5} />
+                <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-indigo-400 pointer-events-none transition-colors" size={14} strokeWidth={3} />
               </div>
             </div>
-          </div>
 
-          {catalogBrands.length > 0 && (
-            <div className="animate-in slide-in-from-left-2 duration-300">
-              <div className="flex flex-col gap-1 min-w-0">
-                <Text variant="label" color="muted">Brand</Text>
-                <div className="relative">
+            {catalogBrands.length > 0 && (
+              <div className="animate-in fade-in slide-in-from-left-4 duration-500">
+                <span className="text-[10px] text-white/40 font-medium mb-3 block">Manufacturer</span>
+                <div className="relative group">
                   <select
                     value={form.brand}
                     onChange={(e) => handleBrandChange(e.target.value)}
-                    className="w-full appearance-none bg-transparent border-b border-gray-200 dark:border-white/10 py-2 pr-10 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all cursor-pointer text-sm font-semibold"
+                    className="w-full appearance-none bg-transparent border-b border-white/10 py-3 pr-10 text-white/80 focus:text-white focus:outline-none focus:border-indigo-500 transition-all cursor-pointer text-sm font-bold tracking-tight"
                   >
-                    <option value="">Select Brand</option>
+                    <option value="" className="bg-[#0A0A0A]">Select Brand</option>
                     {catalogBrands.map(b => (
-                      <option key={b.id} value={b.id}>{b.name}</option>
+                      <option key={b.id} value={b.id} className="bg-[#0A0A0A]">{b.name}</option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none" size={16} strokeWidth={2.5} />
+                  <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-indigo-400 pointer-events-none transition-colors" size={14} strokeWidth={3} />
                 </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
 
-
-        {/* Model */}
-        {catalogItems.length > 0 && (
-          <div className="animate-in slide-in-from-top-2 duration-300">
-            <div className="flex flex-col gap-1 min-w-0">
-              <Text variant="label" color="muted">Model</Text>
-              <div className="relative">
+          {catalogItems.length > 0 && (
+            <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+              <span className="text-[10px] text-white/40 font-medium mb-3 block">Specific model</span>
+              <div className="relative group">
                 <select
                   value={form.model}
                   onChange={(e) => handleModelChange(e.target.value)}
-                  className="w-full appearance-none bg-transparent border-b border-gray-200 dark:border-white/10 py-2 pr-10 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all cursor-pointer text-sm font-semibold"
+                  className="w-full appearance-none bg-transparent border-b border-white/10 py-3 pr-10 text-white/80 focus:text-white focus:outline-none focus:border-indigo-500 transition-all cursor-pointer text-sm font-bold tracking-tight"
                 >
-                  <option value="">Select Model</option>
+                  <option value="" className="bg-[#0A0A0A]">Select Model Reference</option>
                   {catalogItems.map(m => (
-                    <option key={m.id} value={m.id}>{m.name}</option>
+                    <option key={m.id} value={m.id} className="bg-[#0A0A0A]">{m.name}</option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none" size={16} strokeWidth={2.5} />
+                <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-indigo-400 pointer-events-none transition-colors" size={14} strokeWidth={3} />
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Specs Toggle */}
-        {currentModelSpecs && (
-          <div className="animate-in fade-in duration-300">
-            <Button
-              onClick={() => setShowSpecsInForm(!showSpecsInForm)}
-              variant="ghost"
-              size="sm"
-              leftIcon={<Info size={14} strokeWidth={2.5} />}
-              rightIcon={showSpecsInForm ? <ChevronUp size={14} strokeWidth={2.5} /> : <ChevronDown size={14} strokeWidth={2.5} />}
-            >
-              Show Technical Details
-            </Button>
-
-            {showSpecsInForm && (
-              <Card variant="flat" size="sm" className="mt-2 animate-in slide-in-from-top-1">
-                <div className="grid grid-cols-2 gap-3">
-                  {Object.entries(currentModelSpecs).map(([k, v]) => (
-                    <div key={k} className="flex flex-col">
-                      <Text variant="label" color="muted">{k.replace(/([A-Z])/g, ' $1').trim()}</Text>
-                      <Text variant="caption">{String(v)}</Text>
-                    </div>
-                  ))}
+          {currentModelSpecs && (
+            <div className="animate-in fade-in duration-500 pt-8 border-t border-white/5">
+              <button
+                onClick={() => setShowSpecsInForm(!showSpecsInForm)}
+                className="flex items-center gap-3 text-[10px] font-medium text-white/20 hover:text-indigo-400 transition-all mb-6"
+              >
+                <div className={`p-1.5 rounded-lg border transition-all ${showSpecsInForm ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-400' : 'bg-white/5 border-white/5'}`}>
+                  <Info size={12} strokeWidth={3} />
                 </div>
-              </Card>
-            )}
-          </div>
-        )}
+                {showSpecsInForm ? "Hide Technical Details" : "View Technical Specifications"}
+                <div className={`transition-transform duration-300 ${showSpecsInForm ? 'rotate-180' : ''}`}>
+                  <ChevronDown size={12} strokeWidth={3} />
+                </div>
+              </button>
 
-        <div className="h-px bg-gray-100 dark:bg-white/10 my-2" />
+              <AnimatePresence>
+                {showSpecsInForm && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-8 pb-4">
+                      {Object.entries(currentModelSpecs).map(([k, v]) => (
+                        <div key={k} className="group">
+                          <span className="text-[9px] text-white/20 font-medium mb-1 block group-hover:text-indigo-400/50 transition-colors">
+                            {k.replace(/([A-Z])/g, ' $1').trim()}
+                          </span>
+                          <span className="text-xs text-white/50 font-medium group-hover:text-white/80 transition-colors">{String(v || "—")}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
+      </Card>
 
-        {/* Ownership */}
-        <div className="space-y-4">
-          <div className={`p-1.5 ${radius.lg} flex gap-1`}>
-            <Button
+      <Card title="Ownership & acquisitions">
+        <div className="p-6 space-y-10">
+          <div className="flex p-1 bg-white/5 rounded-2xl border border-white/5">
+            <button
               onClick={() => setForm(prev => ({ ...prev, isOwned: true }))}
-              variant={form.isOwned ? 'primary' : 'ghost'}
-              size="sm"
-              fullWidth
+              className={`flex-1 py-3 text-[10px] font-medium rounded-xl transition-all ${form.isOwned ? 'bg-indigo-500 text-white shadow-[0_0_20px_rgba(78,71,221,0.3)]' : 'text-white/20 hover:text-white/40'}`}
             >
-              Owned Asset
-            </Button>
-            <Button
+              Internal Production Asset
+            </button>
+            <button
               onClick={() => setForm(prev => ({ ...prev, isOwned: false }))}
-              variant={!form.isOwned ? 'primary' : 'ghost'}
-              size="sm"
-              fullWidth
+              className={`flex-1 py-3 text-[10px] font-medium rounded-xl transition-all ${!form.isOwned ? 'bg-orange-500 text-white shadow-[0_0_20px_rgba(249,115,22,0.3)]' : 'text-white/20 hover:text-white/40'}`}
             >
-              Rented Gear
-            </Button>
+              External Rental Service
+            </button>
           </div>
 
           {!form.isOwned && (
-            <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 animate-in fade-in slide-in-from-top-4 duration-500">
               <div>
-                <div className="flex flex-col gap-1 min-w-0">
-                  <Text variant="label" color="muted">Rate</Text>
-                  <Input
-                    type="number"
-                    value={form.price || ''}
-                    onChange={(e) => setForm(prev => ({ ...prev, price: parseFloat(e.target.value) }))}
-                    fullWidth
-                    placeholder="0.00"
-                  />
-                </div>
+                <span className="text-[10px] text-white/40 font-medium mb-2 block">Rental cost rate</span>
+                <Input
+                  type="number"
+                  value={form.price || ''}
+                  onChange={(e) => setForm(prev => ({ ...prev, price: parseFloat(e.target.value) }))}
+                  fullWidth
+                  placeholder="0.00"
+                  variant="underline"
+                  leftIcon={<DollarSign size={14} className="text-orange-400/50" />}
+                />
               </div>
               <div>
-                <div className="flex flex-col gap-1 min-w-0">
-                  <Text variant="label" color="muted">Frequency</Text>
-                  <div className="relative">
-                    <select
-                      value={form.frequency}
-                      onChange={(e) => setForm(prev => ({ ...prev, frequency: e.target.value as any }))}
-                      className="w-full appearance-none bg-transparent border-b border-gray-200 dark:border-white/10 py-2 pr-10 text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all cursor-pointer text-sm font-semibold"
-                    >
-                      <option value="hour">Hourly</option>
-                      <option value="day">Daily</option>
-                      <option value="week">Weekly</option>
-                      <option value="month">Monthly</option>
-                    </select>
-                    <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none" size={16} strokeWidth={2.5} />
-                  </div>
+                <span className="text-[10px] text-white/40 font-medium mb-2 block">Price frequency</span>
+                <div className="relative group">
+                  <select
+                    value={form.frequency}
+                    onChange={(e) => setForm(prev => ({ ...prev, frequency: e.target.value as any }))}
+                    className="w-full appearance-none bg-transparent border-b border-white/10 py-3 pr-10 text-white/80 focus:text-white focus:outline-none focus:border-indigo-500 transition-all cursor-pointer text-sm font-bold tracking-tight"
+                  >
+                    <option value="hour" className="bg-[#0A0A0A]">Hourly (Short term)</option>
+                    <option value="day" className="bg-[#0A0A0A]">Daily (Standard)</option>
+                    <option value="week" className="bg-[#0A0A0A]">Weekly (Discounted)</option>
+                    <option value="month" className="bg-[#0A0A0A]">Monthly (Long term)</option>
+                  </select>
+                  <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-indigo-400 pointer-events-none transition-colors" size={14} strokeWidth={3} />
                 </div>
               </div>
             </div>
           )}
         </div>
-      </div>
+      </Card>
     </div>
   )
 }

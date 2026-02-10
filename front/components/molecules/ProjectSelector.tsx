@@ -1,8 +1,6 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Folder, ChevronDown, Check, Plus } from 'lucide-react'
-import { Button, Text, IconContainer, Card } from '@/components/atoms'
-import { radius, typography } from '@/design-system'
 
 interface ProjectSelectorProps {
   currentProject: string
@@ -23,35 +21,34 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
 
   return (
     <div className={`relative ${className}`}>
-      <Button
+      <button
         onClick={() => setIsOpen(!isOpen)}
-        variant="secondary"
-        size="lg"
-        fullWidth
-        className="flex items-center justify-between group active:scale-[0.99] h-20 py-5"
+        className="w-full flex items-center justify-between p-4 rounded-xl bg-[#0D0D0F] border border-white/[0.05] hover:border-white/[0.1] transition-all"
       >
-        <div className="flex items-center gap-4">
-          <IconContainer icon={Folder} size="lg" variant="accent" />
-          <div className="flex flex-col items-start gap-1">
-            <Text variant="label" color="muted">Current Production</Text>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+            <Folder size={20} className="text-indigo-400" />
+          </div>
+          <div className="flex flex-col items-start">
+            <span className="text-xs text-white/40">Current Production</span>
             <div className="flex items-center gap-2">
-              <Text variant="h2">{currentProject}</Text>
-              <ChevronDown size={16} strokeWidth={2.5} className="text-gray-500" />
+              <span className="text-base font-medium text-white">{currentProject}</span>
+              <ChevronDown size={14} className="text-white/40" />
             </div>
           </div>
         </div>
-      </Button>
+      </button>
 
       <AnimatePresence>
         {isOpen && (
           <>
             <div className="fixed inset-0 z-20" onClick={() => setIsOpen(false)} />
             <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              transition={{ duration: 0.1 }}
-              className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#252529] rounded-3xl p-2 border border-gray-200 dark:border-white/10 shadow-2xl z-30 overflow-hidden"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={{ duration: 0.15 }}
+              className="absolute top-full left-0 right-0 mt-2 bg-[#0D0D0F] rounded-xl p-2 border border-white/[0.08] shadow-2xl z-30 overflow-hidden"
             >
               <div className="max-h-[240px] overflow-y-auto">
                 {Object.keys(projects).map(projectName => (
@@ -59,29 +56,28 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
                     key={projectName}
                     onClick={() => { onSelect(projectName); setIsOpen(false); }}
                     className={`
-                      w-full flex items-center justify-between p-4 rounded-2xl mb-1 transition-colors
+                      w-full flex items-center justify-between p-3 rounded-lg mb-1 transition-colors text-sm
                       ${currentProject === projectName 
-                        ? 'bg-blue-50 dark:bg-indigo-500/20 text-blue-600 dark:text-indigo-400' 
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'
+                        ? 'bg-indigo-500/20 text-indigo-400' 
+                        : 'text-white/60 hover:bg-white/5'
                       }
                     `}
                   >
-                    <Text variant="body">{projectName}</Text>
-                    {currentProject === projectName && <Check size={16} strokeWidth={2.5} />}
+                    {projectName}
+                    {currentProject === projectName && <Check size={14} />}
                   </button>
                 ))}
               </div>
-              <div className="h-px bg-gray-100 dark:bg-white/5 my-2" />
-              <Button
+              <div className="h-px bg-white/[0.05] my-2" />
+              <button
                 onClick={() => { onCreate("New Project"); setIsOpen(false); }}
-                variant="ghost"
-                size="md"
-                fullWidth
-                leftIcon={<div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center"><Plus size={16} strokeWidth={2.5} /></div>}
-                className="justify-start"
+                className="w-full flex items-center gap-3 p-3 rounded-lg text-sm text-white/60 hover:bg-white/5 transition-colors"
               >
+                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                  <Plus size={16} />
+                </div>
                 Create New Project
-              </Button>
+              </button>
             </motion.div>
           </>
         )}
@@ -89,3 +85,5 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
     </div>
   )
 }
+
+export default ProjectSelector

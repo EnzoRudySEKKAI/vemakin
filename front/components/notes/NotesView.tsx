@@ -1,14 +1,11 @@
 import React, { useMemo } from 'react'
-import { FileText, Calendar, LayoutGrid, Film, StickyNote, Zap, ArrowRight, Paperclip, ChevronRight, CheckCircle2, Package } from 'lucide-react'
+import { FileText, Calendar, Film, StickyNote, Zap, Paperclip, Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { pageVariants } from '@/utils/animations'
 import { Shot, Note, PostProdTask, NotesFilters } from '@/types'
-import { GlassCard } from '@/components/ui/GlassCard'
-import { HoverCard } from '@/components/ui/HoverCard'
+import { Card } from '@/components/ui/Card'
 import { formatDateToNumeric } from '@/utils'
 import { POST_PROD_CATEGORIES } from '@/constants'
-import { Text } from '@/components/atoms/Text'
-import { IconContainer, IconBadge } from '@/components/atoms/IconContainer'
+import { Button } from '@/components/atoms/Button'
 
 interface NotesViewProps {
   shots: Shot[]
@@ -26,26 +23,28 @@ interface NotesViewProps {
   layout?: 'grid' | 'list'
 }
 
+const getContextIcon = (note: Note & { isAuto?: boolean }, shots: Shot[], tasks: PostProdTask[]) => {
+  if (note.shotId || note.isAuto) return Film
+  if (note.taskId) {
+    const task = tasks.find(t => t.id === note.taskId)
+    const catInfo = task ? POST_PROD_CATEGORIES.find(c => c.label === task.category) : null
+    return catInfo?.icon || Zap
+  }
+  return StickyNote
+}
+
 export const NotesView: React.FC<NotesViewProps> = React.memo(({
   shots,
   notes,
   tasks = [],
-  isAdding,
   setIsAdding,
-  onAddNote,
-  onUpdateNote,
-  onDeleteNote,
-  onSelectShot,
   onSelectNote,
-  onSelectTask,
   filters,
   layout = 'grid'
 }) => {
   const aggregatedNotes = useMemo(() => {
-    // 1. Get manually created notes (from store)
     const manualNotes = notes.map(n => ({ ...n, isAuto: false }))
 
-    // 2. Generate "Auto-Notes" from shots that have content in 'generalNotes'
     const shotAutoNotes: (Note & { isAuto: boolean })[] = shots
       .filter(s => s.generalNotes && s.generalNotes.trim().length > 0)
       .map(s => ({
@@ -67,30 +66,20 @@ export const NotesView: React.FC<NotesViewProps> = React.memo(({
       if (filters.sortBy === 'alpha') {
         return a.title.localeCompare(b.title) * dir
       }
-      // Default to 'updated'
       return (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()) * dir
     })
 
     return combined.filter(n => {
-      // 1. Search Query
       if (filters.query) {
         const q = filters.query.toLowerCase()
         const matchesSearch = n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q)
         if (!matchesSearch) return false
       }
 
-      // 2. Date Filter
-      if (filters.date && filters.date !== 'All') {
-        const noteDate = new Date(n.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-        if (noteDate !== filters.date) return false
-      }
-
-      // 3. Category Filter
       if (filters.category === 'All') return true
       if (filters.category === 'Shots') return !!n.shotId || n.isAuto
       if (filters.category === 'General') return !n.shotId && !n.taskId && !n.isAuto
 
-      // Pipeline Categories (linked to tasks - implicit if we had task filters, but currently main toggle handles main 3)
       if (n.taskId) {
         const task = tasks.find(t => t.id === n.taskId)
         if (task && task.category === filters.category) return true
@@ -100,140 +89,126 @@ export const NotesView: React.FC<NotesViewProps> = React.memo(({
     })
   }, [shots, notes, tasks, filters])
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
+  if (aggregatedNotes.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-300px)] w-full overflow-hidden px-6 select-none">
+        <div className="w-14 h-14 bg-[#0D0D0F] rounded-xl flex items-center justify-center mb-6 border border-white/[0.05]">
+          <StickyNote size={24} className="text-white/40" />
+        </div>
+        <div className="text-center max-w-sm">
+          <h2 className="text-xl font-semibold text-white mb-2">No Notes Found</h2>
+          <p className="text-white/30 mb-8 text-sm">Adjust filters or create your first note.</p>
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={() => setIsAdding(true)}
+            leftIcon={<Plus size={18} strokeWidth={2.5} />}
+          >
+            Add Note
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="space-y-6"
-    >
-      {/* Notes Container */}
-      <div
-        className={layout === 'grid' ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "flex flex-col gap-2"}
-      >
-        {aggregatedNotes.map(note => {
-          // Contextual Logic
-          let ContextIcon = StickyNote
-          let contextLabel = "General Note"
+    <div className="space-y-4">
+      {layout === 'grid' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {aggregatedNotes.map(note => {
+            const ContextIcon = getContextIcon(note, shots, tasks)
+            const linkedShot = note.shotId ? shots.find(s => s.id === note.shotId) : null
+            const linkedTask = note.taskId ? tasks.find(t => t.id === note.taskId) : null
 
-          // Unified Icon Theme
-          const themeBg = "bg-gray-50 dark:bg-white/5"
-          const themeText = "text-blue-600 dark:text-indigo-400"
-          const themeBorder = "border border-gray-100 dark:border-white/5"
-          const headerBg = "bg-blue-50/30 dark:bg-indigo-500/5"
-
-          const linkedShot = note.shotId ? shots.find(s => s.id === note.shotId) : null
-          const linkedTask = note.taskId ? tasks.find(t => t.id === note.taskId) : null
-
-          if (linkedShot || (note as any).isAuto) {
-            ContextIcon = Film
-            contextLabel = linkedShot ? `Sequence ${linkedShot.sceneNumber}` : "Shot Auto-Note"
-          } else if (linkedTask) {
-            const catInfo = POST_PROD_CATEGORIES.find(c => c.label === linkedTask.category)
-            contextLabel = `${linkedTask.category} Task`
-            if (catInfo) {
-              ContextIcon = catInfo.icon
-            } else {
-              ContextIcon = Zap
+            let contextLabel = "General Note"
+            if (linkedShot || note.isAuto) {
+              contextLabel = linkedShot ? `Scene ${linkedShot.sceneNumber}` : "Shot Note"
+            } else if (linkedTask) {
+              contextLabel = `${linkedTask.category}`
             }
-          }
-
-          if (layout === 'list') {
-            const activeClass = ''
-            const isActiveMenu = false
 
             return (
-              <motion.div key={note.id} variants={itemVariants}>
-                <GlassCard
-                  onClick={() => onSelectNote?.(note.id)}
-                  className={`px-4 py-3.5 flex items-center justify-between hover:bg-white dark:hover:bg-white/10 rounded-[24px] group border-l-0 shadow-sm cursor-pointer ${activeClass} ${isActiveMenu ? 'bg-white dark:bg-[#2C2C30] z-[20] ring-2 ring-blue-500 dark:ring-indigo-500/10 dark:ring-indigo-400/20' : 'bg-white/90 dark:bg-[#1C1C1E]/90'}`}
-                >
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <IconContainer icon={ContextIcon} size="md" variant="accent" className="shrink-0 shadow-sm group-hover:scale-105" />
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <Text variant="body" className="truncate">
-                          {note.title}
-                        </Text>
-                        {(note as any).priority && (
-                          <span className={`text-xs font-semibold px-1.5 py-0.5 rounded border ${(note as any).priority === 'urgent' ? 'bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-500/20 text-red-600 dark:text-red-400' : 'bg-blue-50 dark:bg-indigo-500/10 border-blue-100 dark:border-indigo-500/20 text-blue-600 dark:text-indigo-400'
-                            }`}>
-                            {(note as any).priority}
-                          </span>
-                        )}
-                      </div>
-                      <Text variant="caption" color="muted" className="truncate">{note.content}</Text>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4 pl-4 border-l border-gray-100 dark:border-white/10 ml-4">
-                    <Text variant="label" color="muted" className="whitespace-nowrap">
-                      {new Date(note.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                    </Text>
-                    <ChevronRight size={16} className="text-gray-300 dark:text-gray-600"/>
-                  </div>
-                </GlassCard>
-              </motion.div>
-            )
-          }
-
-          return (
-            <motion.div key={note.id} variants={itemVariants} className="h-full">
-              <HoverCard
+              <div
+                key={note.id}
                 onClick={() => onSelectNote(note.id)}
-                blobColor="from-indigo-400 to-indigo-500"
-                className="p-0 flex flex-col hover:border-blue-200 dark:hover:border-indigo-400/30 cursor-pointer group bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/5 shadow-sm hover:shadow-lg dark:hover:shadow-black/40 rounded-[32px] h-full min-h-[260px]"
+                className="group p-4 rounded-xl bg-[#0D0D0F] border border-white/[0.05] hover:border-white/[0.1] transition-all cursor-pointer"
               >
-                <div className="flex flex-col h-full">
-                  <div className="flex-1 p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <IconContainer icon={ContextIcon} size="sm" variant="accent" />
-                      <Text variant="label" color="accent" className="opacity-80">
-                        {contextLabel}
-                      </Text>
-                    </div>
-                    <Text variant="h3" className="mb-2">{note.title}</Text>
-                    <Text variant="caption" color="secondary" className="line-clamp-3">{note.content}</Text>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#0A0A0A] flex items-center justify-center border border-white/[0.05]">
+                    <ContextIcon size={14} className="text-white/40" />
+                  </div>
+                  <div className="text-xs text-white/30 uppercase tracking-wider">{contextLabel}</div>
+                </div>
+
+                <div className="mb-3">
+                  <h3 className="text-sm text-white font-medium mb-1 line-clamp-1">{note.title}</h3>
+                  <p className="text-xs text-white/30 line-clamp-2">{note.content}</p>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-[10px] text-white/20">
+                    <Calendar size={10} />
+                    {formatDateToNumeric(note.updatedAt)}
                   </div>
 
-                  <div className="px-6 pb-6 mt-auto">
-                    <div className="flex items-center gap-3">
-                      <Text variant="caption" color="muted" className="flex items-center gap-2">
-                        <Calendar size={14} className="opacity-70" strokeWidth={2.5}/> {formatDateToNumeric(note.updatedAt)}
-                      </Text>
+                  {note.attachments && note.attachments.length > 0 && (
+                    <div className="flex items-center gap-1 text-white/20">
+                      <Paperclip size={10} />
+                      <span className="text-[10px]">{note.attachments.length}</span>
                     </div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <Card title="Notes">
+          <div className="p-4 space-y-2">
+            {aggregatedNotes.map(note => {
+              const ContextIcon = getContextIcon(note, shots, tasks)
+              const linkedShot = note.shotId ? shots.find(s => s.id === note.shotId) : null
+              const linkedTask = note.taskId ? tasks.find(t => t.id === note.taskId) : null
+
+              let contextLabel = "General"
+              if (linkedShot || note.isAuto) {
+                contextLabel = linkedShot ? `Scene ${linkedShot.sceneNumber}` : "Shot"
+              } else if (linkedTask) {
+                contextLabel = linkedTask.category
+              }
+
+              return (
+                <div
+                  key={note.id}
+                  onClick={() => onSelectNote(note.id)}
+                  className="flex items-center gap-4 p-3 rounded-xl bg-[#0D0D0F] border border-white/[0.05] hover:border-white/[0.1] transition-all cursor-pointer"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-[#0A0A0A] flex items-center justify-center border border-white/[0.05] shrink-0">
+                    <ContextIcon size={16} className="text-white/40" />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm text-white font-medium truncate">{note.title}</div>
+                    <div className="text-xs text-white/30">{contextLabel}</div>
+                  </div>
+
+                  <div className="hidden sm:flex items-center gap-3 shrink-0">
+                    <div className="text-xs text-white/30">
+                      {new Date(note.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    </div>
+                    {note.attachments && note.attachments.length > 0 && (
+                      <div className="flex items-center gap-1 text-white/20">
+                        <Paperclip size={12} />
+                      </div>
+                    )}
                   </div>
                 </div>
-              </HoverCard>
-            </motion.div>
-          )
-        })}
-      </div>
-
-      {aggregatedNotes.length === 0 && (
-        <div className="py-32 flex flex-col items-center justify-center select-none">
-          <IconContainer icon={Package} size="2xl" variant="default" className="mb-6" />
-          <Text variant="h3" color="muted">No Notes Found</Text>
-          <Text variant="caption" color="muted">Adjust filters to see content in your repository</Text>
-        </div>
+              )
+            })}
+          </div>
+        </Card>
       )}
-    </motion.div>
+    </div>
   )
 })
 

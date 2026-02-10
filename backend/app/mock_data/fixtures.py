@@ -5,12 +5,22 @@ Provides realistic demo data when user is not authenticated
 
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
+import uuid
 
 # Guest user identifier
 GUEST_USER_UID = "guest-user"
 
 # Current date for realistic timestamps
 NOW = datetime.now()
+
+# UUIDs for all entities (regenerated for consistency)
+SHOT_UUIDS = [str(uuid.uuid4()) for _ in range(5)]
+EQUIPMENT_UUIDS = [str(uuid.uuid4()) for _ in range(10)]
+NOTE_UUIDS = [str(uuid.uuid4()) for _ in range(3)]
+TASK_UUIDS = [str(uuid.uuid4()) for _ in range(5)]
+CATEGORY_UUIDS = [str(uuid.uuid4()) for _ in range(7)]
+BRAND_UUIDS = [str(uuid.uuid4()) for _ in range(8)]
+CATALOG_UUIDS = [str(uuid.uuid4()) for _ in range(5)]
 
 # =============================================================================
 # PROJECT
@@ -30,7 +40,7 @@ MOCK_PROJECT = {
 
 MOCK_SHOTS = [
     {
-        "id": "shot-001",
+        "id": SHOT_UUIDS[0],
         "project_id": "4df9dc12-33aa-4fcb-9e4b-ad5bc059bcf0",
         "title": "Scène d'ouverture - Vue sur la ville",
         "description": "Plan large au drone de la ville au lever du soleil",
@@ -41,13 +51,13 @@ MOCK_SHOTS = [
         "location": "Toit immeuble Centre-ville",
         "remarks": "Vérifier autorisation drone",
         "scene_number": "1A",
-        "equipment_ids": ["cam-001", "drone-001"],
+        "equipment_ids": [EQUIPMENT_UUIDS[0], EQUIPMENT_UUIDS[4]],
         "prepared_equipment_ids": [],
         "created_at": (NOW - timedelta(days=20)).isoformat(),
         "updated_at": (NOW - timedelta(days=5)).isoformat(),
     },
     {
-        "id": "shot-002",
+        "id": SHOT_UUIDS[1],
         "project_id": "4df9dc12-33aa-4fcb-9e4b-ad5bc059bcf0",
         "title": "Interview protagoniste",
         "description": "Interview en intérieur avec éclairage naturel",
@@ -58,13 +68,13 @@ MOCK_SHOTS = [
         "location": "Café Le Central",
         "remarks": "Réserver la table du fond",
         "scene_number": "2A",
-        "equipment_ids": ["cam-001", "lens-001", "mic-001"],
+        "equipment_ids": [EQUIPMENT_UUIDS[0], EQUIPMENT_UUIDS[1], EQUIPMENT_UUIDS[6]],
         "prepared_equipment_ids": [],
         "created_at": (NOW - timedelta(days=18)).isoformat(),
         "updated_at": (NOW - timedelta(days=4)).isoformat(),
     },
     {
-        "id": "shot-003",
+        "id": SHOT_UUIDS[2],
         "project_id": "4df9dc12-33aa-4fcb-9e4b-ad5bc059bcf0",
         "title": "Séquence action - Course poursuite",
         "description": "Plans caméra embarquée et stabilisée",
@@ -75,13 +85,13 @@ MOCK_SHOTS = [
         "location": "Vieille ville - Ruelles",
         "remarks": "Sécurité sur le tournage",
         "scene_number": "3A",
-        "equipment_ids": ["cam-001", "gimbal-001", "lens-002"],
+        "equipment_ids": [EQUIPMENT_UUIDS[0], EQUIPMENT_UUIDS[5], EQUIPMENT_UUIDS[2]],
         "prepared_equipment_ids": [],
         "created_at": (NOW - timedelta(days=15)).isoformat(),
         "updated_at": (NOW - timedelta(days=3)).isoformat(),
     },
     {
-        "id": "shot-004",
+        "id": SHOT_UUIDS[3],
         "project_id": "4df9dc12-33aa-4fcb-9e4b-ad5bc059bcf0",
         "title": "Portrait crépusculaire",
         "description": "Portrait extérieur à la golden hour",
@@ -92,13 +102,13 @@ MOCK_SHOTS = [
         "location": "Parc municipal",
         "remarks": "Prévoir lumière LED en backup",
         "scene_number": "4A",
-        "equipment_ids": ["cam-001", "lens-003", "light-001"],
+        "equipment_ids": [EQUIPMENT_UUIDS[0], EQUIPMENT_UUIDS[3], EQUIPMENT_UUIDS[8]],
         "prepared_equipment_ids": [],
         "created_at": (NOW - timedelta(days=12)).isoformat(),
         "updated_at": (NOW - timedelta(days=2)).isoformat(),
     },
     {
-        "id": "shot-005",
+        "id": SHOT_UUIDS[4],
         "project_id": "4df9dc12-33aa-4fcb-9e4b-ad5bc059bcf0",
         "title": "Scène finale - Confrontation",
         "description": "Dialogue intense entre les deux personnages",
@@ -109,7 +119,12 @@ MOCK_SHOTS = [
         "location": "Studio A",
         "remarks": "Tours de parole importants",
         "scene_number": "5A",
-        "equipment_ids": ["cam-001", "lens-001", "mic-002", "light-002"],
+        "equipment_ids": [
+            EQUIPMENT_UUIDS[0],
+            EQUIPMENT_UUIDS[1],
+            EQUIPMENT_UUIDS[7],
+            EQUIPMENT_UUIDS[9],
+        ],
         "prepared_equipment_ids": [],
         "created_at": (NOW - timedelta(days=10)).isoformat(),
         "updated_at": (NOW - timedelta(days=1)).isoformat(),
@@ -122,7 +137,7 @@ MOCK_SHOTS = [
 
 MOCK_INVENTORY = [
     {
-        "id": "cam-001",
+        "id": EQUIPMENT_UUIDS[0],
         "user_id": GUEST_USER_UID,
         "name": "Sony A7S III",
         "category": "Camera",
@@ -152,7 +167,7 @@ MOCK_INVENTORY = [
         },
     },
     {
-        "id": "lens-001",
+        "id": EQUIPMENT_UUIDS[1],
         "user_id": GUEST_USER_UID,
         "name": "Sony 24-70mm f/2.8 GM",
         "category": "Lens",
@@ -181,7 +196,7 @@ MOCK_INVENTORY = [
         },
     },
     {
-        "id": "lens-002",
+        "id": EQUIPMENT_UUIDS[2],
         "user_id": GUEST_USER_UID,
         "name": "Sony 16-35mm f/2.8 GM",
         "category": "Lens",
@@ -210,7 +225,7 @@ MOCK_INVENTORY = [
         },
     },
     {
-        "id": "lens-003",
+        "id": EQUIPMENT_UUIDS[3],
         "user_id": GUEST_USER_UID,
         "name": "Sony 85mm f/1.4 GM",
         "category": "Lens",
@@ -239,7 +254,7 @@ MOCK_INVENTORY = [
         },
     },
     {
-        "id": "drone-001",
+        "id": EQUIPMENT_UUIDS[4],
         "user_id": GUEST_USER_UID,
         "name": "DJI Mavic 3 Pro",
         "category": "Drone",
@@ -269,7 +284,7 @@ MOCK_INVENTORY = [
         },
     },
     {
-        "id": "gimbal-001",
+        "id": EQUIPMENT_UUIDS[5],
         "user_id": GUEST_USER_UID,
         "name": "DJI RS 3 Pro",
         "category": "Stabilizer",
@@ -297,7 +312,7 @@ MOCK_INVENTORY = [
         },
     },
     {
-        "id": "mic-001",
+        "id": EQUIPMENT_UUIDS[6],
         "user_id": GUEST_USER_UID,
         "name": "Rode NTG5",
         "category": "Audio",
@@ -326,7 +341,7 @@ MOCK_INVENTORY = [
         },
     },
     {
-        "id": "mic-002",
+        "id": EQUIPMENT_UUIDS[7],
         "user_id": GUEST_USER_UID,
         "name": "Sennheiser MKH 416",
         "category": "Audio",
@@ -355,7 +370,7 @@ MOCK_INVENTORY = [
         },
     },
     {
-        "id": "light-001",
+        "id": EQUIPMENT_UUIDS[8],
         "user_id": GUEST_USER_UID,
         "name": "Aputure 600x Pro",
         "category": "Lighting",
@@ -385,7 +400,7 @@ MOCK_INVENTORY = [
         },
     },
     {
-        "id": "light-002",
+        "id": EQUIPMENT_UUIDS[9],
         "user_id": GUEST_USER_UID,
         "name": "Aputure MC RGBWW",
         "category": "Lighting",
@@ -421,7 +436,7 @@ MOCK_INVENTORY = [
 
 MOCK_NOTES = [
     {
-        "id": "note-001",
+        "id": NOTE_UUIDS[0],
         "project_id": "4df9dc12-33aa-4fcb-9e4b-ad5bc059bcf0",
         "user_id": GUEST_USER_UID,
         "title": "To-do avant tournage",
@@ -430,7 +445,7 @@ MOCK_NOTES = [
         "updated_at": (NOW - timedelta(days=1)).isoformat(),
     },
     {
-        "id": "note-002",
+        "id": NOTE_UUIDS[1],
         "project_id": "4df9dc12-33aa-4fcb-9e4b-ad5bc059bcf0",
         "user_id": GUEST_USER_UID,
         "title": "Idées scène finale",
@@ -439,7 +454,7 @@ MOCK_NOTES = [
         "updated_at": (NOW - timedelta(days=2)).isoformat(),
     },
     {
-        "id": "note-003",
+        "id": NOTE_UUIDS[2],
         "project_id": "4df9dc12-33aa-4fcb-9e4b-ad5bc059bcf0",
         "user_id": GUEST_USER_UID,
         "title": "Contacts utiles",
@@ -455,7 +470,7 @@ MOCK_NOTES = [
 
 MOCK_POSTPROD_TASKS = [
     {
-        "id": "task-001",
+        "id": TASK_UUIDS[0],
         "project_id": "4df9dc12-33aa-4fcb-9e4b-ad5bc059bcf0",
         "user_id": GUEST_USER_UID,
         "title": "Montage assemblage",
@@ -468,7 +483,7 @@ MOCK_POSTPROD_TASKS = [
         "updated_at": (NOW - timedelta(days=1)).isoformat(),
     },
     {
-        "id": "task-002",
+        "id": TASK_UUIDS[1],
         "project_id": "4df9dc12-33aa-4fcb-9e4b-ad5bc059bcf0",
         "user_id": GUEST_USER_UID,
         "title": "Étalonnage première version",
@@ -481,7 +496,7 @@ MOCK_POSTPROD_TASKS = [
         "updated_at": (NOW - timedelta(days=1)).isoformat(),
     },
     {
-        "id": "task-003",
+        "id": TASK_UUIDS[2],
         "project_id": "4df9dc12-33aa-4fcb-9e4b-ad5bc059bcf0",
         "user_id": GUEST_USER_UID,
         "title": "Mixage son",
@@ -494,7 +509,7 @@ MOCK_POSTPROD_TASKS = [
         "updated_at": (NOW - timedelta(days=1)).isoformat(),
     },
     {
-        "id": "task-004",
+        "id": TASK_UUIDS[3],
         "project_id": "4df9dc12-33aa-4fcb-9e4b-ad5bc059bcf0",
         "user_id": GUEST_USER_UID,
         "title": "Musique et sound design",
@@ -507,7 +522,7 @@ MOCK_POSTPROD_TASKS = [
         "updated_at": (NOW - timedelta(days=1)).isoformat(),
     },
     {
-        "id": "task-005",
+        "id": TASK_UUIDS[4],
         "project_id": "4df9dc12-33aa-4fcb-9e4b-ad5bc059bcf0",
         "user_id": GUEST_USER_UID,
         "title": "Export versions livraison",
@@ -526,68 +541,78 @@ MOCK_POSTPROD_TASKS = [
 # =============================================================================
 
 MOCK_CATALOG_CATEGORIES = [
-    {"id": "cat-001", "name": "Camera", "slug": "camera", "icon": "camera"},
-    {"id": "cat-002", "name": "Lens", "slug": "lens", "icon": "aperture"},
-    {"id": "cat-003", "name": "Audio", "slug": "audio", "icon": "mic"},
-    {"id": "cat-004", "name": "Lighting", "slug": "lighting", "icon": "light"},
-    {"id": "cat-005", "name": "Stabilizer", "slug": "stabilizer", "icon": "gimbal"},
-    {"id": "cat-006", "name": "Drone", "slug": "drone", "icon": "drone"},
-    {"id": "cat-007", "name": "Accessories", "slug": "accessories", "icon": "package"},
+    {"id": CATEGORY_UUIDS[0], "name": "Camera", "slug": "camera", "icon": "camera"},
+    {"id": CATEGORY_UUIDS[1], "name": "Lens", "slug": "lens", "icon": "aperture"},
+    {"id": CATEGORY_UUIDS[2], "name": "Audio", "slug": "audio", "icon": "mic"},
+    {"id": CATEGORY_UUIDS[3], "name": "Lighting", "slug": "lighting", "icon": "light"},
+    {
+        "id": CATEGORY_UUIDS[4],
+        "name": "Stabilizer",
+        "slug": "stabilizer",
+        "icon": "gimbal",
+    },
+    {"id": CATEGORY_UUIDS[5], "name": "Drone", "slug": "drone", "icon": "drone"},
+    {
+        "id": CATEGORY_UUIDS[6],
+        "name": "Accessories",
+        "slug": "accessories",
+        "icon": "package",
+    },
 ]
 
 MOCK_CATALOG_BRANDS = [
-    {"id": "brand-001", "name": "Sony", "logo_url": None},
-    {"id": "brand-002", "name": "Canon", "logo_url": None},
-    {"id": "brand-003", "name": "DJI", "logo_url": None},
-    {"id": "brand-004", "name": "Rode", "logo_url": None},
-    {"id": "brand-005", "name": "Sennheiser", "logo_url": None},
-    {"id": "brand-006", "name": "Aputure", "logo_url": None},
-    {"id": "brand-007", "name": "Blackmagic", "logo_url": None},
-    {"id": "brand-008", "name": "RED", "logo_url": None},
+    {"id": BRAND_UUIDS[0], "name": "Sony", "logo_url": None},
+    {"id": BRAND_UUIDS[1], "name": "Canon", "logo_url": None},
+    {"id": BRAND_UUIDS[2], "name": "DJI", "logo_url": None},
+    {"id": BRAND_UUIDS[3], "name": "Rode", "logo_url": None},
+    {"id": BRAND_UUIDS[4], "name": "Sennheiser", "logo_url": None},
+    {"id": BRAND_UUIDS[5], "name": "Aputure", "logo_url": None},
+    {"id": BRAND_UUIDS[6], "name": "Blackmagic", "logo_url": None},
+    {"id": BRAND_UUIDS[7], "name": "RED", "logo_url": None},
 ]
 
 MOCK_CATALOG_ITEMS = [
     {
-        "id": "catalog-001",
+        "id": CATALOG_UUIDS[0],
         "name": "Sony A7S III",
-        "category_id": "cat-001",
-        "brand_id": "brand-001",
+        "category_id": CATEGORY_UUIDS[0],
+        "brand_id": BRAND_UUIDS[0],
         "model": "ILCE-7SM3",
         "description": "Full-frame mirrorless avec capteur 12MP BSI - excellent en basse lumière",
         "image_url": None,
     },
     {
-        "id": "catalog-002",
+        "id": CATALOG_UUIDS[1],
         "name": "Sony 24-70mm f/2.8 GM",
-        "category_id": "cat-002",
-        "brand_id": "brand-001",
+        "category_id": CATEGORY_UUIDS[1],
+        "brand_id": BRAND_UUIDS[0],
         "model": "SEL2470GM",
         "description": "Zoom standard professionnel - optique G Master",
         "image_url": None,
     },
     {
-        "id": "catalog-003",
+        "id": CATALOG_UUIDS[2],
         "name": "DJI Mavic 3 Pro",
-        "category_id": "cat-006",
-        "brand_id": "brand-003",
+        "category_id": CATEGORY_UUIDS[5],
+        "brand_id": BRAND_UUIDS[2],
         "model": "Mavic 3 Pro",
         "description": "Drone triple capteur avec Hasselblad - 5.1K video",
         "image_url": None,
     },
     {
-        "id": "catalog-004",
+        "id": CATALOG_UUIDS[3],
         "name": "Rode NTG5",
-        "category_id": "cat-003",
-        "brand_id": "brand-004",
+        "category_id": CATEGORY_UUIDS[2],
+        "brand_id": BRAND_UUIDS[3],
         "model": "NTG5",
         "description": "Micro canon supercardioïde léger - broadcast quality",
         "image_url": None,
     },
     {
-        "id": "catalog-005",
+        "id": CATALOG_UUIDS[4],
         "name": "Aputure 600x Pro",
-        "category_id": "cat-004",
-        "brand_id": "brand-006",
+        "category_id": CATEGORY_UUIDS[3],
+        "brand_id": BRAND_UUIDS[5],
         "model": "600x Pro",
         "description": "LED bi-couleur 600W - 2700K à 6500K",
         "image_url": None,

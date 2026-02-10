@@ -1,6 +1,4 @@
 import React from 'react'
-import { Text } from '@/components/atoms/Text'
-import { typography } from '@/design-system'
 
 interface MetricBadgeProps {
   label: string
@@ -10,11 +8,11 @@ interface MetricBadgeProps {
 }
 
 const colorStyles = {
-  default: 'text-gray-900 dark:text-white',
-  primary: 'text-blue-600 dark:text-blue-400',
-  success: 'text-green-600 dark:text-green-400',
-  warning: 'text-orange-600 dark:text-orange-400',
-  danger: 'text-red-600 dark:text-red-400'
+  default: 'text-white/60',
+  primary: 'text-indigo-400',
+  success: 'text-emerald-400',
+  warning: 'text-amber-400',
+  danger: 'text-red-400'
 }
 
 export const MetricBadge: React.FC<MetricBadgeProps> = ({
@@ -25,10 +23,10 @@ export const MetricBadge: React.FC<MetricBadgeProps> = ({
 }) => {
   return (
     <div className={`flex flex-col items-center ${className}`}>
-      <Text variant="label" color="muted" className="leading-none mb-0.5">
+      <span className="text-[10px] text-white/30 uppercase tracking-wider leading-none mb-1">
         {label}
-      </Text>
-      <span className={`${typography.size.lg} ${typography.weight.semibold} leading-none ${colorStyles[color]}`}>
+      </span>
+      <span className={`text-lg font-semibold leading-none ${colorStyles[color]}`}>
         {value}
       </span>
     </div>
@@ -49,7 +47,7 @@ export const MetricsGroup: React.FC<MetricsGroupProps> = ({
   className = ''
 }) => {
   return (
-    <div className={`flex items-center gap-4 px-2 ${className}`}>
+    <div className={`flex items-center gap-4 ${className}`}>
       {metrics.map((metric, index) => (
         <React.Fragment key={metric.label}>
           <MetricBadge
@@ -58,10 +56,12 @@ export const MetricsGroup: React.FC<MetricsGroupProps> = ({
             color={metric.color}
           />
           {index < metrics.length - 1 && (
-            <div className="w-px h-5 bg-gray-200 dark:bg-white/10" />
+            <div className="w-px h-6 bg-white/[0.05]" />
           )}
         </React.Fragment>
       ))}
     </div>
   )
 }
+
+export default MetricBadge

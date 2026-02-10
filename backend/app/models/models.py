@@ -32,7 +32,7 @@ class User(Base):
 class Project(Base):
     __tablename__ = "projects"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     name = Column(String, nullable=False, index=True)
     user_id = Column(String(128), ForeignKey("users.id"), nullable=False, index=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
@@ -51,10 +51,10 @@ class Shot(Base):
     __tablename__ = "shots"
 
     id = Column(
-        String, primary_key=True, index=True
-    )  # ID from frontend is string hash usually
+        String(36), primary_key=True, default=lambda: str(uuid.uuid4()), index=True
+    )  # Fixed type mismatch (VARCHAR vs UUID)
     project_id = Column(
-        UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False, index=True
+        String(36), ForeignKey("projects.id"), nullable=False, index=True
     )
 
     title = Column(String, nullable=False)
@@ -82,14 +82,14 @@ class Shot(Base):
 
 
 class Equipment(Base):
-    __tablename__ = "user_inventory"  # Matching the existing table name hint
+    __tablename__ = "user_inventory"  # Matching existing table name hint
 
-    id = Column(String, primary_key=True, index=True)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     user_id = Column(String(128), ForeignKey("users.id"), nullable=False, index=True)
 
     name = Column(String, nullable=False)
     catalog_item_id = Column(
-        UUID(as_uuid=True), ForeignKey("gear_catalog.id"), nullable=True, index=True
+        String(36), ForeignKey("gear_catalog.id"), nullable=True, index=True
     )
     custom_name = Column(String, nullable=True)
     category = Column(String, nullable=False, default="Other", index=True)
@@ -113,9 +113,9 @@ class Equipment(Base):
 class Note(Base):
     __tablename__ = "notes"
 
-    id = Column(String, primary_key=True, index=True)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     project_id = Column(
-        UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False, index=True
+        String(36), ForeignKey("projects.id"), nullable=False, index=True
     )
 
     title = Column(String, nullable=False)
@@ -142,9 +142,9 @@ class Note(Base):
 class PostProdTask(Base):
     __tablename__ = "post_prod_tasks"
 
-    id = Column(String, primary_key=True, index=True)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     project_id = Column(
-        UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False, index=True
+        String(36), ForeignKey("projects.id"), nullable=False, index=True
     )
 
     category = Column(String, default="Editing")
@@ -180,25 +180,25 @@ class PostProdTask(Base):
 
 class Brand(Base):
     __tablename__ = "brands"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String, nullable=False)
 
 
 class Category(Base):
     __tablename__ = "categories"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String, nullable=False)
     slug = Column(String, unique=True, nullable=False)
 
 
 class GearCatalog(Base):
     __tablename__ = "gear_catalog"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     brand_id = Column(
-        UUID(as_uuid=True), ForeignKey("brands.id"), nullable=False, index=True
+        String(36), ForeignKey("brands.id"), nullable=False, index=True
     )
     category_id = Column(
-        UUID(as_uuid=True), ForeignKey("categories.id"), nullable=False, index=True
+        String(36), ForeignKey("categories.id"), nullable=False, index=True
     )
     name = Column(String, nullable=False, index=True)
     description = Column(Text)
@@ -272,7 +272,7 @@ class GearCatalog(Base):
 class CameraSpecs(Base):
     __tablename__ = "specs_cameras"
     gear_id = Column(
-        UUID(as_uuid=True), ForeignKey("gear_catalog.id"), primary_key=True
+        String(36), ForeignKey("gear_catalog.id"), primary_key=True
     )
     sensor = Column(String)
     resolution = Column(String)
@@ -288,7 +288,7 @@ class CameraSpecs(Base):
 class LensSpecs(Base):
     __tablename__ = "specs_lenses"
     gear_id = Column(
-        UUID(as_uuid=True), ForeignKey("gear_catalog.id"), primary_key=True
+        String(36), ForeignKey("gear_catalog.id"), primary_key=True
     )
     focal_length = Column(String)
     aperture = Column(String)
@@ -302,7 +302,7 @@ class LensSpecs(Base):
 class AudioSpecs(Base):
     __tablename__ = "specs_audio"
     gear_id = Column(
-        UUID(as_uuid=True), ForeignKey("gear_catalog.id"), primary_key=True
+        String(36), ForeignKey("gear_catalog.id"), primary_key=True
     )
     type = Column(String)
     pattern = Column(String)
@@ -318,7 +318,7 @@ class AudioSpecs(Base):
 class LightSpecs(Base):
     __tablename__ = "specs_lights"
     gear_id = Column(
-        UUID(as_uuid=True), ForeignKey("gear_catalog.id"), primary_key=True
+        String(36), ForeignKey("gear_catalog.id"), primary_key=True
     )
     type = Column(String)
     power_draw = Column(String)
@@ -333,7 +333,7 @@ class LightSpecs(Base):
 class MonitorSpecs(Base):
     __tablename__ = "specs_monitoring"
     gear_id = Column(
-        UUID(as_uuid=True), ForeignKey("gear_catalog.id"), primary_key=True
+        String(36), ForeignKey("gear_catalog.id"), primary_key=True
     )
     screen = Column(String)
     resolution = Column(String)
@@ -349,7 +349,7 @@ class MonitorSpecs(Base):
 class PropSpecs(Base):
     __tablename__ = "specs_props"
     gear_id = Column(
-        UUID(as_uuid=True), ForeignKey("gear_catalog.id"), primary_key=True
+        String(36), ForeignKey("gear_catalog.id"), primary_key=True
     )
     type = Column(String)
     era = Column(String)
@@ -365,7 +365,7 @@ class PropSpecs(Base):
 class StabilizerSpecs(Base):
     __tablename__ = "specs_stabilizers"
     gear_id = Column(
-        UUID(as_uuid=True), ForeignKey("gear_catalog.id"), primary_key=True
+        String(36), ForeignKey("gear_catalog.id"), primary_key=True
     )
     type = Column(String)
     max_payload = Column(String)
@@ -380,7 +380,7 @@ class StabilizerSpecs(Base):
 class TripodSpecs(Base):
     __tablename__ = "specs_tripods"
     gear_id = Column(
-        UUID(as_uuid=True), ForeignKey("gear_catalog.id"), primary_key=True
+        String(36), ForeignKey("gear_catalog.id"), primary_key=True
     )
     head_type = Column(String)
     max_payload = Column(String)
@@ -395,7 +395,7 @@ class TripodSpecs(Base):
 class WirelessSpecs(Base):
     __tablename__ = "specs_wireless"
     gear_id = Column(
-        UUID(as_uuid=True), ForeignKey("gear_catalog.id"), primary_key=True
+        String(36), ForeignKey("gear_catalog.id"), primary_key=True
     )
     range = Column(String)
     delay = Column(String)
@@ -411,7 +411,7 @@ class WirelessSpecs(Base):
 class DroneSpecs(Base):
     __tablename__ = "specs_drones"
     gear_id = Column(
-        UUID(as_uuid=True), ForeignKey("gear_catalog.id"), primary_key=True
+        String(36), ForeignKey("gear_catalog.id"), primary_key=True
     )
     type = Column(String)
     camera = Column(String)
@@ -427,7 +427,7 @@ class DroneSpecs(Base):
 class FilterSpecs(Base):
     __tablename__ = "specs_filters"
     gear_id = Column(
-        UUID(as_uuid=True), ForeignKey("gear_catalog.id"), primary_key=True
+        String(36), ForeignKey("gear_catalog.id"), primary_key=True
     )
     type = Column(String)
     density = Column(String)
@@ -444,7 +444,7 @@ class FilterSpecs(Base):
 class GripSpecs(Base):
     __tablename__ = "specs_grip"
     gear_id = Column(
-        UUID(as_uuid=True), ForeignKey("gear_catalog.id"), primary_key=True
+        String(36), ForeignKey("gear_catalog.id"), primary_key=True
     )
     type = Column(String)
     max_load = Column(String)

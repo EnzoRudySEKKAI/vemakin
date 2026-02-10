@@ -11,6 +11,20 @@ from ..mock_data import get_mock_db
 router = APIRouter(prefix="/notes", tags=["notes"])
 
 
+def map_note_to_response(note: dict) -> dict:
+    """Helper to map snake_case mock data to camelCase schema fields."""
+    return {
+        "id": note["id"],
+        "project_id": note["project_id"],
+        "title": note.get("title", "New Note"),
+        "content": note.get("content", ""),
+        "shotId": note.get("shot_id"),
+        "taskId": note.get("task_id"),
+        "created_at": note.get("created_at"),
+        "updated_at": note.get("updated_at"),
+    }
+
+
 @router.get("", response_model=schemas.PaginatedNoteResponse)
 def read_notes(
     project_id: str,
@@ -29,8 +43,9 @@ def read_notes(
         notes = mock_db.list_notes(project_id)
         total = len(notes) if notes else 0
         paginated_notes = notes[skip : skip + limit] if notes else []
+        items = [map_note_to_response(n) for n in paginated_notes]
         return {
-            "items": paginated_notes,
+            "items": items,
             "total": total,
             "page": skip // limit + 1 if limit > 0 else 1,
             "limit": limit,
@@ -94,7 +109,8 @@ def create_note(
             "shot_id": note.shotId,
             "task_id": note.taskId,
         }
-        return mock_db.create_note(note_data)
+        new_note = mock_db.create_note(note_data)
+        return map_note_to_response(new_note)
 
     # SQLAlchemy 2.0: Verify project ownership
     project_stmt = select(models.Project).where(

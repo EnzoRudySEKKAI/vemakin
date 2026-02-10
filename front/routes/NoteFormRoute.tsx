@@ -20,7 +20,7 @@ export const NoteFormRoute = () => {
             onClose={() => ctx.navigate('/dashboard/notes')}
             onSwitchForm={handleSwitchForm}
             onSubmit={(title, content, linkedId, linkType, attachments) => ctx.addNote({
-                id: `note-${Date.now()}`,
+                id: crypto.randomUUID(),
                 title,
                 content,
                 createdAt: new Date().toISOString(),

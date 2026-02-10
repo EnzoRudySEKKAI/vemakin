@@ -31,13 +31,14 @@ export const GearTransition: React.FC<GearTransitionProps> = ({ prevShot, nextSh
     return { toDrop, toAdd }
   }, [prevShot, nextShot, inventory])
 
-  if (gearDelta.toDrop.length === 0 && gearDelta.toAdd.length === 0) return null
+  // Ensure GearTransition is always visible as requested by the user
+  // if (gearDelta.toDrop.length === 0 && gearDelta.toAdd.length === 0) return null
 
   return (
     <div className={`
       relative animate-in fade-in slide-in-from-top-1 duration-500
       bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-white/10 rounded-[16px] shadow-sm
-      transition-all duration-300 w-[300px] lg:w-auto lg:flex-1 overflow-hidden
+      transition-all duration-300 flex-1 lg:flex-1 overflow-hidden
       ${isOpen ? 'ring-2 ring-gray-900/5 dark:ring-white/10' : 'hover:border-gray-300 dark:hover:border-white/20'}
     `}>
       <button
@@ -61,7 +62,11 @@ export const GearTransition: React.FC<GearTransitionProps> = ({ prevShot, nextSh
 
         {/* Right: Item Count & Chevron */}
         <div className="flex items-center gap-2 shrink-0">
-          <Text variant="body">{gearDelta.toDrop.length + gearDelta.toAdd.length} Items</Text>
+          <Text variant="body">
+            {gearDelta.toDrop.length + gearDelta.toAdd.length > 0
+              ? `${gearDelta.toDrop.length + gearDelta.toAdd.length} Items`
+              : 'Full Kit'}
+          </Text>
           <ChevronDown size={14} strokeWidth={2.5} className={`text-gray-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
         </div>
       </button>

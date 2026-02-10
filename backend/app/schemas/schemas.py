@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, AliasChoices
 from typing import List, Optional, Any, Dict, Union
 from datetime import datetime
 import uuid
@@ -23,18 +23,20 @@ class User(UserBase):
 
 # --- Equipment ---
 class EquipmentBase(BaseModel):
-    id: str
+    id: Optional[Union[str, uuid.UUID]] = None
     name: str
-    catalogItemId: Optional[uuid.UUID] = None
-    customName: Optional[str] = None
-    serialNumber: Optional[str] = None
+    catalog_item_id: Optional[Union[str, uuid.UUID]] = None
+    custom_name: Optional[str] = None
+    serial_number: Optional[str] = None
     category: str
-    pricePerDay: float
-    rentalPrice: Optional[float] = None
-    rentalFrequency: Optional[str] = None
+    price_per_day: float
+    rental_price: Optional[float] = None
+    rental_frequency: Optional[str] = None
     quantity: int
-    isOwned: bool
+    is_owned: bool
     status: str
+    brand_name: Optional[str] = None
+    model_name: Optional[str] = None
 
 
 class EquipmentCreate(EquipmentBase):
@@ -48,7 +50,7 @@ class Equipment(EquipmentBase):
 
 # --- Shot ---
 class ShotBase(BaseModel):
-    id: str
+    id: Optional[Union[str, uuid.UUID]] = None
     title: str
     description: str
     status: str
@@ -58,8 +60,8 @@ class ShotBase(BaseModel):
     remarks: Optional[str] = None
     date: str
     sceneNumber: Optional[str] = None
-    equipmentIds: List[str] = []
-    preparedEquipmentIds: List[str] = []
+    equipmentIds: List[Union[str, uuid.UUID]] = []
+    preparedEquipmentIds: List[Union[str, uuid.UUID]] = []
 
 
 class ShotCreate(ShotBase):
@@ -67,7 +69,7 @@ class ShotCreate(ShotBase):
 
 
 class Shot(ShotBase):
-    project_id: uuid.UUID
+    project_id: Union[str, uuid.UUID]
 
     class Config:
         from_attributes = True
@@ -75,7 +77,7 @@ class Shot(ShotBase):
 
 # --- PostProdTask ---
 class PostProdTaskBase(BaseModel):
-    id: str
+    id: Optional[Union[str, uuid.UUID]] = None
     category: str
     title: str
     status: str
@@ -89,7 +91,7 @@ class PostProdTaskCreate(PostProdTaskBase):
 
 
 class PostProdTask(PostProdTaskBase):
-    project_id: uuid.UUID
+    project_id: Union[str, uuid.UUID]
     created_at: datetime
     updated_at: datetime
 
@@ -107,7 +109,7 @@ class ProjectCreate(ProjectBase):
 
 
 class Project(ProjectBase):
-    id: uuid.UUID
+    id: Union[str, uuid.UUID]
     user_id: str
     created_at: datetime
     shots: List[Shot] = []
@@ -120,11 +122,11 @@ class Project(ProjectBase):
 
 # --- Note ---
 class NoteBase(BaseModel):
-    id: str
+    id: Optional[Union[str, uuid.UUID]] = None
     title: str
     content: str
-    shotId: Optional[str] = None
-    taskId: Optional[str] = None
+    shotId: Optional[Union[str, uuid.UUID]] = Field(None, validation_alias=AliasChoices("shot_id", "shotId"), serialization_alias="shotId")
+    taskId: Optional[Union[str, uuid.UUID]] = Field(None, validation_alias=AliasChoices("task_id", "taskId"), serialization_alias="taskId")
 
 
 class NoteCreate(NoteBase):
@@ -132,7 +134,7 @@ class NoteCreate(NoteBase):
 
 
 class Note(NoteBase):
-    project_id: uuid.UUID
+    project_id: Union[str, uuid.UUID]
     created_at: datetime
     updated_at: datetime
 
