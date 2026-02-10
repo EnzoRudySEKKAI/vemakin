@@ -11,16 +11,16 @@ logger = logging.getLogger(__name__)
 SQL_ALCHEMY_DATABASE_URL = settings.DATABASE_URL
 
 # Cloud SQL optimized connection pooling
-# Reduced pool sizes to respect Cloud SQL connection limits (100 per instance)
+# Increased pool sizes for better concurrent write performance
 # pool_recycle < Cloud SQL's connection timeout (10 minutes)
 engine = create_engine(
     SQL_ALCHEMY_DATABASE_URL,
     poolclass=QueuePool,
-    pool_size=5,  # Conservative for Cloud SQL (can be increased if needed)
-    max_overflow=10,  # Conservative overflow
+    pool_size=10,  # Increased from 5 for better concurrent performance
+    max_overflow=20,  # Increased from 10 for burst handling
     pool_pre_ping=True,  # Verify connections before using (prevents stale)
     pool_recycle=300,  # Recycle every 5 minutes (< Cloud SQL 10 min timeout)
-    pool_timeout=30,  # Wait up to 30 seconds for available connection
+    pool_timeout=10,  # Reduced from 30 to fail fast if pool exhausted
     echo=False,  # Set to True for SQL query debugging
     connect_args={
         "connect_timeout": 10,

@@ -1,12 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func, over
+from sqlalchemy import select, func
 from typing import List
+import time
 from ..database import get_db
 from ..models import models
 from ..schemas import schemas
 from ..auth import get_current_user_or_guest
 from ..mock_data import get_mock_db
+from ..cache import check_project_owner
 
 router = APIRouter(
     prefix="/shots",
@@ -103,7 +105,9 @@ def create_shot(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
-    """Create a new shot."""
+    """Create a new shot with timing instrumentation."""
+    start_time = time.time()
+
     # Guest mode: create in mock database
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -125,14 +129,10 @@ def create_shot(
         new_shot = mock_db.create_shot(shot_data)
         return map_shot_to_response(new_shot)
 
-    # SQLAlchemy 2.0: Verify project ownership
-    project_stmt = select(models.Project).where(
-        models.Project.id == project_id,
-        models.Project.user_id == current_user["uid"],
-    )
-    project_result = db.execute(project_stmt)
-    if not project_result.scalar_one_or_none():
-        raise HTTPException(status_code=404, detail="Project not found")
+    # Check project ownership with caching
+    validation_start = time.time()
+    check_project_owner(project_id, current_user["uid"], db)
+    validation_time = time.time() - validation_start
 
     db_shot = models.Shot(
         id=shot.id,
@@ -150,8 +150,16 @@ def create_shot(
         prepared_equipment_ids=shot.preparedEquipmentIds,
     )
     db.add(db_shot)
+
+    commit_start = time.time()
     db.commit()
-    db.refresh(db_shot)
+    commit_time = time.time() - commit_start
+
+    total_time = time.time() - start_time
+    print(
+        f"[SHOTS POST] Total: {total_time:.3f}s | Validation: {validation_time:.3f}s | Commit: {commit_time:.3f}s"
+    )
+
     return db_shot
 
 
@@ -163,6 +171,8 @@ def update_shot(
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Update a shot with ownership verification via JOIN."""
+    start_time = time.time()
+
     # Guest mode: update in mock database
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -207,8 +217,13 @@ def update_shot(
     shot.equipment_ids = shot_update.equipmentIds
     shot.prepared_equipment_ids = shot_update.preparedEquipmentIds
 
+    commit_start = time.time()
     db.commit()
-    db.refresh(shot)
+    commit_time = time.time() - commit_start
+
+    total_time = time.time() - start_time
+    print(f"[SHOTS PATCH] Total: {total_time:.3f}s | Commit: {commit_time:.3f}s")
+
     return shot
 
 
@@ -219,6 +234,8 @@ def delete_shot(
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Delete a shot with ownership verification via JOIN."""
+    start_time = time.time()
+
     # Guest mode: delete from mock database
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -243,5 +260,12 @@ def delete_shot(
         raise HTTPException(status_code=404, detail="Shot not found")
 
     db.delete(shot)
+
+    commit_start = time.time()
     db.commit()
+    commit_time = time.time() - commit_start
+
+    total_time = time.time() - start_time
+    print(f"[SHOTS DELETE] Total: {total_time:.3f}s | Commit: {commit_time:.3f}s")
+
     return None

@@ -2,11 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 from typing import List
+import time
 from ..database import get_db
 from ..models import models
 from ..schemas import schemas
 from ..auth import get_current_user_or_guest
 from ..mock_data import get_mock_db
+from ..cache import check_project_owner
 
 router = APIRouter(prefix="/notes", tags=["notes"])
 
@@ -94,7 +96,9 @@ def create_note(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
-    """Create a new note."""
+    """Create a new note with timing instrumentation."""
+    start_time = time.time()
+
     # Guest mode
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -112,13 +116,10 @@ def create_note(
         new_note = mock_db.create_note(note_data)
         return map_note_to_response(new_note)
 
-    # SQLAlchemy 2.0: Verify project ownership
-    project_stmt = select(models.Project).where(
-        models.Project.id == project_id,
-        models.Project.user_id == current_user["uid"],
-    )
-    if not db.execute(project_stmt).scalar_one_or_none():
-        raise HTTPException(status_code=404, detail="Project not found")
+    # Check project ownership with caching
+    validation_start = time.time()
+    check_project_owner(project_id, current_user["uid"], db)
+    validation_time = time.time() - validation_start
 
     db_note = models.Note(
         id=note.id,
@@ -129,8 +130,16 @@ def create_note(
         task_id=note.taskId,
     )
     db.add(db_note)
+
+    commit_start = time.time()
     db.commit()
-    db.refresh(db_note)
+    commit_time = time.time() - commit_start
+
+    total_time = time.time() - start_time
+    print(
+        f"[NOTES POST] Total: {total_time:.3f}s | Validation: {validation_time:.3f}s | Commit: {commit_time:.3f}s"
+    )
+
     return db_note
 
 
@@ -142,6 +151,8 @@ def update_note(
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Update a note with ownership verification."""
+    start_time = time.time()
+
     # Guest mode
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -177,8 +188,13 @@ def update_note(
     note.shot_id = note_update.shotId
     note.task_id = note_update.taskId
 
+    commit_start = time.time()
     db.commit()
-    db.refresh(note)
+    commit_time = time.time() - commit_start
+
+    total_time = time.time() - start_time
+    print(f"[NOTES PATCH] Total: {total_time:.3f}s | Commit: {commit_time:.3f}s")
+
     return note
 
 
@@ -189,6 +205,8 @@ def delete_note(
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Delete a note with ownership verification."""
+    start_time = time.time()
+
     # Guest mode
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -213,5 +231,12 @@ def delete_note(
         raise HTTPException(status_code=404, detail="Note not found")
 
     db.delete(note)
+
+    commit_start = time.time()
     db.commit()
+    commit_time = time.time() - commit_start
+
+    total_time = time.time() - start_time
+    print(f"[NOTES DELETE] Total: {total_time:.3f}s | Commit: {commit_time:.3f}s")
+
     return None

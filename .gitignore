@@ -74,6 +74,7 @@ brain/
 **/__pycache__/
 *.pyc
 **/.pytest_cache/
+**/catalog_cache.json
 
 # Credentials & Secrets
 *.key

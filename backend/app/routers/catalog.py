@@ -1,14 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
+import uuid
+import time
+import logging
+
 from ..database import get_db
 from ..models import models
 from ..schemas import schemas
 from ..auth import get_current_user_or_guest
 from ..mock_data import get_mock_db
-import uuid
-import time
+from ..cache import catalog_cache
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/catalog", tags=["catalog"])
 
 SPECS_MODELS_MAPPING = {
@@ -93,6 +97,11 @@ def get_categories(
         # Return mock catalog categories
         return mock_db.list_catalog_categories()
 
+    # Use cache if available
+    if catalog_cache.is_loaded():
+        return catalog_cache.get_categories()
+
+    # Fallback to database query
     return db.query(models.Category).all()
 
 
@@ -118,6 +127,11 @@ def get_brands(
             brands = [b for b in brands if str(b.get("id")) in brand_ids_in_category]
         return brands
 
+    # Use cache if available
+    if catalog_cache.is_loaded():
+        return catalog_cache.get_brands(category_id)
+
+    # Fallback to database query
     query = db.query(models.Brand)
     if category_id:
         # Join with gear_catalog to find brands that have items in this category
@@ -149,6 +163,11 @@ def get_items(
             items = [item for item in items if item.get("brand_id") == str(brand_id)]
         return items
 
+    # Use cache if available
+    if catalog_cache.is_loaded():
+        return catalog_cache.get_items(category_id, brand_id)
+
+    # Fallback to database query
     start_time = time.time()
 
     query = db.query(models.GearCatalog)
@@ -182,8 +201,10 @@ def get_items(
 
     total_time = time.time() - start_time
     if total_time > 0.5:
-        print(
-            f"[CATALOG] get_items: {len(items)} items, Query: {query_time:.3f}s, Enrich: {enrich_time:.3f}s, Total: {total_time:.3f}s"
+        logger.warning(
+            f"[CATALOG] get_items (DB fallback): {len(items)} items, "
+            f"Query: {query_time:.3f}s, Enrich: {enrich_time:.3f}s, "
+            f"Total: {total_time:.3f}s"
         )
 
     return enriched_items
@@ -204,12 +225,20 @@ def get_item(
             raise HTTPException(status_code=404, detail="Item not found")
         return item
 
+    # Use cache if available
+    if catalog_cache.is_loaded():
+        item = catalog_cache.get_item(item_id)
+        if not item:
+            raise HTTPException(status_code=404, detail="Item not found")
+        return item
+
+    # Fallback to database query
     item = db.query(models.GearCatalog).filter(models.GearCatalog.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
 
     # Use batch function for single item (for consistency)
-    specs_cache = batch_get_items_specs(db, [item])
+    specs_cache_result = batch_get_items_specs(db, [item])
 
     return {
         "id": item.id,
@@ -219,7 +248,7 @@ def get_item(
         "description": item.description,
         "image_url": item.image_url,
         "created_at": item.created_at,
-        "specs": specs_cache.get(str(item.id), {}),
+        "specs": specs_cache_result.get(str(item.id), {}),
     }
 
 
@@ -238,10 +267,22 @@ def get_item_specs(
             raise HTTPException(status_code=404, detail="Item not found")
         return item.get("specs", {})
 
+    # Use cache if available
+    if catalog_cache.is_loaded():
+        specs = catalog_cache.get_specs(item_id)
+        return specs
+
+    # Fallback to database query
     item = db.query(models.GearCatalog).filter(models.GearCatalog.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
 
     # Use batch function for single item
-    specs_cache = batch_get_items_specs(db, [item])
-    return specs_cache.get(str(item.id), {})
+    specs_cache_result = batch_get_items_specs(db, [item])
+    return specs_cache_result.get(str(item.id), {})
+
+
+@router.get("/health")
+def get_cache_health():
+    """Get catalog cache health status and statistics."""
+    return catalog_cache.get_stats()

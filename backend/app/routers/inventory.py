@@ -7,6 +7,8 @@ from ..models import models
 from ..schemas import schemas
 from ..auth import get_current_user_or_guest
 from ..mock_data import get_mock_db
+from ..cache import cache, get_cache_key
+from ..cache.catalog_cache import catalog_cache
 import uuid
 import time
 
@@ -34,72 +36,65 @@ def to_camel_case(snake_str: str) -> str:
 
 
 def enrich_single_equipment(db: Session, item: models.Equipment) -> dict:
-    """Lightweight enrichment for single items - avoids batch overhead"""
-    # Default display values
+    """Lightweight enrichment for single items using catalog cache (zero DB queries)."""
     display_category = item.category
-    display_name = item.name or (
-        item.custom_name if item.custom_name else "New Equipment"
-    )
+    display_name = item.name or item.custom_name or "New Equipment"
     specs = {}
+    brand_name = None
+    model_name = None
+    catalog_item_id = None
 
-    # Try to get category name if it's a UUID
-    if item.category:
-        try:
-            cat_uuid = uuid.UUID(item.category)
-            # SQLAlchemy 2.0
-            category_stmt = select(models.Category).where(
-                models.Category.id == cat_uuid
-            )
-            category = db.execute(category_stmt).scalar_one_or_none()
-            if category:
-                display_category = category.name
-        except (ValueError, TypeError):
-            pass
-
-    catalog_item_id = item.catalog_item_id
-    if not catalog_item_id:
+    # Try to get catalog item ID from various sources
+    if item.catalog_item_id:
+        catalog_item_id = item.catalog_item_id
+    else:
         try:
             catalog_item_id = uuid.UUID(str(item.name))
         except (ValueError, TypeError):
-            catalog_item_id = None
+            pass
 
-    if catalog_item_id:
-        # SQLAlchemy 2.0
-        catalog_stmt = select(models.GearCatalog).where(
-            models.GearCatalog.id == catalog_item_id
-        )
-        catalog_item = db.execute(catalog_stmt).scalar_one_or_none()
-        if catalog_item:
-            display_name = catalog_item.name
-            # Get specs for this item
-            cat_stmt = select(models.Category).where(
-                models.Category.id == catalog_item.category_id
-            )
-            category = db.execute(cat_stmt).scalar_one_or_none()
-            if category and category.slug in SPECS_MODELS_MAPPING:
-                spec_model = SPECS_MODELS_MAPPING[category.slug]
-                spec_stmt = select(spec_model).where(
-                    spec_model.gear_id == catalog_item_id
-                )
-                spec_result = db.execute(spec_stmt).scalar_one_or_none()
-                if spec_result:
-                    specs = {
-                        to_camel_case(c.name): getattr(spec_result, c.name)
-                        for c in spec_result.__table__.columns
-                        if c.name != "gear_id"
-                    }
-    elif display_category:
+    # Use catalog cache if available (zero DB queries!)
+    if catalog_item_id and catalog_cache.is_loaded():
         try:
-            uuid.UUID(display_category)
-        except (ValueError, TypeError):
-            display_name = display_category
+            catalog_item = catalog_cache.get_item(catalog_item_id)
+            if catalog_item:
+                display_name = catalog_item.get("name", display_name)
+                model_name = catalog_item.get("name")
 
-    brand_name = None
-    if catalog_item and catalog_item.brand_id:
-        brand_stmt = select(models.Brand).where(models.Brand.id == catalog_item.brand_id)
-        brand = db.execute(brand_stmt).scalar_one_or_none()
-        if brand:
-            brand_name = brand.name
+                # Get category name from cache
+                category_id = catalog_item.get("category_id")
+                if category_id:
+                    for cat in catalog_cache.get_categories():
+                        if str(cat.id) == category_id:
+                            display_category = cat.name
+                            break
+
+                # Get brand name from cache
+                brand_id = catalog_item.get("brand_id")
+                if brand_id:
+                    for cat in catalog_cache.get_categories():
+                        for brand in catalog_cache.get_brands_for_category(cat.id):
+                            if str(brand.id) == brand_id:
+                                brand_name = brand.name
+                                break
+                        if brand_name:
+                            break
+
+                # Get specs from cache
+                specs = catalog_cache.get_specs(catalog_item_id)
+        except Exception:
+            pass
+
+    elif item.category and catalog_cache.is_loaded():
+        # Try to resolve category UUID to name
+        try:
+            cat_uuid = uuid.UUID(item.category)
+            for cat in catalog_cache.get_categories():
+                if str(cat.id) == str(cat_uuid):
+                    display_category = cat.name
+                    break
+        except (ValueError, TypeError):
+            pass
 
     return {
         "id": item.id,
@@ -116,7 +111,7 @@ def enrich_single_equipment(db: Session, item: models.Equipment) -> dict:
         "status": item.status,
         "specs": specs,
         "brandName": brand_name,
-        "modelName": display_name if catalog_item_id else None,
+        "modelName": model_name,
     }
 
 
@@ -140,143 +135,81 @@ def map_equipment_to_response(item: dict) -> dict:
     }
 
 
-def batch_enrich_equipment(db: Session, items: List[models.Equipment]) -> List[dict]:
-    """Batch enrichment to avoid N+1 queries - uses optimized bulk loading"""
+def batch_enrich_equipment_optimized(
+    db: Session, items: List[models.Equipment]
+) -> List[dict]:
+    """Optimized batch enrichment using pre-warmed catalog cache (zero DB queries)."""
     start_time = time.time()
 
     if not items:
         return []
 
     result = []
+    cache_loaded = catalog_cache.is_loaded()
 
-    # Collect all category IDs and catalog item IDs
-    category_ids = set()
-    catalog_item_ids = set()
+    # Build lookup dicts from cache for O(1) access
+    categories_dict = {}
+    brands_dict = {}
+
+    if cache_loaded:
+        # Build categories lookup
+        for cat in catalog_cache.get_categories():
+            categories_dict[str(cat.id)] = cat
+
+        # Build brands lookup
+        for cat in catalog_cache.get_categories():
+            for brand in catalog_cache.get_brands_for_category(cat.id):
+                brands_dict[str(brand.id)] = brand
+
     for item in items:
-        if item.category:
-            try:
-                cat_uuid = uuid.UUID(item.category)
-                category_ids.add(cat_uuid)
-            except (ValueError, TypeError):
-                pass
+        display_category = item.category
+        display_name = item.name or item.custom_name or "New Equipment"
+        specs = {}
+        brand_name = None
+        model_name = None
+        catalog_item_id_str = None
 
+        # Try to get catalog item ID from various sources
         if item.catalog_item_id:
-            catalog_item_ids.add(item.catalog_item_id)
+            catalog_item_id_str = str(item.catalog_item_id)
         else:
             try:
                 name_uuid = uuid.UUID(str(item.name))
-                catalog_item_ids.add(name_uuid)
+                catalog_item_id_str = str(name_uuid)
             except (ValueError, TypeError):
                 pass
 
-    # Batch fetch all categories in single query (SQLAlchemy 2.0)
-    categories = {}
-    if category_ids:
-        cat_stmt = select(models.Category).where(models.Category.id.in_(category_ids))
-        cat_results = db.execute(cat_stmt).scalars().all()
-        categories = {str(c.id): c for c in cat_results}
-
-    # Batch fetch all catalog items in single query (SQLAlchemy 2.0)
-    catalog_items = {}
-    if catalog_item_ids:
-        catalog_stmt = select(models.GearCatalog).where(
-            models.GearCatalog.id.in_(catalog_item_ids)
-        )
-        catalog_results = db.execute(catalog_stmt).scalars().all()
-        catalog_items = {str(c.id): c for c in catalog_results}
-
-    # Batch fetch all brands
-    brands = {}
-    brand_ids = {c.brand_id for c in catalog_items.values() if c.brand_id}
-    if brand_ids:
-        brand_stmt = select(models.Brand).where(models.Brand.id.in_(brand_ids))
-        brand_results = db.execute(brand_stmt).scalars().all()
-        brands = {str(b.id): b for b in brand_results}
-
-    # Group items by category for efficient specs fetching
-    category_to_gear_ids = {}
-    for item in items:
-        catalog_item_id_str = (
-            str(item.catalog_item_id) if item.catalog_item_id else None
-        )
-        if not catalog_item_id_str:
+        # Use catalog cache to enrich (zero DB queries!)
+        if catalog_item_id_str and cache_loaded:
             try:
-                catalog_item_id_str = str(uuid.UUID(str(item.name)))
-            except (ValueError, TypeError):
-                catalog_item_id_str = None
+                catalog_item = catalog_cache.get_item(uuid.UUID(catalog_item_id_str))
+                if catalog_item:
+                    display_name = catalog_item.get("name", display_name)
+                    model_name = catalog_item.get("name")
 
-        if catalog_item_id_str and catalog_item_id_str in catalog_items:
-            catalog_item = catalog_items[catalog_item_id_str]
-            category = categories.get(str(catalog_item.category_id))
-            if category and category.slug in SPECS_MODELS_MAPPING:
-                if category.slug not in category_to_gear_ids:
-                    category_to_gear_ids[category.slug] = set()
-                try:
-                    gear_id_uuid = uuid.UUID(catalog_item_id_str)
-                    category_to_gear_ids[category.slug].add(gear_id_uuid)
-                except (ValueError, TypeError):
-                    pass
+                    # Get category name from cache
+                    category_id = catalog_item.get("category_id")
+                    if category_id and category_id in categories_dict:
+                        display_category = categories_dict[category_id].name
 
-    # Batch fetch all specs by category (one query per category, not per item)
-    specs_cache = {}
-    for category_slug, gear_ids_set in category_to_gear_ids.items():
-        spec_model = SPECS_MODELS_MAPPING[category_slug]
-        gear_ids = list(gear_ids_set)
-        if gear_ids:
-            specs_stmt = select(spec_model).where(spec_model.gear_id.in_(gear_ids))
-            specs_results = db.execute(specs_stmt).scalars().all()
-            if category_slug not in specs_cache:
-                specs_cache[category_slug] = {}
-            for spec in specs_results:
-                specs_cache[category_slug][str(spec.gear_id)] = spec
+                    # Get brand name from cache
+                    brand_id = catalog_item.get("brand_id")
+                    if brand_id and brand_id in brands_dict:
+                        brand_name = brands_dict[brand_id].name
 
-    # Build result list with cached data
-    for item in items:
-        display_category = item.category
-        if display_category in categories:
-            display_category = categories[display_category].name
+                    # Get specs from cache
+                    specs = catalog_cache.get_specs(uuid.UUID(catalog_item_id_str))
+            except Exception:
+                pass
 
-        display_name = item.name or (
-            item.custom_name if item.custom_name else "New Equipment"
-        )
-        catalog_item_id_str = (
-            str(item.catalog_item_id) if item.catalog_item_id else None
-        )
-        if not catalog_item_id_str:
+        elif item.category and cache_loaded:
+            # Try to resolve category UUID to name
             try:
-                catalog_item_id_str = str(uuid.UUID(str(item.name)))
+                cat_uuid = str(uuid.UUID(item.category))
+                if cat_uuid in categories_dict:
+                    display_category = categories_dict[cat_uuid].name
             except (ValueError, TypeError):
-                catalog_item_id_str = None
-
-        if catalog_item_id_str and catalog_item_id_str in catalog_items:
-            display_name = catalog_items[catalog_item_id_str].name
-        elif display_category:
-            try:
-                uuid.UUID(display_category)
-            except (ValueError, TypeError):
-                display_name = display_category
-
-        # Build specs from cache
-        specs = {}
-        catalog_item_id_str = (
-            str(item.catalog_item_id) if item.catalog_item_id else None
-        )
-        if not catalog_item_id_str:
-            try:
-                catalog_item_id_str = str(uuid.UUID(str(item.name)))
-            except (ValueError, TypeError):
-                catalog_item_id_str = None
-        if catalog_item_id_str and catalog_item_id_str in catalog_items:
-            catalog_item = catalog_items[catalog_item_id_str]
-            category = categories.get(str(catalog_item.category_id))
-            if category and category.slug in specs_cache:
-                spec_result = specs_cache[category.slug].get(catalog_item_id_str)
-                if spec_result:
-                    specs = {
-                        to_camel_case(c.name): getattr(spec_result, c.name)
-                        for c in spec_result.__table__.columns
-                        if c.name != "gear_id"
-                    }
+                pass
 
         item_dict = {
             "id": item.id,
@@ -292,25 +225,26 @@ def batch_enrich_equipment(db: Session, items: List[models.Equipment]) -> List[d
             "isOwned": bool(item.is_owned) if item.is_owned is not None else True,
             "status": item.status,
             "specs": specs,
-            "brandName": None,
-            "modelName": None,
+            "brandName": brand_name,
+            "modelName": model_name,
         }
-
-        if catalog_item_id_str and catalog_item_id_str in catalog_items:
-            cat_item = catalog_items[catalog_item_id_str]
-            item_dict["modelName"] = cat_item.name
-            if str(cat_item.brand_id) in brands:
-                item_dict["brandName"] = brands[str(cat_item.brand_id)].name
 
         result.append(item_dict)
 
     elapsed = time.time() - start_time
-    if elapsed > 0.1:  # Only log if it takes more than 100ms
+    if elapsed > 0.01:  # Only log if it takes more than 10ms
         print(
-            f"[INVENTORY] batch_enrich_equipment: {len(items)} items, {len(category_to_gear_ids)} categories, {elapsed:.3f}s"
+            f"[INVENTORY] batch_enrich_equipment_optimized: {len(items)} items, {elapsed:.3f}s (cache: {cache_loaded})"
         )
 
     return result
+
+
+def invalidate_inventory_cache(user_id: str) -> None:
+    """Invalidate inventory cache for a user."""
+    cache_key = get_cache_key("inventory", user_id)
+    cache.delete(cache_key)
+    print(f"[CACHE] Invalidated inventory cache for user {user_id}")
 
 
 @router.get("")
@@ -320,31 +254,44 @@ def read_inventory(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
-    """Get inventory with batch enrichment."""
-    # Check if guest mode
+    """Get inventory with batch enrichment and caching."""
+    # Check if guest mode - skip caching for guests
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
         inventory = mock_db.list_inventory()
         converted_inventory = [map_equipment_to_response(item) for item in inventory]
         return converted_inventory[skip : skip + limit]
 
+    user_id = current_user["uid"]
+    cache_key = get_cache_key("inventory", user_id)
+
+    # Try to get from cache first
+    cached_result = cache.get(cache_key)
+    if cached_result is not None:
+        print(f"[CACHE] Hit for inventory user {user_id}")
+        return cached_result[skip : skip + limit]
+
+    print(f"[CACHE] Miss for inventory user {user_id}")
     total_start = time.time()
 
     # SQLAlchemy 2.0: Fetch equipment belonging to the current user
     query_start = time.time()
     stmt = (
         select(models.Equipment)
-        .where(models.Equipment.user_id == current_user["uid"])
+        .where(models.Equipment.user_id == user_id)
         .offset(skip)
         .limit(limit)
     )
     inventory = db.execute(stmt).scalars().all()
     query_time = time.time() - query_start
 
-    # Use batch enrichment instead of N+1 queries
+    # Use optimized batch enrichment
     enrich_start = time.time()
-    result = batch_enrich_equipment(db, inventory)
+    result = batch_enrich_equipment_optimized(db, inventory)
     enrich_time = time.time() - enrich_start
+
+    # Cache the result
+    cache.set(cache_key, result, ttl_seconds=300)
 
     total_time = time.time() - total_start
     print(
@@ -360,7 +307,7 @@ def create_equipment(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
-    """Create new equipment."""
+    """Create new equipment and invalidate cache."""
     # Check if guest mode
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -418,6 +365,9 @@ def create_equipment(
     result = enrich_single_equipment(db, db_equipment)
     enrich_time = time.time() - enrich_start
 
+    # Invalidate cache after successful creation
+    invalidate_inventory_cache(current_user["uid"])
+
     total_time = time.time() - start_time
     print(
         f"[INVENTORY POST] Total: {total_time:.3f}s | Commit: {commit_time:.3f}s | Enrich: {enrich_time:.3f}s"
@@ -433,7 +383,7 @@ def update_equipment(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
-    """Update equipment."""
+    """Update equipment and invalidate cache."""
     # Check if guest mode
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -472,11 +422,19 @@ def update_equipment(
     item.is_owned = equipment_update.is_owned
     item.status = equipment_update.status
 
+    commit_start = time.time()
     db.commit()
-    db.refresh(item)
+    commit_time = time.time() - commit_start
 
     # Use lightweight enrichment for single item
-    return enrich_single_equipment(db, item)
+    result = enrich_single_equipment(db, item)
+
+    # Invalidate cache after successful update
+    invalidate_inventory_cache(current_user["uid"])
+
+    print(f"[INVENTORY PATCH] Commit: {commit_time:.3f}s")
+
+    return result
 
 
 @router.delete("/{equipment_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -485,7 +443,7 @@ def delete_equipment(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
-    """Delete equipment."""
+    """Delete equipment and invalidate cache."""
     # Check if guest mode
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -507,4 +465,8 @@ def delete_equipment(
 
     db.delete(item)
     db.commit()
+
+    # Invalidate cache after successful deletion
+    invalidate_inventory_cache(current_user["uid"])
+
     return None

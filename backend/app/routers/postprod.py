@@ -2,11 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 from typing import List
+import time
 from ..database import get_db
 from ..models import models
 from ..schemas import schemas
 from ..auth import get_current_user_or_guest
 from ..mock_data import get_mock_db
+from ..cache import check_project_owner
 
 router = APIRouter(prefix="/postprod", tags=["postprod"])
 
@@ -100,7 +102,9 @@ def create_task(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
-    """Create a new task."""
+    """Create a new task with timing instrumentation."""
+    start_time = time.time()
+
     # Guest mode
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -120,13 +124,10 @@ def create_task(
         new_task = mock_db.create_task(task_data)
         return map_task_to_response(new_task)
 
-    # SQLAlchemy 2.0: Verify project ownership
-    project_stmt = select(models.Project).where(
-        models.Project.id == project_id,
-        models.Project.user_id == current_user["uid"],
-    )
-    if not db.execute(project_stmt).scalar_one_or_none():
-        raise HTTPException(status_code=404, detail="Project not found")
+    # Check project ownership with caching
+    validation_start = time.time()
+    check_project_owner(project_id, current_user["uid"], db)
+    validation_time = time.time() - validation_start
 
     db_task = models.PostProdTask(
         id=task.id,
@@ -139,8 +140,16 @@ def create_task(
         description=task.description,
     )
     db.add(db_task)
+
+    commit_start = time.time()
     db.commit()
-    db.refresh(db_task)
+    commit_time = time.time() - commit_start
+
+    total_time = time.time() - start_time
+    print(
+        f"[POSTPROD POST] Total: {total_time:.3f}s | Validation: {validation_time:.3f}s | Commit: {commit_time:.3f}s"
+    )
+
     return db_task
 
 
@@ -152,6 +161,8 @@ def update_task(
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Update a task with ownership verification."""
+    start_time = time.time()
+
     # Guest mode
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -186,8 +197,13 @@ def update_task(
         else:
             setattr(task, key, value)
 
+    commit_start = time.time()
     db.commit()
-    db.refresh(task)
+    commit_time = time.time() - commit_start
+
+    total_time = time.time() - start_time
+    print(f"[POSTPROD PATCH] Total: {total_time:.3f}s | Commit: {commit_time:.3f}s")
+
     return task
 
 
@@ -198,6 +214,8 @@ def delete_task(
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Delete a task with ownership verification."""
+    start_time = time.time()
+
     # Guest mode
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -222,5 +240,12 @@ def delete_task(
         raise HTTPException(status_code=404, detail="Task not found")
 
     db.delete(task)
+
+    commit_start = time.time()
     db.commit()
+    commit_time = time.time() - commit_start
+
+    total_time = time.time() - start_time
+    print(f"[POSTPROD DELETE] Total: {total_time:.3f}s | Commit: {commit_time:.3f}s")
+
     return None
