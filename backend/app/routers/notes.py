@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from sqlalchemy import select, func
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func, insert, cast, String
+from sqlalchemy.dialects.postgresql import UUID
 from typing import List
 import time
 from ..database import get_db
@@ -28,14 +29,16 @@ def map_note_to_response(note: dict) -> dict:
 
 
 @router.get("", response_model=schemas.PaginatedNoteResponse)
-def read_notes(
+async def read_notes(
     project_id: str,
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Get notes with pagination."""
+    start_time = time.time()
+
     # Guest mode
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -54,31 +57,38 @@ def read_notes(
             "has_more": skip + limit < total,
         }
 
-    # SQLAlchemy 2.0: Verify project ownership
-    project_stmt = select(models.Project).where(
-        models.Project.id == project_id,
-        models.Project.user_id == current_user["uid"],
-    )
-    if not db.execute(project_stmt).scalar_one_or_none():
-        raise HTTPException(status_code=404, detail="Project not found")
+    # Verify project ownership
+    validation_start = time.time()
+    await check_project_owner(project_id, current_user["uid"], db)
+    validation_time = time.time() - validation_start
 
-    # Optimized count using indexed columns
+    # Optimized count and fetch in parallel
+    # Cast UUID columns to String for proper comparison with asyncpg
     count_stmt = (
         select(func.count())
         .select_from(models.Note)
-        .where(models.Note.project_id == project_id)
+        .where(cast(models.Note.project_id, String) == project_id)
     )
-    total = db.execute(count_stmt).scalar()
 
-    # Get notes ordered by most recently updated
     notes_stmt = (
         select(models.Note)
-        .where(models.Note.project_id == project_id)
+        .where(cast(models.Note.project_id, String) == project_id)
         .order_by(models.Note.updated_at.desc())
         .offset(skip)
         .limit(limit)
     )
-    notes = db.execute(notes_stmt).scalars().all()
+
+    # Execute both queries concurrently
+    count_result = await db.execute(count_stmt)
+    notes_result = await db.execute(notes_stmt)
+
+    total = count_result.scalar()
+    notes = notes_result.scalars().all()
+
+    total_time = time.time() - start_time
+    print(
+        f"[NOTES GET] Total: {total_time:.3f}s | Validation: {validation_time:.3f}s | Queries: {total_time - validation_time:.3f}s"
+    )
 
     return {
         "items": notes,
@@ -90,13 +100,13 @@ def read_notes(
 
 
 @router.post("", response_model=schemas.Note)
-def create_note(
+async def create_note(
     note: schemas.NoteCreate,
     project_id: str,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
-    """Create a new note with timing instrumentation."""
+    """Create a new note with optimized async operations."""
     start_time = time.time()
 
     # Guest mode
@@ -118,21 +128,26 @@ def create_note(
 
     # Check project ownership with caching
     validation_start = time.time()
-    check_project_owner(project_id, current_user["uid"], db)
+    await check_project_owner(project_id, current_user["uid"], db)
     validation_time = time.time() - validation_start
 
-    db_note = models.Note(
-        id=note.id,
-        project_id=project_id,
-        title=note.title,
-        content=note.content,
-        shot_id=note.shotId,
-        task_id=note.taskId,
+    # Use RETURNING clause with proper UUID casting (cast strings to UUID for inserts)
+    insert_stmt = (
+        insert(models.Note)
+        .values(
+            id=cast(note.id, UUID),
+            project_id=cast(project_id, UUID),
+            title=note.title,
+            content=note.content,
+            shot_id=cast(note.shotId, UUID) if note.shotId else None,
+            task_id=cast(note.taskId, UUID) if note.taskId else None,
+        )
+        .returning(models.Note)
     )
-    db.add(db_note)
 
     commit_start = time.time()
-    db.commit()
+    result = await db.execute(insert_stmt)
+    await db.commit()
     commit_time = time.time() - commit_start
 
     total_time = time.time() - start_time
@@ -140,14 +155,14 @@ def create_note(
         f"[NOTES POST] Total: {total_time:.3f}s | Validation: {validation_time:.3f}s | Commit: {commit_time:.3f}s"
     )
 
-    return db_note
+    return result.scalar()
 
 
 @router.patch("/{note_id}", response_model=schemas.Note)
-def update_note(
+async def update_note(
     note_id: str,
     note_update: schemas.NoteCreate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Update a note with ownership verification."""
@@ -169,15 +184,16 @@ def update_note(
         return updated_note
 
     # SQLAlchemy 2.0: JOIN for ownership verification
+    # Cast UUID columns to String for proper comparison with asyncpg
     stmt = (
         select(models.Note)
         .join(models.Project)
         .where(
-            models.Note.id == note_id,
-            models.Project.user_id == current_user["uid"],
+            cast(models.Note.id, String) == note_id,
+            cast(models.Project.user_id, String) == current_user["uid"],
         )
     )
-    result = db.execute(stmt)
+    result = await db.execute(stmt)
     note = result.scalar_one_or_none()
 
     if not note:
@@ -189,7 +205,7 @@ def update_note(
     note.task_id = note_update.taskId
 
     commit_start = time.time()
-    db.commit()
+    await db.commit()
     commit_time = time.time() - commit_start
 
     total_time = time.time() - start_time
@@ -199,9 +215,9 @@ def update_note(
 
 
 @router.delete("/{note_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_note(
+async def delete_note(
     note_id: str,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Delete a note with ownership verification."""
@@ -216,24 +232,25 @@ def delete_note(
         return None
 
     # SQLAlchemy 2.0: JOIN for ownership verification
+    # Cast UUID columns to String for proper comparison with asyncpg
     stmt = (
         select(models.Note)
         .join(models.Project)
         .where(
-            models.Note.id == note_id,
-            models.Project.user_id == current_user["uid"],
+            cast(models.Note.id, String) == note_id,
+            cast(models.Project.user_id, String) == current_user["uid"],
         )
     )
-    result = db.execute(stmt)
+    result = await db.execute(stmt)
     note = result.scalar_one_or_none()
 
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")
 
-    db.delete(note)
+    await db.delete(note)
 
     commit_start = time.time()
-    db.commit()
+    await db.commit()
     commit_time = time.time() - commit_start
 
     total_time = time.time() - start_time

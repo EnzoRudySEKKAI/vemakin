@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, insert, cast, String
+from sqlalchemy.dialects.postgresql import UUID
 from typing import List
 from ..database import get_db
 from ..models import models
@@ -14,28 +15,13 @@ import time
 
 router = APIRouter(prefix="/inventory", tags=["inventory"])
 
-SPECS_MODELS_MAPPING = {
-    "audio": models.AudioSpecs,
-    "camera": models.CameraSpecs,
-    "lens": models.LensSpecs,
-    "light": models.LightSpecs,
-    "monitor": models.MonitorSpecs,
-    "prop": models.PropSpecs,
-    "stabilizer": models.StabilizerSpecs,
-    "tripod": models.TripodSpecs,
-    "wireless": models.WirelessSpecs,
-    "drone": models.DroneSpecs,
-    "filter": models.FilterSpecs,
-    "grip": models.GripSpecs,
-}
-
 
 def to_camel_case(snake_str: str) -> str:
     components = snake_str.split("_")
     return components[0] + "".join(x.title() for x in components[1:])
 
 
-def enrich_single_equipment(db: Session, item: models.Equipment) -> dict:
+def enrich_single_equipment(item: models.Equipment) -> dict:
     """Lightweight enrichment for single items using catalog cache (zero DB queries)."""
     display_category = item.category
     display_name = item.name or item.custom_name or "New Equipment"
@@ -135,9 +121,7 @@ def map_equipment_to_response(item: dict) -> dict:
     }
 
 
-def batch_enrich_equipment_optimized(
-    db: Session, items: List[models.Equipment]
-) -> List[dict]:
+def batch_enrich_equipment_optimized(items: List[models.Equipment]) -> List[dict]:
     """Optimized batch enrichment using pre-warmed catalog cache (zero DB queries)."""
     start_time = time.time()
 
@@ -248,13 +232,15 @@ def invalidate_inventory_cache(user_id: str) -> None:
 
 
 @router.get("")
-def read_inventory(
+async def read_inventory(
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
-    """Get inventory with batch enrichment and caching."""
+    """Get inventory with caching and catalog cache enrichment."""
+    start_time = time.time()
+
     # Check if guest mode - skip caching for guests
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -272,42 +258,45 @@ def read_inventory(
         return cached_result[skip : skip + limit]
 
     print(f"[CACHE] Miss for inventory user {user_id}")
-    total_start = time.time()
 
-    # SQLAlchemy 2.0: Fetch equipment belonging to the current user
+    # Single DB query: Fetch equipment belonging to the current user
+    # Cast UUID columns to String for proper comparison with asyncpg
     query_start = time.time()
     stmt = (
         select(models.Equipment)
-        .where(models.Equipment.user_id == user_id)
+        .where(cast(models.Equipment.user_id, String) == user_id)
         .offset(skip)
         .limit(limit)
     )
-    inventory = db.execute(stmt).scalars().all()
+    result = await db.execute(stmt)
+    inventory = result.scalars().all()
     query_time = time.time() - query_start
 
-    # Use optimized batch enrichment
+    # Enrich using catalog cache (zero DB queries!)
     enrich_start = time.time()
-    result = batch_enrich_equipment_optimized(db, inventory)
+    result_data = batch_enrich_equipment_optimized(inventory)
     enrich_time = time.time() - enrich_start
 
     # Cache the result
-    cache.set(cache_key, result, ttl_seconds=300)
+    cache.set(cache_key, result_data, ttl_seconds=300)
 
-    total_time = time.time() - total_start
+    total_time = time.time() - start_time
     print(
         f"[INVENTORY] Total: {total_time:.3f}s | Query: {query_time:.3f}s | Enrich: {enrich_time:.3f}s | Items: {len(inventory)}"
     )
 
-    return result
+    return result_data
 
 
 @router.post("")
-def create_equipment(
+async def create_equipment(
     equipment: schemas.EquipmentCreate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
-    """Create new equipment and invalidate cache."""
+    """Create new equipment with optimized async operations."""
+    start_time = time.time()
+
     # Check if guest mode
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -330,60 +319,58 @@ def create_equipment(
         new_item = mock_db.create_inventory_item(item_data)
         return map_equipment_to_response(new_item)
 
-    start_time = time.time()
-
-    # Manually map CamelCase from Schema to SnakeCase for Model
-    catalog_item_id = equipment.catalog_item_id
-    db_equipment = models.Equipment(
-        id=equipment.id,
-        user_id=current_user["uid"],
-        name=equipment.name,
-        catalog_item_id=catalog_item_id,
-        custom_name=equipment.custom_name,
-        serial_number=equipment.serial_number,
-        category=equipment.category,
-        price_per_day=equipment.price_per_day,
-        rental_price=equipment.rental_price,
-        rental_frequency=equipment.rental_frequency,
-        quantity=equipment.quantity,
-        is_owned=equipment.is_owned,
-        status=equipment.status,
+    # Use RETURNING clause for optimized insert with proper UUID casting (cast strings to UUID for inserts)
+    insert_stmt = (
+        insert(models.Equipment)
+        .values(
+            id=cast(equipment.id, UUID),
+            user_id=cast(current_user["uid"], UUID),
+            name=equipment.name,
+            catalog_item_id=cast(equipment.catalog_item_id, UUID)
+            if equipment.catalog_item_id
+            else None,
+            custom_name=equipment.custom_name,
+            serial_number=equipment.serial_number,
+            category=equipment.category,
+            price_per_day=equipment.price_per_day,
+            rental_price=equipment.rental_price,
+            rental_frequency=equipment.rental_frequency,
+            quantity=equipment.quantity,
+            is_owned=equipment.is_owned,
+            status=equipment.status,
+        )
+        .returning(models.Equipment)
     )
-    db.add(db_equipment)
 
     commit_start = time.time()
-    try:
-        db.commit()
-        db.refresh(db_equipment)
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
+    result = await db.execute(insert_stmt)
+    await db.commit()
     commit_time = time.time() - commit_start
 
-    # Use lightweight enrichment for single item (faster than batch)
-    enrich_start = time.time()
-    result = enrich_single_equipment(db, db_equipment)
-    enrich_time = time.time() - enrich_start
+    db_equipment = result.scalar()
+
+    # Use cache-based enrichment
+    result_data = enrich_single_equipment(db_equipment)
 
     # Invalidate cache after successful creation
     invalidate_inventory_cache(current_user["uid"])
 
     total_time = time.time() - start_time
-    print(
-        f"[INVENTORY POST] Total: {total_time:.3f}s | Commit: {commit_time:.3f}s | Enrich: {enrich_time:.3f}s"
-    )
+    print(f"[INVENTORY POST] Total: {total_time:.3f}s | Commit: {commit_time:.3f}s")
 
-    return result
+    return result_data
 
 
 @router.patch("/{equipment_id}")
-def update_equipment(
+async def update_equipment(
     equipment_id: str,
     equipment_update: schemas.EquipmentCreate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Update equipment and invalidate cache."""
+    start_time = time.time()
+
     # Check if guest mode
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -400,11 +387,13 @@ def update_equipment(
         return updated_item
 
     # SQLAlchemy 2.0
-    stmt = select(models.Equipment).where(
-        models.Equipment.id == equipment_id,
-        models.Equipment.user_id == current_user["uid"],
+    # Cast UUID columns to String for proper comparison with asyncpg
+    result = await db.execute(
+        select(models.Equipment).where(
+            cast(models.Equipment.id, String) == equipment_id,
+            cast(models.Equipment.user_id, String) == current_user["uid"],
+        )
     )
-    result = db.execute(stmt)
     item = result.scalar_one_or_none()
 
     if not item:
@@ -423,27 +412,30 @@ def update_equipment(
     item.status = equipment_update.status
 
     commit_start = time.time()
-    db.commit()
+    await db.commit()
     commit_time = time.time() - commit_start
 
     # Use lightweight enrichment for single item
-    result = enrich_single_equipment(db, item)
+    result_data = enrich_single_equipment(item)
 
     # Invalidate cache after successful update
     invalidate_inventory_cache(current_user["uid"])
 
-    print(f"[INVENTORY PATCH] Commit: {commit_time:.3f}s")
+    total_time = time.time() - start_time
+    print(f"[INVENTORY PATCH] Total: {total_time:.3f}s | Commit: {commit_time:.3f}s")
 
-    return result
+    return result_data
 
 
 @router.delete("/{equipment_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_equipment(
+async def delete_equipment(
     equipment_id: str,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Delete equipment and invalidate cache."""
+    start_time = time.time()
+
     # Check if guest mode
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -453,20 +445,28 @@ def delete_equipment(
         return None
 
     # SQLAlchemy 2.0
-    stmt = select(models.Equipment).where(
-        models.Equipment.id == equipment_id,
-        models.Equipment.user_id == current_user["uid"],
+    # Cast UUID columns to String for proper comparison with asyncpg
+    result = await db.execute(
+        select(models.Equipment).where(
+            cast(models.Equipment.id, String) == equipment_id,
+            cast(models.Equipment.user_id, String) == current_user["uid"],
+        )
     )
-    result = db.execute(stmt)
     item = result.scalar_one_or_none()
 
     if not item:
         raise HTTPException(status_code=404, detail="Equipment not found")
 
-    db.delete(item)
-    db.commit()
+    await db.delete(item)
+
+    commit_start = time.time()
+    await db.commit()
+    commit_time = time.time() - commit_start
 
     # Invalidate cache after successful deletion
     invalidate_inventory_cache(current_user["uid"])
+
+    total_time = time.time() - start_time
+    print(f"[INVENTORY DELETE] Total: {total_time:.3f}s | Commit: {commit_time:.3f}s")
 
     return None

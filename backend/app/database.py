@@ -1,6 +1,6 @@
-from sqlalchemy import create_engine, event
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
-from sqlalchemy.pool import QueuePool, NullPool
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.pool import NullPool
 from .config import settings
 import logging
 import time
@@ -8,45 +8,30 @@ import time
 # Configure logging
 logger = logging.getLogger(__name__)
 
-SQL_ALCHEMY_DATABASE_URL = settings.DATABASE_URL
+# Convert DATABASE_URL to async format
+# postgresql:// -> postgresql+asyncpg://
+SQL_ALCHEMY_DATABASE_URL = settings.DATABASE_URL.replace(
+    "postgresql://", "postgresql+asyncpg://"
+).replace("postgres://", "postgresql+asyncpg://")
 
-# Cloud SQL optimized connection pooling
-# Increased pool sizes for better concurrent write performance
-# pool_recycle < Cloud SQL's connection timeout (10 minutes)
-engine = create_engine(
+# Async engine with optimized connection pooling
+engine = create_async_engine(
     SQL_ALCHEMY_DATABASE_URL,
-    poolclass=QueuePool,
-    pool_size=10,  # Increased from 5 for better concurrent performance
-    max_overflow=20,  # Increased from 10 for burst handling
-    pool_pre_ping=True,  # Verify connections before using (prevents stale)
-    pool_recycle=300,  # Recycle every 5 minutes (< Cloud SQL 10 min timeout)
-    pool_timeout=10,  # Reduced from 30 to fail fast if pool exhausted
-    echo=False,  # Set to True for SQL query debugging
+    poolclass=NullPool,  # Use NullPool for serverless environments like Cloud Run
+    echo=False,
     connect_args={
-        "connect_timeout": 10,
-        "options": "-c statement_timeout=30000",  # 30 second query timeout
+        "timeout": 10,
+        "command_timeout": 30,
     },
 )
 
-
-# Monitor slow queries
-@event.listens_for(engine, "before_cursor_execute")
-def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
-    context._query_start_time = time.time()
-
-
-@event.listens_for(engine, "after_cursor_execute")
-def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
-    total = time.time() - context._query_start_time
-    if total > 1.0:  # Log queries taking longer than 1 second
-        logger.warning(f"Slow query ({total:.2f}s): {statement[:200]}...")
-
-
-SessionLocal = sessionmaker(
+# Async session factory
+AsyncSessionLocal = async_sessionmaker(
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
     autocommit=False,
     autoflush=False,
-    bind=engine,
-    expire_on_commit=False,  # Better performance for read-heavy workloads
 )
 
 
@@ -55,20 +40,24 @@ class Base(DeclarativeBase):
     pass
 
 
-def get_db():
-    """Yield database session with automatic cleanup."""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+async def get_db():
+    """Yield async database session with automatic cleanup."""
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+        finally:
+            await session.close()
 
 
-def get_db_pool_status():
+async def get_db_pool_status():
     """Get current connection pool statistics."""
     return {
-        "size": engine.pool.size(),
-        "checked_in": engine.pool.checkedin(),
-        "checked_out": engine.pool.checkedout(),
-        "overflow": engine.pool.overflow(),
+        "size": engine.pool.size() if hasattr(engine.pool, "size") else 0,
+        "checked_in": engine.pool.checkedin()
+        if hasattr(engine.pool, "checkedin")
+        else 0,
+        "checked_out": engine.pool.checkedout()
+        if hasattr(engine.pool, "checkedout")
+        else 0,
+        "overflow": engine.pool.overflow() if hasattr(engine.pool, "overflow") else 0,
     }

@@ -51,4 +51,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 # Run with gunicorn (production server)
 # Using UvicornWorker for ASGI support
-CMD exec gunicorn --bind :8000 --workers 2 --threads 4 --timeout 0 --worker-class uvicorn.workers.UvicornWorker app.main:app
+# Use PORT env var (defaults to 8000 for local, Cloud Run sets it to 8080)
+CMD exec gunicorn --bind :${PORT:-8000} --workers 2 --threads 4 --timeout 0 --worker-class uvicorn.workers.UvicornWorker app.main:app

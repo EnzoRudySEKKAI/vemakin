@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from sqlalchemy import select, func
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func, insert, cast, String
+from sqlalchemy.dialects.postgresql import UUID
 from typing import List
 import time
 from ..database import get_db
@@ -25,13 +26,15 @@ def invalidate_projects_cache(user_id: str) -> None:
 
 
 @router.get("")
-def read_projects(
+async def read_projects(
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Get list of projects with pagination and caching."""
+    start_time = time.time()
+
     # Guest mode: return mock project
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -50,29 +53,33 @@ def read_projects(
     print(f"[CACHE] Miss for projects user {user_id}")
 
     # Normal mode: query real database with SQLAlchemy 2.0 style
+    # Cast UUID columns to String for proper comparison with asyncpg
     stmt = (
         select(models.Project)
-        .where(models.Project.user_id == user_id)
+        .where(cast(models.Project.user_id, String) == user_id)
         .order_by(models.Project.created_at.desc())
         .offset(skip)
         .limit(limit)
     )
-    result = db.execute(stmt)
+    result = await db.execute(stmt)
     projects = result.scalars().all()
 
     # Cache the result
     cache.set(cache_key, projects, ttl_seconds=300)
 
+    total_time = time.time() - start_time
+    print(f"[PROJECTS GET] Total: {total_time:.3f}s | Items: {len(projects)}")
+
     return projects
 
 
 @router.post("")
-def create_project(
+async def create_project(
     project: schemas.ProjectCreate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
-    """Create a new project with timing instrumentation."""
+    """Create a new project with optimized async operations."""
     start_time = time.time()
 
     # Guest mode: update mock project name (only one project in guest mode)
@@ -88,12 +95,19 @@ def create_project(
             return updated
         return None
 
-    # Normal mode: create in real database
-    db_project = models.Project(name=project.name, user_id=current_user["uid"])
-    db.add(db_project)
+    # Use RETURNING clause for optimized insert with proper UUID casting (cast strings to UUID for inserts)
+    insert_stmt = (
+        insert(models.Project)
+        .values(
+            name=project.name,
+            user_id=cast(current_user["uid"], UUID),
+        )
+        .returning(models.Project)
+    )
 
     commit_start = time.time()
-    db.commit()
+    result = await db.execute(insert_stmt)
+    await db.commit()
     commit_time = time.time() - commit_start
 
     # Invalidate cache after successful creation
@@ -102,14 +116,14 @@ def create_project(
     total_time = time.time() - start_time
     print(f"[PROJECTS POST] Total: {total_time:.3f}s | Commit: {commit_time:.3f}s")
 
-    return db_project
+    return result.scalar()
 
 
 @router.patch("/{project_id}", response_model=schemas.Project)
-def update_project(
+async def update_project(
     project_id: str,
     project_update: schemas.ProjectCreate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Update a project with timing instrumentation."""
@@ -124,11 +138,13 @@ def update_project(
         return updated
 
     # Normal mode: update real database with SQLAlchemy 2.0 style
-    stmt = select(models.Project).where(
-        models.Project.id == project_id,
-        models.Project.user_id == current_user["uid"],
+    # Cast UUID columns to String for proper comparison with asyncpg
+    result = await db.execute(
+        select(models.Project).where(
+            cast(models.Project.id, String) == project_id,
+            cast(models.Project.user_id, String) == current_user["uid"],
+        )
     )
-    result = db.execute(stmt)
     project = result.scalar_one_or_none()
 
     if not project:
@@ -137,7 +153,7 @@ def update_project(
     project.name = project_update.name
 
     commit_start = time.time()
-    db.commit()
+    await db.commit()
     commit_time = time.time() - commit_start
 
     # Invalidate cache after successful update
@@ -150,9 +166,9 @@ def update_project(
 
 
 @router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_project(
+async def delete_project(
     project_id: str,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Delete a project and invalidate all caches."""
@@ -166,20 +182,22 @@ def delete_project(
         return None
 
     # Normal mode: delete from real database with SQLAlchemy 2.0 style
-    stmt = select(models.Project).where(
-        models.Project.id == project_id,
-        models.Project.user_id == current_user["uid"],
+    # Cast UUID columns to String for proper comparison with asyncpg
+    result = await db.execute(
+        select(models.Project).where(
+            cast(models.Project.id, String) == project_id,
+            cast(models.Project.user_id, String) == current_user["uid"],
+        )
     )
-    result = db.execute(stmt)
     project = result.scalar_one_or_none()
 
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    db.delete(project)
+    await db.delete(project)
 
     commit_start = time.time()
-    db.commit()
+    await db.commit()
     commit_time = time.time() - commit_start
 
     # Invalidate all related caches

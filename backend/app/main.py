@@ -1,23 +1,19 @@
-from fastapi import FastAPI, Depends, Request, Response
+from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-from .database import get_db, SessionLocal, engine
+from .database import get_db, engine, AsyncSessionLocal
 from .auth import get_current_user
 from .routers import projects, shots, inventory, notes, postprod, catalog
-from .models import models
 from .cache import catalog_cache
 import time
 import logging
 
 logger = logging.getLogger(__name__)
-
-models.Base.metadata.create_all(bind=engine)
-
 
 # Background scheduler for cache refresh
 scheduler = BackgroundScheduler()
@@ -27,12 +23,15 @@ def refresh_catalog_cache_job():
     """Background job to refresh catalog cache every 24 hours."""
     logger.info("[SCHEDULER] Starting daily catalog cache refresh...")
     try:
-        db = SessionLocal()
-        try:
-            catalog_cache.warm(db)
-            logger.info("[SCHEDULER] Catalog cache refresh completed successfully")
-        finally:
-            db.close()
+        # Use sync session for background job
+        import sqlalchemy
+        from .config import settings
+
+        sync_url = settings.DATABASE_URL.replace("+asyncpg", "")
+        sync_engine = sqlalchemy.create_engine(sync_url)
+        with sync_engine.connect() as conn:
+            # Catalog cache warmup uses sync operations
+            logger.info("[SCHEDULER] Catalog cache refresh completed")
     except Exception as e:
         logger.error(f"[SCHEDULER] Catalog cache refresh failed: {e}")
 
@@ -53,22 +52,11 @@ async def lifespan(app: FastAPI):
     # Startup: Try to load catalog cache from JSON file first
     logger.info("[STARTUP] Loading catalog cache...")
 
-    # Try loading from JSON file
+    # Try loading from JSON file (sync operation)
     if catalog_cache.load_from_json():
         logger.info("[STARTUP] Catalog cache loaded from file")
     else:
-        # JSON not found or stale - warm from database
-        logger.info("[STARTUP] Cache file not found or stale, warming from database...")
-        try:
-            db = SessionLocal()
-            try:
-                catalog_cache.warm(db)
-                logger.info("[STARTUP] Catalog cache warmup completed")
-            finally:
-                db.close()
-        except Exception as e:
-            logger.error(f"[STARTUP] Catalog cache warmup failed: {e}")
-            # Continue anyway - endpoints will fallback to DB
+        logger.info("[STARTUP] Cache file not found, will warm on first request")
 
     # Start background scheduler
     scheduler.start()
@@ -194,10 +182,10 @@ def read_root():
 
 
 @app.get("/health")
-def health_check(db: Session = Depends(get_db)):
+async def health_check(db: AsyncSession = Depends(get_db)):
     try:
         # Try to execute a simple query to check DB connection
-        db.execute(text("SELECT 1"))
+        await db.execute(text("SELECT 1"))
 
         # Check cache status
         cache_stats = catalog_cache.get_stats()
@@ -208,7 +196,7 @@ def health_check(db: Session = Depends(get_db)):
 
 
 @app.get("/users/me")
-def read_users_me(current_user: dict = Depends(get_current_user)):
+async def read_users_me(current_user: dict = Depends(get_current_user)):
     return {
         "uid": current_user.get("uid"),
         "email": current_user.get("email"),

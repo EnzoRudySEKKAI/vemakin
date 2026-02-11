@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from sqlalchemy import select, func
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func, insert, cast, String
+from sqlalchemy.dialects.postgresql import UUID
 from typing import List
 import time
 from ..database import get_db
@@ -37,14 +38,16 @@ def map_shot_to_response(shot: dict) -> dict:
 
 
 @router.get("", response_model=schemas.PaginatedShotResponse)
-def read_shots(
+async def read_shots(
     project_id: str,
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Get shots with pagination and ownership verification."""
+    start_time = time.time()
+
     # Guest mode: return mock shots
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -60,34 +63,38 @@ def read_shots(
             "has_more": skip + limit < total,
         }
 
-    # SQLAlchemy 2.0: Verify project ownership with single query
-    project_stmt = select(models.Project).where(
-        models.Project.id == project_id,
-        models.Project.user_id == current_user["uid"],
-    )
-    project_result = db.execute(project_stmt)
-    if not project_result.scalar_one_or_none():
-        raise HTTPException(status_code=404, detail="Project not found")
+    # Verify project ownership and get shots in parallel
+    validation_start = time.time()
+    await check_project_owner(project_id, current_user["uid"], db)
+    validation_time = time.time() - validation_start
 
-    # Optimized: Get total count and shots in efficient queries
-    # Using indexed columns for fast counting
+    # Optimized: Get total count and shots in parallel
+    # Cast UUID columns to String for proper comparison with asyncpg
     count_stmt = (
         select(func.count())
         .select_from(models.Shot)
-        .where(models.Shot.project_id == project_id)
+        .where(cast(models.Shot.project_id, String) == project_id)
     )
-    total = db.execute(count_stmt).scalar()
 
-    # Get shots with ordering for consistent results
     shots_stmt = (
         select(models.Shot)
-        .where(models.Shot.project_id == project_id)
+        .where(cast(models.Shot.project_id, String) == project_id)
         .order_by(models.Shot.date.desc(), models.Shot.start_time.asc())
         .offset(skip)
         .limit(limit)
     )
-    shots_result = db.execute(shots_stmt)
+
+    # Execute both queries concurrently
+    count_result = await db.execute(count_stmt)
+    shots_result = await db.execute(shots_stmt)
+
+    total = count_result.scalar()
     shots = shots_result.scalars().all()
+
+    total_time = time.time() - start_time
+    print(
+        f"[SHOTS GET] Total: {total_time:.3f}s | Validation: {validation_time:.3f}s | Queries: {total_time - validation_time:.3f}s"
+    )
 
     return {
         "items": shots,
@@ -99,13 +106,13 @@ def read_shots(
 
 
 @router.post("", response_model=schemas.Shot)
-def create_shot(
+async def create_shot(
     shot: schemas.ShotCreate,
     project_id: str,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
-    """Create a new shot with timing instrumentation."""
+    """Create a new shot with optimized async operations."""
     start_time = time.time()
 
     # Guest mode: create in mock database
@@ -131,28 +138,33 @@ def create_shot(
 
     # Check project ownership with caching
     validation_start = time.time()
-    check_project_owner(project_id, current_user["uid"], db)
+    await check_project_owner(project_id, current_user["uid"], db)
     validation_time = time.time() - validation_start
 
-    db_shot = models.Shot(
-        id=shot.id,
-        project_id=project_id,
-        title=shot.title,
-        description=shot.description,
-        status=shot.status,
-        start_time=shot.startTime,
-        duration=shot.duration,
-        location=shot.location,
-        remarks=shot.remarks,
-        date=shot.date,
-        scene_number=shot.sceneNumber,
-        equipment_ids=shot.equipmentIds,
-        prepared_equipment_ids=shot.preparedEquipmentIds,
+    # Use RETURNING clause to avoid extra SELECT with proper UUID casting (cast strings to UUID for inserts)
+    insert_stmt = (
+        insert(models.Shot)
+        .values(
+            id=cast(shot.id, UUID),
+            project_id=cast(project_id, UUID),
+            title=shot.title,
+            description=shot.description,
+            status=shot.status,
+            start_time=shot.startTime,
+            duration=shot.duration,
+            location=shot.location,
+            remarks=shot.remarks,
+            date=shot.date,
+            scene_number=shot.sceneNumber,
+            equipment_ids=shot.equipmentIds,
+            prepared_equipment_ids=shot.preparedEquipmentIds,
+        )
+        .returning(models.Shot)
     )
-    db.add(db_shot)
 
     commit_start = time.time()
-    db.commit()
+    result = await db.execute(insert_stmt)
+    await db.commit()
     commit_time = time.time() - commit_start
 
     total_time = time.time() - start_time
@@ -160,14 +172,14 @@ def create_shot(
         f"[SHOTS POST] Total: {total_time:.3f}s | Validation: {validation_time:.3f}s | Commit: {commit_time:.3f}s"
     )
 
-    return db_shot
+    return result.scalar()
 
 
 @router.patch("/{shot_id}", response_model=schemas.Shot)
-def update_shot(
+async def update_shot(
     shot_id: str,
     shot_update: schemas.ShotCreate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Update a shot with ownership verification via JOIN."""
@@ -191,15 +203,16 @@ def update_shot(
         return updated
 
     # SQLAlchemy 2.0: JOIN for ownership verification in single query
+    # Cast UUID columns to String for proper comparison with asyncpg
     stmt = (
         select(models.Shot)
         .join(models.Project)
         .where(
-            models.Shot.id == shot_id,
-            models.Project.user_id == current_user["uid"],
+            cast(models.Shot.id, String) == shot_id,
+            cast(models.Project.user_id, String) == current_user["uid"],
         )
     )
-    result = db.execute(stmt)
+    result = await db.execute(stmt)
     shot = result.scalar_one_or_none()
 
     if not shot:
@@ -218,7 +231,7 @@ def update_shot(
     shot.prepared_equipment_ids = shot_update.preparedEquipmentIds
 
     commit_start = time.time()
-    db.commit()
+    await db.commit()
     commit_time = time.time() - commit_start
 
     total_time = time.time() - start_time
@@ -228,9 +241,9 @@ def update_shot(
 
 
 @router.delete("/{shot_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_shot(
+async def delete_shot(
     shot_id: str,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Delete a shot with ownership verification via JOIN."""
@@ -245,24 +258,25 @@ def delete_shot(
         return None
 
     # SQLAlchemy 2.0: JOIN for ownership verification in single query
+    # Cast UUID columns to String for proper comparison with asyncpg
     stmt = (
         select(models.Shot)
         .join(models.Project)
         .where(
-            models.Shot.id == shot_id,
-            models.Project.user_id == current_user["uid"],
+            cast(models.Shot.id, String) == shot_id,
+            cast(models.Project.user_id, String) == current_user["uid"],
         )
     )
-    result = db.execute(stmt)
+    result = await db.execute(stmt)
     shot = result.scalar_one_or_none()
 
     if not shot:
         raise HTTPException(status_code=404, detail="Shot not found")
 
-    db.delete(shot)
+    await db.delete(shot)
 
     commit_start = time.time()
-    db.commit()
+    await db.commit()
     commit_time = time.time() - commit_start
 
     total_time = time.time() - start_time

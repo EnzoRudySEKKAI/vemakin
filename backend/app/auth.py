@@ -2,13 +2,14 @@ from fastapi import HTTPException, status, Depends, Header, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import firebase_admin
 from firebase_admin import auth, credentials
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional, Dict, Any
 import time
 from .config import settings
 from .database import get_db
 from .models import models
 from .mock_data import GUEST_USER_UID, get_mock_db
+from sqlalchemy import select, cast, String
 
 # Initialize Firebase Admin
 # If GOOGLE_APPLICATION_CREDENTIALS is set in env, it uses that.
@@ -24,8 +25,6 @@ try:
             firebase_admin.initialize_app()
 except Exception as e:
     print(f"Error initializing Firebase Admin: {e}")
-
-from fastapi.concurrency import run_in_threadpool
 
 security = HTTPBearer()
 
@@ -53,18 +52,6 @@ def _get_cached_token(token: str) -> Optional[Dict[str, Any]]:
     if cached:
         del _token_cache[token]
     return None
-
-
-def _log_cache_stats():
-    """Log cache statistics."""
-    now = time.time()
-    token_count = len(_token_cache)
-    user_count = len(_user_cache)
-    valid_tokens = sum(1 for v in _token_cache.values() if v["expires_at"] > now)
-    valid_users = sum(1 for v in _user_cache.values() if v["expires_at"] > now)
-    print(
-        f"[AUTH CACHE] Tokens: {valid_tokens}/{token_count}, Users: {valid_users}/{user_count}"
-    )
 
 
 def _cache_token(token: str, decoded_token: Dict[str, Any]) -> None:
@@ -102,7 +89,7 @@ def _cache_user(uid: str, exists: bool = True, created: bool = False) -> None:
 
 async def get_current_user(
     creds: HTTPAuthorizationCredentials = Security(security),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """Get current user with token and user caching for performance."""
     token = creds.credentials
@@ -124,27 +111,24 @@ async def get_current_user(
 
             # Token cached but user not cached - do quick DB check
             print(f"[AUTH] Token cache HIT, User cache MISS")
+            result = await db.execute(
+                select(models.User).filter(cast(models.User.id, String) == uid)
+            )
+            db_user = result.scalar_one_or_none()
 
-            def sync_db_ops_cached():
-                db_user = db.query(models.User).filter(models.User.id == uid).first()
-                if db_user:
-                    _cache_user(uid, exists=True, created=False)
-                else:
-                    # User doesn't exist, create it
-                    email = cached_token.get("email")
-                    name = (
-                        cached_token.get("name") or email.split("@")[0]
-                        if email
-                        else "User"
-                    )
-                    new_user = models.User(id=uid, email=email, name=name)
-                    db.add(new_user)
-                    db.commit()
-                    db.refresh(new_user)
-                    _cache_user(uid, exists=True, created=True)
-                return db_user
+            if db_user:
+                _cache_user(uid, exists=True, created=False)
+            else:
+                # User doesn't exist, create it
+                email = cached_token.get("email")
+                name = (
+                    cached_token.get("name") or email.split("@")[0] if email else "User"
+                )
+                new_user = models.User(id=uid, email=email, name=name)
+                db.add(new_user)
+                await db.commit()
+                _cache_user(uid, exists=True, created=True)
 
-            await run_in_threadpool(sync_db_ops_cached)
             elapsed = time.time() - auth_start
             print(f"[AUTH] Token cache HIT, User DB lookup | {elapsed:.3f}s")
             return cached_token
@@ -152,7 +136,7 @@ async def get_current_user(
         # 3. Token not cached - verify with Firebase (network call)
         print(f"[AUTH] Token cache MISS - calling Firebase...")
         firebase_start = time.time()
-        decoded_token = await run_in_threadpool(auth.verify_id_token, token)
+        decoded_token = auth.verify_id_token(token)
         firebase_elapsed = time.time() - firebase_start
         _cache_token(token, decoded_token)
         uid = decoded_token["uid"]
@@ -171,26 +155,21 @@ async def get_current_user(
             f"[AUTH] Token cache MISS ({firebase_elapsed:.3f}s), User cache MISS - DB lookup..."
         )
         db_start = time.time()
+        result = await db.execute(
+            select(models.User).filter(cast(models.User.id, String) == uid)
+        )
+        db_user = result.scalar_one_or_none()
 
-        def sync_db_ops():
-            db_user = db.query(models.User).filter(models.User.id == uid).first()
-            if not db_user:
-                email = decoded_token.get("email")
-                name = (
-                    decoded_token.get("name") or email.split("@")[0]
-                    if email
-                    else "User"
-                )
-                new_user = models.User(id=uid, email=email, name=name)
-                db.add(new_user)
-                db.commit()
-                db.refresh(new_user)
-                _cache_user(uid, exists=True, created=True)
-            else:
-                _cache_user(uid, exists=True, created=False)
-            return db_user
+        if not db_user:
+            email = decoded_token.get("email")
+            name = decoded_token.get("name") or email.split("@")[0] if email else "User"
+            new_user = models.User(id=uid, email=email, name=name)
+            db.add(new_user)
+            await db.commit()
+            _cache_user(uid, exists=True, created=True)
+        else:
+            _cache_user(uid, exists=True, created=False)
 
-        await run_in_threadpool(sync_db_ops)
         db_elapsed = time.time() - db_start
         total_elapsed = time.time() - auth_start
         print(
@@ -226,7 +205,7 @@ async def get_current_user(
 async def get_current_user_or_guest(
     authorization: Optional[str] = Header(None),
     x_guest_mode: Optional[str] = Header(None),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ) -> Dict[str, Any]:
     """
     Authenticate user - supports both Firebase auth and Guest mode.

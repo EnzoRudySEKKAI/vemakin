@@ -1,14 +1,15 @@
 """Project ownership cache for fast authorization checks."""
 
 import time
-from typing import Dict, Optional
-from sqlalchemy.orm import Session
-from sqlalchemy import select
+import uuid
+from typing import Dict, Optional, Any
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, cast, String
 from ..models import models
 
 # In-memory cache for project ownership
 # Key: "project_id:user_id", Value: {"is_owner": bool, "expires_at": timestamp}
-_project_ownership_cache: Dict[str, Dict] = {}
+_project_ownership_cache: Dict[str, Dict[str, Any]] = {}
 PROJECT_OWNERSHIP_TTL = 300  # 5 minutes
 
 
@@ -17,9 +18,7 @@ def _get_cache_key(project_id: str, user_id: str) -> str:
     return f"{project_id}:{user_id}"
 
 
-def is_project_owner_cached(
-    project_id: str, user_id: str, db: Session
-) -> Optional[bool]:
+def is_project_owner_cached(project_id: str, user_id: str) -> Optional[bool]:
     """
     Check if user owns project using cache.
 
@@ -73,7 +72,7 @@ def invalidate_all_project_cache() -> None:
         print(f"[PROJECT CACHE] Cleared all {count} entries")
 
 
-def check_project_owner(project_id: str, user_id: str, db: Session) -> bool:
+async def check_project_owner(project_id: str, user_id: str, db: AsyncSession) -> bool:
     """
     Check project ownership with caching.
 
@@ -91,7 +90,7 @@ def check_project_owner(project_id: str, user_id: str, db: Session) -> bool:
     from fastapi import HTTPException, status
 
     # Check cache first
-    cached_result = is_project_owner_cached(project_id, user_id, db)
+    cached_result = is_project_owner_cached(project_id, user_id)
     if cached_result is not None:
         if not cached_result:
             raise HTTPException(
@@ -100,11 +99,14 @@ def check_project_owner(project_id: str, user_id: str, db: Session) -> bool:
         return True
 
     # Cache miss - check database
-    project_stmt = select(models.Project).where(
-        models.Project.id == project_id,
-        models.Project.user_id == user_id,
+    # Cast both sides to String for proper comparison with asyncpg
+    result = await db.execute(
+        select(models.Project).where(
+            cast(models.Project.id, String) == project_id,
+            cast(models.Project.user_id, String) == user_id,
+        )
     )
-    project = db.execute(project_stmt).scalar_one_or_none()
+    project = result.scalar_one_or_none()
 
     if not project:
         # Cache negative result too (not owner)

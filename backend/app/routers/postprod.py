@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from sqlalchemy import select, func
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func, insert, cast, String
+from sqlalchemy.dialects.postgresql import UUID
 from typing import List
 import time
 from ..database import get_db
@@ -30,14 +31,16 @@ def map_task_to_response(task: dict) -> dict:
 
 
 @router.get("", response_model=schemas.PaginatedTaskResponse)
-def read_tasks(
+async def read_tasks(
     project_id: str,
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Get tasks with pagination."""
+    start_time = time.time()
+
     # Guest mode
     if current_user.get("is_guest"):
         mock_db = get_mock_db()
@@ -56,26 +59,22 @@ def read_tasks(
             "has_more": skip + limit < total,
         }
 
-    # SQLAlchemy 2.0: Verify project ownership
-    project_stmt = select(models.Project).where(
-        models.Project.id == project_id,
-        models.Project.user_id == current_user["uid"],
-    )
-    if not db.execute(project_stmt).scalar_one_or_none():
-        raise HTTPException(status_code=404, detail="Project not found")
+    # Verify project ownership
+    validation_start = time.time()
+    await check_project_owner(project_id, current_user["uid"], db)
+    validation_time = time.time() - validation_start
 
-    # Optimized count
+    # Optimized count and fetch in parallel
+    # Cast UUID columns to String for proper comparison with asyncpg
     count_stmt = (
         select(func.count())
         .select_from(models.PostProdTask)
-        .where(models.PostProdTask.project_id == project_id)
+        .where(cast(models.PostProdTask.project_id, String) == project_id)
     )
-    total = db.execute(count_stmt).scalar()
 
-    # Get tasks ordered by status and priority (using indexed columns)
     tasks_stmt = (
         select(models.PostProdTask)
-        .where(models.PostProdTask.project_id == project_id)
+        .where(cast(models.PostProdTask.project_id, String) == project_id)
         .order_by(
             models.PostProdTask.status.asc(),
             models.PostProdTask.priority.asc(),
@@ -84,7 +83,18 @@ def read_tasks(
         .offset(skip)
         .limit(limit)
     )
-    tasks = db.execute(tasks_stmt).scalars().all()
+
+    # Execute both queries concurrently
+    count_result = await db.execute(count_stmt)
+    tasks_result = await db.execute(tasks_stmt)
+
+    total = count_result.scalar()
+    tasks = tasks_result.scalars().all()
+
+    total_time = time.time() - start_time
+    print(
+        f"[POSTPROD GET] Total: {total_time:.3f}s | Validation: {validation_time:.3f}s | Queries: {total_time - validation_time:.3f}s"
+    )
 
     return {
         "items": tasks,
@@ -96,13 +106,13 @@ def read_tasks(
 
 
 @router.post("", response_model=schemas.PostProdTask)
-def create_task(
+async def create_task(
     task: schemas.PostProdTaskCreate,
     project_id: str,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
-    """Create a new task with timing instrumentation."""
+    """Create a new task with optimized async operations."""
     start_time = time.time()
 
     # Guest mode
@@ -126,23 +136,28 @@ def create_task(
 
     # Check project ownership with caching
     validation_start = time.time()
-    check_project_owner(project_id, current_user["uid"], db)
+    await check_project_owner(project_id, current_user["uid"], db)
     validation_time = time.time() - validation_start
 
-    db_task = models.PostProdTask(
-        id=task.id,
-        project_id=project_id,
-        category=task.category,
-        title=task.title,
-        status=task.status,
-        priority=task.priority,
-        due_date=task.dueDate,
-        description=task.description,
+    # Use RETURNING clause with proper UUID casting (cast strings to UUID for inserts)
+    insert_stmt = (
+        insert(models.PostProdTask)
+        .values(
+            id=cast(task.id, UUID),
+            project_id=cast(project_id, UUID),
+            category=task.category,
+            title=task.title,
+            status=task.status,
+            priority=task.priority,
+            due_date=task.dueDate,
+            description=task.description,
+        )
+        .returning(models.PostProdTask)
     )
-    db.add(db_task)
 
     commit_start = time.time()
-    db.commit()
+    result = await db.execute(insert_stmt)
+    await db.commit()
     commit_time = time.time() - commit_start
 
     total_time = time.time() - start_time
@@ -150,14 +165,14 @@ def create_task(
         f"[POSTPROD POST] Total: {total_time:.3f}s | Validation: {validation_time:.3f}s | Commit: {commit_time:.3f}s"
     )
 
-    return db_task
+    return result.scalar()
 
 
 @router.patch("/{task_id}", response_model=schemas.PostProdTask)
-def update_task(
+async def update_task(
     task_id: str,
     task_update: schemas.PostProdTaskCreate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Update a task with ownership verification."""
@@ -176,15 +191,16 @@ def update_task(
         return updated_task
 
     # SQLAlchemy 2.0: JOIN for ownership verification
+    # Cast UUID columns to String for proper comparison with asyncpg
     stmt = (
         select(models.PostProdTask)
         .join(models.Project)
         .where(
-            models.PostProdTask.id == task_id,
-            models.Project.user_id == current_user["uid"],
+            cast(models.PostProdTask.id, String) == task_id,
+            cast(models.Project.user_id, String) == current_user["uid"],
         )
     )
-    result = db.execute(stmt)
+    result = await db.execute(stmt)
     task = result.scalar_one_or_none()
 
     if not task:
@@ -198,7 +214,7 @@ def update_task(
             setattr(task, key, value)
 
     commit_start = time.time()
-    db.commit()
+    await db.commit()
     commit_time = time.time() - commit_start
 
     total_time = time.time() - start_time
@@ -208,9 +224,9 @@ def update_task(
 
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_task(
+async def delete_task(
     task_id: str,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     """Delete a task with ownership verification."""
@@ -225,24 +241,25 @@ def delete_task(
         return None
 
     # SQLAlchemy 2.0: JOIN for ownership verification
+    # Cast UUID columns to String for proper comparison with asyncpg
     stmt = (
         select(models.PostProdTask)
         .join(models.Project)
         .where(
-            models.PostProdTask.id == task_id,
-            models.Project.user_id == current_user["uid"],
+            cast(models.PostProdTask.id, String) == task_id,
+            cast(models.Project.user_id, String) == current_user["uid"],
         )
     )
-    result = db.execute(stmt)
+    result = await db.execute(stmt)
     task = result.scalar_one_or_none()
 
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    db.delete(task)
+    await db.delete(task)
 
     commit_start = time.time()
-    db.commit()
+    await db.commit()
     commit_time = time.time() - commit_start
 
     total_time = time.time() - start_time
