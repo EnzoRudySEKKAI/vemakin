@@ -24,19 +24,22 @@ const ensureAuth = async () => {
 
 /**
  * Loader for the root route.
- * Prefetches initial data (projects, inventory) if not already in cache.
+ * Prefetches initial data (projects, inventory, and optionally project data) if not already in cache.
+ * Uses the optimized /bulk/initial endpoint for single-request fetching.
  */
 export const rootLoader = async () => {
   await ensureAuth()
   
   // Prefetch initial data in background
   const { isGuest, currentUser } = useAuthStore.getState()
+  const { currentProjectId } = useProjectStore.getState()
   
   if (currentUser || isGuest) {
-    // Check if we already have the data cached
-    const cachedData = queryClient.getQueryData(queryKeys.initialData)
+    // Check if we already have the data cached - use the new key format with projectId
+    const cachedData = queryClient.getQueryData(queryKeys.initialData(currentProjectId))
     if (!cachedData) {
-      await prefetchInitialData(queryClient)
+      // Prefetch with optional projectId to get all data in one request
+      await prefetchInitialData(queryClient, currentProjectId)
     }
   }
   
@@ -66,16 +69,17 @@ export const shotsLoader = async () => {
 /**
  * Loader for inventory route.
  * Prefetches inventory and catalog categories.
+ * Uses /bulk/initial endpoint for efficient single-request fetching.
  */
 export const inventoryLoader = async () => {
   await ensureAuth()
   
-  // Prefetch inventory if not cached
-  const cachedInventory = queryClient.getQueryData(queryKeys.inventory)
-  if (!cachedInventory) {
+  // Prefetch all initial data (includes inventory) if not cached
+  const cachedData = queryClient.getQueryData(queryKeys.initialData(undefined))
+  if (!cachedData) {
     await queryClient.prefetchQuery({
-      queryKey: queryKeys.inventory,
-      queryFn: () => bulkApi.getInitialData().then(d => d.inventory),
+      queryKey: queryKeys.initialData(undefined),
+      queryFn: () => bulkApi.getInitialData(),
       staleTime: 5 * 60 * 1000,
     })
   }
@@ -147,14 +151,10 @@ export const detailLoader = async ({ params }: { params: Record<string, string> 
 export const projectsLoader = async () => {
   await ensureAuth()
   
-  // Ensure projects are loaded
-  const cachedProjects = queryClient.getQueryData(queryKeys.projects)
-  if (!cachedProjects) {
-    await queryClient.prefetchQuery({
-      queryKey: queryKeys.projects,
-      queryFn: projectsApi.getAll,
-      staleTime: 5 * 60 * 1000,
-    })
+  // Ensure projects are loaded - use initial data endpoint
+  const cachedData = queryClient.getQueryData(queryKeys.initialData(undefined))
+  if (!cachedData) {
+    await prefetchInitialData(queryClient)
   }
   
   return null

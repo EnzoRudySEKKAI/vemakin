@@ -57,7 +57,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         placeholder={placeholders[view] || placeholders.default}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full h-full bg-[#0D0D0F] border border-white/[0.05] rounded-xl pl-11 pr-12 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/[0.1] transition-colors"
+        className="w-full h-full bg-[#16181D] border border-white/[0.05] rounded-xl pl-11 pr-12 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/[0.1] transition-colors"
       />
       {value && (
         <button

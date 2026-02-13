@@ -3,7 +3,7 @@ import { GlassCard } from '@/components/ui/GlassCard'
 import { HTMLMotionProps } from 'framer-motion'
 
 interface HoverCardProps extends HTMLMotionProps<"div"> {
-  blobColor?: string // e.g. "from-indigo-400 to-indigo-500"
+  blobColor?: string // e.g. "from-primary/70 to-primary"
   showBlob?: boolean
   enableHoverScale?: boolean
 }
@@ -11,7 +11,7 @@ interface HoverCardProps extends HTMLMotionProps<"div"> {
 export const HoverCard: React.FC<HoverCardProps> = ({
   children,
   className = "",
-  blobColor = "from-indigo-400 to-indigo-500",
+  blobColor = "from-primary/70 to-primary",
   showBlob = true,
   enableHoverScale = true,
   ...props

@@ -23,7 +23,7 @@ import { getViewFromPath, ROUTE_PATHS } from '@/router'
 // Loading fallback for lazy-loaded routes
 const RouteLoading = () => (
     <div className="flex items-center justify-center min-h-[200px]">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
     </div>
 )
 
@@ -80,6 +80,7 @@ const RootLayoutInner = () => {
         addGear,
         updateGear,
         deleteGear,
+        fetchEquipmentDetail,
         addNote,
         updateNote,
         deleteNote,
@@ -273,7 +274,9 @@ const RootLayoutInner = () => {
     }
 
     if (isLoadingAuth) {
-        return <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#0A0A0A] flex items-center justify-center text-[#1C1C1E] dark:text-white">Loading...</div>
+        return <div className="min-h-screen bg-[#0F1116] flex items-center justify-center text-white">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
     }
 
     if (currentUser && !isGuest && projects.length === 0) {
@@ -282,7 +285,7 @@ const RootLayoutInner = () => {
 
     return (
         <HeaderActionsProvider>
-            <div className={`min-h-screen bg-[#F2F2F7] dark:bg-[#0A0A0A] text-[#1C1C1E] selection:bg-blue-100 dark:text-white transition-colors duration-500 ${darkMode ? 'dark' : ''}`}>
+            <div className={`min-h-screen bg-[#F2F2F7] dark:bg-[#0F1116] text-[#16181D] selection:bg-blue-100 dark:text-white transition-colors duration-500 ${darkMode ? 'dark' : ''}`}>
                 <Header
                     ref={headerRef}
                     filterTranslateY={effectiveHeaderTranslateY}
@@ -345,7 +348,7 @@ const RootLayoutInner = () => {
                 )}
 
                 <div
-                    className={`content-wrapper px-4 md:px-6 pb-0 lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(240px+1.5rem)] view-${mainView}`}
+                    className={`content-wrapper px-4 md:px-6 pb-0 ${shouldHideNavigation ? '' : 'lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(240px+1.5rem)]'} view-${mainView}`}
                     style={mainView === 'settings' || mainView === 'manage-projects' ? { paddingTop: 0 } : layoutStyle}
                 >
                     <main className={`mx-auto w-full transition-all duration-500 ease-in-out ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`} style={{ paddingBottom: shouldHideNavigation ? '24px' : '120px' }}>
@@ -379,6 +382,7 @@ const RootLayoutInner = () => {
                                         addGear,
                                         updateGear,
                                         deleteGear,
+                                        fetchEquipmentDetail,
                                         addNote,
                                         updateNote,
                                         deleteNote,
@@ -434,7 +438,7 @@ const RootLayoutInner = () => {
                 )}
 
                 {showOnboarding && currentUser && (
-                    <div className="fixed inset-0 z-[2000] bg-white">
+                    <div className="fixed inset-0 z-[2000] bg-[#0F1116]">
                         <OnboardingView onComplete={() => setShowOnboarding(false)} />
                     </div>
                 )}

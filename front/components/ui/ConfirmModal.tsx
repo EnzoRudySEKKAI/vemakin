@@ -34,7 +34,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
       case 'warning':
         return 'bg-orange-500 hover:bg-orange-600 text-white'
       default:
-        return 'bg-blue-600 hover:bg-blue-700 text-white'
+        return 'bg-primary hover:bg-blue-700 text-white'
     }
   }
 
@@ -54,7 +54,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className={`relative w-full max-w-sm bg-white dark:bg-[#1C1C1E] ${radius.md} shadow-xl overflow-hidden border border-gray-100 dark:border-white/10`}
+            className={`relative w-full max-w-sm bg-white dark:bg-[#16181D] ${radius.md} shadow-xl overflow-hidden border border-gray-100 dark:border-white/10`}
           >
             <div className="p-6">
               <div className="flex items-center gap-4 mb-4">

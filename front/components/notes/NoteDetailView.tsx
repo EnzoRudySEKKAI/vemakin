@@ -4,6 +4,7 @@ import { Note, Shot, PostProdTask, Attachment } from '../../types'
 import { useDetailView } from '../../hooks/useDetailView'
 import { DetailViewLayout } from '../../components/organisms/DetailViewLayout'
 import { ActionButtonGroup } from '../../components/molecules/ActionButton'
+import { DetailItem } from '../../components/molecules'
 import { Text } from '../../components/atoms/Text'
 import { Input } from '../../components/atoms/Input'
 import { Textarea } from '../../components/atoms/Textarea'
@@ -145,7 +146,7 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
                   className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all group"
                 >
                   <div className="flex items-center gap-4 min-w-0">
-                    <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
                       <Film size={16} />
                     </div>
                     <div className="text-left min-w-0">
@@ -155,7 +156,7 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
                       </p>
                     </div>
                   </div>
-                  <ArrowUpRight size={12} className="text-white/10 group-hover:text-indigo-400 transition-colors" />
+                  <ArrowUpRight size={12} className="text-white/10 group-hover:text-primary transition-colors" />
                 </button>
               )}
               {linkedTask && (
@@ -188,18 +189,14 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
 
           <Card title="Note details">
             <div className="p-4 space-y-6">
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-white/40 font-medium">Last modified</span>
-                <div className="text-sm text-white/50 font-medium tracking-tight">
-                  {new Date(note.updatedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                </div>
-              </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-white/40 font-medium">Timestamp</span>
-                <div className="text-sm text-white/50 font-medium tracking-tight">
-                  {new Date(note.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                </div>
-              </div>
+              <DetailItem
+                label="Last modified"
+                value={new Date(note.updatedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              />
+              <DetailItem
+                label="Timestamp"
+                value={new Date(note.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              />
             </div>
           </Card>
         </div>
@@ -208,39 +205,44 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
       <Card title="Core content" className="mb-8">
         <div className="p-6 space-y-10">
           <div className="flex flex-col gap-1 min-w-0">
-            <span className="text-[10px] text-white/40 font-medium mb-2">Note title</span>
             {isEditing ? (
-              <Input
-                type="text"
-                value={editedItem.title}
-                onChange={(e) => setEditedItem({ ...editedItem, title: e.target.value })}
-                placeholder="Name your note..."
-                variant="underline"
-                fullWidth
-                className="text-2xl"
-              />
+              <>
+                <span className="text-[10px] text-white/40 font-medium mb-2">Note title</span>
+                <Input
+                  type="text"
+                  value={editedItem.title}
+                  onChange={(e) => setEditedItem({ ...editedItem, title: e.target.value })}
+                  placeholder="Name your note..."
+                  variant="underline"
+                  fullWidth
+                  className="text-2xl"
+                />
+              </>
             ) : (
-              <div className="text-2xl text-white font-semibold leading-tight">
-                {note.title || 'Untitled note'}
-              </div>
+              <DetailItem
+                label="Note title"
+                value={note.title || 'Untitled note'}
+              />
             )}
           </div>
 
-          <div className="flex flex-col gap-1 min-w-0">
-            <span className="text-[10px] text-white/40 font-medium mb-2">Remarks & observations</span>
-            {isEditing ? (
+          {isEditing ? (
+            <div className="flex flex-col gap-1 min-w-0">
+              <span className="text-[10px] text-white/40 font-medium mb-2">Remarks & observations</span>
               <Textarea
                 value={editedItem.content}
                 onChange={(e) => setEditedItem({ ...editedItem, content: e.target.value })}
                 placeholder="Share your thoughts or observations..."
                 className="min-h-[250px]"
               />
-            ) : (
-              <div className="text-sm text-white/70 whitespace-pre-wrap leading-relaxed font-medium">
-                {note.content || 'No specific content has been added to this note yet.'}
-              </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <DetailItem
+              label="Remarks & observations"
+              value={note.content || 'No specific content has been added to this note yet.'}
+              valueClassName="whitespace-pre-wrap"
+            />
+          )}
         </div>
       </Card>
 
@@ -253,7 +255,7 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
         headerRight={
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 text-[10px] font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+            className="flex items-center gap-2 text-[10px] font-medium text-primary hover:text-primary/70 transition-colors"
           >
             <Plus size={12} strokeWidth={3} />
             Append File
@@ -268,9 +270,9 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
               editedItem.attachments.map(att => (
                 <div
                   key={att.id}
-                  className="group relative bg-white/5 p-4 rounded-xl border border-white/5 hover:border-indigo-500/30 transition-all flex items-center gap-4"
+                  className="group relative bg-white/5 p-4 rounded-xl border border-white/5 hover:border-primary/30 transition-all flex items-center gap-4"
                 >
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-white/5 text-white/20 group-hover:text-indigo-400 group-hover:bg-indigo-400/10 transition-all">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-white/5 text-white/20 group-hover:text-primary group-hover:bg-primary/10 transition-all">
                     {att.type === 'image' ? <ImageIcon size={18} /> : <File size={18} />}
                   </div>
                   <div className="flex-1 min-w-0">

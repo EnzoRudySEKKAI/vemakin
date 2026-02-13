@@ -47,9 +47,9 @@ export const NewsModal: React.FC<NewsModalProps> = ({ onClose }) => {
         <div className="max-h-[60vh] overflow-y-auto p-6 space-y-6">
           {updates.map((update, idx) => (
             <div key={idx} className="relative pl-6 border-l-2 border-gray-100 last:border-0 pb-2">
-              <div className={`absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full ring-4 ring-white ${idx === 0 ? 'bg-blue-600 dark:bg-indigo-600' : 'bg-gray-300'}`} />
+              <div className={`absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full ring-4 ring-white ${idx === 0 ? 'bg-primary dark:bg-primary' : 'bg-gray-300'}`} />
               <div className="flex justify-between items-start mb-1">
-                <span className={`px-2 py-0.5 rounded-md ${idx === 0 ? 'bg-blue-100 text-blue-600 dark:text-indigo-600' : 'bg-gray-100 text-gray-500'} ${typography.size.xs} ${typography.weight.semibold}`}>
+                <span className={`px-2 py-0.5 rounded-md ${idx === 0 ? 'bg-blue-100 text-primary dark:text-bg-primary' : 'bg-gray-100 text-gray-500'} ${typography.size.xs} ${typography.weight.semibold}`}>
                   v{update.version}
                 </span>
                 <Text variant="label" color="muted">{update.date}</Text>

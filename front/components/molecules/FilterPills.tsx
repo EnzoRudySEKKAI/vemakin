@@ -27,8 +27,8 @@ export const FilterPills: React.FC<FilterPillsProps> = ({
             className={`
               px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all
               ${isActive 
-                ? 'bg-indigo-500 text-white' 
-                : 'bg-[#0D0D0F] text-white/50 border border-white/[0.05] hover:border-white/[0.1] hover:text-white/70'
+                ? 'bg-primary text-white' 
+                : 'bg-[#16181D] text-white/50 border border-white/[0.05] hover:border-white/[0.1] hover:text-white/70'
               }
             `}
           >

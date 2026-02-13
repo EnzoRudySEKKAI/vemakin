@@ -28,17 +28,17 @@ export const colors = {
   // Background Colors - Pure black theme
   background: {
     light: '#F2F2F7',
-    dark: '#0A0A0A',      // Pure black background
-    darker: '#050505',    // Even darker for contrast
+    dark: '#0F1116',      // Dark blue-grey background
+    darker: '#090A0D',    // Even darker for contrast
   },
 
   // Surface/Card Colors
   surface: {
     light: '#FFFFFF',
     lightGlass: 'rgba(255, 255, 255, 0.8)',
-    dark: '#0D0D0F',      // Slightly lighter than pure black for cards
-    darker: '#0A0A0A',    // For nested elements
-    darkGlass: 'rgba(13, 13, 15, 0.95)',
+    dark: '#16181D',      // Slightly lighter than background for cards
+    darker: '#0F1116',    // For nested elements
+    darkGlass: 'rgba(22, 24, 29, 0.95)',
   },
 
   // Border Colors
@@ -195,8 +195,8 @@ export const shadows = {
   lg: 'shadow-lg',
   xl: 'shadow-xl',
   '2xl': 'shadow-2xl',
-  primary: 'shadow-lg shadow-[#3762E3]/20 dark:shadow-[#4E47DD]/20',
-  primarySm: 'shadow-md shadow-[#3762E3]/10 dark:shadow-[#4E47DD]/10',
+  primary: 'shadow-lg shadow-primary/20',
+  primarySm: 'shadow-md shadow-primary/10',
 } as const
 
 // ============================================================================
@@ -339,7 +339,7 @@ export function formatText(text: string, type: 'sentence' | 'title' = 'title'): 
  */
 export function glassClasses(variant: 'light' | 'dark' = 'light'): string {
   if (variant === 'dark') {
-    return 'bg-[#1A1A1D]/90 backdrop-blur-xl border border-white/5'
+    return 'bg-[#16181D]/90 backdrop-blur-xl border border-white/5'
   }
   return 'bg-white/80 backdrop-blur-xl border border-white/20'
 }
@@ -357,13 +357,13 @@ export function primaryButtonClasses(size: 'sm' | 'md' | 'lg' = 'md'): string {
   return `
     ${sizes[size]}
     ${radius.md}
-    bg-[#3762E3] dark:bg-[#4E47DD]
+    bg-primary
     text-white
     ${typography.weight.semibold}
     ${typography.size.sm}
     ${shadows.primary}
     transition-all ${animations.duration.normal}
-    hover:bg-[#2952D1] dark:hover:bg-[#3F39D1]
+    hover:opacity-90
     active:scale-[0.98]
     disabled:opacity-50 disabled:cursor-not-allowed
   `.trim().replace(/\s+/g, ' ')
@@ -382,7 +382,7 @@ export function secondaryButtonClasses(size: 'sm' | 'md' | 'lg' = 'md'): string 
   return `
     ${sizes[size]}
     ${radius.md}
-    bg-white dark:bg-[#1C1C1E]
+    bg-white dark:bg-[#16181D]
     border border-gray-200 dark:border-white/10
     text-gray-700 dark:text-gray-200
     ${typography.weight.semibold}
@@ -457,10 +457,10 @@ export function inputClasses(variant: 'default' | 'glass' = 'default'): string {
   `.trim().replace(/\s+/g, ' ')
   
   if (variant === 'glass') {
-    return `${base} bg-white/80 dark:bg-[#1A1A1E]/90 backdrop-blur-xl border border-white/20 dark:border-white/5 focus:border-[#3762E3] dark:focus:border-[#4E47DD]`
+    return `${base} bg-white/80 dark:bg-[#16181D]/90 backdrop-blur-xl border border-white/20 dark:border-white/5 focus:border-primary`
   }
   
-  return `${base} bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-white/10 focus:border-[#3762E3] dark:focus:border-[#4E47DD]`
+  return `${base} bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/10 focus:border-primary`
 }
 
 /**
@@ -490,9 +490,9 @@ export function cardClasses(
     case 'flat':
       return `${base} bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5`
     case 'window':
-      return `${base} bg-[#0D0D0F] border border-white/[0.08] overflow-hidden`
+      return `${base} bg-[#16181D] border border-white/[0.08] overflow-hidden`
     default:
-      return `${base} bg-white dark:bg-[#1A1A1D] border border-gray-200 dark:border-white/10`
+      return `${base} bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/10`
   }
 }
 
@@ -504,7 +504,7 @@ export function windowCardHeaderClasses(): string {
     flex items-center justify-between
     px-4 py-3
     border-b border-white/[0.08]
-    bg-[#0D0D0F]
+    bg-[#16181D]
   `.trim().replace(/\s+/g, ' ')
 }
 
@@ -514,7 +514,7 @@ export function windowCardHeaderClasses(): string {
 export function windowCardContentClasses(): string {
   return `
     p-4
-    bg-[#0A0A0A]
+    bg-[#0F1116]
   `.trim().replace(/\s+/g, ' ')
 }
 
@@ -524,14 +524,14 @@ export function windowCardContentClasses(): string {
 export function timelineItemClasses(status: 'done' | 'current' | 'pending' = 'pending'): string {
   const barColors = {
     done: 'bg-[#27CA40]',
-    current: 'bg-[#4E47DD]',
+    current: 'bg-primary',
     pending: 'bg-[#3A3A3C]',
   }
 
   return `
     flex items-center gap-3
     p-3 rounded-xl
-    bg-[#0D0D0F] border border-white/[0.05]
+    bg-[#16181D] border border-white/[0.05]
     transition-all duration-200
     hover:border-white/[0.12]
     group
@@ -546,7 +546,7 @@ export function timelineBarColor(status: 'done' | 'current' | 'pending'): string
     case 'done':
       return 'bg-[#27CA40]'
     case 'current':
-      return 'bg-[#4E47DD]'
+      return 'bg-primary'
     default:
       return 'bg-[#3A3A3C]'
   }

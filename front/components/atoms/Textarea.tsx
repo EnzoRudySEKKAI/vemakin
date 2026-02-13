@@ -71,7 +71,7 @@ export const Textarea: React.FC<TextareaProps> = ({
           text-gray-900 dark:text-white
           placeholder:text-gray-400 dark:placeholder:text-gray-500
           focus:outline-none
-          focus:border-blue-500 dark:focus:border-indigo-400
+          focus:border-primary dark:focus:border-primary
           focus:bg-transparent
           focus-visible:bg-transparent
           focus-visible:outline-none

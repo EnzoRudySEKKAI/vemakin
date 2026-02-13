@@ -2,12 +2,12 @@ import { create } from 'zustand';
 import {
   MainView, Shot, ShotLayout, Equipment, Note, PostProdTask,
   PostProdFilters, NotesFilters, User, CatalogCategory,
-  CatalogBrand, CatalogItem
+  CatalogBrand, CatalogItem, Project
 } from '../types.ts';
 import { timeToMinutes } from '../utils.ts';
 import { auth } from '../firebase';
 import { onAuthStateChanged, signOut, User as FirebaseUser } from 'firebase/auth';
-import api from '../api/client';
+import { bulkApi, apiClient, ProjectDataResponse } from '../api';
 
 const toNullableString = (value?: string | null) => {
   if (value === undefined || value === null) return null
@@ -109,6 +109,7 @@ interface ProductionStore {
   addGear: (gear: Equipment) => Promise<void>;
   updateGear: (gear: Equipment) => Promise<void>;
   deleteGear: (id: string) => Promise<void>;
+  fetchEquipmentDetail: (id: string) => Promise<Equipment | null>;
 
   addNote: (note: Note) => Promise<void>;
   updateNote: (note: Note) => Promise<void>;
@@ -124,6 +125,7 @@ interface ProductionStore {
   fetchItemSpecs: (itemId: string) => Promise<any>;
 
   refreshProjectData: () => void;
+  prefetchProjectsData: (projectNames: string[]) => Promise<void>;
 
   // Utility
   exportProject: (name: string) => void;
@@ -251,15 +253,10 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
   fetchInitialData: async () => {
     try {
-      const [projectsRes, invRes] = await Promise.all([
-        api.get('/projects'),
-        api.get('/inventory').catch(err => {
-          console.error("Failed to fetch inventory:", err);
-          return { data: [] };
-        })
-      ]);
+      // Step 1: Fetch projects + inventory (without project_id)
+      const response = await bulkApi.getInitialData();
 
-      const fetchedProjects = projectsRes.data;
+      const fetchedProjects = response.projects || [];
       if (fetchedProjects.length > 0) {
         const projectNames = fetchedProjects.map((p: any) => p.name);
         const newProjectData: Record<string, ProjectState> = {};
@@ -273,7 +270,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
           };
         });
 
-        const fetchedInv: Equipment[] = invRes.data.map((i: any) => ({
+        const fetchedInv: Equipment[] = (response.inventory || []).map((i: any) => ({
           id: i.id,
           name: i.name,
           catalogItemId: i.catalogItemId,
@@ -291,15 +288,24 @@ export const useStore = create<ProductionStore>((set, get) => ({
           specs: i.specs || {}
         }));
 
-        set((state) => ({
+        // Step 2: Set projects and inventory, set current project if not set
+        set((s) => ({
           projects: projectNames,
-          projectData: { ...state.projectData, ...newProjectData },
+          projectData: { ...s.projectData, ...newProjectData },
           allInventory: fetchedInv,
-          currentProject: state.currentProject || projectNames[0]
+          currentProject: s.currentProject || projectNames[0]
         }));
 
-        if (get().currentProject) {
-          get().fetchProjectData(get().currentProject);
+        // Step 3: Fetch project data (shots, notes, tasks) for current project
+        const currentProjectName = get().currentProject;
+        if (currentProjectName) {
+          await get().fetchProjectData(currentProjectName);
+          
+          // Prefetch data for other projects in the background
+          const otherProjects = projectNames.filter(name => name !== currentProjectName);
+          if (otherProjects.length > 0) {
+            get().prefetchProjectsData(otherProjects);
+          }
         }
       }
     } catch (err) {
@@ -314,49 +320,46 @@ export const useStore = create<ProductionStore>((set, get) => ({
     if (state.fetchedProjectIds.has(projectState.id)) return;
 
     try {
-      const [shotsRes, notesRes, tasksRes] = await Promise.all([
-        api.get(`/shots?project_id=${projectState.id}`),
-        api.get(`/notes?project_id=${projectState.id}`),
-        api.get(`/postprod?project_id=${projectState.id}`)
-      ]);
+      // Use the optimized bulk endpoint - fetches shots, notes, tasks in ONE request
+      const response: ProjectDataResponse = await bulkApi.getProjectData(projectState.id);
 
-      // Handle paginated responses - extract items array
-      const shotsData = shotsRes.data.items || shotsRes.data;
-      const notesData = notesRes.data.items || notesRes.data;
-      const tasksData = tasksRes.data.items || tasksRes.data;
-
-      const fetchedShots: Shot[] = shotsData.map((s: any) => ({
+      const fetchedShots: Shot[] = (response.shots || []).map((s) => ({
         id: s.id,
         title: s.title,
         description: s.description,
         status: s.status,
-        startTime: s.startTime || s.start_time || '00:00',
+        startTime: s.startTime || '00:00',
         duration: s.duration || '1h',
         location: s.location,
         remarks: s.remarks,
         date: s.date,
-        sceneNumber: s.sceneNumber || s.scene_number,
-        equipmentIds: s.equipment_ids || [],
-        preparedEquipmentIds: s.prepared_equipment_ids || []
+        sceneNumber: s.sceneNumber,
+        equipmentIds: s.equipmentIds || [],
+        preparedEquipmentIds: s.preparedEquipmentIds || []
       }));
 
-      const fetchedNotes: Note[] = notesData.map((n: any) => ({
+      const fetchedNotes: Note[] = (response.notes || []).map((n) => ({
         id: n.id,
         title: n.title,
-        content: n.content,
-        date: n.updated_at || n.updatedAt,
-        shotId: n.shot_id || n.shotId,
-        taskId: n.task_id || n.taskId
+        content: n.content || '',
+        date: n.updatedAt,
+        createdAt: n.updatedAt,
+        updatedAt: n.updatedAt,
+        shotId: n.shotId,
+        taskId: n.taskId,
+        attachments: []
       }));
 
-      const fetchedTasks: PostProdTask[] = tasksData.map((t: any) => ({
+      const fetchedTasks: PostProdTask[] = (response.tasks || []).map((t) => ({
         id: t.id,
-        category: t.category,
+        category: t.category || 'Editing',
         title: t.title,
-        status: t.status,
-        priority: t.priority,
-        dueDate: t.due_date,
-        description: t.description
+        status: t.status || 'todo',
+        priority: t.priority || 'medium',
+        dueDate: t.dueDate,
+        description: t.description || '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       }));
 
       set((s) => ({
@@ -381,8 +384,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
     if (get().projects.includes(newProjectName) || !newProjectName) return;
 
     try {
-      const res = await api.post('/projects', { name: newProjectName });
-      const newProject = res.data;
+      const newProject = await apiClient.post<Project>('/projects', { name: newProjectName });
 
       set((state) => ({
         projects: [newProjectName, ...state.projects],
@@ -409,7 +411,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
     const projectState = get().projectData[name];
     if (projectState?.id) {
       try {
-        await api.delete(`/projects/${projectState.id}`);
+        await apiClient.delete(`/projects/${projectState.id}`);
         set((state) => {
           const newProjects = state.projects.filter(p => p !== name);
           const newData = { ...state.projectData };
@@ -448,8 +450,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
     const pid = get().projectData[get().currentProject]?.id;
     if (pid) {
       try {
-        const res = await api.post(`/shots?project_id=${pid}`, shot);
-        const newShot = res.data;
+        const newShot = await apiClient.post<Shot>(`/shots?project_id=${pid}`, shot);
         set((state) => ({
           projectData: {
             ...state.projectData,
@@ -467,7 +468,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
   updateShot: async (shot) => {
     try {
-      await api.patch(`/shots/${shot.id}`, shot);
+      await apiClient.patch(`/shots/${shot.id}`, shot);
       set((state) => ({
         projectData: {
           ...state.projectData,
@@ -484,7 +485,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
   deleteShot: async (shotId) => {
     try {
-      await api.delete(`/shots/${shotId}`);
+      await apiClient.delete(`/shots/${shotId}`);
       set((state) => ({
         projectData: {
           ...state.projectData,
@@ -503,8 +504,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
     const pid = get().projectData[get().currentProject]?.id;
     if (pid) {
       try {
-        const res = await api.post(`/postprod?project_id=${pid}`, task);
-        const newTask = res.data;
+        const newTask = await apiClient.post<PostProdTask>(`/postprod?project_id=${pid}`, task);
         set((state) => ({
           projectData: {
             ...state.projectData,
@@ -522,7 +522,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
   updateTask: async (task) => {
     try {
-      await api.patch(`/postprod/${task.id}`, task);
+      await apiClient.patch(`/postprod/${task.id}`, task);
       set((state) => ({
         projectData: {
           ...state.projectData,
@@ -539,7 +539,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
   deleteTask: async (taskId) => {
     try {
-      await api.delete(`/postprod/${taskId}`);
+      await apiClient.delete(`/postprod/${taskId}`);
       set((state) => ({
         projectData: {
           ...state.projectData,
@@ -556,8 +556,8 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
   addGear: async (gear) => {
     try {
-      const resp = await api.post('/inventory', buildEquipmentPayload(gear))
-      set((state) => ({ allInventory: [resp.data, ...state.allInventory] }))
+      const newEquipment = await apiClient.post<Equipment>('/inventory', buildEquipmentPayload(gear))
+      set((state) => ({ allInventory: [newEquipment, ...state.allInventory] }))
     } catch (e) {
       console.error("Failed to add gear", e)
     }
@@ -565,9 +565,9 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
   updateGear: async (gear) => {
     try {
-      const resp = await api.patch(`/inventory/${gear.id}`, buildEquipmentPayload(gear))
+      const updatedEquipment = await apiClient.patch<Equipment>(`/inventory/${gear.id}`, buildEquipmentPayload(gear))
       set((state) => ({
-        allInventory: state.allInventory.map(item => item.id === gear.id ? resp.data : item)
+        allInventory: state.allInventory.map(item => item.id === gear.id ? updatedEquipment : item)
       }))
     } catch (e) {
       console.error("Failed to update gear", e)
@@ -576,10 +576,45 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
   deleteGear: async (id) => {
     try {
-      await api.delete(`/inventory/${id}`);
+      await apiClient.delete(`/inventory/${id}`);
       set((state) => ({ allInventory: state.allInventory.filter(item => item.id !== id) }));
     } catch (e) {
       console.error("Failed to delete gear", e);
+    }
+  },
+
+  fetchEquipmentDetail: async (id) => {
+    try {
+      const res = await apiClient.get<Equipment>(`/inventory/${id}`);
+      const detailedEquipment: Equipment = {
+        id: res.id,
+        name: res.name,
+        catalogItemId: res.catalogItemId,
+        customName: res.customName,
+        serialNumber: res.serialNumber,
+        category: res.category,
+        pricePerDay: res.pricePerDay,
+        rentalPrice: res.rentalPrice,
+        rentalFrequency: res.rentalFrequency,
+        quantity: res.quantity,
+        isOwned: res.isOwned,
+        status: res.status,
+        brandName: res.brandName,
+        modelName: res.modelName,
+        specs: res.specs || {}
+      };
+      
+      // Update the equipment in the store with full details including specs
+      set((state) => ({
+        allInventory: state.allInventory.map(item => 
+          item.id === id ? detailedEquipment : item
+        )
+      }));
+      
+      return detailedEquipment;
+    } catch (e) {
+      console.error("Failed to fetch equipment detail:", e);
+      return null;
     }
   },
 
@@ -587,8 +622,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
     const pid = get().projectData[get().currentProject]?.id;
     if (pid) {
       try {
-        const res = await api.post(`/notes?project_id=${pid}`, note);
-        const newNote = res.data;
+        const newNote = await apiClient.post<Note>(`/notes?project_id=${pid}`, note);
         set((state) => ({
           projectData: {
             ...state.projectData,
@@ -606,7 +640,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
   updateNote: async (note) => {
     try {
-      await api.patch(`/notes/${note.id}`, note);
+      await apiClient.patch(`/notes/${note.id}`, note);
       set((state) => ({
         projectData: {
           ...state.projectData,
@@ -623,7 +657,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
   deleteNote: async (noteId) => {
     try {
-      await api.delete(`/notes/${noteId}`);
+      await apiClient.delete(`/notes/${noteId}`);
       set((state) => ({
         projectData: {
           ...state.projectData,
@@ -682,8 +716,8 @@ export const useStore = create<ProductionStore>((set, get) => ({
   fetchCatalogCategories: async () => {
     if (get().hasFetchedCatalog && get().catalogCategories.length > 0) return;
     try {
-      const res = await api.get('/catalog/categories');
-      set({ catalogCategories: res.data, hasFetchedCatalog: true });
+      const res = await apiClient.get<CatalogCategory[]>('/catalog/categories');
+      set({ catalogCategories: res, hasFetchedCatalog: true });
     } catch (err) {
       console.error("Failed to fetch catalog categories:", err);
     }
@@ -691,8 +725,8 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
   fetchBrands: async (categoryId) => {
     try {
-      const res = await api.get(`/catalog/brands?category_id=${categoryId}`);
-      set({ catalogBrands: res.data });
+      const res = await apiClient.get<CatalogBrand[]>(`/catalog/brands?category_id=${categoryId}`);
+      set({ catalogBrands: res });
     } catch (err) {
       console.error("Failed to fetch catalog brands:", err);
     }
@@ -700,8 +734,8 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
   fetchCatalogItems: async (categoryId, brandId) => {
     try {
-      const res = await api.get(`/catalog/items?category_id=${categoryId}&brand_id=${brandId}`);
-      set({ catalogItems: res.data });
+      const res = await apiClient.get<CatalogItem[]>(`/catalog/items?category_id=${categoryId}&brand_id=${brandId}`);
+      set({ catalogItems: res });
     } catch (err) {
       console.error("Failed to fetch catalog items:", err);
     }
@@ -709,8 +743,8 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
   fetchItemSpecs: async (itemId) => {
     try {
-      const res = await api.get(`/catalog/items/${itemId}/specs`);
-      return res.data;
+      const res = await apiClient.get<Record<string, unknown>>(`/catalog/items/${itemId}/specs`);
+      return res;
     } catch (err) {
       console.error("Failed to fetch item specs:", err);
       return {};
@@ -727,6 +761,21 @@ export const useStore = create<ProductionStore>((set, get) => ({
         return { fetchedProjectIds: newIds };
       });
       get().fetchProjectData(currentProject);
+    }
+  },
+
+  // Prefetch data for multiple projects in the background
+  prefetchProjectsData: async (projectNames: string[]) => {
+    const state = get();
+    const prefetchPromises = projectNames
+      .filter(name => {
+        const project = state.projectData[name];
+        return project?.id && !state.fetchedProjectIds.has(project.id);
+      })
+      .map(name => get().fetchProjectData(name));
+    
+    if (prefetchPromises.length > 0) {
+      await Promise.all(prefetchPromises);
     }
   },
 

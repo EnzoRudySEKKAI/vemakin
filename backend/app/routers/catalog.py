@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, cast, String
 from typing import List, Optional
 import uuid
 import time
@@ -36,7 +37,9 @@ def to_camel_case(snake_str: str) -> str:
     return components[0] + "".join(x.title() for x in components[1:])
 
 
-def batch_get_items_specs(db: Session, items: List[models.GearCatalog]) -> dict:
+async def batch_get_items_specs(
+    db: AsyncSession, items: List[models.GearCatalog]
+) -> dict:
     """Optimized batch specs fetching - fetch all specs in bulk instead of N+1 queries"""
     if not items:
         return {}
@@ -50,9 +53,13 @@ def batch_get_items_specs(db: Session, items: List[models.GearCatalog]) -> dict:
     # Bulk fetch categories
     categories = {}
     if category_ids:
-        cat_results = (
-            db.query(models.Category).filter(models.Category.id.in_(category_ids)).all()
+        # Convert UUIDs to strings for the query
+        category_id_strs = [str(cat_id) for cat_id in category_ids]
+        stmt = select(models.Category).where(
+            cast(models.Category.id, String).in_(category_id_strs)
         )
+        result = await db.execute(stmt)
+        cat_results = result.scalars().all()
         categories = {str(c.id): c for c in cat_results}
 
     # Group items by category slug for batch fetching
@@ -70,11 +77,12 @@ def batch_get_items_specs(db: Session, items: List[models.GearCatalog]) -> dict:
         spec_model = SPECS_MODELS_MAPPING[category_slug]
         item_ids = list(item_ids_set)
         if item_ids:
-            # Convert strings back to UUIDs for query
-            uuid_ids = [uuid.UUID(id_str) for id_str in item_ids]
-            specs_results = (
-                db.query(spec_model).filter(spec_model.gear_id.in_(uuid_ids)).all()
+            # Use string comparison for UUID columns
+            stmt = select(spec_model).where(
+                cast(spec_model.gear_id, String).in_(item_ids)
             )
+            result = await db.execute(stmt)
+            specs_results = result.scalars().all()
             for spec in specs_results:
                 spec_dict = {
                     to_camel_case(c.name): getattr(spec, c.name)
@@ -87,8 +95,8 @@ def batch_get_items_specs(db: Session, items: List[models.GearCatalog]) -> dict:
 
 
 @router.get("/categories", response_model=List[schemas.Category])
-def get_categories(
-    db: Session = Depends(get_db),
+async def get_categories(
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     # Check if guest mode
@@ -102,13 +110,14 @@ def get_categories(
         return catalog_cache.get_categories()
 
     # Fallback to database query
-    return db.query(models.Category).all()
+    result = await db.execute(select(models.Category))
+    return result.scalars().all()
 
 
 @router.get("/brands", response_model=List[schemas.Brand])
-def get_brands(
+async def get_brands(
     category_id: Optional[uuid.UUID] = None,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     # Check if guest mode
@@ -132,22 +141,23 @@ def get_brands(
         return catalog_cache.get_brands(category_id)
 
     # Fallback to database query
-    query = db.query(models.Brand)
+    stmt = select(models.Brand)
     if category_id:
         # Join with gear_catalog to find brands that have items in this category
-        query = (
-            query.join(models.GearCatalog)
-            .filter(models.GearCatalog.category_id == category_id)
+        stmt = (
+            stmt.join(models.GearCatalog)
+            .where(models.GearCatalog.category_id == category_id)
             .distinct()
         )
-    return query.all()
+    result = await db.execute(stmt)
+    return result.scalars().all()
 
 
 @router.get("/items", response_model=List[schemas.GearCatalog])
-def get_items(
+async def get_items(
     category_id: Optional[uuid.UUID] = None,
     brand_id: Optional[uuid.UUID] = None,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     # Check if guest mode
@@ -170,18 +180,19 @@ def get_items(
     # Fallback to database query
     start_time = time.time()
 
-    query = db.query(models.GearCatalog)
+    stmt = select(models.GearCatalog)
     if category_id:
-        query = query.filter(models.GearCatalog.category_id == category_id)
+        stmt = stmt.where(models.GearCatalog.category_id == category_id)
     if brand_id:
-        query = query.filter(models.GearCatalog.brand_id == brand_id)
+        stmt = stmt.where(models.GearCatalog.brand_id == brand_id)
 
-    items = query.all()
+    result = await db.execute(stmt)
+    items = result.scalars().all()
     query_time = time.time() - start_time
 
     # Batch fetch all specs at once
     enrich_start = time.time()
-    specs_cache = batch_get_items_specs(db, items)
+    specs_cache = await batch_get_items_specs(db, items)
     enrich_time = time.time() - enrich_start
 
     # Build response
@@ -211,9 +222,9 @@ def get_items(
 
 
 @router.get("/items/{item_id}", response_model=schemas.GearCatalog)
-def get_item(
+async def get_item(
     item_id: uuid.UUID,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     # Check if guest mode
@@ -233,12 +244,14 @@ def get_item(
         return item
 
     # Fallback to database query
-    item = db.query(models.GearCatalog).filter(models.GearCatalog.id == item_id).first()
+    stmt = select(models.GearCatalog).where(models.GearCatalog.id == item_id)
+    result = await db.execute(stmt)
+    item = result.scalars().first()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
 
     # Use batch function for single item (for consistency)
-    specs_cache_result = batch_get_items_specs(db, [item])
+    specs_cache_result = await batch_get_items_specs(db, [item])
 
     return {
         "id": item.id,
@@ -253,9 +266,9 @@ def get_item(
 
 
 @router.get("/items/{item_id}/specs")
-def get_item_specs(
+async def get_item_specs(
     item_id: uuid.UUID,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user_or_guest),
 ):
     # Check if guest mode
@@ -273,12 +286,14 @@ def get_item_specs(
         return specs
 
     # Fallback to database query
-    item = db.query(models.GearCatalog).filter(models.GearCatalog.id == item_id).first()
+    stmt = select(models.GearCatalog).where(models.GearCatalog.id == item_id)
+    result = await db.execute(stmt)
+    item = result.scalars().first()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
 
     # Use batch function for single item
-    specs_cache_result = batch_get_items_specs(db, [item])
+    specs_cache_result = await batch_get_items_specs(db, [item])
     return specs_cache_result.get(str(item.id), {})
 
 

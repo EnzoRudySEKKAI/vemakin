@@ -150,7 +150,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
                 leftIcon={<span className="text-[10px] font-bold text-white/20">SC</span>}
                 fullWidth
                 variant="underline"
-                className="font-mono text-indigo-300"
+                className="font-mono text-primary/70"
               />
             </div>
           </div>
@@ -206,7 +206,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
                 placeholder="Enter filming location..."
                 fullWidth
                 variant="underline"
-                leftIcon={<MapPin size={14} className="text-white/20 group-focus-within:text-indigo-400 transition-colors" />}
+                leftIcon={<MapPin size={14} className="text-white/20 group-focus-within:text-primary transition-colors" />}
               />
             </div>
           </div>
@@ -227,7 +227,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
       <Card
         title="Equipment assignment"
         headerRight={
-          <span className="text-indigo-400 font-medium text-xs">
+          <span className="text-primary font-medium text-xs">
             {form.equipmentIds.length} items selected
           </span>
         }
@@ -254,7 +254,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
                     key={cat}
                     onClick={() => setShotGearCategory(cat)}
                     className={`px-4 py-2 rounded-xl text-[10px] font-medium transition-all border whitespace-nowrap ${isActive
-                      ? 'bg-indigo-500 text-white border-indigo-500 shadow-[0_0_15px_rgba(78,71,221,0.3)]'
+                      ? 'bg-primary text-white border-primary shadow-[0_0_15px_rgba(78,71,221,0.3)]'
                       : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10 hover:text-white/70 hover:border-white/10'
                       }`}
                   >
@@ -275,19 +275,19 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
                   key={item.id}
                   onClick={() => toggleShotGear(item.id)}
                   className={`w-full flex items-center justify-between p-3 rounded-xl transition-all group border ${isSelected
-                    ? 'bg-indigo-500/10 border-indigo-500/20 shadow-[0_0_10px_rgba(78,71,221,0.05)]'
+                    ? 'bg-primary/10 border-primary/20 shadow-[0_0_10px_rgba(78,71,221,0.05)]'
                     : 'bg-transparent border-transparent hover:bg-white/5'
                     }`}
                 >
                   <div className="flex items-center gap-4 min-w-0">
                     <div className={`p-2.5 rounded-xl transition-all ${isSelected
-                      ? 'bg-indigo-500/20 text-indigo-400'
+                      ? 'bg-primary/20 text-primary'
                       : 'bg-white/5 text-white/20 group-hover:bg-white/10 group-hover:text-white/40'
                       }`}>
                       <Icon size={18} strokeWidth={2} />
                     </div>
                     <div className="min-w-0 text-left">
-                      <p className={`text-sm font-medium truncate transition-colors ${isSelected ? 'text-indigo-100' : 'text-white/60 group-hover:text-white'}`}>
+                      <p className={`text-sm font-medium truncate transition-colors ${isSelected ? 'text-primary/10' : 'text-white/60 group-hover:text-white'}`}>
                         {item.customName || item.name}
                       </p>
                       <div className="flex items-center gap-2 mt-0.5">
@@ -304,7 +304,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
                   </div>
 
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 ${isSelected
-                    ? 'bg-indigo-500 text-white shadow-[0_0_10px_rgba(78,71,221,0.4)] scale-100'
+                    ? 'bg-primary text-white shadow-[0_0_10px_rgba(78,71,221,0.4)] scale-100'
                     : 'bg-white/5 text-white/5 scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100'
                     }`}>
                     <Check size={14} strokeWidth={3} />

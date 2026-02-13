@@ -9,7 +9,7 @@ interface MetricBadgeProps {
 
 const colorStyles = {
   default: 'text-white/60',
-  primary: 'text-indigo-400',
+  primary: 'text-primary',
   success: 'text-emerald-400',
   warning: 'text-amber-400',
   danger: 'text-red-400'

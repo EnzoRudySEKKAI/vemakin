@@ -24,3 +24,7 @@ export type { SelectProps, SelectSize, SelectOption } from './Select'
 
 export { Modal, ConfirmModal } from './Modal'
 export type { ModalProps, ModalSize, ConfirmModalProps } from './Modal'
+
+export { Logo } from './Logo'
+export type { LogoProps } from './Logo'
+

@@ -23,7 +23,7 @@ export const TimeSelector: React.FC<TimeSelectorProps> = ({ label, value = '00:0
           <select
             value={h}
             onChange={(e) => setHours(e.target.value)}
-            className="w-full appearance-none bg-transparent border-b border-gray-200 dark:border-white/10 py-1.5 text-base font-semibold text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] cursor-pointer"
+            className="w-full appearance-none bg-transparent border-b border-gray-200 dark:border-white/10 py-1.5 text-base font-semibold text-gray-900 dark:text-white focus:outline-none focus:border-primary dark:focus:border-primary cursor-pointer"
           >
             {Array.from({ length: 24 }).map((_, i) => {
               const val = String(i).padStart(2, '0')
@@ -37,7 +37,7 @@ export const TimeSelector: React.FC<TimeSelectorProps> = ({ label, value = '00:0
           <select
             value={m}
             onChange={(e) => setMinutes(e.target.value)}
-            className="w-full appearance-none bg-transparent border-b border-gray-200 dark:border-white/10 py-1.5 text-base font-semibold text-gray-900 dark:text-white focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] cursor-pointer"
+            className="w-full appearance-none bg-transparent border-b border-gray-200 dark:border-white/10 py-1.5 text-base font-semibold text-gray-900 dark:text-white focus:outline-none focus:border-primary dark:focus:border-primary cursor-pointer"
           >
             {Array.from({ length: 12 }).map((_, i) => {
               const val = String(i * 5).padStart(2, '0')

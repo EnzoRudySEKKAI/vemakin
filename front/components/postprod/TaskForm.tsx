@@ -24,11 +24,11 @@ interface TaskFormProps {
 }
 
 const TASK_CATEGORIES = [
-  { id: 'Script', icon: PenLine, color: 'text-blue-500 dark:text-indigo-500', bg: 'bg-blue-50' },
-  { id: 'Editing', icon: Scissors, color: 'text-blue-500 dark:text-indigo-500', bg: 'bg-blue-50' },
-  { id: 'Sound', icon: Music, color: 'text-blue-500 dark:text-indigo-500', bg: 'bg-blue-50' },
-  { id: 'VFX', icon: Layers, color: 'text-blue-500 dark:text-indigo-500', bg: 'bg-blue-50' },
-  { id: 'Color', icon: Palette, color: 'text-blue-500 dark:text-indigo-500', bg: 'bg-blue-50' },
+  { id: 'Script', icon: PenLine, color: 'text-primary dark:text-primary', bg: 'bg-primary/5' },
+  { id: 'Editing', icon: Scissors, color: 'text-primary dark:text-primary', bg: 'bg-primary/5' },
+  { id: 'Sound', icon: Music, color: 'text-primary dark:text-primary', bg: 'bg-primary/5' },
+  { id: 'VFX', icon: Layers, color: 'text-primary dark:text-primary', bg: 'bg-primary/5' },
+  { id: 'Color', icon: Palette, color: 'text-primary dark:text-primary', bg: 'bg-primary/5' },
 ]
 
 export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) => {
@@ -47,7 +47,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
                   key={cat.id}
                   onClick={() => setForm({ ...form, category: cat.id as any, metadata: {} })}
                   className={`flex flex-col items-center gap-3 p-4 ${radius.xl} border-2 transition-all duration-300 group ${isActive
-                    ? `bg-white dark:bg-[#2C2C30] border-blue-500 dark:border-indigo-500 shadow-xl ring-8 ring-blue-500/5 dark:ring-indigo-500/5 ${cat.color}`
+                    ? `bg-white dark:bg-[#2C2C30] border-primary dark:border-primary shadow-xl ring-8 ring-primary/5 dark:ring-primary/5 ${cat.color}`
                     : 'bg-white dark:bg-[#2C2C30] border-gray-100 dark:border-white/10 text-gray-300 dark:text-gray-600 hover:border-gray-200 dark:hover:border-white/20'
                     }`}
                 >
@@ -173,7 +173,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
         </Card>
 
         {/* Submit */}
-        <div className="pt-4 sticky bottom-0 bg-white dark:bg-[#1C1C1E] flex justify-center pb-6">
+        <div className="pt-4 sticky bottom-0 bg-white dark:bg-[#16181D] flex justify-center pb-6">
           <Button
             onClick={onSubmit}
             disabled={!form.title.trim()}

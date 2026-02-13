@@ -39,8 +39,8 @@ interface ActionSuiteProps {
 type ViewMode = 'hub' | 'shot' | 'gear' | 'task' | 'note' | 'project'
 
 const VIEWS: { id: ViewMode; label: string; icon: any; color: string }[] = [
-  { id: 'gear', label: 'Gear', icon: Package, color: 'text-blue-600 dark:text-indigo-600' },
-  { id: 'shot', label: 'Scene', icon: Film, color: 'text-blue-600 dark:text-indigo-600' },
+  { id: 'gear', label: 'Gear', icon: Package, color: 'text-primary dark:text-bg-primary' },
+  { id: 'shot', label: 'Scene', icon: Film, color: 'text-primary dark:text-bg-primary' },
   { id: 'task', label: 'Task', icon: Zap, color: 'text-orange-600' },
   { id: 'note', label: 'Note', icon: StickyNote, color: 'text-gray-600' },
 ]
@@ -353,7 +353,7 @@ export const ActionSuite: React.FC<ActionSuiteProps> = ({
       >
         <Card variant="glass" className="relative max-h-[95vh] md:max-h-[92vh] lg:max-h-[90vh] flex flex-col overflow-hidden rounded-[32px] sm:rounded-[48px]">
           {/* Header Area with Navigation */}
-          <div className="px-6 py-6 sm:px-10 sm:py-8 border-b border-gray-50 dark:border-white/5 flex flex-col gap-6 shrink-0 bg-white dark:bg-[#1C1C1E] z-20">
+          <div className="px-6 py-6 sm:px-10 sm:py-8 border-b border-gray-50 dark:border-white/5 flex flex-col gap-6 shrink-0 bg-white dark:bg-[#16181D] z-20">
             {/* Navigation Switcher */}
             <div className="flex items-center justify-between">
               <div className="flex gap-2 overflow-x-auto no-scrollbar">
@@ -492,11 +492,11 @@ export const ActionSuite: React.FC<ActionSuiteProps> = ({
                       <IconContainer icon={Package} size="sm" variant="accent" />
                       <Text variant="caption" color="muted">Equipment</Text>
                     </div>
-                    <span className="bg-blue-50 dark:bg-indigo-500/10 text-blue-600 dark:text-indigo-400 px-2.5 py-1 rounded-lg text-xs font-semibold">{shotForm.equipmentIds.length} Selected</span>
+                    <span className="bg-primary/10 text-primary dark:text-primary px-2.5 py-1 rounded-lg text-xs font-semibold">{shotForm.equipmentIds.length} Selected</span>
                   </div>
 
                   {isCreatingGearInline ? (
-                    <div className="p-4 bg-blue-50 dark:bg-indigo-500/10 border border-blue-100 dark:border-indigo-500/20 rounded-2xl animate-in fade-in slide-in-from-top-2">
+                    <div className="p-4 bg-primary/10 border border-blue-100 dark:border-primary/20 rounded-2xl animate-in fade-in slide-in-from-top-2">
                       <div className="space-y-4">
                         <div>
                           <Text variant="caption" color="secondary" className="mb-2 block">Item Name / Model</Text>
@@ -513,7 +513,7 @@ export const ActionSuite: React.FC<ActionSuiteProps> = ({
                           <select
                             value={inlineGearForm.category}
                             onChange={(e) => setInlineGearForm({ ...inlineGearForm, category: e.target.value })}
-                            className="w-full bg-white dark:bg-[#2C2C30] border-2 border-gray-100 dark:border-white/10 rounded-2xl px-4 py-4 text-sm font-semibold text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 dark:border-indigo-500 transition-all cursor-pointer"
+                            className="w-full bg-white dark:bg-[#2C2C30] border-2 border-gray-100 dark:border-white/10 rounded-2xl px-4 py-4 text-sm font-semibold text-gray-900 dark:text-white focus:outline-none focus:border-primary dark:border-primary transition-all cursor-pointer"
                           >
                             {['Camera', 'Lens', 'Light', 'Filter', 'Audio', 'Support', 'Grip', 'Other'].map(cat => (
                               <option key={cat} value={cat}>{cat}</option>
@@ -550,7 +550,7 @@ export const ActionSuite: React.FC<ActionSuiteProps> = ({
                             value={shotGearSearch}
                             onChange={(e) => setShotGearSearch(e.target.value)}
                             placeholder="Search inventory..."
-                            className="w-full bg-white dark:bg-[#2C2C30] border border-gray-200 dark:border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs font-semibold text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-indigo-400/20"
+                            className="w-full bg-white dark:bg-[#2C2C30] border border-gray-200 dark:border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs font-semibold text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-primary/20"
                           />
                         </div>
                       </div>
@@ -560,8 +560,8 @@ export const ActionSuite: React.FC<ActionSuiteProps> = ({
                             key={cat}
                             onClick={() => setShotGearCategory(cat)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap border transition-all ${shotGearCategory === cat
-                              ? 'bg-blue-600 dark:bg-indigo-600 text-white border-blue-600 dark:border-indigo-600'
-                              : 'bg-white dark:bg-[#2C2C30] border-gray-100 dark:border-white/10 text-gray-400 dark:text-gray-500 hover:border-blue-200 dark:hover:border-indigo-400/30 hover:text-blue-500 dark:hover:text-indigo-400'
+                              ? 'bg-primary dark:bg-primary text-white border-blue-600 dark:border-primary'
+                              : 'bg-white dark:bg-[#2C2C30] border-gray-100 dark:border-white/10 text-gray-400 dark:text-gray-500 hover:border-blue-200 dark:hover:border-primary/30 hover:text-primary dark:hover:text-primary'
                               }`}
                           >
                             {cat}
@@ -583,22 +583,22 @@ export const ActionSuite: React.FC<ActionSuiteProps> = ({
                               key={item.id}
                               onClick={() => toggleShotGear(item.id)}
                               className={`w-full flex items-center justify-between p-2.5 rounded-xl border transition-all text-left group ${isSelected
-                                ? 'bg-blue-50 dark:bg-indigo-500/10 border-blue-200 dark:border-indigo-400/30 shadow-sm ring-1 ring-blue-200 dark:ring-indigo-400/20'
-                                : 'bg-white dark:bg-[#2C2C30] border-gray-100 dark:border-white/10 hover:border-blue-100 dark:hover:border-indigo-400/20 hover:bg-gray-50 dark:hover:bg-[#3A3A3E]'
+                                ? 'bg-primary/10 border-primary/30 shadow-sm ring-1 ring-primary/20'
+                                : 'bg-white dark:bg-[#2C2C30] border-gray-100 dark:border-white/10 hover:border-blue-100 dark:hover:border-primary/20 hover:bg-gray-50 dark:hover:bg-[#3A3A3E]'
                                 }`}
                             >
                               <div className="flex items-center gap-3 min-w-0">
-                                <div className={`p-1.5 rounded-lg transition-colors ${isSelected ? 'bg-blue-100 dark:bg-indigo-500/20 text-blue-600 dark:text-indigo-400' : 'bg-gray-50 dark:bg-[#3A3A3E] text-gray-400 dark:text-gray-500'}`}>
+                                <div className={`p-1.5 rounded-lg transition-colors ${isSelected ? 'bg-blue-100 dark:bg-primary/20 text-primary dark:text-primary' : 'bg-gray-50 dark:bg-[#3A3A3E] text-gray-400 dark:text-gray-500'}`}>
                                   <Icon size={12} strokeWidth={2.5} />
                                 </div>
                                 <div className="min-w-0">
-                                  <p className={`text-xs font-semibold truncate leading-none mb-0.5 ${isSelected ? 'text-blue-900 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300'}`}>
+                                  <p className={`text-xs font-semibold truncate leading-none mb-0.5 ${isSelected ? 'text-blue-900 dark:text-primary' : 'text-gray-700 dark:text-gray-300'}`}>
                                     {item.customName || item.name}
                                   </p>
                                   <p className="text-xs font-semibold text-gray-400 dark:text-gray-500">{item.category}</p>
                                 </div>
                               </div>
-                              <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-all ${isSelected ? 'bg-blue-600 dark:bg-indigo-600 border-blue-600 dark:border-indigo-600 text-white' : 'bg-white dark:bg-[#3A3A3E] border-gray-200 dark:border-white/10 text-transparent'
+                              <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-all ${isSelected ? 'bg-primary dark:bg-primary border-blue-600 dark:border-primary text-white' : 'bg-white dark:bg-[#3A3A3E] border-gray-200 dark:border-white/10 text-transparent'
                                 }`}>
                                 <Check size={10} strokeWidth={2.5} />
                               </div>
@@ -610,7 +610,7 @@ export const ActionSuite: React.FC<ActionSuiteProps> = ({
                   )}
                 </Card>
 
-                <div className="pt-4 sticky bottom-0 bg-white dark:bg-[#1C1C1E] flex justify-center pb-6 mt-auto">
+                <div className="pt-4 sticky bottom-0 bg-white dark:bg-[#16181D] flex justify-center pb-6 mt-auto">
                   <Button
                     variant="primary"
                     size="lg"

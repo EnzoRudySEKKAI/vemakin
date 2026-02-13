@@ -97,7 +97,7 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
     <div className={`flex items-center justify-between mb-4 ${className}`}>
       <div className="flex items-center gap-3">
         {icon && (
-          <div className="p-2 bg-blue-50 dark:bg-indigo-500/10 rounded-xl">
+          <div className="p-2 bg-primary/10 rounded-xl">
             {icon}
           </div>
         )}

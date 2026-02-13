@@ -75,7 +75,7 @@ export const Modal: React.FC<ModalProps> = ({
               w-full
               ${sizeStyles[size]}
               ${radius['2xl']}
-              bg-white dark:bg-[#1C1C1E]
+              bg-white dark:bg-[#16181D]
               border border-gray-100 dark:border-white/10
               shadow-2xl
               overflow-hidden

@@ -19,11 +19,11 @@ const toISODate = (dateStr: string) => {
 };
 
 const TASK_CATEGORIES = [
-  { id: 'Script', icon: PenLine, color: 'text-blue-500', bg: 'bg-blue-50' },
-  { id: 'Editing', icon: Scissors, color: 'text-blue-500', bg: 'bg-blue-50' },
-  { id: 'Sound', icon: Music, color: 'text-blue-500', bg: 'bg-blue-50' },
-  { id: 'VFX', icon: Layers, color: 'text-blue-500', bg: 'bg-blue-50' },
-  { id: 'Color', icon: Palette, color: 'text-blue-500', bg: 'bg-blue-50' },
+  { id: 'Script', icon: PenLine, color: 'text-primary', bg: 'bg-primary/5' },
+  { id: 'Editing', icon: Scissors, color: 'text-primary', bg: 'bg-primary/5' },
+  { id: 'Sound', icon: Music, color: 'text-primary', bg: 'bg-primary/5' },
+  { id: 'VFX', icon: Layers, color: 'text-primary', bg: 'bg-primary/5' },
+  { id: 'Color', icon: Palette, color: 'text-primary', bg: 'bg-primary/5' },
 ];
 
 export const TaskFormPage: React.FC<TaskFormPageProps> = ({
@@ -86,14 +86,14 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
                   key={cat.id}
                   onClick={() => setForm({ ...form, category: cat.id as any, metadata: {} })}
                   className={`flex flex-col items-center gap-4 p-5 rounded-2xl border transition-all duration-500 group ${isActive
-                    ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400 shadow-[0_0_20px_rgba(78,71,221,0.1)]'
+                    ? 'bg-primary/10 border-primary/30 text-primary shadow-[0_0_20px_rgba(78,71,221,0.1)]'
                     : 'bg-white/5 border-white/5 text-white/20 hover:border-white/10 hover:text-white/40'
                     }`}
                 >
-                  <div className={`p-2.5 rounded-xl transition-all duration-500 ${isActive ? 'bg-indigo-500/20 scale-110' : 'group-hover:scale-105 group-hover:bg-white/5'}`}>
+                  <div className={`p-2.5 rounded-xl transition-all duration-500 ${isActive ? 'bg-primary/20 scale-110' : 'group-hover:scale-105 group-hover:bg-white/5'}`}>
                     <CatIcon size={24} strokeWidth={isActive ? 3 : 2} />
                   </div>
-                  <span className={`text-[10px] font-medium uppercase tracking-widest transition-colors ${isActive ? 'text-indigo-300' : 'text-white/20 group-hover:text-white/40'}`}>
+                  <span className={`text-[10px] font-medium uppercase tracking-widest transition-colors ${isActive ? 'text-primary/70' : 'text-white/20 group-hover:text-white/40'}`}>
                     {cat.id}
                   </span>
                 </button>
@@ -146,14 +146,14 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
                 <select
                   value={form.priority}
                   onChange={(e) => setForm({ ...form, priority: e.target.value as any })}
-                  className="w-full bg-transparent border-b border-white/10 py-3 text-white/80 focus:text-white focus:outline-none focus:border-indigo-500 appearance-none cursor-pointer pr-10 text-sm font-bold tracking-tight transition-all"
+                  className="w-full bg-transparent border-b border-white/10 py-3 text-white/80 focus:text-white focus:outline-none focus:border-primary appearance-none cursor-pointer pr-10 text-sm font-bold tracking-tight transition-all"
                 >
-                  <option value="low" className="bg-[#0A0A0A]">Low Tier</option>
-                  <option value="medium" className="bg-[#0A0A0A]">Medium Tier</option>
-                  <option value="high" className="bg-[#0A0A0A]">High Priority</option>
-                  <option value="critical" className="bg-[#0A0A0A]">Mission Critical</option>
+                  <option value="low" className="bg-[#0F1116]">Low Tier</option>
+                  <option value="medium" className="bg-[#0F1116]">Medium Tier</option>
+                  <option value="high" className="bg-[#0F1116]">High Priority</option>
+                  <option value="critical" className="bg-[#0F1116]">Mission Critical</option>
                 </select>
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-white/20 group-hover:text-indigo-400 transition-colors pointer-events-none">
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-white/20 group-hover:text-primary transition-colors pointer-events-none">
                   <ChevronDown size={16} strokeWidth={3} />
                 </div>
               </div>
@@ -196,21 +196,21 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
                 <div className="flex flex-col gap-1 min-w-0">
                   <span className="text-[10px] text-white/40 font-medium mb-3 block">Aspect ratio</span>
                   <div className="relative group">
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-white/20 group-hover:text-indigo-400 transition-colors pointer-events-none">
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-white/20 group-hover:text-primary transition-colors pointer-events-none">
                       <Crop size={16} />
                     </div>
                     <select
                       value={form.metadata['aspectRatio'] as string || ''}
                       onChange={(e) => setForm({ ...form, metadata: { ...form.metadata, aspectRatio: e.target.value } })}
-                      className="w-full appearance-none bg-transparent border-b border-white/10 pl-10 pr-10 py-3 text-sm font-bold tracking-tight focus:outline-none focus:border-indigo-500 transition-all cursor-pointer text-white/80 focus:text-white"
+                      className="w-full appearance-none bg-transparent border-b border-white/10 pl-10 pr-10 py-3 text-sm font-bold tracking-tight focus:outline-none focus:border-primary transition-all cursor-pointer text-white/80 focus:text-white"
                     >
-                      <option value="" className="bg-[#0A0A0A]">Select Ratio</option>
-                      <option value="16:9" className="bg-[#0A0A0A]">16:9 (Widescreen)</option>
-                      <option value="9:16" className="bg-[#0A0A0A]">9:16 (Vertical)</option>
-                      <option value="2.39:1" className="bg-[#0A0A0A]">2.39:1 (Cinema)</option>
-                      <option value="4:3" className="bg-[#0A0A0A]">4:3 (Classic)</option>
+                      <option value="" className="bg-[#0F1116]">Select Ratio</option>
+                      <option value="16:9" className="bg-[#0F1116]">16:9 (Widescreen)</option>
+                      <option value="9:16" className="bg-[#0F1116]">9:16 (Vertical)</option>
+                      <option value="2.39:1" className="bg-[#0F1116]">2.39:1 (Cinema)</option>
+                      <option value="4:3" className="bg-[#0F1116]">4:3 (Classic)</option>
                     </select>
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-white/20 pointer-events-none group-hover:text-indigo-400 transition-colors">
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-white/20 pointer-events-none group-hover:text-primary transition-colors">
                       <ChevronDown size={14} strokeWidth={3} />
                     </div>
                   </div>

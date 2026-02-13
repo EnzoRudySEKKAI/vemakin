@@ -6,7 +6,6 @@ import { RouterProvider } from 'react-router-dom'
 import { router } from './router'
 import { QueryProvider } from './providers/QueryProvider'
 
-// Main App with React Router and Query Provider
 const App = () => (
   <QueryProvider>
     <RouterProvider router={router} />
@@ -17,4 +16,15 @@ const container = document.getElementById('root')
 if (container) {
   const root = createRoot(container)
   root.render(<App />)
+  
+  // Delay removing initial loader until React has had a chance to paint
+  setTimeout(() => {
+    requestAnimationFrame(() => {
+      const loader = document.getElementById('initial-loader')
+      if (loader) {
+        loader.classList.add('loaded')
+        setTimeout(() => loader.remove(), 400)
+      }
+    })
+  }, 100)
 }

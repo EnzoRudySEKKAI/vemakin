@@ -26,8 +26,8 @@ export const InventoryListItem: React.FC<InventoryListItemProps> = ({
   return (
     <HoverCard
       onClick={onClick}
-      className="px-6 py-4 flex items-center rounded-[24px] cursor-pointer bg-white/80 dark:bg-[#1A1A1D]/80"
-      blobColor="from-blue-400 to-indigo-500 dark:from-indigo-400 dark:to-[#4E47DD]"
+      className="px-6 py-4 flex items-center rounded-[24px] cursor-pointer bg-white/80 dark:bg-[#16181D]/80"
+      blobColor="from-primary/70 to-primary dark:from-primary/70 dark:to-primary"
       enableHoverScale={true}
     >
       <div className="w-full flex items-center justify-between gap-8">
@@ -58,7 +58,7 @@ export const InventoryListItem: React.FC<InventoryListItemProps> = ({
           {/* Middle-Right: Status Badge */}
           <div className="hidden sm:flex items-center">
             <span className={`w-28 flex justify-center px-3 py-1.5 rounded-xl text-xs font-semibold border whitespace-nowrap ${item.isOwned
-              ? 'bg-indigo-50/50 dark:bg-indigo-500/10 border-indigo-100/50 dark:border-indigo-500/20 text-[#3762E3] dark:text-indigo-300'
+              ? 'bg-primary/5 dark:bg-primary/10 border-primary/10 dark:border-primary/20 text-primary dark:text-primary/70'
               : 'bg-orange-50/50 dark:bg-orange-500/10 border-orange-100/50 dark:border-orange-500/20 text-orange-600 dark:text-orange-300'
               }`}>
               {item.isOwned ? 'Owned' : 'Rent'}

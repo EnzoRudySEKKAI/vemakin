@@ -3,7 +3,6 @@ import {
   useMutation,
   useQueryClient,
   UseQueryOptions,
-  QueryKey,
 } from '@tanstack/react-query'
 import { 
   projectsApi, 
@@ -12,7 +11,9 @@ import {
   tasksApi, 
   inventoryApi, 
   catalogApi,
-  bulkApi 
+  bulkApi,
+  InitialDataResponse,
+  ProjectDataResponse,
 } from '@/api'
 import { 
   Project, 
@@ -42,7 +43,7 @@ export const queryKeys = {
     specs: (itemId: string) => ['catalog', 'specs', itemId] as const,
   },
   projectData: (projectId: string) => ['projectData', projectId] as const,
-  initialData: ['initialData'] as const,
+  initialData: (projectId?: string) => ['initialData', projectId || 'all'] as const,
 }
 
 // Default stale times for different data types
@@ -342,19 +343,9 @@ export const useItemSpecs = (itemId: string, options?: UseQueryOptions<Record<st
   })
 }
 
-// Bulk data fetching hooks
-interface ProjectData {
-  shots: Shot[]
-  notes: Note[]
-  tasks: PostProdTask[]
-}
+// Bulk data fetching hooks using the optimized /bulk/initial endpoint
 
-interface InitialData {
-  projects: Project[]
-  inventory: Equipment[]
-}
-
-export const useProjectData = (projectId: string, options?: UseQueryOptions<ProjectData, Error>) => {
+export const useProjectData = (projectId: string, options?: UseQueryOptions<ProjectDataResponse, Error>) => {
   return useQuery({
     queryKey: queryKeys.projectData(projectId),
     queryFn: () => bulkApi.getProjectData(projectId),
@@ -364,11 +355,13 @@ export const useProjectData = (projectId: string, options?: UseQueryOptions<Proj
   })
 }
 
-export const useInitialData = (options?: UseQueryOptions<InitialData, Error>) => {
+// Optimized initial data hook - fetches projects + inventory + (optionally) project data in ONE request
+export const useInitialData = (projectId?: string, options?: UseQueryOptions<InitialDataResponse, Error>) => {
   return useQuery({
-    queryKey: queryKeys.initialData,
-    queryFn: bulkApi.getInitialData,
+    queryKey: queryKeys.initialData(projectId),
+    queryFn: () => bulkApi.getInitialData(projectId),
     staleTime: Math.min(STALE_TIMES.projects, STALE_TIMES.inventory),
+    enabled: true,
     ...options,
   })
 }
@@ -385,12 +378,14 @@ export const prefetchProjectData = async (
   })
 }
 
+// Prefetch initial data with optional project data
 export const prefetchInitialData = async (
-  queryClient: ReturnType<typeof useQueryClient>
+  queryClient: ReturnType<typeof useQueryClient>,
+  projectId?: string
 ) => {
   await queryClient.prefetchQuery({
-    queryKey: queryKeys.initialData,
-    queryFn: bulkApi.getInitialData,
+    queryKey: queryKeys.initialData(projectId),
+    queryFn: () => bulkApi.getInitialData(projectId),
     staleTime: Math.min(STALE_TIMES.projects, STALE_TIMES.inventory),
   })
 }

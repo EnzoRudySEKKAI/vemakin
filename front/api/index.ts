@@ -12,6 +12,8 @@ import {
   PaginationParams,
 } from '@/types'
 
+export { apiClient }
+
 // Projects API
 export const projectsApi = {
   getAll: () => apiClient.get<Project[]>('/projects'),
@@ -97,21 +99,29 @@ export const catalogApi = {
 }
 
 // Bulk operations for efficient data fetching
+export interface InitialDataResponse {
+  projects: Project[]
+  inventory: Equipment[]
+  shots?: Shot[]
+  notes?: Note[]
+  tasks?: PostProdTask[]
+}
+
+export interface ProjectDataResponse {
+  shots: Shot[]
+  notes: Note[]
+  tasks: PostProdTask[]
+}
+
 export const bulkApi = {
-  getProjectData: async (projectId: string) => {
-    const [shots, notes, tasks] = await Promise.all([
-      shotsApi.getAll(projectId, { limit: 100 }),
-      notesApi.getAll(projectId, { limit: 100 }),
-      tasksApi.getAll(projectId, { limit: 100 }),
-    ])
-    return { shots: shots.items, notes: notes.items, tasks: tasks.items }
+  // Single request to fetch all data: projects + inventory + (optionally project data)
+  getInitialData: async (projectId?: string): Promise<InitialDataResponse> => {
+    const params = projectId ? `?project_id=${projectId}` : ''
+    return apiClient.get<InitialDataResponse>(`/bulk/initial${params}`)
   },
   
-  getInitialData: async () => {
-    const [projects, inventory] = await Promise.all([
-      projectsApi.getAll(),
-      inventoryApi.getAll().catch(() => [] as Equipment[]),
-    ])
-    return { projects, inventory }
+  // Fetch all project data (shots, notes, tasks) in a single request
+  getProjectData: async (projectId: string): Promise<ProjectDataResponse> => {
+    return apiClient.get<ProjectDataResponse>(`/bulk/project/${projectId}`)
   },
 }

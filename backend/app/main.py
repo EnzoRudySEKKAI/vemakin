@@ -8,7 +8,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from .database import get_db, engine, AsyncSessionLocal
 from .auth import get_current_user
-from .routers import projects, shots, inventory, notes, postprod, catalog
+from .routers import projects, shots, inventory, notes, postprod, catalog, bulk
 from .cache import catalog_cache
 import time
 import logging
@@ -23,14 +23,17 @@ def refresh_catalog_cache_job():
     """Background job to refresh catalog cache every 24 hours."""
     logger.info("[SCHEDULER] Starting daily catalog cache refresh...")
     try:
-        # Use sync session for background job
+        # Use sync session for background job as it's outside request context
         import sqlalchemy
+        from sqlalchemy.orm import Session
         from .config import settings
 
-        sync_url = settings.DATABASE_URL.replace("+asyncpg", "")
+        sync_url = settings.DATABASE_URL.replace("+asyncpg", "").replace(
+            "postgresql+asyncpg://", "postgresql://"
+        )
         sync_engine = sqlalchemy.create_engine(sync_url)
-        with sync_engine.connect() as conn:
-            # Catalog cache warmup uses sync operations
+        with Session(sync_engine) as db:
+            catalog_cache.warm(db)
             logger.info("[SCHEDULER] Catalog cache refresh completed")
     except Exception as e:
         logger.error(f"[SCHEDULER] Catalog cache refresh failed: {e}")
@@ -56,7 +59,12 @@ async def lifespan(app: FastAPI):
     if catalog_cache.load_from_json():
         logger.info("[STARTUP] Catalog cache loaded from file")
     else:
-        logger.info("[STARTUP] Cache file not found, will warm on first request")
+        logger.info("[STARTUP] Cache file not found, warming from database...")
+        try:
+            async with AsyncSessionLocal() as db:
+                await catalog_cache.async_warm(db)
+        except Exception as e:
+            logger.error(f"[STARTUP] Failed to warm catalog cache: {e}")
 
     # Start background scheduler
     scheduler.start()
@@ -174,6 +182,7 @@ app.include_router(inventory.router)
 app.include_router(notes.router)
 app.include_router(postprod.router)
 app.include_router(catalog.router)
+app.include_router(bulk.router)
 
 
 @app.get("/")

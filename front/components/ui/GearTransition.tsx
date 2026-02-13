@@ -2,8 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { Package, ArrowDownRight, ArrowUpRight, ChevronDown, Boxes, Check } from 'lucide-react'
 import { Shot, Equipment } from '@/types'
 import { CATEGORY_ICONS } from '@/constants'
-import { Text, IconContainer, Card, Button } from '@/components/atoms'
-import { radius, typography } from '@/design-system'
+import { Text, IconContainer, Card } from '@/components/atoms'
 
 interface GearTransitionProps {
   prevShot: Shot
@@ -31,53 +30,35 @@ export const GearTransition: React.FC<GearTransitionProps> = ({ prevShot, nextSh
     return { toDrop, toAdd }
   }, [prevShot, nextShot, inventory])
 
-  // Ensure GearTransition is always visible as requested by the user
-  // if (gearDelta.toDrop.length === 0 && gearDelta.toAdd.length === 0) return null
+  const totalItems = gearDelta.toDrop.length + gearDelta.toAdd.length
 
   return (
-    <div className={`
-      relative animate-in fade-in slide-in-from-top-1 duration-500
-      bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-white/10 rounded-[16px] shadow-sm
-      transition-all duration-300 flex-1 lg:flex-1 overflow-hidden
-      ${isOpen ? 'ring-2 ring-gray-900/5 dark:ring-white/10' : 'hover:border-gray-300 dark:hover:border-white/20'}
-    `}>
+    <div className="relative animate-in fade-in slide-in-from-top-1 duration-500 flex-1 lg:flex-1 overflow-hidden transition-all duration-300">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center gap-6 py-3 px-6 transition-all active:scale-[0.98] group"
+        className="w-full flex items-center justify-center gap-4 py-2 group cursor-pointer"
       >
-        {/* Left: Icon & Label */}
-        <div className="flex items-center gap-3 shrink-0">
-          <IconContainer
-            icon={Boxes}
-            size="md"
-            variant="default"
-          />
-          <div className="flex flex-col items-start leading-none">
-            <Text variant="caption">Shift Gear</Text>
-          </div>
+        <div className="h-px flex-1 bg-gray-200 dark:bg-white/10 group-hover:bg-gray-300 dark:group-hover:bg-white/20 transition-colors" />
+        
+        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-white/40 group-hover:text-gray-600 dark:group-hover:text-white/60 transition-colors">
+          <Boxes size={12} />
+          Shift Gear
+          <span className="opacity-60 ml-1">
+            ({totalItems > 0 ? `${totalItems} Items` : 'Full Kit'})
+          </span>
+          <ChevronDown size={10} className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
         </div>
 
-        {/* Middle: Spacer */}
-        <div className="flex-1" />
-
-        {/* Right: Item Count & Chevron */}
-        <div className="flex items-center gap-2 shrink-0">
-          <Text variant="body">
-            {gearDelta.toDrop.length + gearDelta.toAdd.length > 0
-              ? `${gearDelta.toDrop.length + gearDelta.toAdd.length} Items`
-              : 'Full Kit'}
-          </Text>
-          <ChevronDown size={14} strokeWidth={2.5} className={`text-gray-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
-        </div>
+        <div className="h-px flex-1 bg-gray-200 dark:bg-white/10 group-hover:bg-gray-300 dark:group-hover:bg-white/20 transition-colors" />
       </button>
 
       {/* Expanded Content */}
       <div className={`
         grid transition-all duration-300 ease-in-out
-        ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}
+        ${isOpen ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0'}
       `}>
         <div className="overflow-hidden">
-          <div className="p-5 pt-2 border-t border-gray-100 dark:border-white/5 relative">
+          <div className="bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/10 rounded-[16px] shadow-sm p-5 relative">
             <div className="absolute top-0 right-0 p-4 opacity-5 text-gray-900 dark:text-white pointer-events-none">
               <Package size={80} strokeWidth={2.5} />
             </div>

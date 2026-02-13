@@ -1,5 +1,5 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from ..models import models
 import uuid
 
@@ -15,24 +15,33 @@ SPECS_MODELS_MAPPING = {
     "wireless": models.WirelessSpecs,
     "drone": models.DroneSpecs,
     "filter": models.FilterSpecs,
-    "grip": models.GripSpecs
+    "grip": models.GripSpecs,
 }
 
-def get_item_specs(db: Session, item_id: uuid.UUID, category_id: uuid.UUID):
+
+async def get_item_specs(db: AsyncSession, item_id: uuid.UUID, category_id: uuid.UUID):
     # Find category slug
-    category = db.query(models.Category).filter(models.Category.id == category_id).first()
+    stmt = select(models.Category).where(models.Category.id == category_id)
+    result = await db.execute(stmt)
+    category = result.scalars().first()
     if not category or category.slug not in SPECS_MODELS_MAPPING:
         return {}
-    
+
     spec_model = SPECS_MODELS_MAPPING[category.slug]
-    result = db.query(spec_model).filter(spec_model.gear_id == item_id).first()
-    
-    if not result:
+    stmt = select(spec_model).where(spec_model.gear_id == item_id)
+    result = await db.execute(stmt)
+    spec_result = result.scalars().first()
+
+    if not spec_result:
         return {}
-        
+
     def to_camel_case(snake_str):
-        components = snake_str.split('_')
-        return components[0] + ''.join(x.title() for x in components[1:])
+        components = snake_str.split("_")
+        return components[0] + "".join(x.title() for x in components[1:])
 
     # Convert ORM object to dict (excluding internal SQLAlchemy state and gear_id)
-    return {to_camel_case(c.name): getattr(result, c.name) for c in result.__table__.columns if c.name != 'gear_id'}
+    return {
+        to_camel_case(c.name): getattr(spec_result, c.name)
+        for c in spec_result.__table__.columns
+        if c.name != "gear_id"
+    }

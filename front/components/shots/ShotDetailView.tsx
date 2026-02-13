@@ -6,6 +6,7 @@ import { CATEGORY_ICONS } from '@/constants'
 import { useDetailView } from '@/hooks/useDetailView'
 import { DetailViewLayout } from '@/components/organisms/DetailViewLayout'
 import { ActionButton, ActionButtonGroup } from '@/components/molecules/ActionButton'
+import { DetailItem } from '@/components/molecules'
 import { Card } from '@/components/ui/Card'
 import { StatusToggle } from '@/components/molecules/StatusToggle'
 import { Text, Input, Button, Textarea } from '@/components/atoms'
@@ -162,7 +163,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
           <Card
             title="Gear checklist"
             subtitle={!isEditing && (
-              <span className="text-indigo-400">
+              <span className="text-primary">
                 {selectedShot.preparedEquipmentIds.length}/{selectedShot.equipmentIds.length} ready
               </span>
             )}
@@ -198,19 +199,19 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                           <div
                             key={eId}
                             className={`flex items-center justify-between p-3 rounded-xl transition-all group border ${isReady
-                              ? 'bg-indigo-500/5 border-indigo-500/10'
+                              ? 'bg-primary/5 border-primary/10'
                               : 'bg-transparent border-transparent hover:bg-white/5'
                               }`}
                           >
                             <div className="flex items-center gap-4 min-w-0">
                               <div className={`p-2.5 rounded-xl transition-all ${isReady
-                                ? 'bg-indigo-500/20 text-indigo-400'
+                                ? 'bg-primary/20 text-primary'
                                 : 'bg-white/5 text-white/20'
                                 }`}>
                                 <Icon size={18} strokeWidth={2} />
                               </div>
                               <div className="min-w-0">
-                                <p className={`text-sm font-medium truncate transition-colors ${isReady ? 'text-indigo-200' : 'text-white/60'}`}>
+                                <p className={`text-sm font-medium truncate transition-colors ${isReady ? 'text-primary/70' : 'text-white/60'}`}>
                                   {item ? (item.customName || item.name) : 'Unknown'}
                                 </p>
                                 <div className="flex items-center gap-2 mt-0.5">
@@ -231,8 +232,8 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                               <button
                                 onClick={() => onToggleEquipment(selectedShot.id, eId)}
                                 className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 ${isReady
-                                  ? 'bg-indigo-500 text-white shadow-[0_0_10px_rgba(78,71,221,0.3)] scale-100'
-                                  : 'bg-white/5 text-white/10 hover:bg-white/10 hover:text-indigo-400 scale-95 hover:scale-100'
+                                  ? 'bg-primary text-white shadow-[0_0_10px_rgba(78,71,221,0.3)] scale-100'
+                                  : 'bg-white/5 text-white/10 hover:bg-white/10 hover:text-primary scale-95 hover:scale-100'
                                   }`}
                               >
                                 <Check size={14} strokeWidth={3} />
@@ -271,7 +272,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                             className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all text-left group border border-transparent hover:border-white/5"
                           >
                             <div className="flex items-center gap-4 min-w-0">
-                              <div className="p-2.5 bg-white/5 text-white/20 rounded-xl group-hover:text-indigo-400 group-hover:bg-indigo-400/10 transition-all">
+                              <div className="p-2.5 bg-white/5 text-white/20 rounded-xl group-hover:text-primary group-hover:bg-primary/10 transition-all">
                                 <Icon size={18} strokeWidth={2} />
                               </div>
                               <div className="min-w-0">
@@ -290,7 +291,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                                 </div>
                               </div>
                             </div>
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white/10 group-hover:text-indigo-400 group-hover:bg-indigo-400/10 transition-all">
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white/10 group-hover:text-primary group-hover:bg-primary/10 transition-all">
                               <Plus size={16} />
                             </div>
                           </button>
@@ -414,7 +415,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
 
                 {/* Description */}
                 <div className="w-full">
-                  <span className="text-[10px] text-white/40 font-medium mb-2 block">Action brief</span>
+                  <span className="text-[10px] text-white/40 font-medium mb-2 block">Description</span>
                   <Textarea
                     value={editedItem.description}
                     onChange={e => setEditedItem({ ...editedItem, description: e.target.value })}
@@ -425,39 +426,27 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
               </>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
-                <div className="flex flex-col gap-1 min-w-0">
-                  <span className="text-[10px] text-white/40 font-medium mb-2 block">Schedule</span>
-                  <div className="flex flex-col group">
-                    <div className="text-xl text-white font-semibold leading-tight">
-                      {formatDateToNumeric(selectedShot.date)}
-                    </div>
-                    <div className="text-xs text-white/30 font-medium mt-1">
-                      {selectedShot.startTime} — {calculateEndTime(selectedShot.startTime, selectedShot.duration)}
-                    </div>
-                  </div>
-                </div>
+                <DetailItem
+                  label="Schedule"
+                  value={formatDateToNumeric(selectedShot.date)}
+                  subValue={`${selectedShot.startTime} — ${calculateEndTime(selectedShot.startTime, selectedShot.duration)}`}
+                />
 
-                <div className="flex flex-col gap-1 min-w-0">
-                  <span className="text-[10px] text-white/40 font-medium mb-2 block">Location</span>
-                  <div
-                    className="flex flex-col group cursor-pointer"
-                    onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedShot.location)}`, '_blank')}
-                  >
-                    <div className="text-xl text-white font-semibold leading-tight truncate">
-                      {selectedShot.location}
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[10px] font-medium text-indigo-400 mt-1 opacity-60 hover:opacity-100 transition-opacity">
-                      View on Maps <ExternalLink size={10} strokeWidth={3} />
-                    </div>
-                  </div>
-                </div>
+                <DetailItem
+                  label="Location"
+                  value={selectedShot.location}
+                  subValue="View on Maps"
+                  isLink
+                  onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedShot.location)}`, '_blank')}
+                  valueClassName="truncate"
+                />
 
-                <div className="md:col-span-2">
-                  <span className="text-[10px] text-white/40 font-medium mb-2 block">Action brief</span>
-                  <div className="text-sm text-white/60 leading-relaxed font-medium whitespace-pre-wrap">
-                    {selectedShot.description || "No specific instructions provided for this shot."}
-                  </div>
-                </div>
+                <DetailItem
+                  label="Description"
+                  value={selectedShot.description || "No specific instructions provided for this shot."}
+                  className="md:col-span-2"
+                  valueClassName="whitespace-pre-wrap"
+                />
               </div>
             )}
           </div>
@@ -469,7 +458,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
         headerRight={
           <button
             onClick={() => onAddNote({ title: '', content: '', shotId: selectedShot.id, attachments: [] })}
-            className="flex items-center gap-2 text-[10px] font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+            className="flex items-center gap-2 text-[10px] font-medium text-primary hover:text-primary/70 transition-colors"
           >
             <Plus size={12} strokeWidth={3} />
             Add Note
@@ -483,9 +472,9 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                 <button
                   key={note.id}
                   onClick={() => onOpenNote?.(note.id)}
-                  className="flex flex-col items-start text-left p-5 bg-white/5 border border-white/5 rounded-2xl hover:border-indigo-500/30 transition-all group"
+                  className="flex flex-col items-start text-left p-5 bg-white/5 border border-white/5 rounded-2xl hover:border-primary/30 transition-all group"
                 >
-                  <div className="text-sm font-bold text-white mb-2 group-hover:text-indigo-400 transition-colors">
+                  <div className="text-sm font-bold text-white mb-2 group-hover:text-primary transition-colors">
                     {note.title || "Untitled Note"}
                   </div>
                   <div className="text-[11px] text-white/30 truncate w-full font-medium">

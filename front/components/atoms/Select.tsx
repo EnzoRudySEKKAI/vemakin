@@ -80,7 +80,7 @@ export const Select: React.FC<SelectProps> = ({
             text-gray-900 dark:text-white
             appearance-none
             focus:outline-none
-            focus:border-blue-500 dark:focus:border-indigo-400
+            focus:border-primary dark:focus:border-primary
             focus:bg-transparent
             focus-visible:bg-transparent
             focus-visible:outline-none

@@ -34,7 +34,7 @@ const iconSizes: Record<IconContainerSize, number> = {
 
 const variantStyles: Record<IconContainerVariant, string> = {
   default: 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400',
-  accent: 'bg-blue-50 dark:bg-indigo-500/10 text-blue-600 dark:text-indigo-400',
+  accent: 'bg-primary/10 text-primary dark:text-primary',
   muted: 'bg-gray-50 dark:bg-white/5 text-gray-400 dark:text-gray-500',
   success: 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400',
   warning: 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400',
@@ -81,7 +81,7 @@ export const IconBadge: React.FC<IconBadgeProps> = ({
 }) => {
   const badgeVariantStyles: Record<IconContainerVariant, string> = {
     default: 'bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400',
-    accent: 'bg-blue-100 dark:bg-indigo-500/20 text-blue-600 dark:text-indigo-400',
+    accent: 'bg-blue-100 dark:bg-primary/20 text-primary dark:text-primary',
     muted: 'bg-gray-50 dark:bg-white/5 text-gray-400 dark:text-gray-500',
     success: 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400',
     warning: 'bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400',
@@ -125,7 +125,7 @@ export const IconStack: React.FC<IconStackProps> = ({
           className={`
             ${sizeStyles[size]}
             ${radius.full}
-            bg-white dark:bg-[#1C1C1E]
+            bg-white dark:bg-[#16181D]
             border-2 border-white dark:border-[#141417]
             flex items-center justify-center
           `}

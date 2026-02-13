@@ -89,10 +89,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           className={`
             w-8 h-8 rounded-full flex items-center justify-center ${typography.size.base} ${typography.weight.semibold} relative transition-all
             ${selected
-              ? 'bg-blue-500 text-white shadow-md shadow-blue-500/30 dark:bg-indigo-500 dark:shadow-indigo-500/30 scale-100'
+              ? 'bg-primary text-white shadow-md shadow-primary/30 scale-100'
               : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10'
             }
-            ${today && !selected ? 'text-blue-600 dark:text-indigo-400 font-semibold' : ''}
+            ${today && !selected ? 'text-primary font-semibold' : ''}
           `}
         >
           {d}
@@ -118,7 +118,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
             className={`
               absolute top-full right-0 mt-2 z-[70]
               w-[280px] p-4
-              bg-white dark:bg-[#1C1C1E]
+              bg-white dark:bg-[#16181D]
               ${radius.xl}
               border border-gray-200 dark:border-white/10
               shadow-2xl

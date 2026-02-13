@@ -28,8 +28,8 @@ export const FilterPill: React.FC<FilterPillProps> = ({
         transition-all duration-200
         border shadow-sm
         ${isActive 
-          ? 'bg-[#3762E3] dark:bg-[#4E47DD] text-white border-[#3762E3] dark:border-[#4E47DD]' 
-          : 'bg-white dark:bg-[#1C1C1E] border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5'
+          ? 'bg-primary text-white border-primary' 
+          : 'bg-white dark:bg-[#16181D] border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5'
         }
         ${className}
       `}

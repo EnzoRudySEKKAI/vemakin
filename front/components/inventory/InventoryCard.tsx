@@ -28,8 +28,8 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({
   return (
     <HoverCard
       onClick={onClick}
-      className="p-5 flex flex-col h-full rounded-[28px] bg-white/80 dark:bg-[#1A1A1D]/80 backdrop-blur-xl border border-white/20 dark:border-white/5 shadow-sm hover:shadow-lg"
-      blobColor="from-blue-400 to-indigo-500 dark:from-indigo-400 dark:to-[#4E47DD]"
+      className="p-5 flex flex-col h-full rounded-[28px] bg-white/80 dark:bg-[#16181D]/80 backdrop-blur-xl border border-white/20 dark:border-white/5 shadow-sm hover:shadow-lg"
+      blobColor="from-primary/70 to-primary dark:from-primary/70 dark:to-primary"
       enableHoverScale={true}
     >
       {/* Header */}
@@ -63,7 +63,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({
           {item.category}
         </span>
         <span className={`w-28 flex justify-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${item.isOwned
-          ? 'bg-indigo-50/50 dark:bg-indigo-500/10 border-indigo-100/50 dark:border-indigo-500/20 text-[#3762E3] dark:text-indigo-300'
+          ? 'bg-primary/5 dark:bg-primary/10 border-primary/10 dark:border-primary/20 text-primary dark:text-primary/70'
           : 'bg-orange-50/50 dark:bg-orange-500/10 border-orange-100/50 dark:border-orange-500/20 text-orange-600 dark:text-orange-300'
           }`}>
           {item.isOwned ? 'Owned' : 'Rented'}

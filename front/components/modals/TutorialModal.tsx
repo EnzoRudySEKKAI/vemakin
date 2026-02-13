@@ -34,7 +34,7 @@ const GUIDES = [
     id: 'inventory',
     title: 'Inventory & Gear',
     icon: Package,
-    color: 'text-blue-600 dark:text-indigo-600',
+    color: 'text-primary dark:text-bg-primary',
     bg: 'bg-indigo-50',
     items: [
       {
@@ -55,8 +55,8 @@ const GUIDES = [
     id: 'timeline',
     title: 'Timeline & Scheduling',
     icon: Film,
-    color: 'text-blue-600 dark:text-indigo-600',
-    bg: 'bg-blue-50',
+    color: 'text-primary dark:text-bg-primary',
+    bg: 'bg-primary/5',
     items: [
       {
         question: 'Scheduling Shots',
@@ -114,7 +114,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({ onClose }) => {
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-6 py-5 flex items-center justify-between shrink-0 shadow-sm z-10">
         <div className="flex items-center gap-4">
-          <IconContainer icon={BookOpen} size="lg" variant="accent" className="text-white bg-blue-600 dark:bg-indigo-600" />
+          <IconContainer icon={BookOpen} size="lg" variant="accent" className="text-white bg-primary dark:bg-primary" />
           <div>
             <Text variant="h2" className="leading-none">Help Center</Text>
             <Text variant="caption" color="muted" className="mt-1">Guides & Documentation</Text>
@@ -167,16 +167,16 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({ onClose }) => {
                       <Card
                         key={itemId}
                         variant="glass"
-                        className={`p-0 cursor-pointer group transition-all duration-300 ${isExpanded ? 'ring-2 ring-blue-500 dark:ring-indigo-500/10' : ''}`}
+                        className={`p-0 cursor-pointer group transition-all duration-300 ${isExpanded ? 'ring-2 ring-primary dark:ring-primary/10' : ''}`}
                       >
                         <div
                           className="flex items-center justify-between p-5"
                           onClick={() => toggleItem(itemId)}
                         >
-                          <Text variant="body" className="group-hover:text-blue-600 dark:group-hover:text-indigo-400 transition-colors">
+                          <Text variant="body" className="group-hover:text-primary dark:group-hover:text-primary transition-colors">
                             {item.question}
                           </Text>
-                          <div className={`transition-transform duration-300 text-gray-400 ${isExpanded ? 'rotate-180 text-blue-500 dark:text-indigo-500' : ''}`}>
+                          <div className={`transition-transform duration-300 text-gray-400 ${isExpanded ? 'rotate-180 text-primary dark:text-primary' : ''}`}>
                             <ChevronDown size={18} strokeWidth={2.5} />
                           </div>
                         </div>

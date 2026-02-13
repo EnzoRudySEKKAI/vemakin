@@ -147,15 +147,15 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
                 <select
                   value={form.category}
                   onChange={(e) => handleCategoryChange(e.target.value)}
-                  className="w-full appearance-none bg-transparent border-b border-white/10 py-3 pr-10 text-white/80 focus:text-white focus:outline-none focus:border-indigo-500 transition-all cursor-pointer text-sm font-bold tracking-tight"
+                  className="w-full appearance-none bg-transparent border-b border-white/10 py-3 pr-10 text-white/80 focus:text-white focus:outline-none focus:border-primary transition-all cursor-pointer text-sm font-bold tracking-tight"
                 >
-                  <option value="" className="bg-[#0A0A0A]">Select Category</option>
+                  <option value="" className="bg-[#0F1116]">Select Category</option>
                   {catalogCategories.map(cat => (
-                    <option key={cat.id} value={cat.id} className="bg-[#0A0A0A]">{cat.name}</option>
+                    <option key={cat.id} value={cat.id} className="bg-[#0F1116]">{cat.name}</option>
                   ))}
-                  <option value="Other" className="bg-[#0A0A0A]">Other</option>
+                  <option value="Other" className="bg-[#0F1116]">Other</option>
                 </select>
-                <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-indigo-400 pointer-events-none transition-colors" size={14} strokeWidth={3} />
+                <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-primary pointer-events-none transition-colors" size={14} strokeWidth={3} />
               </div>
             </div>
 
@@ -166,14 +166,14 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
                   <select
                     value={form.brand}
                     onChange={(e) => handleBrandChange(e.target.value)}
-                    className="w-full appearance-none bg-transparent border-b border-white/10 py-3 pr-10 text-white/80 focus:text-white focus:outline-none focus:border-indigo-500 transition-all cursor-pointer text-sm font-bold tracking-tight"
+                    className="w-full appearance-none bg-transparent border-b border-white/10 py-3 pr-10 text-white/80 focus:text-white focus:outline-none focus:border-primary transition-all cursor-pointer text-sm font-bold tracking-tight"
                   >
-                    <option value="" className="bg-[#0A0A0A]">Select Brand</option>
+                    <option value="" className="bg-[#0F1116]">Select Brand</option>
                     {catalogBrands.map(b => (
-                      <option key={b.id} value={b.id} className="bg-[#0A0A0A]">{b.name}</option>
+                      <option key={b.id} value={b.id} className="bg-[#0F1116]">{b.name}</option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-indigo-400 pointer-events-none transition-colors" size={14} strokeWidth={3} />
+                  <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-primary pointer-events-none transition-colors" size={14} strokeWidth={3} />
                 </div>
               </div>
             )}
@@ -186,14 +186,14 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
                 <select
                   value={form.model}
                   onChange={(e) => handleModelChange(e.target.value)}
-                  className="w-full appearance-none bg-transparent border-b border-white/10 py-3 pr-10 text-white/80 focus:text-white focus:outline-none focus:border-indigo-500 transition-all cursor-pointer text-sm font-bold tracking-tight"
+                  className="w-full appearance-none bg-transparent border-b border-white/10 py-3 pr-10 text-white/80 focus:text-white focus:outline-none focus:border-primary transition-all cursor-pointer text-sm font-bold tracking-tight"
                 >
-                  <option value="" className="bg-[#0A0A0A]">Select Model Reference</option>
+                  <option value="" className="bg-[#0F1116]">Select Model Reference</option>
                   {catalogItems.map(m => (
-                    <option key={m.id} value={m.id} className="bg-[#0A0A0A]">{m.name}</option>
+                    <option key={m.id} value={m.id} className="bg-[#0F1116]">{m.name}</option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-indigo-400 pointer-events-none transition-colors" size={14} strokeWidth={3} />
+                <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-primary pointer-events-none transition-colors" size={14} strokeWidth={3} />
               </div>
             </div>
           )}
@@ -202,9 +202,9 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
             <div className="animate-in fade-in duration-500 pt-8 border-t border-white/5">
               <button
                 onClick={() => setShowSpecsInForm(!showSpecsInForm)}
-                className="flex items-center gap-3 text-[10px] font-medium text-white/20 hover:text-indigo-400 transition-all mb-6"
+                className="flex items-center gap-3 text-[10px] font-medium text-white/20 hover:text-primary transition-all mb-6"
               >
-                <div className={`p-1.5 rounded-lg border transition-all ${showSpecsInForm ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-400' : 'bg-white/5 border-white/5'}`}>
+                <div className={`p-1.5 rounded-lg border transition-all ${showSpecsInForm ? 'bg-primary/20 border-primary/30 text-primary' : 'bg-white/5 border-white/5'}`}>
                   <Info size={12} strokeWidth={3} />
                 </div>
                 {showSpecsInForm ? "Hide Technical Details" : "View Technical Specifications"}
@@ -225,7 +225,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-8 pb-4">
                       {Object.entries(currentModelSpecs).map(([k, v]) => (
                         <div key={k} className="group">
-                          <span className="text-[9px] text-white/20 font-medium mb-1 block group-hover:text-indigo-400/50 transition-colors">
+                          <span className="text-[9px] text-white/20 font-medium mb-1 block group-hover:text-primary/50 transition-colors">
                             {k.replace(/([A-Z])/g, ' $1').trim()}
                           </span>
                           <span className="text-xs text-white/50 font-medium group-hover:text-white/80 transition-colors">{String(v || "—")}</span>
@@ -245,7 +245,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
           <div className="flex p-1 bg-white/5 rounded-2xl border border-white/5">
             <button
               onClick={() => setForm(prev => ({ ...prev, isOwned: true }))}
-              className={`flex-1 py-3 text-[10px] font-medium rounded-xl transition-all ${form.isOwned ? 'bg-indigo-500 text-white shadow-[0_0_20px_rgba(78,71,221,0.3)]' : 'text-white/20 hover:text-white/40'}`}
+              className={`flex-1 py-3 text-[10px] font-medium rounded-xl transition-all ${form.isOwned ? 'bg-primary text-white shadow-[0_0_20px_rgba(78,71,221,0.3)]' : 'text-white/20 hover:text-white/40'}`}
             >
               Internal Production Asset
             </button>
@@ -277,14 +277,14 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
                   <select
                     value={form.frequency}
                     onChange={(e) => setForm(prev => ({ ...prev, frequency: e.target.value as any }))}
-                    className="w-full appearance-none bg-transparent border-b border-white/10 py-3 pr-10 text-white/80 focus:text-white focus:outline-none focus:border-indigo-500 transition-all cursor-pointer text-sm font-bold tracking-tight"
+                    className="w-full appearance-none bg-transparent border-b border-white/10 py-3 pr-10 text-white/80 focus:text-white focus:outline-none focus:border-primary transition-all cursor-pointer text-sm font-bold tracking-tight"
                   >
-                    <option value="hour" className="bg-[#0A0A0A]">Hourly (Short term)</option>
-                    <option value="day" className="bg-[#0A0A0A]">Daily (Standard)</option>
-                    <option value="week" className="bg-[#0A0A0A]">Weekly (Discounted)</option>
-                    <option value="month" className="bg-[#0A0A0A]">Monthly (Long term)</option>
+                    <option value="hour" className="bg-[#0F1116]">Hourly (Short term)</option>
+                    <option value="day" className="bg-[#0F1116]">Daily (Standard)</option>
+                    <option value="week" className="bg-[#0F1116]">Weekly (Discounted)</option>
+                    <option value="month" className="bg-[#0F1116]">Monthly (Long term)</option>
                   </select>
-                  <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-indigo-400 pointer-events-none transition-colors" size={14} strokeWidth={3} />
+                  <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-primary pointer-events-none transition-colors" size={14} strokeWidth={3} />
                 </div>
               </div>
             </div>

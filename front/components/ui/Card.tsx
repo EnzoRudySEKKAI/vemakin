@@ -17,7 +17,7 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   return (
     <motion.div
-      className={`bg-[#0D0D0F] border border-white/[0.05] rounded-2xl overflow-hidden flex flex-col ${className}`}
+      className={`bg-[#16181D] border border-white/[0.05] rounded-2xl overflow-hidden flex flex-col ${className}`}
       {...props}
     >
       {(title || headerRight) && (
@@ -34,7 +34,7 @@ export const Card: React.FC<CardProps> = ({
           )}
         </div>
       )}
-      <div className="bg-[#0A0A0A] flex-1">
+      <div className="bg-[#0F1116] flex-1">
         {children}
       </div>
     </motion.div>
@@ -49,7 +49,7 @@ export const SimpleCard: React.FC<CardProps> = ({
 }) => {
   return (
     <motion.div
-      className={`bg-[#0D0D0F] border border-white/[0.05] rounded-xl p-4 ${className}`}
+      className={`bg-[#16181D] border border-white/[0.05] rounded-xl p-4 ${className}`}
       {...props}
     >
       {children}
@@ -65,7 +65,7 @@ export const ListItem: React.FC<CardProps> = ({
 }) => {
   return (
     <motion.div
-      className={`bg-[#0D0D0F] border border-white/[0.05] rounded-xl p-3 hover:border-white/[0.1] transition-colors cursor-pointer ${className}`}
+      className={`bg-[#16181D] border border-white/[0.05] rounded-xl p-3 hover:border-white/[0.1] transition-colors cursor-pointer ${className}`}
       {...props}
     >
       {children}

@@ -15,14 +15,14 @@ interface StatusToggleProps {
 const statusConfig: Record<StatusType, { label: string; color: string; dotColor: string; variant: 'default' | 'accent' | 'success' | 'warning' | 'danger' }> = {
   pending: {
     label: 'Pending',
-    color: 'bg-[#3762E3]/5 dark:bg-[#4E47DD]/10 border-[#3762E3]/20 dark:border-[#4E47DD]/30 text-[#3762E3] dark:text-[#4E47DD]',
-    dotColor: 'bg-[#3762E3] dark:bg-[#4E47DD] animate-pulse shadow-[0_0_8px_rgba(55,98,227,0.4)]',
+    color: 'bg-primary/5 dark:bg-primary/10 border-primary/20 dark:border-primary/30 text-primary',
+    dotColor: 'bg-primary animate-pulse shadow-[0_0_8px_rgba(55,98,227,0.4)]',
     variant: 'default'
   },
   'in-progress': {
     label: 'In Progress',
-    color: 'bg-blue-500/5 border-blue-500/20 text-blue-600 dark:text-blue-400',
-    dotColor: 'bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.4)]',
+    color: 'bg-primary/5 border-primary/20 text-primary dark:text-primary',
+    dotColor: 'bg-primary animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.4)]',
     variant: 'accent'
   },
   completed: {

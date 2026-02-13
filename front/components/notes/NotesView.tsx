@@ -92,7 +92,7 @@ export const NotesView: React.FC<NotesViewProps> = React.memo(({
   if (aggregatedNotes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-300px)] w-full overflow-hidden px-6 select-none">
-        <div className="w-14 h-14 bg-[#0D0D0F] rounded-xl flex items-center justify-center mb-6 border border-white/[0.05]">
+        <div className="w-14 h-14 bg-[#16181D] rounded-xl flex items-center justify-center mb-6 border border-white/[0.05]">
           <StickyNote size={24} className="text-white/40" />
         </div>
         <div className="text-center max-w-sm">
@@ -131,30 +131,30 @@ export const NotesView: React.FC<NotesViewProps> = React.memo(({
               <div
                 key={note.id}
                 onClick={() => onSelectNote(note.id)}
-                className="group p-4 rounded-xl bg-[#0D0D0F] border border-white/[0.05] hover:border-white/[0.1] transition-all cursor-pointer"
+                className="group p-5 rounded-xl bg-[#16181D] border border-white/[0.05] hover:border-white/[0.1] hover:bg-[#1A1D23] transition-all cursor-pointer"
               >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#0A0A0A] flex items-center justify-center border border-white/[0.05]">
-                    <ContextIcon size={14} className="text-white/40" />
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-[#0F1116] flex items-center justify-center border border-white/[0.05]">
+                    <ContextIcon size={18} className="text-white/50" />
                   </div>
-                  <div className="text-xs text-white/30 uppercase tracking-wider">{contextLabel}</div>
+                  <div className="text-xs text-white/40 uppercase tracking-wider font-medium">{contextLabel}</div>
                 </div>
 
-                <div className="mb-3">
-                  <h3 className="text-sm text-white font-medium mb-1 line-clamp-1">{note.title}</h3>
-                  <p className="text-xs text-white/30 line-clamp-2">{note.content}</p>
+                <div className="mb-4">
+                  <h3 className="text-base text-white/90 group-hover:text-white font-medium mb-2 line-clamp-1 transition-colors">{note.title}</h3>
+                  <p className="text-sm text-white/40 line-clamp-2 leading-relaxed">{note.content}</p>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-[10px] text-white/20">
-                    <Calendar size={10} />
+                  <div className="flex items-center gap-2 text-xs text-white/30">
+                    <Calendar size={12} />
                     {formatDateToNumeric(note.updatedAt)}
                   </div>
 
                   {note.attachments && note.attachments.length > 0 && (
-                    <div className="flex items-center gap-1 text-white/20">
-                      <Paperclip size={10} />
-                      <span className="text-[10px]">{note.attachments.length}</span>
+                    <div className="flex items-center gap-1.5 text-white/30">
+                      <Paperclip size={12} />
+                      <span className="text-xs font-medium">{note.attachments.length}</span>
                     </div>
                   )}
                 </div>
@@ -163,7 +163,14 @@ export const NotesView: React.FC<NotesViewProps> = React.memo(({
           })}
         </div>
       ) : (
-        <Card title="Notes">
+        <Card
+          title={
+            <div className="flex items-center gap-3">
+              <StickyNote size={20} className="text-white/50" />
+              <span className="text-lg font-semibold text-white tracking-tight">Notes</span>
+            </div>
+          }
+        >
           <div className="p-4 space-y-2">
             {aggregatedNotes.map(note => {
               const ContextIcon = getContextIcon(note, shots, tasks)
@@ -181,24 +188,24 @@ export const NotesView: React.FC<NotesViewProps> = React.memo(({
                 <div
                   key={note.id}
                   onClick={() => onSelectNote(note.id)}
-                  className="flex items-center gap-4 p-3 rounded-xl bg-[#0D0D0F] border border-white/[0.05] hover:border-white/[0.1] transition-all cursor-pointer"
+                  className="group flex items-center gap-4 p-4 rounded-xl bg-[#16181D] border border-white/[0.05] hover:border-white/[0.1] hover:bg-[#1A1D23] transition-all cursor-pointer"
                 >
-                  <div className="w-9 h-9 rounded-lg bg-[#0A0A0A] flex items-center justify-center border border-white/[0.05] shrink-0">
-                    <ContextIcon size={16} className="text-white/40" />
+                  <div className="w-10 h-10 rounded-lg bg-[#0F1116] flex items-center justify-center border border-white/[0.05] shrink-0">
+                    <ContextIcon size={18} className="text-white/50" />
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm text-white font-medium truncate">{note.title}</div>
-                    <div className="text-xs text-white/30">{contextLabel}</div>
+                    <div className="text-base text-white/90 group-hover:text-white font-medium truncate transition-colors">{note.title}</div>
+                    <div className="text-sm text-white/40">{contextLabel}</div>
                   </div>
 
-                  <div className="hidden sm:flex items-center gap-3 shrink-0">
-                    <div className="text-xs text-white/30">
+                  <div className="hidden sm:flex items-center gap-4 shrink-0">
+                    <div className="text-sm text-white/40">
                       {new Date(note.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                     </div>
                     {note.attachments && note.attachments.length > 0 && (
-                      <div className="flex items-center gap-1 text-white/20">
-                        <Paperclip size={12} />
+                      <div className="flex items-center gap-1.5 text-white/30">
+                        <Paperclip size={14} />
                       </div>
                     )}
                   </div>

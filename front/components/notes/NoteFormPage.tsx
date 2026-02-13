@@ -120,7 +120,7 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
               <button
                 type="button"
                 onClick={() => setForm({ ...form, linkType: 'shot', linkedId: '' })}
-                className={`flex-1 py-2.5 rounded-xl text-[10px] font-medium transition-all ${form.linkType === 'shot' ? 'bg-indigo-500/20 text-indigo-400 shadow-xl' : 'text-white/30 hover:text-indigo-400/50'}`}
+                className={`flex-1 py-2.5 rounded-xl text-[10px] font-medium transition-all ${form.linkType === 'shot' ? 'bg-primary/20 text-primary shadow-xl' : 'text-white/30 hover:text-primary/50'}`}
               >
                 Link Shot
               </button>
@@ -141,14 +141,14 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
                 <select
                   value={form.linkedId}
                   onChange={e => setForm({ ...form, linkedId: e.target.value })}
-                  className="w-full appearance-none bg-transparent border-b border-white/5 pl-10 pr-10 py-4 text-sm font-bold focus:outline-none focus:border-indigo-500/50 transition-all cursor-pointer text-white/80"
+                  className="w-full appearance-none bg-transparent border-b border-white/5 pl-10 pr-10 py-4 text-sm font-bold focus:outline-none focus:border-primary/50 transition-all cursor-pointer text-white/80"
                 >
-                  <option value="" className="bg-[#0A0A0A]">Choose a reference point...</option>
+                  <option value="" className="bg-[#0F1116]">Choose a reference point...</option>
                   {form.linkType === 'shot' && existingShots.map(s => (
-                    <option key={s.id} value={s.id} className="bg-[#0A0A0A]">SCENE {s.sceneNumber}: {s.title}</option>
+                    <option key={s.id} value={s.id} className="bg-[#0F1116]">SCENE {s.sceneNumber}: {s.title}</option>
                   ))}
                   {form.linkType === 'task' && existingTasks.map(t => (
-                    <option key={t.id} value={t.id} className="bg-[#0A0A0A]">[{t.category}] {t.title}</option>
+                    <option key={t.id} value={t.id} className="bg-[#0F1116]">[{t.category}] {t.title}</option>
                   ))}
                 </select>
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-white/20 pointer-events-none">
@@ -170,7 +170,7 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 text-[10px] font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+            className="flex items-center gap-2 text-[10px] font-medium text-primary hover:text-primary/70 transition-colors"
           >
             <Plus size={12} strokeWidth={3} />
             Add Image/PDF
@@ -183,8 +183,8 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {form.attachments.length > 0 ? (
               form.attachments.map(att => (
-                <div key={att.id} className="group relative bg-white/5 p-4 rounded-xl border border-white/5 hover:border-indigo-500/30 transition-all flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-white/5 text-white/20 group-hover:text-indigo-400 transition-all">
+                <div key={att.id} className="group relative bg-white/5 p-4 rounded-xl border border-white/5 hover:border-primary/30 transition-all flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-white/5 text-white/20 group-hover:text-primary transition-all">
                     {att.type === 'image' ? <ImageIcon size={18} /> : <File size={18} />}
                   </div>
                   <div className="flex-1 min-w-0">

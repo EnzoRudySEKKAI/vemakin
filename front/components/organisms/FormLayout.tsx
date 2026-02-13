@@ -54,7 +54,7 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
               key={ft.id}
               onClick={() => onSwitchForm(ft.id)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${isActive
-                ? 'bg-indigo-600 text-white shadow-sm'
+                ? 'bg-primary text-white shadow-sm'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
             >
@@ -71,7 +71,7 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
         disabled={submitDisabled}
         className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${submitDisabled
           ? 'bg-gray-200 dark:bg-white/10 text-gray-400 cursor-not-allowed'
-          : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-sm'
+          : 'bg-primary text-white hover:bg-primary shadow-sm'
           }`}
       >
         {submitLabel}
@@ -106,11 +106,11 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
       transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
       className={`
         flex flex-col 
-        bg-[#F2F2F7] dark:bg-[#0A0A0A] 
+        bg-[#F2F2F7] dark:bg-[#0F1116] 
         ${className}
       `}
     >
-      <div className="max-w-3xl w-full mx-auto p-4 md:p-8 pt-6 pb-32">
+      <div className="max-w-3xl w-full mx-auto py-4 md:py-8 px-0 pt-6 pb-32">
         {children}
       </div>
     </motion.div>

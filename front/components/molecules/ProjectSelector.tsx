@@ -23,11 +23,11 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
     <div className={`relative ${className}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-4 rounded-xl bg-[#0D0D0F] border border-white/[0.05] hover:border-white/[0.1] transition-all"
+        className="w-full flex items-center justify-between p-4 rounded-xl bg-[#16181D] border border-white/[0.05] hover:border-white/[0.1] transition-all"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-            <Folder size={20} className="text-indigo-400" />
+          <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+            <Folder size={20} className="text-primary" />
           </div>
           <div className="flex flex-col items-start">
             <span className="text-xs text-white/40">Current Production</span>
@@ -48,7 +48,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 8 }}
               transition={{ duration: 0.15 }}
-              className="absolute top-full left-0 right-0 mt-2 bg-[#0D0D0F] rounded-xl p-2 border border-white/[0.08] shadow-2xl z-30 overflow-hidden"
+              className="absolute top-full left-0 right-0 mt-2 bg-[#16181D] rounded-xl p-2 border border-white/[0.08] shadow-2xl z-30 overflow-hidden"
             >
               <div className="max-h-[240px] overflow-y-auto">
                 {Object.keys(projects).map(projectName => (
@@ -58,7 +58,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
                     className={`
                       w-full flex items-center justify-between p-3 rounded-lg mb-1 transition-colors text-sm
                       ${currentProject === projectName 
-                        ? 'bg-indigo-500/20 text-indigo-400' 
+                        ? 'bg-primary/20 text-primary' 
                         : 'text-white/60 hover:bg-white/5'
                       }
                     `}

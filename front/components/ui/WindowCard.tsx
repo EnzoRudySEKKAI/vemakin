@@ -30,12 +30,12 @@ export const WindowCard: React.FC<WindowCardProps> = ({
 }) => {
   return (
     <motion.div
-      className={`bg-[#0D0D0F] border border-white/[0.08] rounded-2xl overflow-hidden ${className}`}
+      className={`bg-[#16181D] border border-white/[0.08] rounded-2xl overflow-hidden ${className}`}
       {...props}
     >
       {/* Header with Traffic Lights */}
       {(showTrafficLights || title || headerRight) && (
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08] bg-[#0D0D0F]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08] bg-[#16181D]">
           {/* Left: Traffic Lights */}
           {showTrafficLights && (
             <div className="flex items-center gap-1.5">
@@ -62,7 +62,7 @@ export const WindowCard: React.FC<WindowCardProps> = ({
       )}
 
       {/* Content */}
-      <div className={`bg-[#0A0A0A] ${contentClassName}`}>
+      <div className={`bg-[#0F1116] ${contentClassName}`}>
         {children}
       </div>
     </motion.div>

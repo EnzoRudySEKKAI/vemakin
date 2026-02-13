@@ -18,11 +18,11 @@ export interface BadgeProps {
 const variantStyles: Record<BadgeVariant, { base: string; active: string }> = {
   default: {
     base: 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-white/10',
-    active: 'bg-[#3762E3] dark:bg-[#4E47DD] text-white border-[#3762E3] dark:border-[#4E47DD]'
+    active: 'bg-primary text-white border-primary'
   },
   primary: {
-    base: 'bg-[#3762E3]/10 dark:bg-[#4E47DD]/10 text-[#3762E3] dark:text-[#4E47DD] border-[#3762E3]/20 dark:border-[#4E47DD]/20',
-    active: 'bg-[#3762E3] dark:bg-[#4E47DD] text-white border-[#3762E3] dark:border-[#4E47DD]'
+    base: 'bg-primary/10 dark:bg-primary/10 text-primary border-primary/20 dark:border-primary/20',
+    active: 'bg-primary text-white border-primary'
   },
   success: {
     base: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
@@ -37,8 +37,8 @@ const variantStyles: Record<BadgeVariant, { base: string; active: string }> = {
     active: 'bg-red-500 text-white border-red-500'
   },
   info: {
-    base: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
-    active: 'bg-blue-500 text-white border-blue-500'
+    base: 'bg-primary/10 text-primary dark:text-primary border-primary/20',
+    active: 'bg-primary text-white border-primary'
   },
   ghost: {
     base: 'bg-transparent text-gray-500 dark:text-gray-400 border-transparent',

@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useMemo } from 'react'
+import { motion } from 'framer-motion'
 import { Shot } from '../../../types'
 import { SearchBar } from '../../molecules/SearchBar'
 import { SegmentControl } from '../../molecules/SegmentControl'
@@ -33,6 +34,17 @@ export const ShotsFilterBar: React.FC<ShotsFilterBarProps> = ({
   className = ''
 }) => {
 
+  const { totalShots, completedShots, completionPercentage } = useMemo(() => {
+    const allShots = Object.values(groupedShots).flat()
+    const total = allShots.length
+    const completed = allShots.filter(s => s.status === 'done').length
+    return {
+      totalShots: total,
+      completedShots: completed,
+      completionPercentage: total > 0 ? (completed / total) * 100 : 0
+    }
+  }, [groupedShots])
+
   return (
     <div className={`flex flex-col gap-3 ${className}`}>
       <SearchBar
@@ -45,6 +57,21 @@ export const ShotsFilterBar: React.FC<ShotsFilterBarProps> = ({
         activeDate={activeDate}
         onDateSelect={onDateSelect}
       />
+
+      <div className="flex flex-col gap-1.5 h-[42px] justify-center">
+        <div className="flex items-center justify-between text-xs uppercase tracking-wider font-medium text-white/40">
+          <span>Progress</span>
+          <span>{completedShots}/{totalShots} Finished</span>
+        </div>
+        <div className="h-1.5 w-full bg-white/[0.06] rounded-full overflow-hidden">
+          <motion.div
+            className="h-full bg-primary rounded-full"
+            initial={{ width: 0 }}
+            animate={{ width: `${completionPercentage}%` }}
+            transition={{ type: "spring", stiffness: 40, damping: 15 }}
+          />
+        </div>
+      </div>
 
       <div className="flex items-center gap-3">
         <div className="w-2/3 md:flex-1 flex items-center gap-2 min-w-0">

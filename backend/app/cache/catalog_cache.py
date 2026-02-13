@@ -50,6 +50,7 @@ class CatalogCache:
         "brands_by_category": Dict[category_id, List[Brand]],
         "items_by_id": Dict[item_id, GearCatalog],
         "items_by_category_brand": Dict[(category_id, brand_id), List[Item]],
+        "items_by_name": Dict[name_lower, GearCatalog],
         "all_items": List[GearCatalog],
         "specs_by_gear_id": Dict[gear_id, dict],
         "last_updated": datetime,
@@ -78,6 +79,7 @@ class CatalogCache:
             "brands_by_category": {},
             "items_by_id": {},
             "items_by_category_brand": {},
+            "items_by_name": {},
             "all_items": [],
             "specs_by_gear_id": {},
             "last_updated": None,
@@ -164,6 +166,7 @@ class CatalogCache:
                         f"{k[0]}|{k[1]}": v
                         for k, v in self._data["items_by_category_brand"].items()
                     },
+                    "items_by_name": self._data["items_by_name"],
                     "all_items": self._data["all_items"],
                     "specs_by_gear_id": self._data["specs_by_gear_id"],
                     "last_updated": self._serialize_datetime(
@@ -224,6 +227,7 @@ class CatalogCache:
                 tuple(k.split("|")): v
                 for k, v in data.get("items_by_category_brand", {}).items()
             }
+            items_by_name = data.get("items_by_name", {})
             all_items = data.get("all_items", [])
             specs_by_gear_id = data.get("specs_by_gear_id", {})
 
@@ -234,6 +238,7 @@ class CatalogCache:
                     "brands_by_category": brands_by_category,
                     "items_by_id": items_by_id,
                     "items_by_category_brand": items_by_category_brand,
+                    "items_by_name": items_by_name,
                     "all_items": all_items,
                     "specs_by_gear_id": specs_by_gear_id,
                     "last_updated": last_updated,
@@ -298,6 +303,7 @@ class CatalogCache:
             # Build items lookup structures
             items_by_id: Dict[str, dict] = {}
             items_by_category_brand: Dict[tuple, List[dict]] = {}
+            items_by_name: Dict[str, dict] = {}
 
             SPECS_MODELS_MAPPING = {
                 "audio": models.AudioSpecs,
@@ -333,6 +339,10 @@ class CatalogCache:
                 }
 
                 items_by_id[item_id_str] = item_dict
+
+                # Index by name (lowercase for case-insensitive lookup)
+                if item.name:
+                    items_by_name[item.name.lower()] = item_dict
 
                 # Index by category + brand
                 if cat_id_str and brand_id_str:
@@ -387,6 +397,7 @@ class CatalogCache:
                     "brands_by_category": brands_by_category,
                     "items_by_id": items_by_id,
                     "items_by_category_brand": items_by_category_brand,
+                    "items_by_name": items_by_name,
                     "all_items": all_items_enriched,
                     "specs_by_gear_id": specs_by_gear_id,
                     "last_updated": datetime.now(),
@@ -543,6 +554,21 @@ class CatalogCache:
         with self._data_lock:
             specs = self._data["specs_by_gear_id"].get(gear_id_str, {})
             return specs.copy()
+
+    def find_item_by_name(self, name: str) -> Optional[dict]:
+        """
+        Find a catalog item by its name (case-insensitive).
+
+        Args:
+            name: The name of the item to search for
+
+        Returns:
+            Item dictionary if found, None otherwise
+        """
+        if not name:
+            return None
+        with self._data_lock:
+            return self._data["items_by_name"].get(name.lower())
 
     def get_stats(self) -> dict:
         """Get cache statistics for monitoring."""

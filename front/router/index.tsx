@@ -1,55 +1,72 @@
+import { lazy, Suspense } from 'react'
 import { createBrowserRouter, createRoutesFromElements, Route, Navigate } from 'react-router-dom'
 import { RootLayout } from '@/layouts/RootLayout'
-import { LandingPage } from '@/components/landing/LandingPage'
 
-// Import route wrapper components
-import { OverviewRoute } from '@/routes/OverviewRoute'
-import { ShotsRoute } from '@/routes/ShotsRoute'
-import { ShotDetailRoute } from '@/routes/ShotDetailRoute'
-import { ShotFormRoute } from '@/routes/ShotFormRoute'
-import { InventoryRoute } from '@/routes/InventoryRoute'
-import { EquipmentDetailRoute } from '@/routes/EquipmentDetailRoute'
-import { GearFormRoute } from '@/routes/GearFormRoute'
-import { NotesRoute } from '@/routes/NotesRoute'
-import { NoteDetailRoute } from '@/routes/NoteDetailRoute'
-import { NoteFormRoute } from '@/routes/NoteFormRoute'
-import { PipelineRoute } from '@/routes/PipelineRoute'
-import { TaskDetailRoute } from '@/routes/TaskDetailRoute'
-import { TaskFormRoute } from '@/routes/TaskFormRoute'
-import { SettingsRoute } from '@/routes/SettingsRoute'
-import { ProjectsRoute } from '@/routes/ProjectsRoute'
+const LandingPage = lazy(() => import('@/components/landing/LandingPage'))
+const OverviewRoute = lazy(() => import('@/routes/OverviewRoute').then(m => ({ default: m.OverviewRoute })))
+const ShotsRoute = lazy(() => import('@/routes/ShotsRoute').then(m => ({ default: m.ShotsRoute })))
+const ShotDetailRoute = lazy(() => import('@/routes/ShotDetailRoute').then(m => ({ default: m.ShotDetailRoute })))
+const ShotFormRoute = lazy(() => import('@/routes/ShotFormRoute').then(m => ({ default: m.ShotFormRoute })))
+const InventoryRoute = lazy(() => import('@/routes/InventoryRoute').then(m => ({ default: m.InventoryRoute })))
+const EquipmentDetailRoute = lazy(() => import('@/routes/EquipmentDetailRoute').then(m => ({ default: m.EquipmentDetailRoute })))
+const GearFormRoute = lazy(() => import('@/routes/GearFormRoute').then(m => ({ default: m.GearFormRoute })))
+const NotesRoute = lazy(() => import('@/routes/NotesRoute').then(m => ({ default: m.NotesRoute })))
+const NoteDetailRoute = lazy(() => import('@/routes/NoteDetailRoute').then(m => ({ default: m.NoteDetailRoute })))
+const NoteFormRoute = lazy(() => import('@/routes/NoteFormRoute').then(m => ({ default: m.NoteFormRoute })))
+const PipelineRoute = lazy(() => import('@/routes/PipelineRoute').then(m => ({ default: m.PipelineRoute })))
+const TaskDetailRoute = lazy(() => import('@/routes/TaskDetailRoute').then(m => ({ default: m.TaskDetailRoute })))
+const TaskFormRoute = lazy(() => import('@/routes/TaskFormRoute').then(m => ({ default: m.TaskFormRoute })))
+const SettingsRoute = lazy(() => import('@/routes/SettingsRoute').then(m => ({ default: m.SettingsRoute })))
+const ProjectsRoute = lazy(() => import('@/routes/ProjectsRoute').then(m => ({ default: m.ProjectsRoute })))
 
-// Import loaders
 import { rootLoader, shotsLoader, inventoryLoader, notesLoader, pipelineLoader, detailLoader } from './loaders'
 
-// Router configuration
-// Landing page at /, dashboard routes under /dashboard
+const PageLoader = () => (
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '100vh',
+    background: '#0F1116'
+  }}>
+    <div style={{
+      width: '24px',
+      height: '24px',
+      border: '2px solid rgba(255,255,255,0.2)',
+      borderTopColor: '#4E47DD',
+      borderRadius: '50%',
+      animation: 'spin 0.8s linear infinite'
+    }} />
+  </div>
+)
+
+const withSuspense = (Component: React.LazyExoticComponent<React.FC>) => (
+  <Suspense fallback={<PageLoader />}>
+    <Component />
+  </Suspense>
+)
+
 export const router = createBrowserRouter(
     createRoutesFromElements(
         <>
-            {/* Public Landing Page */}
-            <Route path="/" element={<LandingPage />} />
-            
-            {/* Auth redirect - points to dashboard which handles auth flow */}
+            <Route path="/" element={withSuspense(LandingPage)} />
             <Route path="/auth" element={<Navigate to="/dashboard" replace />} />
-            
-            {/* Dashboard/App Routes - wrapped by RootLayout */}
             <Route path="/dashboard" element={<RootLayout />} loader={rootLoader}>
-                <Route index element={<OverviewRoute />} />
-                <Route path="shots" element={<ShotsRoute />} loader={shotsLoader} />
-                <Route path="shots/new" element={<ShotFormRoute />} />
-                <Route path="shots/:id" element={<ShotDetailRoute />} loader={detailLoader} />
-                <Route path="inventory" element={<InventoryRoute />} loader={inventoryLoader} />
-                <Route path="inventory/new" element={<GearFormRoute />} />
-                <Route path="inventory/:id" element={<EquipmentDetailRoute />} loader={detailLoader} />
-                <Route path="notes" element={<NotesRoute />} loader={notesLoader} />
-                <Route path="notes/new" element={<NoteFormRoute />} />
-                <Route path="notes/:id" element={<NoteDetailRoute />} loader={detailLoader} />
-                <Route path="pipeline" element={<PipelineRoute />} loader={pipelineLoader} />
-                <Route path="pipeline/new" element={<TaskFormRoute />} />
-                <Route path="pipeline/:id" element={<TaskDetailRoute />} loader={detailLoader} />
-                <Route path="settings" element={<SettingsRoute />} />
-                <Route path="projects" element={<ProjectsRoute />} />
+                <Route index element={withSuspense(OverviewRoute)} />
+                <Route path="shots" element={withSuspense(ShotsRoute)} loader={shotsLoader} />
+                <Route path="shots/new" element={withSuspense(ShotFormRoute)} />
+                <Route path="shots/:id" element={withSuspense(ShotDetailRoute)} loader={detailLoader} />
+                <Route path="inventory" element={withSuspense(InventoryRoute)} loader={inventoryLoader} />
+                <Route path="inventory/new" element={withSuspense(GearFormRoute)} />
+                <Route path="inventory/:id" element={withSuspense(EquipmentDetailRoute)} loader={detailLoader} />
+                <Route path="notes" element={withSuspense(NotesRoute)} loader={notesLoader} />
+                <Route path="notes/new" element={withSuspense(NoteFormRoute)} />
+                <Route path="notes/:id" element={withSuspense(NoteDetailRoute)} loader={detailLoader} />
+                <Route path="pipeline" element={withSuspense(PipelineRoute)} loader={pipelineLoader} />
+                <Route path="pipeline/new" element={withSuspense(TaskFormRoute)} />
+                <Route path="pipeline/:id" element={withSuspense(TaskDetailRoute)} loader={detailLoader} />
+                <Route path="settings" element={withSuspense(SettingsRoute)} />
+                <Route path="projects" element={withSuspense(ProjectsRoute)} />
             </Route>
         </>
     )

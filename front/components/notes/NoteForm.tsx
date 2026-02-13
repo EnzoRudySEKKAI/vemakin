@@ -113,7 +113,7 @@ export const NoteForm: React.FC<NoteFormProps> = ({
             <select
               value={form.linkedId}
               onChange={e => setForm({ ...form, linkedId: e.target.value })}
-              className="w-full appearance-none bg-transparent border-b border-gray-200 dark:border-white/10 pl-12 pr-10 py-4 text-sm font-semibold focus:outline-none focus:border-[#3762E3] dark:focus:border-[#4E47DD] transition-all cursor-pointer text-gray-900 dark:text-white"
+              className="w-full appearance-none bg-transparent border-b border-gray-200 dark:border-white/10 pl-12 pr-10 py-4 text-sm font-semibold focus:outline-none focus:border-primary dark:focus:border-primary transition-all cursor-pointer text-gray-900 dark:text-white"
             >
               <option value="">Select reference...</option>
               {form.linkType === 'shot' && existingShots.map(s => (
@@ -175,7 +175,7 @@ export const NoteForm: React.FC<NoteFormProps> = ({
       </div>
 
       {/* Submit */}
-      <div className="pt-4 sticky bottom-0 bg-white dark:bg-[#1C1C1E] flex justify-center pb-6">
+      <div className="pt-4 sticky bottom-0 bg-white dark:bg-[#16181D] flex justify-center pb-6">
         <Button
           onClick={onSubmit}
           disabled={!form.title.trim()}

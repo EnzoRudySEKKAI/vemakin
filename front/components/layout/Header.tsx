@@ -140,12 +140,12 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
       <header
         ref={ref}
         data-header-row="1"
-        className="fixed top-0 left-0 right-0 z-[51] bg-[#0A0A0A]"
+        className="fixed top-0 left-0 right-0 z-[51] bg-[#0F1116]"
         style={{
           paddingTop: 'calc(env(safe-area-inset-top) + 12px)',
         }}
       >
-        <div className="px-4 md:px-6 lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(240px+1.5rem)]">
+        <div className={`px-4 md:px-6 ${isSettingsView ? '' : 'lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(240px+1.5rem)]'}`}>
           <div className={`mx-auto w-full ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`}>
             <div className="flex items-center justify-between h-14">
               {/* Left: Title & Subtitle */}
@@ -190,7 +190,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
 
                 <button
                   onClick={onAdd}
-                  className="w-9 h-9 flex items-center justify-center rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white transition-colors"
+                  className="w-9 h-9 flex items-center justify-center rounded-xl bg-primary hover:bg-primary text-white transition-colors"
                 >
                   <Plus size={20} strokeWidth={2.5} />
                 </button>
@@ -204,13 +204,13 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
       <div
         ref={headerBottomRef}
         data-header-row="2"
-        className="fixed left-0 right-0 z-[50] bg-[#0A0A0A] pt-2 overflow-visible"
+        className="fixed left-0 right-0 z-[50] bg-[#0F1116] pt-2 overflow-visible"
         style={{
           top: 'calc(env(safe-area-inset-top) + 68px)',
           transform: `translateY(${filterTranslateY}px)`
         }}
       >
-        <div className="px-4 md:px-6 lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(240px+1.5rem)]">
+        <div className={`px-4 md:px-6 ${isSettingsView ? '' : 'lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(240px+1.5rem)]'}`}>
           <div className={`mx-auto w-full ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`}>
             <div className="flex flex-col gap-2 pb-3">
               {isDetailView || backAction ? (

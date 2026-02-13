@@ -31,3 +31,6 @@ export type { MetricBadgeProps, MetricsGroupProps } from './MetricBadge'
 
 export { FilterPills } from './FilterPills'
 export type { FilterPillsProps } from './FilterPills'
+
+export { DetailItem } from './DetailItem'
+export type { DetailItemProps } from './DetailItem'

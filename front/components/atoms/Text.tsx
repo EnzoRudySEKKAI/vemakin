@@ -31,6 +31,8 @@ export interface TextProps {
   center?: boolean
   /** If true, text is treated as a sentence (only first word capitalized) */
   sentence?: boolean
+  /** If true, no automatic formatting (Title/Sentence case) is applied */
+  noFormat?: boolean
 }
 
 // Map variants to typography classes
@@ -50,7 +52,7 @@ const colorStyles: Record<TextColor, string> = {
   primary: `text-gray-900 dark:text-white`,
   secondary: `text-gray-700 dark:text-gray-200`,
   muted: `text-gray-500 dark:text-gray-400`,
-  accent: `text-[#3762E3] dark:text-[#4E47DD]`,
+  accent: `text-primary`,
   success: 'text-green-600 dark:text-green-400',
   warning: 'text-orange-600 dark:text-orange-400',
   danger: 'text-red-600 dark:text-red-400',
@@ -86,8 +88,9 @@ export const Text: React.FC<TextProps> = ({
   truncate = false,
   center = false,
   sentence = false,
+  noFormat = false,
 }) => {
-  const formattedChildren = formatTextContent(children, sentence)
+  const formattedChildren = noFormat ? children : formatTextContent(children, sentence)
   const classes = `
     ${variantStyles[variant]}
     ${colorStyles[color]}

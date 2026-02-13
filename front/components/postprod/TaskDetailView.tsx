@@ -5,6 +5,7 @@ import { POST_PROD_CATEGORIES } from '../../constants'
 import { useDetailView } from '../../hooks/useDetailView'
 import { DetailViewLayout } from '../../components/organisms/DetailViewLayout'
 import { ActionButtonGroup } from '../../components/molecules/ActionButton'
+import { DetailItem } from '../../components/molecules'
 import { Text, Input, Textarea, Select } from '../../components/atoms'
 
 import { ConfirmModal } from '../ui/ConfirmModal'
@@ -157,13 +158,13 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                     key={status.key}
                     onClick={() => onUpdateTask({ ...task, status: status.key as any })}
                     className={`w-full flex items-center justify-between p-4 rounded-xl transition-all border ${isActive
-                      ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400 shadow-[0_0_15px_rgba(78,71,221,0.1)]'
+                      ? 'bg-primary/10 border-primary/20 text-primary shadow-[0_0_15px_rgba(78,71,221,0.1)]'
                       : 'bg-transparent border-transparent text-white/20 hover:bg-white/5 hover:text-white/40'
                       }`}
                   >
                     <span className="text-sm font-medium">{status.label}</span>
                     {isActive ? (
-                      <div className="w-5 h-5 rounded-lg bg-indigo-500 flex items-center justify-center text-white shadow-[0_0_10px_rgba(78,71,221,0.4)]">
+                      <div className="w-5 h-5 rounded-lg bg-primary flex items-center justify-center text-white shadow-[0_0_10px_rgba(78,71,221,0.4)]">
                         <Check size={12} strokeWidth={4} />
                       </div>
                     ) : (
@@ -208,14 +209,14 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                     <select
                       value={editedItem.priority}
                       onChange={(e) => setEditedItem({ ...editedItem, priority: e.target.value as any })}
-                      className="w-full bg-transparent border-b border-white/10 py-3 text-white/80 focus:text-white focus:outline-none focus:border-indigo-500 appearance-none cursor-pointer pr-10 text-sm font-bold tracking-tight transition-all"
+                      className="w-full bg-transparent border-b border-white/10 py-3 text-white/80 focus:text-white focus:outline-none focus:border-primary appearance-none cursor-pointer pr-10 text-sm font-bold tracking-tight transition-all"
                     >
-                      <option value="low" className="bg-[#0A0A0A]">Low Tier</option>
-                      <option value="medium" className="bg-[#0A0A0A]">Medium Tier</option>
-                      <option value="high" className="bg-[#0A0A0A]">High Priority</option>
-                      <option value="critical" className="bg-[#0A0A0A]">Mission Critical</option>
+                      <option value="low" className="bg-[#0F1116]">Low Tier</option>
+                      <option value="medium" className="bg-[#0F1116]">Medium Tier</option>
+                      <option value="high" className="bg-[#0F1116]">High Priority</option>
+                      <option value="critical" className="bg-[#0F1116]">Mission Critical</option>
                     </select>
-                    <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-indigo-400 pointer-events-none transition-colors" size={16} strokeWidth={3} />
+                    <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-primary pointer-events-none transition-colors" size={16} strokeWidth={3} />
                   </div>
                 </div>
 
@@ -232,7 +233,7 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
               </div>
 
               <div className="flex flex-col gap-1 min-w-0">
-                <span className="text-[10px] text-white/40 font-medium mb-2">Action objectives</span>
+                <span className="text-[10px] text-white/40 font-medium mb-2">Description</span>
                 <Textarea
                   value={editedItem.description || ''}
                   onChange={(e) => setEditedItem({ ...editedItem, description: e.target.value })}
@@ -247,17 +248,17 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                     {categoryFields[editedItem.category].map((field) => (
                       <div key={field.key} className="group">
-                        <span className="text-[10px] text-white/40 font-medium mb-2 block group-hover:text-indigo-400 transition-colors">{field.label}</span>
+                        <span className="text-[10px] text-white/40 font-medium mb-2 block group-hover:text-primary transition-colors">{field.label}</span>
                         {field.type === 'select' ? (
                           <div className="relative">
                             <select
                               value={editedItem.metadata?.[field.key] as string || ''}
                               onChange={(e) => updateMetadata(field.key, e.target.value)}
-                              className="w-full bg-transparent border-b border-white/10 py-3 text-white/80 focus:text-white focus:outline-none focus:border-indigo-500 appearance-none cursor-pointer pr-10 text-sm font-bold tracking-tight transition-all"
+                              className="w-full bg-transparent border-b border-white/10 py-3 text-white/80 focus:text-white focus:outline-none focus:border-primary appearance-none cursor-pointer pr-10 text-sm font-bold tracking-tight transition-all"
                             >
-                              <option value="" className="bg-[#0A0A0A]">Select option...</option>
+                              <option value="" className="bg-[#0F1116]">Select option...</option>
                               {field.options?.map(opt => (
-                                <option key={opt} value={opt} className="bg-[#0A0A0A]">{opt}</option>
+                                <option key={opt} value={opt} className="bg-[#0F1116]">{opt}</option>
                               ))}
                             </select>
                             <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" size={16} strokeWidth={3} />
@@ -281,10 +282,10 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
           ) : (
             <div className="space-y-12">
               <div className="flex flex-col sm:flex-row justify-between items-start gap-8">
-                <div className="flex flex-col gap-1 min-w-0">
-                  <span className="text-[10px] text-white/40 font-medium mb-2">Production objective</span>
-                  <div className="text-3xl text-white font-bold tracking-tight">{task.title}</div>
-                </div>
+                <DetailItem
+                  label="Production objective"
+                  value={task.title}
+                />
 
                 <div className={`flex items-center gap-4 px-5 py-3 rounded-2xl border transition-all duration-500 ${task.priority === 'critical' || task.priority === 'high'
                   ? 'bg-red-500/10 border-red-500/20 text-red-400'
@@ -305,21 +306,23 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
-                <div>
-                  <span className="text-[10px] text-white/40 font-medium block mb-2 leading-none">Due date</span>
-                  <div className="text-sm text-white font-bold">{task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase() : 'NO DEADLINE'}</div>
-                </div>
-                <div>
-                  <span className="text-[10px] text-white/40 font-medium block mb-2 leading-none">Department</span>
-                  <div className="text-sm text-white font-bold uppercase tracking-widest text-indigo-400/80">{task.category}</div>
-                </div>
+                <DetailItem
+                  label="Due date"
+                  value={task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'No deadline'}
+                />
+
+                <DetailItem
+                  label="Department"
+                  value={task.category}
+                />
               </div>
 
               <div className="max-w-3xl">
-                <span className="text-[10px] text-white/40 font-medium block mb-4 leading-none">Description & context</span>
-                <div className="text-white/60 text-sm leading-relaxed whitespace-pre-wrap">
-                  {task.description || "No specific objectives defined for this module."}
-                </div>
+                <DetailItem
+                  label="Description"
+                  value={task.description || "No specific objectives defined for this module."}
+                  valueClassName="whitespace-pre-wrap"
+                />
               </div>
 
               {task.metadata && Object.keys(task.metadata).length > 0 && (
@@ -328,17 +331,17 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-y-12 gap-x-12">
                     {Object.entries(task.metadata).map(([key, val]) => (
                       val ? (
-                        <div key={key} className="group">
-                          <span className="text-[10px] text-white/40 font-medium block mb-2 leading-none group-hover:text-indigo-400 transition-colors">
-                            {key.replace(/([A-Z])/g, ' $1').trim()}
-                          </span>
-                          <div className="text-sm text-white/80 font-medium group-hover:text-white transition-colors">{String(val)}</div>
-                        </div>
+                        <DetailItem
+                          key={key}
+                          label={key.replace(/([A-Z])/g, ' $1').trim()}
+                          value={String(val)}
+                        />
                       ) : null
                     ))}
                   </div>
                 </div>
               )}
+
             </div>
           )}
         </div>
@@ -347,7 +350,7 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
       <Card title="Related notes" headerRight={
         <button
           onClick={onAddNote}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 text-[10px] font-medium hover:bg-indigo-500 hover:text-white transition-all shadow-sm"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-[10px] font-medium hover:bg-primary hover:text-white transition-all shadow-sm"
         >
           <Plus size={12} strokeWidth={3} /> New entry
         </button>
@@ -359,12 +362,12 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                 <div
                   key={note.id}
                   onClick={() => onOpenNote(note.id)}
-                  className="p-6 bg-white/5 border border-white/5 rounded-2xl cursor-pointer hover:border-indigo-500/30 hover:bg-white/[0.07] transition-all group relative overflow-hidden"
+                  className="p-6 bg-white/5 border border-white/5 rounded-2xl cursor-pointer hover:border-primary/30 hover:bg-white/[0.07] transition-all group relative overflow-hidden"
                 >
                   <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
                     <FileText size={40} />
                   </div>
-                  <h4 className="font-bold text-white/90 text-sm mb-2 line-clamp-1 group-hover:text-indigo-400 transition-colors">
+                  <h4 className="font-bold text-white/90 text-sm mb-2 line-clamp-1 group-hover:text-primary transition-colors">
                     {note.title || "Untitled entry"}
                   </h4>
                   <p className="text-white/30 text-xs line-clamp-2 leading-relaxed">{note.content}</p>

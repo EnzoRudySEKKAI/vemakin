@@ -51,6 +51,7 @@ export interface RouteContext {
     addGear: (gear: Equipment) => void
     updateGear: (gear: Equipment) => void
     deleteGear: (id: string) => void
+    fetchEquipmentDetail: (id: string) => Promise<Equipment | null>
 
     // Actions - Notes
     addNote: (note: Note) => void

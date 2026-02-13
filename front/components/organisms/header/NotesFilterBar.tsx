@@ -59,7 +59,7 @@ export const NotesFilterBar: React.FC<NotesFilterBarProps> = ({
       <div className="flex items-center gap-3">
         <button
           onClick={onSort}
-          className="flex-1 flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium bg-[#0D0D0F] border border-white/[0.05] text-white/50 hover:text-white/70 transition-colors"
+          className="flex-1 flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium bg-[#16181D] border border-white/[0.05] text-white/50 hover:text-white/70 transition-colors"
         >
           <span>{getSortLabel()}</span>
           <ArrowUpDown

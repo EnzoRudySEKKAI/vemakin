@@ -41,7 +41,7 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         className={`
           w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium transition-all
-          bg-[#0D0D0F] border border-white/[0.05]
+          bg-[#16181D] border border-white/[0.05]
           ${isOpen ? 'border-white/[0.1]' : ''}
           ${isActive ? 'text-white' : 'text-white/50 hover:text-white/70'}
         `}
@@ -66,7 +66,7 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15 }}
-              className="absolute top-full left-0 right-0 mt-2 bg-[#0D0D0F] border border-white/[0.08] rounded-xl p-1.5 z-[70] overflow-hidden"
+              className="absolute top-full left-0 right-0 mt-2 bg-[#16181D] border border-white/[0.08] rounded-xl p-1.5 z-[70] overflow-hidden"
             >
               {options.map((option) => {
                 const Icon = option.icon
@@ -86,7 +86,7 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
                     className={`
                       w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all
                       ${isSelected 
-                        ? 'bg-indigo-500 text-white' 
+                        ? 'bg-primary text-white' 
                         : 'text-white/50 hover:text-white hover:bg-white/5'
                       }
                     `}

@@ -1,7 +1,9 @@
 import React from 'react'
 import { ArrowRight, User, Aperture } from 'lucide-react'
-import { Card, Button, Text, IconContainer } from '@/components/atoms'
-import { radius, typography } from '@/design-system'
+import { Button, Text, IconContainer, Logo } from '@/components/atoms'
+import { SimpleCard } from '@/components/ui/Card'
+
+import { AuthLayout } from './AuthLayout'
 
 // Icons as components
 const GoogleIcon = () => (
@@ -14,7 +16,7 @@ const GoogleIcon = () => (
 )
 
 const AppleIcon = () => (
-  <svg viewBox="0 0 24 24" width="20" height="20" className="dark:fill-white" fill="#000000" xmlns="http://www.w3.org/2000/svg">
+  <svg viewBox="0 0 24 24" width="20" height="20" className="fill-white" xmlns="http://www.w3.org/2000/svg">
     <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-.68-.3-1.3-.4-2.03-.4-.73 0-1.35.1-2.03.4-1.03.48-2.1.55-3.08-.4-1.98-1.95-2.95-5.38-1.45-8.1 1.08-1.95 3-2.9 4.95-2.9 1.25 0 2.25.4 2.95.68.7.28 1.15.28 1.85.03.88-.35 2.05-.7 3.3-.68 1.55.02 2.98.78 3.8 1.95-3.18 1.58-2.65 6.08.53 7.33-.25.7-.6 1.48-1.15 2.05-.75.75-1.6 1.38-2.58 1.65zm-1.85-11.8c-.28-1.58.9-3.23 2.45-3.95.23 1.7-1.18 3.4-2.45 3.95z" />
   </svg>
 )
@@ -27,83 +29,77 @@ interface LandingViewProps {
 
 export const LandingView: React.FC<LandingViewProps> = ({ onSignIn, onSignUp, onGuest }) => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden bg-[#F2F2F7] dark:bg-[#0A0A0A]">
-      {/* Abstract Background */}
-      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-blue-300/30 dark:bg-blue-600/20 rounded-full blur-[120px] animate-float pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-[500px] h-[500px] bg-indigo-300/30 dark:bg-indigo-600/20 rounded-full blur-[100px] pointer-events-none" />
-
-      <div className="w-full max-w-md space-y-10 relative z-10">
+    <AuthLayout>
+      <div className="space-y-12">
         {/* Logo Section */}
         <div className="text-center space-y-6 animate-in slide-in-from-top-8 duration-700">
-          <IconContainer
-            icon={Aperture}
-            size="xl"
-            variant="accent"
-            className="mx-auto text-[#3762E3] dark:text-[#4E47DD] bg-white/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl shadow-2xl shadow-blue-100 dark:shadow-blue-900/10 ring-1 ring-black/5 dark:ring-white/10"
-          />
+          <Logo size="xl" showText={false} className="justify-center" />
           <div>
-            <Text variant="hero" className="mb-2">Vemakin</Text>
+            <Text variant="hero" className="mb-2 text-white">Vemakin</Text>
             <Text variant="body" color="muted">Production OS</Text>
           </div>
         </div>
 
-        {/* Action Cards */}
+
+        {/* Action Buttons - Clean Stack */}
         <div className="space-y-4 animate-in slide-in-from-bottom-8 duration-700 delay-150">
-          <Card variant="glass" className="p-1.5">
-            <Button
-              onClick={onSignIn}
-              variant="primary"
-              size="lg"
-              fullWidth
-              rightIcon={<ArrowRight size={18} strokeWidth={2.5} />}
-            >
-              Sign In
-            </Button>
-          </Card>
+          <Button
+            onClick={onSignIn}
+            variant="primary"
+            size="lg"
+            fullWidth
+            rightIcon={<ArrowRight size={18} strokeWidth={2.5} />}
+            className="h-14 text-base shadow-lg shadow-primary/20"
+          >
+            Sign In
+          </Button>
 
           <Button
             onClick={onSignUp}
             variant="secondary"
             size="lg"
             fullWidth
+            className="h-14 text-base bg-[#16181D] border-white/5 text-white hover:bg-white/5"
           >
             Create Account
           </Button>
 
-          {/* Social Logins */}
-          <div className="pt-3">
-            <div className="flex items-center gap-6 mb-4">
-              <div className="h-px bg-gray-300 dark:bg-gray-700 flex-1 opacity-50" />
-              <Text variant="label" color="muted">Or Continue With</Text>
-              <div className="h-px bg-gray-300 dark:bg-gray-700 flex-1 opacity-50" />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                onClick={onSignIn}
-                variant="secondary"
-                size="md"
-                leftIcon={<GoogleIcon />}
-              >
-                Google
-              </Button>
-              <Button
-                onClick={onSignIn}
-                variant="secondary"
-                size="md"
-                leftIcon={<AppleIcon />}
-              >
-                Apple
-              </Button>
-            </div>
+          {/* Divider */}
+          <div className="py-4 flex items-center gap-4">
+            <div className="h-px bg-white/10 flex-1" />
+            <Text variant="label" color="muted" className="text-[10px] uppercase tracking-widest">Or Continue With</Text>
+            <div className="h-px bg-white/10 flex-1" />
           </div>
 
-          <div className="pt-4 flex justify-center">
+          {/* Social Logins */}
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              onClick={onSignIn}
+              variant="secondary"
+              size="md"
+              leftIcon={<GoogleIcon />}
+              className="bg-[#16181D] border-white/5 text-white hover:bg-white/5"
+            >
+              Google
+            </Button>
+            <Button
+              onClick={onSignIn}
+              variant="secondary"
+              size="md"
+              leftIcon={<AppleIcon />}
+              className="bg-[#16181D] border-white/5 text-white hover:bg-white/5"
+            >
+              Apple
+            </Button>
+          </div>
+
+          <div className="pt-6 flex justify-center">
             <Button
               onClick={onGuest}
               variant="ghost"
               size="sm"
               leftIcon={<User size={14} strokeWidth={2.5} />}
+              className="text-white/40 hover:text-white"
             >
               Continue Without Account
             </Button>
@@ -111,11 +107,13 @@ export const LandingView: React.FC<LandingViewProps> = ({ onSignIn, onSignUp, on
         </div>
 
         {/* Footer */}
-        <Text variant="label" color="muted" className="text-center max-w-xs mx-auto leading-relaxed opacity-60">
-          By entering, you agree to our Terms of Service and Privacy Policy.
-          <br />Designed for modern filmmakers.
-        </Text>
+        <div className="text-center opacity-40">
+          <p className="text-[10px] text-white leading-relaxed">
+            By entering, you agree to our Terms of Service and Privacy Policy.
+            <br />Designed for modern filmmakers.
+          </p>
+        </div>
       </div>
-    </div>
+    </AuthLayout>
   )
 }
