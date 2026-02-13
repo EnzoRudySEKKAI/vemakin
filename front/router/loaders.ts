@@ -24,22 +24,19 @@ const ensureAuth = async () => {
 
 /**
  * Loader for the root route.
- * Prefetches initial data (projects, inventory, and optionally project data) if not already in cache.
- * Uses the optimized /bulk/initial endpoint for single-request fetching.
+ * Prefetches initial data (projects, inventory) if not already in cache.
  */
 export const rootLoader = async () => {
   await ensureAuth()
   
   // Prefetch initial data in background
   const { isGuest, currentUser } = useAuthStore.getState()
-  const { currentProjectId } = useProjectStore.getState()
   
   if (currentUser || isGuest) {
-    // Check if we already have the data cached - use the new key format with projectId
-    const cachedData = queryClient.getQueryData(queryKeys.initialData(currentProjectId))
+    // Check if we already have the data cached
+    const cachedData = queryClient.getQueryData(queryKeys.initialData)
     if (!cachedData) {
-      // Prefetch with optional projectId to get all data in one request
-      await prefetchInitialData(queryClient, currentProjectId)
+      prefetchInitialData(queryClient)
     }
   }
   
@@ -59,7 +56,7 @@ export const shotsLoader = async () => {
     // Prefetch project data if not cached
     const cachedData = queryClient.getQueryData(queryKeys.projectData(currentProjectId))
     if (!cachedData) {
-      await prefetchProjectData(queryClient, currentProjectId)
+      prefetchProjectData(queryClient, currentProjectId)
     }
   }
   
@@ -69,17 +66,16 @@ export const shotsLoader = async () => {
 /**
  * Loader for inventory route.
  * Prefetches inventory and catalog categories.
- * Uses /bulk/initial endpoint for efficient single-request fetching.
  */
 export const inventoryLoader = async () => {
   await ensureAuth()
   
-  // Prefetch all initial data (includes inventory) if not cached
-  const cachedData = queryClient.getQueryData(queryKeys.initialData(undefined))
-  if (!cachedData) {
-    await queryClient.prefetchQuery({
-      queryKey: queryKeys.initialData(undefined),
-      queryFn: () => bulkApi.getInitialData(),
+  // Prefetch inventory if not cached
+  const cachedInventory = queryClient.getQueryData(queryKeys.inventory)
+  if (!cachedInventory) {
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.inventory,
+      queryFn: () => bulkApi.getInitialData().then(d => d.inventory),
       staleTime: 5 * 60 * 1000,
     })
   }
@@ -87,7 +83,7 @@ export const inventoryLoader = async () => {
   // Prefetch catalog categories if not cached
   const cachedCategories = queryClient.getQueryData(queryKeys.catalog.categories)
   if (!cachedCategories) {
-    await queryClient.prefetchQuery({
+    queryClient.prefetchQuery({
       queryKey: queryKeys.catalog.categories,
       queryFn: catalogApi.getCategories,
       staleTime: 60 * 60 * 1000, // 1 hour - catalog rarely changes
@@ -108,7 +104,7 @@ export const notesLoader = async () => {
   if (currentProjectId) {
     const cachedData = queryClient.getQueryData(queryKeys.projectData(currentProjectId))
     if (!cachedData) {
-      await prefetchProjectData(queryClient, currentProjectId)
+      prefetchProjectData(queryClient, currentProjectId)
     }
   }
   
@@ -126,7 +122,7 @@ export const pipelineLoader = async () => {
   if (currentProjectId) {
     const cachedData = queryClient.getQueryData(queryKeys.projectData(currentProjectId))
     if (!cachedData) {
-      await prefetchProjectData(queryClient, currentProjectId)
+      prefetchProjectData(queryClient, currentProjectId)
     }
   }
   
@@ -151,10 +147,14 @@ export const detailLoader = async ({ params }: { params: Record<string, string> 
 export const projectsLoader = async () => {
   await ensureAuth()
   
-  // Ensure projects are loaded - use initial data endpoint
-  const cachedData = queryClient.getQueryData(queryKeys.initialData(undefined))
-  if (!cachedData) {
-    await prefetchInitialData(queryClient)
+  // Ensure projects are loaded
+  const cachedProjects = queryClient.getQueryData(queryKeys.projects)
+  if (!cachedProjects) {
+    await queryClient.prefetchQuery({
+      queryKey: queryKeys.projects,
+      queryFn: projectsApi.getAll,
+      staleTime: 5 * 60 * 1000,
+    })
   }
   
   return null

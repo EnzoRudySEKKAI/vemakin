@@ -53,7 +53,7 @@ export const GearFormPage: React.FC<GearFormPageProps> = ({
       catalogItemId: form.model || undefined,
       customName: form.name.trim() || undefined,
       serialNumber: form.serialNumber.trim() || undefined,
-      category: form.category as any || 'Other',
+      category: (form.categoryName || form.category || 'Other') as any,
       pricePerDay: form.isOwned ? 0 : form.price,
       rentalPrice: form.isOwned ? undefined : form.price,
       rentalFrequency: form.isOwned ? undefined : form.frequency,

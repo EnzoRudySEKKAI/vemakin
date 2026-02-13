@@ -7,14 +7,12 @@ import { User } from '@/types'
 interface AuthState {
   // State
   currentUser: User | null
-  isGuest: boolean
   isLoadingAuth: boolean
   authPromise: Promise<void> | null
   resolveAuth: (() => void) | null
 
   // Actions
   initAuth: () => () => void
-  enterGuest: () => Promise<void>
   logout: () => Promise<void>
   login: (name: string, email: string) => void
   setLoading: (loading: boolean) => void
@@ -25,7 +23,6 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       // Initial State
       currentUser: null,
-      isGuest: localStorage.getItem('vemakin_guest_mode') === 'true',
       isLoadingAuth: true,
       authPromise: null,
       resolveAuth: null,
@@ -48,11 +45,8 @@ export const useAuthStore = create<AuthState>()(
                 name: user.displayName || user.email?.split('@')[0] || 'User',
                 email: user.email || ''
               },
-              isGuest: false,
               isLoadingAuth: false
             })
-          } else if (get().isGuest) {
-            set({ isLoadingAuth: false })
           } else {
             set({ currentUser: null, isLoadingAuth: false })
           }
@@ -63,22 +57,10 @@ export const useAuthStore = create<AuthState>()(
         return unsubscribe
       },
 
-      enterGuest: async () => {
-        localStorage.setItem('vemakin_guest_mode', 'true')
-        set({ isGuest: true, currentUser: null })
-
-        const { resolveAuth } = get()
-        if (resolveAuth) resolveAuth()
-      },
-
       logout: async () => {
         try {
           await signOut(auth)
-          localStorage.removeItem('vemakin_guest_mode')
-          set({ 
-            isGuest: false, 
-            currentUser: null
-          })
+          set({ currentUser: null })
         } catch {
           // Silently fail - user will see they're still logged in
         }
@@ -96,7 +78,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'vemakin-auth',
-      partialize: (state) => ({ isGuest: state.isGuest })
+      partialize: (state) => ({ currentUser: state.currentUser })
     }
   )
 )

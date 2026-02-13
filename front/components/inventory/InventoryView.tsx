@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { Package, Camera, Lightbulb, Speaker, Wrench } from 'lucide-react'
 import { Equipment, Shot, InventoryFilters, Currency, InventoryLayout } from '@/types'
 import { Card } from '@/components/ui/Card'
+import { useProductionStore } from '@/hooks/useProductionStore'
 
 interface InventoryViewProps {
   inventory: Equipment[]
@@ -59,6 +60,24 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
   currency,
   layout = 'grid',
 }) => {
+  const { catalogCategories, fetchCatalogCategories } = useProductionStore()
+
+  useEffect(() => {
+    fetchCatalogCategories()
+  }, [fetchCatalogCategories])
+
+  const getCategoryDisplayName = (categoryIdOrName: string): string => {
+    if (!catalogCategories || !Array.isArray(catalogCategories)) {
+      console.log('catalogCategories not loaded yet:', catalogCategories)
+      return categoryIdOrName
+    }
+    const match = catalogCategories.find(c => c.id === categoryIdOrName)
+    if (!match && categoryIdOrName.length > 20) {
+      console.log('No match found for category:', categoryIdOrName)
+      console.log('Available categories:', catalogCategories.map(c => ({ id: c.id, name: c.name })))
+    }
+    return match?.name || categoryIdOrName
+  }
   const assignedEquipmentIds = useMemo(() => {
     const ids = new Set<string>()
     shots.forEach(shot => {
@@ -92,13 +111,14 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
   const groupedByCategory = useMemo(() => {
     const groups: Record<string, Equipment[]> = {}
     filteredInventory.forEach(item => {
-      if (!groups[item.category]) {
-        groups[item.category] = []
+      const displayName = getCategoryDisplayName(item.category)
+      if (!groups[displayName]) {
+        groups[displayName] = []
       }
-      groups[item.category].push(item)
+      groups[displayName].push(item)
     })
     return groups
-  }, [filteredInventory])
+  }, [filteredInventory, catalogCategories])
 
   if (filteredInventory.length === 0) {
     return (
@@ -121,12 +141,12 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
           <Card
             key={category}
             title={
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 {(() => {
                   const Icon = getCategoryIcon(category)
-                  return <Icon size={20} className="text-white/50" />
+                  return <Icon size={16} className="text-white/40" />
                 })()}
-                <span className="text-lg font-semibold text-white tracking-tight">{category}</span>
+                <span>{category}</span>
               </div>
             }
           >
@@ -138,37 +158,37 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
                   <div
                     key={item.id}
                     onClick={() => onEquipmentClick(item.id)}
-                    className="group p-5 rounded-xl bg-[#16181D] border border-white/[0.05] hover:border-white/[0.1] hover:bg-[#1A1D23] transition-all cursor-pointer"
+                    className="group p-4 rounded-xl bg-[#16181D] border border-white/[0.05] hover:border-white/[0.1] transition-all cursor-pointer"
                   >
-                    <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
-                        <div className="text-base text-white/90 group-hover:text-white font-medium truncate transition-colors">
+                        <div className="text-sm text-white font-medium truncate">
                           {title}
                         </div>
                         {subtitle && (
-                          <div className="mt-1.5 text-sm text-white/40 truncate">
+                          <div className="mt-1 text-[10px] font-medium text-white/40 truncate">
                             {subtitle}
                           </div>
                         )}
                       </div>
 
                       <div className="shrink-0 text-right">
-                        <span className={`block text-xs font-medium mb-1.5 ${item.isOwned ? 'text-emerald-400/70' : 'text-amber-400/70'}`}>
+                        <span className="block text-[10px] font-medium text-white/40 mb-1">
                           {item.isOwned ? 'Owned' : 'Rented'}
                         </span>
                         {!item.isOwned && (
                           <div className="flex items-baseline justify-end gap-1">
-                            <span className="text-sm text-white/60 font-semibold">
+                            <span className="text-xs text-white/40 font-medium">
                               {currency.symbol}{(item.rentalPrice ?? item.pricePerDay ?? 0).toLocaleString()}
                             </span>
-                            <span className="text-xs text-white/30">/{item.rentalFrequency || 'Day'}</span>
+                            <span className="text-[10px] text-white/20">/{item.rentalFrequency || 'Day'}</span>
                           </div>
                         )}
                       </div>
                     </div>
 
-                    <div className="mt-4 pt-4 border-t border-white/[0.05]">
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                    <div className="mt-3 pt-3 border-t border-white/[0.05]">
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                         {(() => {
                           const specs = Object.entries(item.specs).slice(0, 4)
                           const slots = [...specs]
@@ -177,10 +197,10 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
                           }
                           return slots.map(([key, val], idx) => (
                             <div key={`${item.id}-spec-${idx}`} className="flex flex-col min-w-0">
-                              <span className="text-[10px] text-white/25 uppercase font-bold tracking-wider truncate mb-1">
+                              <span className="text-[9px] text-white/20 uppercase font-bold tracking-wider truncate mb-0.5">
                                 {key === '—' ? '—' : key.replace(/([A-Z])/g, ' $1').trim()}
                               </span>
-                              <span className={`text-sm truncate ${key === '—' ? 'text-white/5' : 'text-white/60'}`} title={String(val)}>
+                              <span className={`text-xs truncate ${key === '—' ? 'text-white/5' : 'text-white/50'}`} title={String(val)}>
                                 {String(val)}
                               </span>
                             </div>
@@ -195,14 +215,7 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
           </Card>
         ))
       ) : (
-        <Card
-          title={
-            <div className="flex items-center gap-3">
-              <Package size={20} className="text-white/50" />
-              <span className="text-lg font-semibold text-white tracking-tight">Equipment</span>
-            </div>
-          }
-        >
+        <Card title="Equipment">
           <div className="p-4 space-y-2">
             {filteredInventory.map((item) => {
               const { title, subtitle } = getEquipmentDisplayInfo(item)
@@ -210,27 +223,27 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
               <div
                 key={item.id}
                 onClick={() => onEquipmentClick(item.id)}
-                className="group flex items-center gap-4 p-4 rounded-xl bg-[#16181D] border border-white/[0.05] hover:border-white/[0.1] hover:bg-[#1A1D23] transition-all cursor-pointer"
+                className="flex items-center gap-4 p-3 rounded-xl bg-[#16181D] border border-white/[0.05] hover:border-white/[0.1] transition-all cursor-pointer"
               >
                 <div className="flex-1 min-w-0">
-                  <div className="text-base text-white/90 group-hover:text-white font-medium truncate transition-colors">{title}</div>
+                  <div className="text-sm text-white font-medium truncate">{title}</div>
                   {subtitle && (
-                    <div className="mt-1 text-sm text-white/40 truncate">
+                    <div className="mt-1 text-[10px] font-medium text-white/40 truncate">
                       {subtitle}
                     </div>
                   )}
                 </div>
 
                 <div className="text-right shrink-0">
-                  <span className={`block text-xs font-medium mb-1 ${item.isOwned ? 'text-emerald-400/70' : 'text-amber-400/70'}`}>
+                  <span className="block text-[10px] font-medium text-white/40 mb-1">
                     {item.isOwned ? 'Owned' : 'Rented'}
                   </span>
                   {!item.isOwned && (
                     <div className="flex items-baseline justify-end gap-1">
-                      <span className="text-sm text-white/60 font-semibold">
+                      <span className="text-xs text-white/40">
                         {currency.symbol}{(item.rentalPrice ?? item.pricePerDay ?? 0).toLocaleString()}
                       </span>
-                      <span className="text-xs text-white/30">/{item.rentalFrequency || 'Day'}</span>
+                      <span className="text-[10px] text-white/20">/{item.rentalFrequency || 'Day'}</span>
                     </div>
                   )}
                 </div>

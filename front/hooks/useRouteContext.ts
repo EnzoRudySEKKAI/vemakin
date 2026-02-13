@@ -52,6 +52,9 @@ export interface RouteContext {
     updateGear: (gear: Equipment) => void
     deleteGear: (id: string) => void
     fetchEquipmentDetail: (id: string) => Promise<Equipment | null>
+    fetchInventorySpecs: () => Promise<void>
+    isLoadingInventorySpecs: boolean
+    hasLoadedInventorySpecs: boolean
 
     // Actions - Notes
     addNote: (note: Note) => void

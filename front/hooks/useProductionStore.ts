@@ -2,12 +2,20 @@ import { create } from 'zustand';
 import {
   MainView, Shot, ShotLayout, Equipment, Note, PostProdTask,
   PostProdFilters, NotesFilters, User, CatalogCategory,
-  CatalogBrand, CatalogItem, Project
+  CatalogBrand, CatalogItem
 } from '../types.ts';
 import { timeToMinutes } from '../utils.ts';
 import { auth } from '../firebase';
 import { onAuthStateChanged, signOut, User as FirebaseUser } from 'firebase/auth';
-import { bulkApi, apiClient, ProjectDataResponse } from '../api';
+import { bulkApi } from '@/api';
+import { apiClient } from '@/api/client';
+import { 
+  projectService, 
+  shotService, 
+  noteService, 
+  taskService, 
+  equipmentService 
+} from '@/api/services';
 
 const toNullableString = (value?: string | null) => {
   if (value === undefined || value === null) return null
@@ -58,11 +66,17 @@ interface ProductionStore {
   currentUser: User | null;
   isGuest: boolean;
   isLoadingAuth: boolean;
+  isLoadingInitialData: boolean;
+  lastInitialDataFetch: number;
 
   catalogCategories: CatalogCategory[];
   catalogBrands: CatalogBrand[];
   catalogItems: CatalogItem[];
   hasFetchedCatalog: boolean;
+
+  // Inventory Specs Loading State
+  isLoadingInventorySpecs: boolean;
+  hasLoadedInventorySpecs: boolean;
 
   postProdFilters: PostProdFilters;
   notesFilters: NotesFilters;
@@ -110,6 +124,7 @@ interface ProductionStore {
   updateGear: (gear: Equipment) => Promise<void>;
   deleteGear: (id: string) => Promise<void>;
   fetchEquipmentDetail: (id: string) => Promise<Equipment | null>;
+  fetchInventorySpecs: () => Promise<void>;
 
   addNote: (note: Note) => Promise<void>;
   updateNote: (note: Note) => Promise<void>;
@@ -141,13 +156,18 @@ export const useStore = create<ProductionStore>((set, get) => ({
   currentProject: '',
   allInventory: [],
   currentUser: null,
-  isGuest: localStorage.getItem('vemakin_guest_mode') === 'true',
   isLoadingAuth: true,
+  isLoadingInitialData: false,
+  lastInitialDataFetch: 0,
 
   catalogCategories: [],
   catalogBrands: [],
   catalogItems: [],
   hasFetchedCatalog: false,
+
+  // Inventory Specs Loading State
+  isLoadingInventorySpecs: false,
+  hasLoadedInventorySpecs: false,
 
   postProdFilters: {
     category: 'All',
@@ -227,21 +247,10 @@ export const useStore = create<ProductionStore>((set, get) => ({
     return unsubscribe;
   },
 
-  enterGuest: async () => {
-    localStorage.setItem('vemakin_guest_mode', 'true');
-    set({ isGuest: true, currentUser: null, mainView: 'overview' });
-    await get().fetchInitialData();
-
-    // Resolve promise if anyone is waiting
-    const { resolveAuth } = get();
-    if (resolveAuth) resolveAuth();
-  },
-
   logout: async () => {
     try {
       await signOut(auth);
-      localStorage.removeItem('vemakin_guest_mode');
-      set({ isGuest: false, currentUser: null, projects: [], projectData: {}, currentProject: '', fetchedProjectIds: new Set() });
+      set({ currentUser: null, projects: [], projectData: {}, currentProject: '', fetchedProjectIds: new Set() });
     } catch (error) {
       console.error("Logout failed", error);
     }
@@ -252,9 +261,29 @@ export const useStore = create<ProductionStore>((set, get) => ({
   },
 
   fetchInitialData: async () => {
+    const state = get();
+    const now = Date.now();
+    const minFetchInterval = 5000; // 5 seconds
+    
+    // Prevent duplicate calls
+    if (state.isLoadingInitialData) {
+      console.log('[fetchInitialData] Already loading, skipping duplicate call');
+      return;
+    }
+    
+    // Prevent fetching too frequently (within 5 seconds)
+    if (now - state.lastInitialDataFetch < minFetchInterval) {
+      console.log('[fetchInitialData] Fetched recently, skipping');
+      return;
+    }
+    
+    set({ isLoadingInitialData: true, lastInitialDataFetch: now });
+    
     try {
-      // Step 1: Fetch projects + inventory (without project_id)
-      const response = await bulkApi.getInitialData();
+      const currentProjectId = state.projectData[state.currentProject]?.id;
+      
+      // Use the optimized bulk endpoint - fetches everything in ONE request
+      const response = await bulkApi.getInitialData(currentProjectId);
 
       const fetchedProjects = response.projects || [];
       if (fetchedProjects.length > 0) {
@@ -288,7 +317,6 @@ export const useStore = create<ProductionStore>((set, get) => ({
           specs: i.specs || {}
         }));
 
-        // Step 2: Set projects and inventory, set current project if not set
         set((s) => ({
           projects: projectNames,
           projectData: { ...s.projectData, ...newProjectData },
@@ -296,20 +324,47 @@ export const useStore = create<ProductionStore>((set, get) => ({
           currentProject: s.currentProject || projectNames[0]
         }));
 
-        // Step 3: Fetch project data (shots, notes, tasks) for current project
-        const currentProjectName = get().currentProject;
-        if (currentProjectName) {
-          await get().fetchProjectData(currentProjectName);
-          
-          // Prefetch data for other projects in the background
-          const otherProjects = projectNames.filter(name => name !== currentProjectName);
-          if (otherProjects.length > 0) {
-            get().prefetchProjectsData(otherProjects);
+        // If the response includes project data (shots, notes, tasks), use it
+        if (response.shots || response.notes || response.tasks) {
+          const currentProjectName = get().currentProject;
+          if (currentProjectName) {
+            const projectId = newProjectData[currentProjectName]?.id;
+            if (projectId) {
+              set((s) => ({
+                projectData: {
+                  ...s.projectData,
+                  [currentProjectName]: {
+                    ...s.projectData[currentProjectName],
+                    shots: response.shots || [],
+                    notes: response.notes || [],
+                    tasks: response.tasks || []
+                  }
+                },
+                fetchedProjectIds: new Set(s.fetchedProjectIds).add(projectId)
+              }));
+              
+              // Prefetch data for other projects in the background
+              const otherProjects = projectNames.filter(name => name !== currentProjectName);
+              if (otherProjects.length > 0) {
+                get().prefetchProjectsData(otherProjects);
+              }
+            }
           }
+        } else if (get().currentProject) {
+          // Fallback: fetch project data separately if not included in initial response
+          get().fetchProjectData(get().currentProject);
         }
+      }
+      
+      // Trigger background loading of inventory specs
+      if (!get().hasLoadedInventorySpecs && !get().isLoadingInventorySpecs) {
+        console.log('[fetchInitialData] Triggering background inventory specs loading');
+        get().fetchInventorySpecs();
       }
     } catch (err) {
       console.error("Initial fetch failed:", err);
+    } finally {
+      set({ isLoadingInitialData: false });
     }
   },
 
@@ -321,45 +376,40 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
     try {
       // Use the optimized bulk endpoint - fetches shots, notes, tasks in ONE request
-      const response: ProjectDataResponse = await bulkApi.getProjectData(projectState.id);
+      const response = await bulkApi.getProjectData(projectState.id);
 
-      const fetchedShots: Shot[] = (response.shots || []).map((s) => ({
+      const fetchedShots: Shot[] = (response.shots || []).map((s: any) => ({
         id: s.id,
         title: s.title,
         description: s.description,
         status: s.status,
-        startTime: s.startTime || '00:00',
+        startTime: s.startTime || s.start_time || '00:00',
         duration: s.duration || '1h',
         location: s.location,
         remarks: s.remarks,
         date: s.date,
-        sceneNumber: s.sceneNumber,
-        equipmentIds: s.equipmentIds || [],
-        preparedEquipmentIds: s.preparedEquipmentIds || []
+        sceneNumber: s.sceneNumber || s.scene_number,
+        equipmentIds: s.equipmentIds || s.equipment_ids || [],
+        preparedEquipmentIds: s.preparedEquipmentIds || s.prepared_equipment_ids || []
       }));
 
-      const fetchedNotes: Note[] = (response.notes || []).map((n) => ({
+      const fetchedNotes: Note[] = (response.notes || []).map((n: any) => ({
         id: n.id,
         title: n.title,
-        content: n.content || '',
-        date: n.updatedAt,
-        createdAt: n.updatedAt,
-        updatedAt: n.updatedAt,
-        shotId: n.shotId,
-        taskId: n.taskId,
-        attachments: []
+        content: n.content,
+        date: n.updatedAt || n.updated_at,
+        shotId: n.shotId || n.shot_id,
+        taskId: n.taskId || n.task_id
       }));
 
-      const fetchedTasks: PostProdTask[] = (response.tasks || []).map((t) => ({
+      const fetchedTasks: PostProdTask[] = (response.tasks || []).map((t: any) => ({
         id: t.id,
-        category: t.category || 'Editing',
+        category: t.category,
         title: t.title,
-        status: t.status || 'todo',
-        priority: t.priority || 'medium',
-        dueDate: t.dueDate,
-        description: t.description || '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        status: t.status,
+        priority: t.priority,
+        dueDate: t.dueDate || t.due_date,
+        description: t.description
       }));
 
       set((s) => ({
@@ -379,12 +429,40 @@ export const useStore = create<ProductionStore>((set, get) => ({
     }
   },
 
+  fetchInventorySpecs: async () => {
+    const state = get();
+    
+    // Prevent duplicate calls
+    if (state.isLoadingInventorySpecs || state.hasLoadedInventorySpecs) {
+      return;
+    }
+    
+    set({ isLoadingInventorySpecs: true });
+    
+    try {
+      console.log('[fetchInventorySpecs] Loading full inventory with specs...');
+      const response = await equipmentService.getAll();
+      
+      // Update inventory with specs
+      set({
+        allInventory: response,
+        hasLoadedInventorySpecs: true,
+        isLoadingInventorySpecs: false
+      });
+      
+      console.log('[fetchInventorySpecs] Inventory specs loaded successfully');
+    } catch (err) {
+      console.error("[fetchInventorySpecs] Failed to load inventory specs:", err);
+      set({ isLoadingInventorySpecs: false });
+    }
+  },
+
   addProject: async (name, data) => {
     const newProjectName = name.trim();
     if (get().projects.includes(newProjectName) || !newProjectName) return;
 
     try {
-      const newProject = await apiClient.post<Project>('/projects', { name: newProjectName });
+      const newProject = await projectService.create({ name: newProjectName });
 
       set((state) => ({
         projects: [newProjectName, ...state.projects],
@@ -411,7 +489,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
     const projectState = get().projectData[name];
     if (projectState?.id) {
       try {
-        await apiClient.delete(`/projects/${projectState.id}`);
+        await projectService.delete(projectState.id);
         set((state) => {
           const newProjects = state.projects.filter(p => p !== name);
           const newData = { ...state.projectData };
@@ -450,7 +528,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
     const pid = get().projectData[get().currentProject]?.id;
     if (pid) {
       try {
-        const newShot = await apiClient.post<Shot>(`/shots?project_id=${pid}`, shot);
+        const newShot = await shotService.create(pid, shot);
         set((state) => ({
           projectData: {
             ...state.projectData,
@@ -467,8 +545,10 @@ export const useStore = create<ProductionStore>((set, get) => ({
   },
 
   updateShot: async (shot) => {
+    const pid = get().projectData[get().currentProject]?.id;
+    if (!pid) return;
     try {
-      await apiClient.patch(`/shots/${shot.id}`, shot);
+      await shotService.update(shot.id, pid, shot);
       set((state) => ({
         projectData: {
           ...state.projectData,
@@ -484,8 +564,10 @@ export const useStore = create<ProductionStore>((set, get) => ({
   },
 
   deleteShot: async (shotId) => {
+    const pid = get().projectData[get().currentProject]?.id;
+    if (!pid) return;
     try {
-      await apiClient.delete(`/shots/${shotId}`);
+      await shotService.delete(shotId, pid);
       set((state) => ({
         projectData: {
           ...state.projectData,
@@ -504,7 +586,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
     const pid = get().projectData[get().currentProject]?.id;
     if (pid) {
       try {
-        const newTask = await apiClient.post<PostProdTask>(`/postprod?project_id=${pid}`, task);
+        const newTask = await taskService.create(pid, task);
         set((state) => ({
           projectData: {
             ...state.projectData,
@@ -521,8 +603,10 @@ export const useStore = create<ProductionStore>((set, get) => ({
   },
 
   updateTask: async (task) => {
+    const pid = get().projectData[get().currentProject]?.id;
+    if (!pid) return;
     try {
-      await apiClient.patch(`/postprod/${task.id}`, task);
+      await taskService.update(task.id, pid, task);
       set((state) => ({
         projectData: {
           ...state.projectData,
@@ -538,8 +622,10 @@ export const useStore = create<ProductionStore>((set, get) => ({
   },
 
   deleteTask: async (taskId) => {
+    const pid = get().projectData[get().currentProject]?.id;
+    if (!pid) return;
     try {
-      await apiClient.delete(`/postprod/${taskId}`);
+      await taskService.delete(taskId, pid);
       set((state) => ({
         projectData: {
           ...state.projectData,
@@ -556,8 +642,8 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
   addGear: async (gear) => {
     try {
-      const newEquipment = await apiClient.post<Equipment>('/inventory', buildEquipmentPayload(gear))
-      set((state) => ({ allInventory: [newEquipment, ...state.allInventory] }))
+      const resp = await equipmentService.create(buildEquipmentPayload(gear))
+      set((state) => ({ allInventory: [resp, ...state.allInventory] }))
     } catch (e) {
       console.error("Failed to add gear", e)
     }
@@ -565,9 +651,9 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
   updateGear: async (gear) => {
     try {
-      const updatedEquipment = await apiClient.patch<Equipment>(`/inventory/${gear.id}`, buildEquipmentPayload(gear))
+      const resp = await equipmentService.update(gear.id, buildEquipmentPayload(gear))
       set((state) => ({
-        allInventory: state.allInventory.map(item => item.id === gear.id ? updatedEquipment : item)
+        allInventory: state.allInventory.map(item => item.id === gear.id ? resp : item)
       }))
     } catch (e) {
       console.error("Failed to update gear", e)
@@ -576,7 +662,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
   deleteGear: async (id) => {
     try {
-      await apiClient.delete(`/inventory/${id}`);
+      await equipmentService.delete(id);
       set((state) => ({ allInventory: state.allInventory.filter(item => item.id !== id) }));
     } catch (e) {
       console.error("Failed to delete gear", e);
@@ -585,26 +671,8 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
   fetchEquipmentDetail: async (id) => {
     try {
-      const res = await apiClient.get<Equipment>(`/inventory/${id}`);
-      const detailedEquipment: Equipment = {
-        id: res.id,
-        name: res.name,
-        catalogItemId: res.catalogItemId,
-        customName: res.customName,
-        serialNumber: res.serialNumber,
-        category: res.category,
-        pricePerDay: res.pricePerDay,
-        rentalPrice: res.rentalPrice,
-        rentalFrequency: res.rentalFrequency,
-        quantity: res.quantity,
-        isOwned: res.isOwned,
-        status: res.status,
-        brandName: res.brandName,
-        modelName: res.modelName,
-        specs: res.specs || {}
-      };
+      const detailedEquipment = await equipmentService.getById(id);
       
-      // Update the equipment in the store with full details including specs
       set((state) => ({
         allInventory: state.allInventory.map(item => 
           item.id === id ? detailedEquipment : item
@@ -622,7 +690,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
     const pid = get().projectData[get().currentProject]?.id;
     if (pid) {
       try {
-        const newNote = await apiClient.post<Note>(`/notes?project_id=${pid}`, note);
+        const newNote = await noteService.create(pid, note);
         set((state) => ({
           projectData: {
             ...state.projectData,
@@ -639,8 +707,10 @@ export const useStore = create<ProductionStore>((set, get) => ({
   },
 
   updateNote: async (note) => {
+    const pid = get().projectData[get().currentProject]?.id;
+    if (!pid) return;
     try {
-      await apiClient.patch(`/notes/${note.id}`, note);
+      await noteService.update(note.id, pid, note);
       set((state) => ({
         projectData: {
           ...state.projectData,
@@ -656,8 +726,10 @@ export const useStore = create<ProductionStore>((set, get) => ({
   },
 
   deleteNote: async (noteId) => {
+    const pid = get().projectData[get().currentProject]?.id;
+    if (!pid) return;
     try {
-      await apiClient.delete(`/notes/${noteId}`);
+      await noteService.delete(noteId, pid);
       set((state) => ({
         projectData: {
           ...state.projectData,

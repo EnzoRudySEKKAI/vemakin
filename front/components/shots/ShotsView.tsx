@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Film, Plus, Sun, Moon, Clock, MapPin, Check, Package, ChevronUp, ChevronDown } from 'lucide-react'
+import { Aperture, Plus, Sun, Moon, Clock, MapPin, Check, Package, ChevronUp, ChevronDown } from 'lucide-react'
+
 import { Shot, ShotLayout, Equipment } from '@/types'
 import { calculateEndTime, timeToMinutes, getSunTimes, formatDateWithDay } from '@/utils'
 import { Card } from '@/components/ui/Card'
@@ -104,9 +105,10 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
   if (totalShots === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-220px)] w-full overflow-hidden px-6 select-none">
-        <div className="w-14 h-14 bg-[#0D0D0F] rounded-xl flex items-center justify-center mb-6 border border-white/[0.05]">
-          <Film size={24} className="text-white/40" />
+        <div className="w-14 h-14 bg-[#16181D] rounded-xl flex items-center justify-center mb-6 border border-white/[0.05]">
+          <Aperture size={24} className="text-white/40" />
         </div>
+
         <div className="text-center max-w-sm">
           <h2 className="text-xl font-semibold text-white mb-2">
             {searchQuery || statusFilter !== 'all' ? "No Matches Found" : "Empty Timeline"}
@@ -148,7 +150,7 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
                   <div className="flex items-center gap-1.5 text-xs font-medium text-orange-400/60">
                     <Sun size={14} strokeWidth={2} /> {sunrise}
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs font-medium text-indigo-400/60">
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-primary/60">
                     <Moon size={14} strokeWidth={2} /> {sunset}
                   </div>
                 </div>
@@ -167,7 +169,7 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
                     }
 
                     const status = getTimelineStatus(shot)
-                    const barColor = status === 'done' ? 'bg-emerald-500' : status === 'current' ? 'bg-indigo-500' : 'bg-white/20'
+                    const barColor = status === 'done' ? 'bg-primary' : status === 'current' ? 'bg-primary' : 'bg-white/20'
                     const isChecklistOpen = expandedChecklist === shot.id
 
                     return (
@@ -188,7 +190,7 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
                         )}
 
                         <div
-                          className="group cursor-pointer rounded-xl transition-all duration-200 bg-[#0D0D0F] border border-white/[0.05] hover:border-white/[0.1]"
+                          className="group cursor-pointer rounded-xl transition-all duration-200 bg-[#16181D] border border-white/[0.05] hover:border-white/[0.1]"
                         >
                           <div className={shotLayout === 'list' ? "p-3" : "p-4"} onClick={() => onShotClick(shot)}>
                             <div className={shotLayout === 'list' ? "flex flex-col gap-2" : "flex flex-col gap-4"}>
@@ -198,7 +200,7 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
                                   <div className="text-xs">
                                     <div className="text-white/50 font-mono">{shot.startTime}</div>
                                     {shotLayout === 'timeline' && (
-                                      <div className="text-white/20 text-[10px]">{shot.duration}</div>
+                                      <div className="text-white/50 font-mono">{calculateEndTime(shot.startTime, shot.duration)}</div>
                                     )}
                                   </div>
                                 </div>
@@ -218,28 +220,31 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
 
                               {shotLayout !== 'list' && (
                                 <div className="flex items-center justify-between gap-3">
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      handleToggleChecklist(shot.id)
-                                    }}
-                                    className={`h-7 px-2.5 rounded-lg flex items-center gap-1.5 text-[10px] font-semibold border transition-all ${isChecklistOpen
-                                      ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30'
-                                      : 'bg-white/5 text-white/40 border-white/10 hover:border-white/20 hover:bg-white/10'
-                                      }`}
-                                  >
-                                    <Package size={12} />
-                                    <span className={shotLayout === 'list' ? 'hidden sm:inline' : ''}>Check Gear</span>
-                                    <div className="flex items-center gap-1 ml-1 px-1.5 py-0.5 rounded-md bg-white/5 border border-white/5 text-[9px]">
-                                      {shot.preparedEquipmentIds.length}/{shot.equipmentIds.length}
+                                  <div className="flex items-center gap-4">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleToggleChecklist(shot.id)
+                                      }}
+                                      className={`h-9 pl-3 pr-2.5 rounded-xl flex items-center gap-2 text-xs font-semibold border transition-all ${isChecklistOpen
+                                        ? 'bg-white/10 text-white border-white/20'
+                                        : 'bg-[#1A1D21] text-white/70 border-white/[0.08] hover:border-white/20 hover:bg-white/10 hover:text-white'
+                                        }`}
+                                    >
+                                      <span>Checklist</span>
+                                      {isChecklistOpen ? <ChevronUp size={14} className="opacity-50" /> : <ChevronDown size={14} className="opacity-50" />}
+                                    </button>
+
+                                    <div className="flex items-center gap-2 text-xs font-bold text-indigo-400">
+                                      <Package size={18} strokeWidth={2.5} />
+                                      <span>Gear {shot.preparedEquipmentIds.length}/{shot.equipmentIds.length}</span>
                                     </div>
-                                    {isChecklistOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                                  </button>
+                                  </div>
 
                                   <button
                                     onClick={(e) => { e.stopPropagation(); onToggleStatus(shot.id) }}
                                     className={`${shotLayout === 'list' ? 'w-7 h-7' : 'w-8 h-8'} rounded-lg flex items-center justify-center border transition-all ${shot.status === 'done'
-                                      ? 'bg-emerald-500 text-white border-transparent'
+                                      ? 'bg-primary text-white border-transparent'
                                       : 'bg-transparent text-white/30 border-white/[0.08] hover:border-white/20'
                                       }`}
                                   >
@@ -270,13 +275,13 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
                                             key={eId}
                                             onClick={(e) => { e.stopPropagation(); onToggleEquipment(shot.id, eId) }}
                                             className={`flex items-center justify-between p-2.5 rounded-lg text-xs font-medium border text-left transition-all ${isPrepared
-                                              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                                              : 'bg-[#0A0A0A] border-white/[0.05] text-white/40 hover:border-white/10'
+                                              ? 'bg-primary/10 dark:bg-primary/10 border-primary/30 dark:border-primary/30 text-primary'
+                                              : 'bg-[#0F1116] border-white/[0.05] text-white/40 hover:border-white/10'
                                               }`}
                                           >
                                             <span className="truncate mr-2">{equip?.customName || equip?.name || 'Unknown Item'}</span>
                                             <div className={`w-4 h-4 rounded-full flex items-center justify-center border ${isPrepared
-                                              ? 'bg-emerald-500 border-emerald-500 text-white'
+                                              ? 'bg-primary border-primary text-white'
                                               : 'border-white/20'
                                               }`}>
                                               {isPrepared && <Check size={10} strokeWidth={4} />}

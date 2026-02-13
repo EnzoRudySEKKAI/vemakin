@@ -12,7 +12,7 @@ import {
   PaginationParams,
 } from '@/types'
 
-export { apiClient }
+export { projectService, shotService, noteService, taskService, equipmentService } from './services'
 
 // Projects API
 export const projectsApi = {

@@ -1,11 +1,9 @@
 import React from 'react'
 import { Package, ChevronRight } from 'lucide-react'
-import { motion } from 'framer-motion'
 import { Equipment, Currency } from '@/types'
 import { CATEGORY_ICONS } from '@/constants'
 import { HoverCard } from '@/components/ui/HoverCard'
 import { Text, IconContainer } from '@/components/atoms'
-import { radius, typography } from '@/design-system'
 
 interface InventoryListItemProps {
   item: Equipment
@@ -22,6 +20,13 @@ export const InventoryListItem: React.FC<InventoryListItemProps> = ({
 }) => {
   const Icon = (CATEGORY_ICONS as any)[item.category] || Package
   const mainTitle = item.customName || item.name
+  
+  // Build subtitle from brand and model
+  const subtitleParts = []
+  if (item.brandName) subtitleParts.push(item.brandName)
+  if (item.modelName) subtitleParts.push(item.modelName)
+  if (subtitleParts.length === 0 && item.customName) subtitleParts.push(item.name)
+  const subTitle = subtitleParts.join(' ')
 
   return (
     <HoverCard
@@ -40,8 +45,8 @@ export const InventoryListItem: React.FC<InventoryListItemProps> = ({
           />
           <div className="min-w-0 flex flex-col justify-center">
             <Text variant="h3">{mainTitle}</Text>
-            {item.customName && (
-              <Text variant="caption" color="muted" className="mt-0.5">{item.name}</Text>
+            {subTitle && (
+              <Text variant="caption" color="muted" className="mt-0.5">{subTitle}</Text>
             )}
           </div>
         </div>

@@ -1,11 +1,9 @@
 import React from 'react'
 import { Package } from 'lucide-react'
-import { motion } from 'framer-motion'
 import { Equipment, Currency } from '@/types'
 import { HoverCard } from '@/components/ui/HoverCard'
 import { CATEGORY_ICONS } from '@/constants'
 import { Text, IconContainer } from '@/components/atoms'
-import { radius, typography } from '@/design-system'
 
 interface InventoryCardProps {
   item: Equipment
@@ -23,7 +21,13 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({
   const Icon = (CATEGORY_ICONS as any)[item.category] || Package
 
   const mainTitle = item.customName || item.name
-  const subTitle = item.name
+  
+  // Build subtitle from brand and model
+  const subtitleParts = []
+  if (item.brandName) subtitleParts.push(item.brandName)
+  if (item.modelName) subtitleParts.push(item.modelName)
+  if (subtitleParts.length === 0 && item.customName) subtitleParts.push(item.name)
+  const subTitle = subtitleParts.join(' ')
 
   return (
     <HoverCard
@@ -42,7 +46,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({
           />
           <div className="min-w-0">
             <Text variant="h3" className="leading-tight truncate">{mainTitle}</Text>
-            {item.customName && (
+            {subTitle && (
               <Text variant="caption" color="muted" className="mt-0.5 truncate">{subTitle}</Text>
             )}
           </div>
@@ -72,7 +76,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({
 
       {/* Specs Grid */}
       <div className="mt-auto grid grid-cols-2 gap-2 bg-white/40 dark:bg-white/5 p-3 rounded-xl border border-white/40 dark:border-white/10">
-        {Object.entries(item.specs).slice(0, 4).map(([key, val]) => (
+        {Object.entries(item.specs || {}).slice(0, 4).map(([key, val]) => (
           <div key={key} className="flex flex-col min-w-0 overflow-hidden">
             <Text variant="label" color="muted" className="leading-none mb-1 truncate">
               {key.replace(/([A-Z])/g, ' $1').trim()}
@@ -80,7 +84,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({
             <Text variant="body" className="truncate" title={String(val)}>{val}</Text>
           </div>
         ))}
-        {Object.entries(item.specs).length < 4 && Array(4 - Object.entries(item.specs).length).fill(0).map((_, i) => (
+        {Object.entries(item.specs || {}).length < 4 && Array(4 - Object.entries(item.specs || {}).length).fill(0).map((_, i) => (
           <div key={`empty-${i}`} className="flex flex-col">
             <span className="text-transparent text-xs leading-none mb-1">—</span>
             <span className="text-gray-200 dark:text-gray-700 text-sm font-medium">—</span>

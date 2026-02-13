@@ -115,32 +115,32 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
               <div
                 key={task.id}
                 onClick={() => onSelectTask?.(task.id)}
-                className="group p-5 rounded-xl bg-[#16181D] border border-white/[0.05] hover:border-white/[0.1] hover:bg-[#1A1D23] transition-all cursor-pointer"
+                className="group p-4 rounded-xl bg-[#16181D] border border-white/[0.05] hover:border-white/[0.1] transition-all cursor-pointer"
               >
-                <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-[#0F1116] flex items-center justify-center border border-white/[0.05]">
-                      <CategoryIcon size={18} className="text-white/50" />
+                    <div className="w-9 h-9 rounded-lg bg-[#0F1116] flex items-center justify-center border border-white/[0.05]">
+                      <CategoryIcon size={16} className="text-white/50" />
                     </div>
                     <div>
-                      <div className="text-xs text-white/40 uppercase tracking-wider font-medium">{task.category}</div>
+                      <div className="text-xs text-white/30 uppercase tracking-wider">{task.category}</div>
                       {task.dueDate && (
-                        <div className="flex items-center gap-1.5 text-xs text-white/30 mt-1">
-                          <Calendar size={12} />
+                        <div className="flex items-center gap-1 text-[10px] text-white/20 mt-0.5">
+                          <Calendar size={10} />
                           {new Date(task.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <span className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide shrink-0 border ${getPriorityColor(task.priority)}`}>
-                    {task.priority}
+                  <span className={`w-14 text-center px-2 py-0.5 rounded text-[10px] font-medium shrink-0 ${getPriorityColor(task.priority)}`}>
+                    {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
                   </span>
                 </div>
 
-                <div className="mb-5">
-                  <h3 className="text-base text-white/90 group-hover:text-white font-medium mb-1.5 transition-colors">{task.title}</h3>
-                  <p className="text-sm text-white/40 line-clamp-2 leading-relaxed">
+                <div className="mb-4">
+                  <h3 className="text-sm text-white font-medium mb-1">{task.title}</h3>
+                  <p className="text-xs text-white/30 line-clamp-2">
                     {task.description || "No specific details provided."}
                   </p>
                 </div>
@@ -151,16 +151,16 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
                       e.stopPropagation()
                       setActiveStatusMenuId(isActiveMenu ? null : task.id)
                     }}
-                    className="w-full py-3 px-4 rounded-xl flex items-center justify-between text-sm font-medium bg-[#0F1116] text-white/60 border border-white/[0.05] hover:border-white/10 hover:text-white/80 transition-all"
+                    className="w-full py-2.5 px-3 rounded-lg flex items-center justify-between text-xs font-medium bg-[#0F1116] text-white/50 border border-white/[0.05] hover:border-white/10 transition-all"
                   >
-                    <div className="flex items-center gap-2.5">
-                      <div className={`w-2.5 h-2.5 rounded-full ${task.status === 'done' ? 'bg-emerald-500' :
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${task.status === 'done' ? 'bg-emerald-500' :
                           task.status === 'progress' ? 'bg-primary' :
                             'bg-white/30'
                         }`} />
                       <span className="capitalize">{task.status}</span>
                     </div>
-                    <ChevronDown size={16} className={`${isActiveMenu ? 'rotate-180' : ''} transition-transform`} />
+                    <ChevronDown size={14} className={`${isActiveMenu ? 'rotate-180' : ''} transition-transform`} />
                   </button>
 
                   <AnimatePresence>
@@ -169,7 +169,7 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
-                        className="absolute left-0 right-0 bottom-full mb-2 bg-[#16181D] rounded-xl border border-white/[0.08] p-2 z-50 shadow-xl"
+                        className="absolute left-0 right-0 bottom-full mb-2 bg-[#16181D] rounded-xl border border-white/[0.08] p-1.5 z-50 shadow-xl"
                       >
                         {(['todo', 'progress', 'review', 'done'] as const).map((s) => (
                           <button
@@ -179,13 +179,13 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
                               onUpdateTask?.({ ...task, status: s })
                               setActiveStatusMenuId(null)
                             }}
-                            className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition-colors ${task.status === s
+                            className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium mb-0.5 flex items-center justify-between transition-colors ${task.status === s
                                 ? 'bg-primary text-white'
-                                : 'text-white/60 hover:bg-white/5'
+                                : 'text-white/50 hover:bg-white/5'
                               }`}
                           >
                             <span className="capitalize">{s}</span>
-                            {task.status === s && <Check size={14} />}
+                            {task.status === s && <Check size={12} />}
                           </button>
                         ))}
                       </motion.div>
@@ -197,14 +197,7 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
           })}
         </div>
       ) : (
-        <Card
-          title={
-            <div className="flex items-center gap-3">
-              <Scissors size={20} className="text-white/50" />
-              <span className="text-lg font-semibold text-white tracking-tight">Tasks</span>
-            </div>
-          }
-        >
+        <Card title="Tasks">
           <div className="p-4 space-y-2">
             {filteredTasks.map((task) => {
               const CategoryIcon = getCategoryIcon(task.category)
@@ -214,27 +207,27 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
                 <div
                   key={task.id}
                   onClick={() => onSelectTask?.(task.id)}
-                  className="group flex items-center gap-4 p-4 rounded-xl bg-[#16181D] border border-white/[0.05] hover:border-white/[0.1] hover:bg-[#1A1D23] transition-all cursor-pointer"
+                  className="flex items-center gap-4 p-3 rounded-xl bg-[#16181D] border border-white/[0.05] hover:border-white/[0.1] transition-all cursor-pointer"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-[#0F1116] flex items-center justify-center border border-white/[0.05] shrink-0">
-                    <CategoryIcon size={18} className="text-white/50" />
+                  <div className="w-9 h-9 rounded-lg bg-[#0F1116] flex items-center justify-center border border-white/[0.05] shrink-0">
+                    <CategoryIcon size={16} className="text-white/50" />
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="text-base text-white/90 group-hover:text-white font-medium truncate transition-colors">{task.title}</div>
-                    <div className="text-sm text-white/40">{task.category}</div>
+                    <div className="text-sm text-white font-medium truncate">{task.title}</div>
+                    <div className="text-xs text-white/30">{task.category}</div>
                   </div>
 
-                  <div className="hidden sm:flex items-center gap-4">
+                  <div className="hidden sm:flex items-center gap-3">
                     {task.dueDate && (
-                      <div className="text-sm text-white/40 flex items-center gap-1.5">
-                        <Calendar size={14} />
+                      <div className="text-xs text-white/30 flex items-center gap-1">
+                        <Calendar size={12} />
                         {new Date(task.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                       </div>
                     )}
 
-                    <span className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide shrink-0 border ${getPriorityColor(task.priority)}`}>
-                      {task.priority}
+                    <span className={`w-14 text-center px-2 py-0.5 rounded text-[10px] font-medium shrink-0 ${getPriorityColor(task.priority)}`}>
+                      {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
                     </span>
                   </div>
 
@@ -244,9 +237,9 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
                         e.stopPropagation()
                         setActiveStatusMenuId(isActiveMenu ? null : task.id)
                       }}
-                      className="w-28 py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 text-sm font-medium bg-[#0F1116] text-white/60 border border-white/[0.05] hover:border-white/10 hover:text-white/80 transition-all"
+                      className="w-24 py-2 px-2 rounded-lg flex items-center justify-center gap-2 text-xs font-medium bg-[#0F1116] text-white/50 border border-white/[0.05] hover:border-white/10 transition-all"
                     >
-                      <div className={`w-2 h-2 rounded-full ${task.status === 'done' ? 'bg-emerald-500' :
+                      <div className={`w-1.5 h-1.5 rounded-full ${task.status === 'done' ? 'bg-emerald-500' :
                           task.status === 'progress' ? 'bg-primary' :
                             'bg-white/30'
                         }`} />
@@ -259,7 +252,7 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
                           initial={{ opacity: 0, y: 5 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 5 }}
-                          className="absolute top-full right-0 mt-2 w-36 bg-[#16181D] rounded-xl border border-white/[0.08] p-2 z-50 shadow-xl"
+                          className="absolute top-full right-0 mt-2 w-32 bg-[#16181D] rounded-xl border border-white/[0.08] p-1.5 z-50 shadow-xl"
                         >
                           {(['todo', 'progress', 'review', 'done'] as const).map((s) => (
                             <button
@@ -269,9 +262,9 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
                                 onUpdateTask?.({ ...task, status: s })
                                 setActiveStatusMenuId(null)
                               }}
-                              className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${task.status === s
+                              className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium mb-0.5 transition-colors ${task.status === s
                                   ? 'bg-primary text-white'
-                                  : 'text-white/60 hover:bg-white/5'
+                                  : 'text-white/50 hover:bg-white/5'
                                 }`}
                             >
                               <span className="capitalize">{s}</span>
