@@ -14,8 +14,11 @@ import {
   shotService, 
   noteService, 
   taskService, 
-  equipmentService 
+  equipmentService,
+  userService 
 } from '@/api/services';
+import { useProjectStore } from '@/stores/useProjectStore';
+import { useUIStore } from '@/stores/useUIStore';
 
 const toNullableString = (value?: string | null) => {
   if (value === undefined || value === null) return null
@@ -186,7 +189,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
     sortDirection: 'desc'
   },
   notesLayout: 'grid',
-  darkMode: true,
+  darkMode: false,
   projectData: {},
   fetchedProjectIds: new Set(),
   authPromise: null,
@@ -198,14 +201,28 @@ export const useStore = create<ProductionStore>((set, get) => ({
   setShotStatusFilter: (filter) => set({ shotStatusFilter: filter }),
   setProjects: (projects) => set({ projects }),
   setCurrentProject: (projectName) => {
+    const projectId = get().projectData[projectName]?.id;
     set({ currentProject: projectName });
+    useProjectStore.getState().setCurrentProject(projectId || null, projectName);
     get().fetchProjectData(projectName);
   },
   setAllInventory: (inventory) => set({ allInventory: inventory }),
   setPostProdFilters: (updater) => set((state) => ({ postProdFilters: updater(state.postProdFilters) })),
   setNotesFilters: (updater) => set((state) => ({ notesFilters: updater(state.notesFilters) })),
   setNotesLayout: (layout) => set({ notesLayout: layout }),
-  toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
+  toggleDarkMode: async () => {
+    const newMode = !get().darkMode;
+    set({ darkMode: newMode });
+    
+    // Sync to backend (fire and forget, handle errors gracefully)
+    if (!get().isGuest && get().currentUser) {
+      try {
+        await userService.updateProfile({ darkMode: newMode });
+      } catch (error) {
+        console.error('Failed to sync theme preference:', error);
+      }
+    }
+  },
 
   // Auth Initialization
   initAuth: () => {
@@ -221,13 +238,25 @@ export const useStore = create<ProductionStore>((set, get) => ({
 
     const unsubscribe = onAuthStateChanged(auth, async (user: FirebaseUser | null) => {
       if (user) {
+        // Fetch user profile from backend to get preferences including darkMode
+        let userProfile: User | null = null;
+        try {
+          userProfile = await userService.getProfile();
+        } catch (error) {
+          console.error('Failed to fetch user profile:', error);
+        }
+
         set({
           currentUser: {
-            name: user.displayName || user.email?.split('@')[0] || 'User',
-            email: user.email || ''
+            id: user.uid,
+            name: userProfile?.name || user.displayName || user.email?.split('@')[0] || 'User',
+            email: user.email || '',
+            darkMode: userProfile?.darkMode
           },
           isGuest: false,
-          isLoadingAuth: false
+          isLoadingAuth: false,
+          // Set darkMode from user preference, default to false (light mode)
+          darkMode: userProfile?.darkMode ?? false
         });
       } else if (get().isGuest) {
         set({ isLoadingAuth: false });
@@ -251,6 +280,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
     try {
       await signOut(auth);
       set({ currentUser: null, projects: [], projectData: {}, currentProject: '', fetchedProjectIds: new Set() });
+      useUIStore.getState().setShowCreateProjectPrompt(false);
     } catch (error) {
       console.error("Logout failed", error);
     }
@@ -321,7 +351,7 @@ export const useStore = create<ProductionStore>((set, get) => ({
           projects: projectNames,
           projectData: { ...s.projectData, ...newProjectData },
           allInventory: fetchedInv,
-          currentProject: s.currentProject || projectNames[0]
+          currentProject: s.currentProject || useProjectStore.getState().currentProjectName || projectNames[0]
         }));
 
         // If the response includes project data (shots, notes, tasks), use it
@@ -525,7 +555,12 @@ export const useStore = create<ProductionStore>((set, get) => ({
   },
 
   addShot: async (shot) => {
-    const pid = get().projectData[get().currentProject]?.id;
+    const currentProject = get().currentProject;
+    if (!currentProject) {
+      useUIStore.getState().setShowCreateProjectPrompt(true);
+      return;
+    }
+    const pid = get().projectData[currentProject]?.id;
     if (pid) {
       try {
         const newShot = await shotService.create(pid, shot);
@@ -583,7 +618,12 @@ export const useStore = create<ProductionStore>((set, get) => ({
   },
 
   addTask: async (task) => {
-    const pid = get().projectData[get().currentProject]?.id;
+    const currentProject = get().currentProject;
+    if (!currentProject) {
+      useUIStore.getState().setShowCreateProjectPrompt(true);
+      return;
+    }
+    const pid = get().projectData[currentProject]?.id;
     if (pid) {
       try {
         const newTask = await taskService.create(pid, task);
@@ -687,7 +727,12 @@ export const useStore = create<ProductionStore>((set, get) => ({
   },
 
   addNote: async (note) => {
-    const pid = get().projectData[get().currentProject]?.id;
+    const currentProject = get().currentProject;
+    if (!currentProject) {
+      useUIStore.getState().setShowCreateProjectPrompt(true);
+      return;
+    }
+    const pid = get().projectData[currentProject]?.id;
     if (pid) {
       try {
         const newNote = await noteService.create(pid, note);

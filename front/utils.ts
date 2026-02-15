@@ -59,6 +59,54 @@ export const getMockTravelInfo = (from: string, to: string, mode: TransportMode)
     return { distance: distance.toFixed(1), time: timeMin };
 };
 
+interface TravelInfo {
+    distance: string
+    time: number
+}
+
+export const getRealTravelInfo = async (
+    lat1: number,
+    lng1: number,
+    lat2: number,
+    lng2: number,
+    mode: TransportMode
+): Promise<TravelInfo> => {
+    const osrmMode = mode === 'driving' ? 'driving' : mode === 'cycling' ? 'cycling' : mode === 'walking' ? 'foot' : 'driving'
+    
+    try {
+        const response = await fetch(
+            `https://router.project-osrm.org/route/v1/${osrmMode}/${lng1},${lat1};${lng2},${lat2}?overview=false`
+        )
+        
+        if (!response.ok) {
+            throw new Error('OSRM request failed')
+        }
+        
+        const data = await response.json()
+        
+        if (data.code !== 'Ok' || !data.routes || data.routes.length === 0) {
+            throw new Error('No route found')
+        }
+        
+        const route = data.routes[0]
+        const distanceKm = route.distance / 1000
+        const timeMin = Math.round(route.duration / 60)
+        
+        return {
+            distance: distanceKm.toFixed(1),
+            time: timeMin
+        }
+    } catch (error) {
+        console.error('OSRM routing error:', error)
+        const isSameLocation = lat1 === lat2 && lng1 === lng2
+        const distance = isSameLocation ? 0 : 5
+        return {
+            distance: distance.toFixed(1),
+            time: isSameLocation ? 20 : 15
+        }
+    }
+};
+
 export const formatDateToNumeric = (dateStr: string) => {
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;

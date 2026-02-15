@@ -19,6 +19,14 @@ func NewNoteRepository(db *sqlx.DB) *NoteRepository {
 	return &NoteRepository{db: db}
 }
 
+func (r *NoteRepository) CountByProject(ctx context.Context, projectID string) (int, error) {
+	var count int
+	err := r.db.GetContext(ctx, &count, `
+		SELECT COUNT(*) FROM notes WHERE project_id = $1
+	`, projectID)
+	return count, err
+}
+
 func (r *NoteRepository) GetByProject(ctx context.Context, projectID string, limit, offset int) ([]models.Note, error) {
 	var notes []models.Note
 	err := r.db.SelectContext(ctx, &notes, `
@@ -31,6 +39,21 @@ func (r *NoteRepository) GetByProject(ctx context.Context, projectID string, lim
 	return notes, err
 }
 
+func (r *NoteRepository) GetByProjectAndUser(ctx context.Context, projectID, userID string, limit, offset int) ([]models.Note, error) {
+	var notes []models.Note
+	err := r.db.SelectContext(ctx, &notes, `
+		WITH project_owner AS (
+			SELECT 1 FROM projects WHERE id = $1 AND user_id = $2
+		)
+		SELECT n.id, n.project_id, n.title, n.content, n.shot_id, n.task_id, n.created_at, n.updated_at
+		FROM notes n
+		WHERE n.project_id = $1 AND EXISTS (SELECT 1 FROM project_owner)
+		ORDER BY n.updated_at DESC 
+		LIMIT $3 OFFSET $4
+	`, projectID, userID, limit, offset)
+	return notes, err
+}
+
 func (r *NoteRepository) GetByID(ctx context.Context, id, projectID string) (*models.Note, error) {
 	var n models.Note
 	err := r.db.GetContext(ctx, &n, `
@@ -38,6 +61,22 @@ func (r *NoteRepository) GetByID(ctx context.Context, id, projectID string) (*mo
 		FROM notes 
 		WHERE id = $1 AND project_id = $2
 	`, id, projectID)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	return &n, err
+}
+
+func (r *NoteRepository) GetByIDAndUser(ctx context.Context, id, projectID, userID string) (*models.Note, error) {
+	var n models.Note
+	err := r.db.GetContext(ctx, &n, `
+		WITH project_owner AS (
+			SELECT 1 FROM projects WHERE id = $1 AND user_id = $2
+		)
+		SELECT n.id, n.project_id, n.title, n.content, n.shot_id, n.task_id, n.created_at, n.updated_at
+		FROM notes n
+		WHERE n.id = $3 AND n.project_id = $1 AND EXISTS (SELECT 1 FROM project_owner)
+	`, projectID, userID, id)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}

@@ -49,7 +49,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   return (
     <div className={`relative h-12 ${className}`}>
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/30">
         <Search size={18} strokeWidth={2} />
       </div>
       <input
@@ -57,12 +57,12 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         placeholder={placeholders[view] || placeholders.default}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full h-full bg-[#16181D] border border-white/[0.05] rounded-xl pl-11 pr-12 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/[0.1] transition-colors"
+        className="w-full h-full bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] rounded-xl pl-11 pr-12 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:border-gray-300 dark:focus:border-white/[0.1] transition-colors"
       />
       {value && (
         <button
           onClick={() => onChange('')}
-          className="absolute right-12 top-1/2 -translate-y-1/2 p-1 text-white/30 hover:text-white/50 transition-colors"
+          className="absolute right-12 top-1/2 -translate-y-1/2 p-1 text-gray-400 dark:text-white/30 hover:text-gray-600 dark:hover:text-white/50 transition-colors"
         >
           <X size={16} strokeWidth={2} />
         </button>
@@ -72,7 +72,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           <button
             onClick={onDatePickerToggle}
             title="Filter by date"
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-white/30 hover:text-white/50 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 dark:text-white/30 hover:text-gray-600 dark:hover:text-white/50 transition-colors"
           >
             <Calendar size={16} strokeWidth={2} />
           </button>

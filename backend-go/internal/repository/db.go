@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -19,14 +20,18 @@ func NewDB(connStr string) (*DB, error) {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	// Cloud Run optimized
-	db.SetMaxOpenConns(10)
-	db.SetMaxIdleConns(5)
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(10)
 	db.SetConnMaxLifetime(5 * time.Minute)
+	db.SetConnMaxIdleTime(1 * time.Minute)
 
 	return &DB{db}, nil
 }
 
 func (db *DB) Close() error {
 	return db.DB.Close()
+}
+
+func (db *DB) Ping(ctx context.Context) error {
+	return db.DB.PingContext(ctx)
 }

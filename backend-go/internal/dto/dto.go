@@ -223,6 +223,33 @@ type UserInfoResponse struct {
 	Email string `json:"email"`
 }
 
+type UserResponse struct {
+	ID       string `json:"id"`
+	Email    string `json:"email"`
+	Name     string `json:"name"`
+	DarkMode *bool  `json:"darkMode"`
+}
+
+type UpdateUserRequest struct {
+	DarkMode *bool `json:"dark_mode"`
+}
+
 type ErrorResponse struct {
 	Error string `json:"error"`
+}
+
+type PaginationResponse struct {
+	Total   int  `json:"total"`
+	Limit   int  `json:"limit"`
+	Offset  int  `json:"offset"`
+	HasMore bool `json:"hasMore"`
+}
+
+func NewPaginationResponse(total, limit, offset int) PaginationResponse {
+	return PaginationResponse{
+		Total:   total,
+		Limit:   limit,
+		Offset:  offset,
+		HasMore: offset+limit < total,
+	}
 }

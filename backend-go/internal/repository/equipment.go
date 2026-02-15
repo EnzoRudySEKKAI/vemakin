@@ -19,6 +19,14 @@ func NewEquipmentRepository(db *sqlx.DB) *EquipmentRepository {
 	return &EquipmentRepository{db: db}
 }
 
+func (r *EquipmentRepository) CountByUser(ctx context.Context, userID string) (int, error) {
+	var count int
+	err := r.db.GetContext(ctx, &count, `
+		SELECT COUNT(*) FROM user_inventory WHERE user_id = $1
+	`, userID)
+	return count, err
+}
+
 func (r *EquipmentRepository) GetByUser(ctx context.Context, userID string, limit, offset int) ([]models.Equipment, error) {
 	var equipment []models.Equipment
 	err := r.db.SelectContext(ctx, &equipment, `
@@ -125,10 +133,103 @@ func (r *EquipmentRepository) GetSpecsForCatalogItem(ctx context.Context, catalo
 		WHERE gc.id = $1
 	`, catalogItemID)
 	if err != nil {
-		return specs, nil // Return empty specs if no category found
+		return specs, nil
 	}
 
-	// Map category slugs to their specs tables
+	return getSpecsByCategorySlug(ctx, r.db, categorySlug, catalogItemID)
+}
+
+// GetSpecsBatch fetches specs for multiple catalog items in a single query per category
+func (r *EquipmentRepository) GetSpecsBatch(ctx context.Context, catalogItemIDs []string) (map[string]map[string]interface{}, error) {
+	if len(catalogItemIDs) == 0 {
+		return make(map[string]map[string]interface{}), nil
+	}
+
+	// Get category slugs for all catalog items
+	type itemCategory struct {
+		ItemID       string `db:"id"`
+		CategorySlug string `db:"slug"`
+	}
+
+	var items []itemCategory
+	query := `
+		SELECT gc.id, c.slug
+		FROM gear_catalog gc
+		JOIN categories c ON c.id = gc.category_id
+		WHERE gc.id = ANY($1)
+	`
+	err := r.db.SelectContext(ctx, &items, query, catalogItemIDs)
+	if err != nil {
+		return make(map[string]map[string]interface{}), nil
+	}
+
+	// Group items by category
+	itemsByCategory := make(map[string][]string)
+	for _, item := range items {
+		itemsByCategory[item.CategorySlug] = append(itemsByCategory[item.CategorySlug], item.ItemID)
+	}
+
+	result := make(map[string]map[string]interface{})
+
+	// Query each category's specs table
+	specsQueries := map[string]string{
+		"camera":     "SELECT gear_id, sensor, resolution, mount, dynamic_range, native_iso, media, frame_rate, weight FROM specs_cameras WHERE gear_id = ANY($1)",
+		"lens":       "SELECT gear_id, focal_length, aperture, mount, coverage, focus_type, weight FROM specs_lenses WHERE gear_id = ANY($1)",
+		"audio":      "SELECT gear_id, type, pattern, freq_response, sensitivity, max_spl, power, connector, weight FROM specs_audio WHERE gear_id = ANY($1)",
+		"light":      "SELECT gear_id, type, power_draw, color_temp, cri, mount, control, weight FROM specs_lights WHERE gear_id = ANY($1)",
+		"monitor":    "SELECT gear_id, screen, resolution, brightness, inputs, power, features, dimensions, weight FROM specs_monitoring WHERE gear_id = ANY($1)",
+		"prop":       "SELECT gear_id, type, era, material, condition, quantity, dimensions, power, weight FROM specs_props WHERE gear_id = ANY($1)",
+		"stabilizer": "SELECT gear_id, type, max_payload, axes, battery_life, connectivity, dimensions, weight FROM specs_stabilizers WHERE gear_id = ANY($1)",
+		"tripod":     "SELECT gear_id, head_type, max_payload, bowl_size, height_range, material, counterbalance, weight FROM specs_tripods WHERE gear_id = ANY($1)",
+		"wireless":   "SELECT gear_id, range, delay, resolution, inputs, freq, power, multicast, weight FROM specs_wireless WHERE gear_id = ANY($1)",
+		"drone":      "SELECT gear_id, type, camera, res, flight_time, transmission, sensors, speed, weight FROM specs_drones WHERE gear_id = ANY($1)",
+		"filter":     "SELECT gear_id, type, density, size, stops, effect, strength, mount, material, weight FROM specs_filters WHERE gear_id = ANY($1)",
+		"grip":       "SELECT gear_id, type, max_load, max_height, min_height, footprint, material, mount, weight FROM specs_grip WHERE gear_id = ANY($1)",
+	}
+
+	for categorySlug, itemIDs := range itemsByCategory {
+		sqlQuery, ok := specsQueries[categorySlug]
+		if !ok {
+			continue
+		}
+
+		rows, err := r.db.QueryxContext(ctx, sqlQuery, itemIDs)
+		if err != nil {
+			continue
+		}
+
+		for rows.Next() {
+			specs := make(map[string]interface{})
+			values, err := rows.SliceScan()
+			if err != nil {
+				continue
+			}
+			columns, _ := rows.Columns()
+			var gearID string
+			for i, col := range columns {
+				if col == "gear_id" {
+					if i < len(values) {
+						gearID = fmt.Sprintf("%v", values[i])
+					}
+					continue
+				}
+				if i < len(values) {
+					specs[toCamelCase(col)] = values[i]
+				}
+			}
+			if gearID != "" {
+				result[gearID] = specs
+			}
+		}
+		rows.Close()
+	}
+
+	return result, nil
+}
+
+func getSpecsByCategorySlug(ctx context.Context, db *sqlx.DB, categorySlug, catalogItemID string) (map[string]interface{}, error) {
+	specs := make(map[string]interface{})
+
 	specsQueries := map[string]string{
 		"camera":     "SELECT sensor, resolution, mount, dynamic_range, native_iso, media, frame_rate, weight FROM specs_cameras WHERE gear_id = $1",
 		"lens":       "SELECT focal_length, aperture, mount, coverage, focus_type, weight FROM specs_lenses WHERE gear_id = $1",
@@ -146,11 +247,10 @@ func (r *EquipmentRepository) GetSpecsForCatalogItem(ctx context.Context, catalo
 
 	query, ok := specsQueries[categorySlug]
 	if !ok {
-		return specs, nil // Unknown category, return empty specs
+		return specs, nil
 	}
 
-	// Query the specs table
-	rows, err := r.db.QueryxContext(ctx, query, catalogItemID)
+	rows, err := db.QueryxContext(ctx, query, catalogItemID)
 	if err != nil {
 		return specs, nil
 	}
@@ -159,24 +259,15 @@ func (r *EquipmentRepository) GetSpecsForCatalogItem(ctx context.Context, catalo
 	for rows.Next() {
 		values, err := rows.SliceScan()
 		if err != nil {
-			fmt.Printf("[DEBUG] SliceScan error: %v\n", err)
 			continue
 		}
 		columns, _ := rows.Columns()
-		fmt.Printf("[DEBUG] Got %d columns\n", len(columns))
 		for i, col := range columns {
 			if i < len(values) {
 				specs[toCamelCase(col)] = values[i]
-				fmt.Printf("[DEBUG] Setting %s = %v\n", toCamelCase(col), values[i])
 			}
 		}
 	}
-
-	if err := rows.Err(); err != nil {
-		fmt.Printf("[DEBUG] rows.Err(): %v\n", err)
-	}
-
-	fmt.Printf("[DEBUG] Returning %d specs\n", len(specs))
 
 	return specs, nil
 }

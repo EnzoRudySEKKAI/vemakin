@@ -7,9 +7,10 @@ import (
 
 // User represents a user in the system (Firebase UID)
 type User struct {
-	ID    string `db:"id" json:"id"`
-	Email string `db:"email" json:"email"`
-	Name  string `db:"name" json:"name"`
+	ID       string `db:"id" json:"id"`
+	Email    string `db:"email" json:"email"`
+	Name     string `db:"name" json:"name"`
+	DarkMode *bool  `db:"dark_mode" json:"darkMode"`
 }
 
 // Project represents a film project
@@ -23,21 +24,23 @@ type Project struct {
 
 // Shot represents a shot in a project
 type Shot struct {
-	ID                   string         `db:"id" json:"id"`
-	ProjectID            string         `db:"project_id" json:"projectId"`
-	Title                string         `db:"title" json:"title"`
-	Description          string         `db:"description" json:"description"`
-	Status               string         `db:"status" json:"status"`
-	StartTime            sql.NullString `db:"start_time" json:"startTime"`
-	Duration             string         `db:"duration" json:"duration"`
-	Location             string         `db:"location" json:"location"`
-	Remarks              sql.NullString `db:"remarks" json:"remarks"`
-	Date                 sql.NullString `db:"date" json:"date"`
-	SceneNumber          sql.NullString `db:"scene_number" json:"sceneNumber"`
-	EquipmentIDs         []byte         `db:"equipment_ids" json:"equipmentIds"`
-	PreparedEquipmentIDs []byte         `db:"prepared_equipment_ids" json:"preparedEquipmentIds"`
-	CreatedAt            time.Time      `db:"created_at" json:"createdAt"`
-	UpdatedAt            sql.NullTime   `db:"updated_at" json:"updatedAt"`
+	ID                   string          `db:"id" json:"id"`
+	ProjectID            string          `db:"project_id" json:"projectId"`
+	Title                string          `db:"title" json:"title"`
+	Description          string          `db:"description" json:"description"`
+	Status               string          `db:"status" json:"status"`
+	StartTime            sql.NullString  `db:"start_time" json:"startTime"`
+	Duration             string          `db:"duration" json:"duration"`
+	Location             string          `db:"location" json:"location"`
+	LocationLat          sql.NullFloat64 `db:"location_lat" json:"locationLat"`
+	LocationLng          sql.NullFloat64 `db:"location_lng" json:"locationLng"`
+	Remarks              sql.NullString  `db:"remarks" json:"remarks"`
+	Date                 sql.NullString  `db:"date" json:"date"`
+	SceneNumber          sql.NullString  `db:"scene_number" json:"sceneNumber"`
+	EquipmentIDs         []byte          `db:"equipment_ids" json:"equipmentIds"`
+	PreparedEquipmentIDs []byte          `db:"prepared_equipment_ids" json:"preparedEquipmentIds"`
+	CreatedAt            time.Time       `db:"created_at" json:"createdAt"`
+	UpdatedAt            sql.NullTime    `db:"updated_at" json:"updatedAt"`
 }
 
 // Equipment represents user inventory items

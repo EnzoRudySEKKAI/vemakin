@@ -12,6 +12,7 @@ import { StatusToggle } from '@/components/molecules/StatusToggle'
 import { Text, Input, Button, Textarea } from '@/components/atoms'
 import { ConfirmModal } from '@/components/ui/ConfirmModal'
 import { TimeSelector } from '@/components/ui/TimeSelector'
+import { LocationAutocomplete } from '@/components/ui/LocationAutocomplete'
 
 interface ShotDetailViewProps {
   selectedShot: Shot
@@ -170,16 +171,16 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
           >
             <div className="p-2 space-y-4">
               {isEditing && (
-                <div className="flex p-1 bg-white/5 rounded-xl border border-white/5 mx-2">
+                <div className="flex p-1 bg-gray-100 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/5 mx-2">
                   <button
                     onClick={() => setActiveGearTab('list')}
-                    className={`flex-1 py-1.5 text-[10px] font-medium rounded-lg transition-all ${activeGearTab === 'list' ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/50'}`}
+                    className={`flex-1 py-1.5 text-[10px] font-medium rounded-lg transition-all ${activeGearTab === 'list' ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-white/30 hover:text-gray-700 dark:hover:text-white/50'}`}
                   >
                     Assigned
                   </button>
                   <button
                     onClick={() => setActiveGearTab('pool')}
-                    className={`flex-1 py-1.5 text-[10px] font-medium rounded-lg transition-all ${activeGearTab === 'pool' ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/50'}`}
+                    className={`flex-1 py-1.5 text-[10px] font-medium rounded-lg transition-all ${activeGearTab === 'pool' ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-white/30 hover:text-gray-700 dark:hover:text-white/50'}`}
                   >
                     Browse Pool
                   </button>
@@ -206,16 +207,16 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                             <div className="flex items-center gap-4 min-w-0">
                               <div className={`p-2.5 rounded-xl transition-all ${isReady
                                 ? 'bg-primary/20 text-primary'
-                                : 'bg-white/5 text-white/20'
+                                : 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/20'
                                 }`}>
                                 <Icon size={18} strokeWidth={2} />
                               </div>
                               <div className="min-w-0">
-                                <p className={`text-sm font-medium truncate transition-colors ${isReady ? 'text-primary/70' : 'text-white/60'}`}>
+                                <p className={`text-sm font-medium truncate transition-colors ${isReady ? 'text-primary/70' : 'text-gray-600 dark:text-white/60'}`}>
                                   {item ? (item.customName || item.name) : 'Unknown'}
                                 </p>
                                 <div className="flex items-center gap-2 mt-0.5">
-                                  <span className="text-[10px] font-medium text-white/30">
+                                  <span className="text-[10px] font-medium text-gray-500 dark:text-white/30">
                                     {item?.category}
                                   </span>
                                 </div>
@@ -224,7 +225,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                             {isEditing ? (
                               <button
                                 onClick={() => handleRemoveEquipment(eId)}
-                                className="w-8 h-8 flex items-center justify-center text-white/20 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                                className="w-8 h-8 flex items-center justify-center text-gray-400 dark:text-white/20 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
                               >
                                 <Plus size={16} className="rotate-45" />
                               </button>
@@ -233,7 +234,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                                 onClick={() => onToggleEquipment(selectedShot.id, eId)}
                                 className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 ${isReady
                                   ? 'bg-primary text-white shadow-[0_0_10px_rgba(78,71,221,0.3)] scale-100'
-                                  : 'bg-white/5 text-white/10 hover:bg-white/10 hover:text-primary scale-95 hover:scale-100'
+                                  : 'bg-gray-100 dark:bg-white/5 text-gray-200 dark:text-white/10 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-primary scale-95 hover:scale-100'
                                   }`}
                               >
                                 <Check size={14} strokeWidth={3} />
@@ -260,7 +261,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                       placeholder="Search items..."
                       variant="underline"
                       fullWidth
-                      leftIcon={<Search size={14} className="text-white/20" />}
+                      leftIcon={<Search size={14} className="text-gray-400 dark:text-white/20" />}
                     />
                     <div className="space-y-1 max-h-[400px] overflow-y-auto custom-scrollbar pr-1">
                       {availableGear.length > 0 ? availableGear.map(gear => {
@@ -272,26 +273,26 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                             className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all text-left group border border-transparent hover:border-white/5"
                           >
                             <div className="flex items-center gap-4 min-w-0">
-                              <div className="p-2.5 bg-white/5 text-white/20 rounded-xl group-hover:text-primary group-hover:bg-primary/10 transition-all">
+                              <div className="p-2.5 bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/20 rounded-xl group-hover:text-primary group-hover:bg-primary/10 transition-all">
                                 <Icon size={18} strokeWidth={2} />
                               </div>
                               <div className="min-w-0">
-                                <p className="text-sm font-medium text-white/50 group-hover:text-white transition-colors truncate">
+                                <p className="text-sm font-medium text-gray-600 dark:text-white/50 group-hover:text-gray-900 dark:group-hover:text-white transition-colors truncate">
                                   {gear.customName || gear.name}
                                 </p>
                                 <div className="flex items-center gap-2 mt-0.5">
-                                  <span className="text-[10px] font-medium text-white/30 group-hover:text-white/50">
+                                  <span className="text-[10px] font-medium text-gray-500 dark:text-white/30 group-hover:text-gray-700 dark:group-hover:text-white/50">
                                     {gear.category}
                                   </span>
                                   {gear.status !== 'available' && (
-                                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/30 font-medium">
+                                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-white/30 font-medium">
                                       {gear.status}
                                     </span>
                                   )}
                                 </div>
                               </div>
                             </div>
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white/10 group-hover:text-primary group-hover:bg-primary/10 transition-all">
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-200 dark:text-white/10 group-hover:text-primary group-hover:bg-primary/10 transition-all">
                               <Plus size={16} />
                             </div>
                           </button>
@@ -356,7 +357,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
               <>
                 {/* Scene Identity */}
                 <div className="w-full">
-                  <span className="text-[10px] text-white/40 font-medium mb-2 block">Scene identity</span>
+                  <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Scene identity</span>
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <div className="sm:col-span-3">
                       <Input
@@ -374,7 +375,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                         value={editedItem.sceneNumber}
                         onChange={e => setEditedItem({ ...editedItem, sceneNumber: e.target.value })}
                         placeholder="Scene #"
-                        leftIcon={<span className="text-[10px] font-bold text-white/20">SC</span>}
+                        leftIcon={<span className="text-[10px] font-bold text-gray-400 dark:text-white/20">SC</span>}
                         fullWidth
                         variant="underline"
                       />
@@ -384,7 +385,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
 
                 {/* Schedule */}
                 <div className="w-full">
-                  <span className="text-[10px] text-white/40 font-medium mb-2 block">Schedule</span>
+                  <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Schedule</span>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
                     <div className="relative">
                       <Input
@@ -402,20 +403,22 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
 
                 {/* Location */}
                 <div className="w-full relative z-20">
-                  <span className="text-[10px] text-white/40 font-medium mb-2 block">Location</span>
-                  <Input
-                    type="text"
+                  <LocationAutocomplete
                     value={editedItem.location}
-                    onChange={e => setEditedItem({ ...editedItem, location: e.target.value })}
+                    onChange={(value, location) => setEditedItem(prev => ({ 
+                      ...prev, 
+                      location: value,
+                      locationLat: location?.lat,
+                      locationLng: location?.lng
+                    }))}
                     placeholder="Search filming location..."
-                    fullWidth
-                    variant="underline"
+                    label="Location"
                   />
                 </div>
 
                 {/* Description */}
                 <div className="w-full">
-                  <span className="text-[10px] text-white/40 font-medium mb-2 block">Description</span>
+                  <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Description</span>
                   <Textarea
                     value={editedItem.description}
                     onChange={e => setEditedItem({ ...editedItem, description: e.target.value })}
@@ -474,10 +477,10 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                   onClick={() => onOpenNote?.(note.id)}
                   className="flex flex-col items-start text-left p-5 bg-white/5 border border-white/5 rounded-2xl hover:border-primary/30 transition-all group"
                 >
-                  <div className="text-sm font-bold text-white mb-2 group-hover:text-primary transition-colors">
+                  <div className="text-sm font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary transition-colors">
                     {note.title || "Untitled Note"}
                   </div>
-                  <div className="text-[11px] text-white/30 truncate w-full font-medium">
+                  <div className="text-[11px] text-gray-500 dark:text-white/30 truncate w-full font-medium">
                     {note.content || "Empty content"}
                   </div>
                 </button>

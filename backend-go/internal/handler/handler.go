@@ -60,7 +60,7 @@ func NewHandler(
 // Health check
 func (h *Handler) Health(c echo.Context) error {
 	ctx := c.Request().Context()
-	_, err := h.projectRepo.GetByUser(ctx, "health-check", 0, 0)
+	err := h.projectRepo.Ping(ctx)
 
 	health := dto.HealthResponse{
 		Status: "ok",
@@ -68,8 +68,7 @@ func (h *Handler) Health(c echo.Context) error {
 		Cache:  h.catalogCache.GetStats(),
 	}
 
-	// Ignore "no rows" error - that's expected for health check query
-	if err != nil && err.Error() != "sql: no rows in result set" {
+	if err != nil {
 		health.DB = "error: " + err.Error()
 		health.Status = "degraded"
 	}
@@ -222,18 +221,14 @@ func (h *Handler) GetShots(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "project_id is required"})
 	}
 
-	// Verify ownership
-	if err := h.projectRepo.CheckOwnership(c.Request().Context(), projectID, userID); err != nil {
-		return c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Project not found"})
-	}
-
 	skip, _ := strconv.Atoi(c.QueryParam("skip"))
 	limit, _ := strconv.Atoi(c.QueryParam("limit"))
 	if limit == 0 {
 		limit = 100
 	}
 
-	shots, err := h.shotRepo.GetByProject(c.Request().Context(), projectID, limit, skip)
+	// Use CTE-based query that checks ownership in same query
+	shots, err := h.shotRepo.GetByProjectAndUser(c.Request().Context(), projectID, userID, limit, skip)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 	}
@@ -253,6 +248,7 @@ func (h *Handler) CreateShot(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "project_id is required"})
 	}
 
+	// Verify ownership using CTE
 	if err := h.projectRepo.CheckOwnership(c.Request().Context(), projectID, userID); err != nil {
 		return c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Project not found"})
 	}
@@ -295,11 +291,8 @@ func (h *Handler) GetShot(c echo.Context) error {
 	shotID := c.Param("id")
 	projectID := c.QueryParam("project_id")
 
-	if err := h.projectRepo.CheckOwnership(c.Request().Context(), projectID, userID); err != nil {
-		return c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Project not found"})
-	}
-
-	shot, err := h.shotRepo.GetByID(c.Request().Context(), shotID, projectID)
+	// Use CTE-based query that checks ownership in same query
+	shot, err := h.shotRepo.GetByIDAndUser(c.Request().Context(), shotID, projectID, userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 	}
@@ -375,11 +368,16 @@ func (h *Handler) DeleteShot(c echo.Context) error {
 	shotID := c.Param("id")
 	projectID := c.QueryParam("project_id")
 
-	if err := h.projectRepo.CheckOwnership(c.Request().Context(), projectID, userID); err != nil {
-		return c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Project not found"})
+	// Use CTE-based query that checks ownership in same query
+	shot, err := h.shotRepo.GetByIDAndUser(c.Request().Context(), shotID, projectID, userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
+	}
+	if shot == nil {
+		return c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Shot not found"})
 	}
 
-	err := h.shotRepo.Delete(c.Request().Context(), shotID, projectID)
+	err = h.shotRepo.Delete(c.Request().Context(), shotID, projectID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 	}
@@ -487,15 +485,24 @@ func (h *Handler) GetInventory(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 	}
 
+	// Batch fetch specs for all equipment with catalog_item_id
+	catalogItemIDs := make([]string, 0, len(equipment))
+	for _, e := range equipment {
+		if e.CatalogItemID != nil && *e.CatalogItemID != "" {
+			catalogItemIDs = append(catalogItemIDs, *e.CatalogItemID)
+		}
+	}
+
+	specsMap := make(map[string]map[string]interface{})
+	if len(catalogItemIDs) > 0 {
+		specsMap, _ = h.equipmentRepo.GetSpecsBatch(c.Request().Context(), catalogItemIDs)
+	}
+
 	var response []dto.EquipmentResponse
 	for _, e := range equipment {
-		// Fetch specs if catalog_item_id exists
-		specs := make(map[string]interface{})
-		if e.CatalogItemID != nil && *e.CatalogItemID != "" {
-			specs, _ = h.equipmentRepo.GetSpecsForCatalogItem(c.Request().Context(), *e.CatalogItemID)
-			if specs == nil {
-				specs = make(map[string]interface{})
-			}
+		specs := specsMap[*e.CatalogItemID]
+		if specs == nil {
+			specs = make(map[string]interface{})
 		}
 
 		response = append(response, dto.EquipmentResponse{
@@ -707,17 +714,13 @@ func (h *Handler) GetNotes(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "project_id is required"})
 	}
 
-	if err := h.projectRepo.CheckOwnership(c.Request().Context(), projectID, userID); err != nil {
-		return c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Project not found"})
-	}
-
 	skip, _ := strconv.Atoi(c.QueryParam("skip"))
 	limit, _ := strconv.Atoi(c.QueryParam("limit"))
 	if limit == 0 {
 		limit = 100
 	}
 
-	notes, err := h.noteRepo.GetByProject(c.Request().Context(), projectID, limit, skip)
+	notes, err := h.noteRepo.GetByProjectAndUser(c.Request().Context(), projectID, userID, limit, skip)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 	}
@@ -789,11 +792,7 @@ func (h *Handler) GetNote(c echo.Context) error {
 	noteID := c.Param("id")
 	projectID := c.QueryParam("project_id")
 
-	if err := h.projectRepo.CheckOwnership(c.Request().Context(), projectID, userID); err != nil {
-		return c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Project not found"})
-	}
-
-	note, err := h.noteRepo.GetByID(c.Request().Context(), noteID, projectID)
+	note, err := h.noteRepo.GetByIDAndUser(c.Request().Context(), noteID, projectID, userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 	}
@@ -866,11 +865,15 @@ func (h *Handler) DeleteNote(c echo.Context) error {
 	noteID := c.Param("id")
 	projectID := c.QueryParam("project_id")
 
-	if err := h.projectRepo.CheckOwnership(c.Request().Context(), projectID, userID); err != nil {
-		return c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Project not found"})
+	note, err := h.noteRepo.GetByIDAndUser(c.Request().Context(), noteID, projectID, userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
+	}
+	if note == nil {
+		return c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Note not found"})
 	}
 
-	err := h.noteRepo.Delete(c.Request().Context(), noteID, projectID)
+	err = h.noteRepo.Delete(c.Request().Context(), noteID, projectID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 	}
@@ -887,17 +890,13 @@ func (h *Handler) GetTasks(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "project_id is required"})
 	}
 
-	if err := h.projectRepo.CheckOwnership(c.Request().Context(), projectID, userID); err != nil {
-		return c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Project not found"})
-	}
-
 	skip, _ := strconv.Atoi(c.QueryParam("skip"))
 	limit, _ := strconv.Atoi(c.QueryParam("limit"))
 	if limit == 0 {
 		limit = 100
 	}
 
-	tasks, err := h.taskRepo.GetByProject(c.Request().Context(), projectID, limit, skip)
+	tasks, err := h.taskRepo.GetByProjectAndUser(c.Request().Context(), projectID, userID, limit, skip)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 	}
@@ -981,11 +980,7 @@ func (h *Handler) GetTask(c echo.Context) error {
 	taskID := c.Param("id")
 	projectID := c.QueryParam("project_id")
 
-	if err := h.projectRepo.CheckOwnership(c.Request().Context(), projectID, userID); err != nil {
-		return c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Project not found"})
-	}
-
-	task, err := h.taskRepo.GetByID(c.Request().Context(), taskID, projectID)
+	task, err := h.taskRepo.GetByIDAndUser(c.Request().Context(), taskID, projectID, userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 	}
@@ -1068,11 +1063,15 @@ func (h *Handler) DeleteTask(c echo.Context) error {
 	taskID := c.Param("id")
 	projectID := c.QueryParam("project_id")
 
-	if err := h.projectRepo.CheckOwnership(c.Request().Context(), projectID, userID); err != nil {
-		return c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Project not found"})
+	task, err := h.taskRepo.GetByIDAndUser(c.Request().Context(), taskID, projectID, userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
+	}
+	if task == nil {
+		return c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Task not found"})
 	}
 
-	err := h.taskRepo.Delete(c.Request().Context(), taskID, projectID)
+	err = h.taskRepo.Delete(c.Request().Context(), taskID, projectID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 	}
@@ -1255,14 +1254,40 @@ func (h *Handler) GetInitialData(c echo.Context) error {
 
 	ctx := c.Request().Context()
 
-	// Fetch projects
-	projects, err := h.projectRepo.GetByUser(ctx, userID, 100, 0)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
+	type projectResult struct {
+		projects []models.Project
+		err      error
+	}
+	type equipmentResult struct {
+		equipment []models.Equipment
+		err       error
+	}
+
+	projectChan := make(chan projectResult, 1)
+	equipmentChan := make(chan equipmentResult, 1)
+
+	go func() {
+		projects, err := h.projectRepo.GetByUser(ctx, userID, 100, 0)
+		projectChan <- projectResult{projects: projects, err: err}
+	}()
+
+	go func() {
+		equipment, err := h.equipmentRepo.GetByUser(ctx, userID, 100, 0)
+		equipmentChan <- equipmentResult{equipment: equipment, err: err}
+	}()
+
+	pr := <-projectChan
+	if pr.err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: pr.err.Error()})
+	}
+
+	er := <-equipmentChan
+	if er.err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: er.err.Error()})
 	}
 
 	var projectResponses []dto.ProjectResponse
-	for _, p := range projects {
+	for _, p := range pr.projects {
 		projectResponses = append(projectResponses, dto.ProjectResponse{
 			ID:        p.ID,
 			Name:      p.Name,
@@ -1272,15 +1297,43 @@ func (h *Handler) GetInitialData(c echo.Context) error {
 		})
 	}
 
-	// Fetch inventory
-	equipment, err := h.equipmentRepo.GetByUser(ctx, userID, 100, 0)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
+	// Batch load specs for equipment
+	catalogItemIDs := make([]string, 0, len(er.equipment))
+	for _, e := range er.equipment {
+		if e.CatalogItemID != nil && *e.CatalogItemID != "" {
+			catalogItemIDs = append(catalogItemIDs, *e.CatalogItemID)
+		}
+	}
+
+	specsMap := make(map[string]map[string]interface{})
+	if len(catalogItemIDs) > 0 {
+		specsMap, _ = h.equipmentRepo.GetSpecsBatch(ctx, catalogItemIDs)
 	}
 
 	var equipmentResponses []dto.EquipmentResponse
-	for _, e := range equipment {
-		equipmentResponses = append(equipmentResponses, h.buildEquipmentResponseBasic(e))
+	for _, e := range er.equipment {
+		specs := specsMap[*e.CatalogItemID]
+		if specs == nil {
+			specs = make(map[string]interface{})
+		}
+		equipmentResponses = append(equipmentResponses, dto.EquipmentResponse{
+			ID:              e.ID,
+			UserID:          e.UserID,
+			Name:            e.Name,
+			CatalogItemID:   e.CatalogItemID,
+			CustomName:      e.CustomName,
+			SerialNumber:    e.SerialNumber,
+			Category:        e.Category,
+			PricePerDay:     e.PricePerDay,
+			RentalPrice:     e.RentalPrice,
+			RentalFrequency: e.RentalFrequency,
+			Quantity:        e.Quantity,
+			IsOwned:         e.IsOwned,
+			Status:          e.Status,
+			Specs:           specs,
+			CreatedAt:       e.CreatedAt,
+			UpdatedAt:       nullTimeToPtr(e.UpdatedAt),
+		})
 	}
 
 	response := dto.InitialDataResponse{
@@ -1288,53 +1341,47 @@ func (h *Handler) GetInitialData(c echo.Context) error {
 		Inventory: equipmentResponses,
 	}
 
-	// If project_id provided, also fetch project data
 	if projectID != "" {
-		if err := h.projectRepo.CheckOwnership(ctx, projectID, userID); err == nil {
-			// Shots
-			shots, _ := h.shotRepo.GetByProject(ctx, projectID, 100, 0)
-			var shotResponses []dto.ShotResponse
-			for _, s := range shots {
-				shotResponses = append(shotResponses, h.shotToResponse(s))
-			}
-			response.Shots = shotResponses
-
-			// Notes
-			notes, _ := h.noteRepo.GetByProject(ctx, projectID, 100, 0)
-			var noteResponses []dto.NoteResponse
-			for _, n := range notes {
-				noteResponses = append(noteResponses, dto.NoteResponse{
-					ID:        n.ID,
-					ProjectID: n.ProjectID,
-					Title:     n.Title,
-					Content:   n.Content,
-					ShotID:    n.ShotID,
-					TaskID:    n.TaskID,
-					CreatedAt: n.CreatedAt,
-					UpdatedAt: nullTimeToPtr(n.UpdatedAt),
-				})
-			}
-			response.Notes = noteResponses
-
-			// Tasks
-			tasks, _ := h.taskRepo.GetByProject(ctx, projectID, 100, 0)
-			var taskResponses []dto.TaskResponse
-			for _, t := range tasks {
-				taskResponses = append(taskResponses, dto.TaskResponse{
-					ID:          t.ID,
-					ProjectID:   t.ProjectID,
-					Category:    t.Category,
-					Title:       t.Title,
-					Status:      t.Status,
-					Priority:    t.Priority,
-					DueDate:     t.DueDate,
-					Description: t.Description,
-					CreatedAt:   t.CreatedAt,
-					UpdatedAt:   nullTimeToPtr(t.UpdatedAt),
-				})
-			}
-			response.Tasks = taskResponses
+		shots, _ := h.shotRepo.GetByProjectAndUser(ctx, projectID, userID, 100, 0)
+		var shotResponses []dto.ShotResponse
+		for _, s := range shots {
+			shotResponses = append(shotResponses, h.shotToResponse(s))
 		}
+		response.Shots = shotResponses
+
+		notes, _ := h.noteRepo.GetByProjectAndUser(ctx, projectID, userID, 100, 0)
+		var noteResponses []dto.NoteResponse
+		for _, n := range notes {
+			noteResponses = append(noteResponses, dto.NoteResponse{
+				ID:        n.ID,
+				ProjectID: n.ProjectID,
+				Title:     n.Title,
+				Content:   n.Content,
+				ShotID:    n.ShotID,
+				TaskID:    n.TaskID,
+				CreatedAt: n.CreatedAt,
+				UpdatedAt: nullTimeToPtr(n.UpdatedAt),
+			})
+		}
+		response.Notes = noteResponses
+
+		tasks, _ := h.taskRepo.GetByProjectAndUser(ctx, projectID, userID, 100, 0)
+		var taskResponses []dto.TaskResponse
+		for _, t := range tasks {
+			taskResponses = append(taskResponses, dto.TaskResponse{
+				ID:          t.ID,
+				ProjectID:   t.ProjectID,
+				Category:    t.Category,
+				Title:       t.Title,
+				Status:      t.Status,
+				Priority:    t.Priority,
+				DueDate:     t.DueDate,
+				Description: t.Description,
+				CreatedAt:   t.CreatedAt,
+				UpdatedAt:   nullTimeToPtr(t.UpdatedAt),
+			})
+		}
+		response.Tasks = taskResponses
 	}
 
 	return c.JSON(http.StatusOK, response)
@@ -1350,21 +1397,54 @@ func (h *Handler) GetProjectData(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Project not found"})
 	}
 
-	// Shots
-	shots, err := h.shotRepo.GetByProject(ctx, projectID, 100, 0)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
+	type result struct {
+		data any
+		err  error
 	}
+
+	shotsChan := make(chan result, 1)
+	notesChan := make(chan result, 1)
+	tasksChan := make(chan result, 1)
+
+	go func() {
+		shots, err := h.shotRepo.GetByProjectAndUser(ctx, projectID, userID, 100, 0)
+		shotsChan <- result{data: shots, err: err}
+	}()
+
+	go func() {
+		notes, err := h.noteRepo.GetByProjectAndUser(ctx, projectID, userID, 100, 0)
+		notesChan <- result{data: notes, err: err}
+	}()
+
+	go func() {
+		tasks, err := h.taskRepo.GetByProjectAndUser(ctx, projectID, userID, 100, 0)
+		tasksChan <- result{data: tasks, err: err}
+	}()
+
+	shotsResult := <-shotsChan
+	if shotsResult.err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: shotsResult.err.Error()})
+	}
+
+	notesResult := <-notesChan
+	if notesResult.err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: notesResult.err.Error()})
+	}
+
+	tasksResult := <-tasksChan
+	if tasksResult.err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: tasksResult.err.Error()})
+	}
+
+	shots := shotsResult.data.([]models.Shot)
+	notes := notesResult.data.([]models.Note)
+	tasks := tasksResult.data.([]models.PostProdTask)
+
 	var shotResponses []dto.ShotResponse
 	for _, s := range shots {
 		shotResponses = append(shotResponses, h.shotToResponse(s))
 	}
 
-	// Notes
-	notes, err := h.noteRepo.GetByProject(ctx, projectID, 100, 0)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
-	}
 	var noteResponses []dto.NoteResponse
 	for _, n := range notes {
 		noteResponses = append(noteResponses, dto.NoteResponse{
@@ -1379,11 +1459,6 @@ func (h *Handler) GetProjectData(c echo.Context) error {
 		})
 	}
 
-	// Tasks
-	tasks, err := h.taskRepo.GetByProject(ctx, projectID, 100, 0)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
-	}
 	var taskResponses []dto.TaskResponse
 	for _, t := range tasks {
 		taskResponses = append(taskResponses, dto.TaskResponse{
@@ -1404,5 +1479,62 @@ func (h *Handler) GetProjectData(c echo.Context) error {
 		Shots: shotResponses,
 		Notes: noteResponses,
 		Tasks: taskResponses,
+	})
+}
+
+// ============ Users ============
+
+// GetUser returns the current user's profile including preferences
+func (h *Handler) GetUser(c echo.Context) error {
+	userID := c.Get("userID").(string)
+
+	user, err := h.userRepo.GetByID(c.Request().Context(), userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
+	}
+	if user == nil {
+		return c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "User not found"})
+	}
+
+	return c.JSON(http.StatusOK, dto.UserResponse{
+		ID:       user.ID,
+		Email:    user.Email,
+		Name:     user.Name,
+		DarkMode: user.DarkMode,
+	})
+}
+
+// UpdateUser updates the current user's profile and preferences
+func (h *Handler) UpdateUser(c echo.Context) error {
+	userID := c.Get("userID").(string)
+
+	var req dto.UpdateUserRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+	}
+
+	updates := make(map[string]interface{})
+	if req.DarkMode != nil {
+		updates["dark_mode"] = *req.DarkMode
+	}
+
+	if len(updates) == 0 {
+		return c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "No fields to update"})
+	}
+
+	if err := h.userRepo.Update(c.Request().Context(), userID, updates); err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
+	}
+
+	user, err := h.userRepo.GetByID(c.Request().Context(), userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, dto.UserResponse{
+		ID:       user.ID,
+		Email:    user.Email,
+		Name:     user.Name,
+		DarkMode: user.DarkMode,
 	})
 }

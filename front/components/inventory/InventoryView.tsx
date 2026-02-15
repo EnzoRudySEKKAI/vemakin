@@ -123,12 +123,12 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
   if (filteredInventory.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-300px)] w-full overflow-hidden px-6 select-none">
-        <div className="w-14 h-14 bg-[#16181D] rounded-xl flex items-center justify-center mb-6 border border-white/[0.05]">
-          <Package size={24} className="text-white/40" />
+        <div className="w-14 h-14 bg-gray-100 dark:bg-[#16181D] rounded-xl flex items-center justify-center mb-6 border border-gray-200 dark:border-white/[0.05]">
+          <Package size={24} className="text-gray-500 dark:text-white/40" />
         </div>
         <div className="text-center max-w-sm">
-          <h2 className="text-xl font-semibold text-white mb-2">Empty Repository</h2>
-          <p className="text-white/30 text-sm">No items match your criteria</p>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Empty Repository</h2>
+          <p className="text-gray-500 dark:text-white/30 text-sm">No items match your criteria</p>
         </div>
       </div>
     )
@@ -144,7 +144,7 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
               <div className="flex items-center gap-2">
                 {(() => {
                   const Icon = getCategoryIcon(category)
-                  return <Icon size={16} className="text-white/40" />
+                  return <Icon size={16} className="text-gray-500 dark:text-white/40" />
                 })()}
                 <span>{category}</span>
               </div>
@@ -158,36 +158,36 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
                   <div
                     key={item.id}
                     onClick={() => onEquipmentClick(item.id)}
-                    className="group p-4 rounded-xl bg-[#16181D] border border-white/[0.05] hover:border-white/[0.1] transition-all cursor-pointer"
+                    className="group p-4 rounded-xl bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] hover:border-gray-300 dark:hover:border-white/[0.1] transition-all cursor-pointer"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
-                        <div className="text-sm text-white font-medium truncate">
+                        <div className="text-sm text-gray-900 dark:text-white font-medium truncate">
                           {title}
                         </div>
                         {subtitle && (
-                          <div className="mt-1 text-[10px] font-medium text-white/40 truncate">
+                          <div className="mt-1 text-[10px] font-medium text-gray-500 dark:text-white/40 truncate">
                             {subtitle}
                           </div>
                         )}
                       </div>
 
                       <div className="shrink-0 text-right">
-                        <span className="block text-[10px] font-medium text-white/40 mb-1">
+                        <span className="block text-[10px] font-medium text-gray-500 dark:text-white/40 mb-1">
                           {item.isOwned ? 'Owned' : 'Rented'}
                         </span>
                         {!item.isOwned && (
                           <div className="flex items-baseline justify-end gap-1">
-                            <span className="text-xs text-white/40 font-medium">
+                            <span className="text-xs text-gray-500 dark:text-white/40 font-medium">
                               {currency.symbol}{(item.rentalPrice ?? item.pricePerDay ?? 0).toLocaleString()}
                             </span>
-                            <span className="text-[10px] text-white/20">/{item.rentalFrequency || 'Day'}</span>
+                            <span className="text-[10px] text-gray-400 dark:text-white/20">/{item.rentalFrequency || 'Day'}</span>
                           </div>
                         )}
                       </div>
                     </div>
 
-                    <div className="mt-3 pt-3 border-t border-white/[0.05]">
+                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-white/[0.05]">
                       <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                         {(() => {
                           const specs = Object.entries(item.specs).slice(0, 4)
@@ -197,10 +197,10 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
                           }
                           return slots.map(([key, val], idx) => (
                             <div key={`${item.id}-spec-${idx}`} className="flex flex-col min-w-0">
-                              <span className="text-[9px] text-white/20 uppercase font-bold tracking-wider truncate mb-0.5">
+                              <span className="text-[9px] text-gray-400 dark:text-white/20 uppercase font-bold tracking-wider truncate mb-0.5">
                                 {key === '—' ? '—' : key.replace(/([A-Z])/g, ' $1').trim()}
                               </span>
-                              <span className={`text-xs truncate ${key === '—' ? 'text-white/5' : 'text-white/50'}`} title={String(val)}>
+                              <span className={`text-xs truncate ${key === '—' ? 'text-gray-200 dark:text-white/5' : 'text-gray-600 dark:text-white/50'}`} title={String(val)}>
                                 {String(val)}
                               </span>
                             </div>
@@ -223,27 +223,27 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
               <div
                 key={item.id}
                 onClick={() => onEquipmentClick(item.id)}
-                className="flex items-center gap-4 p-3 rounded-xl bg-[#16181D] border border-white/[0.05] hover:border-white/[0.1] transition-all cursor-pointer"
+                className="flex items-center gap-4 p-3 rounded-xl bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] hover:border-gray-300 dark:hover:border-white/[0.1] transition-all cursor-pointer"
               >
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm text-white font-medium truncate">{title}</div>
+                  <div className="text-sm text-gray-900 dark:text-white font-medium truncate">{title}</div>
                   {subtitle && (
-                    <div className="mt-1 text-[10px] font-medium text-white/40 truncate">
+                    <div className="mt-1 text-[10px] font-medium text-gray-500 dark:text-white/40 truncate">
                       {subtitle}
                     </div>
                   )}
                 </div>
 
                 <div className="text-right shrink-0">
-                  <span className="block text-[10px] font-medium text-white/40 mb-1">
+                  <span className="block text-[10px] font-medium text-gray-500 dark:text-white/40 mb-1">
                     {item.isOwned ? 'Owned' : 'Rented'}
                   </span>
                   {!item.isOwned && (
                     <div className="flex items-baseline justify-end gap-1">
-                      <span className="text-xs text-white/40">
+                      <span className="text-xs text-gray-500 dark:text-white/40">
                         {currency.symbol}{(item.rentalPrice ?? item.pricePerDay ?? 0).toLocaleString()}
                       </span>
-                      <span className="text-[10px] text-white/20">/{item.rentalFrequency || 'Day'}</span>
+                      <span className="text-[10px] text-gray-400 dark:text-white/20">/{item.rentalFrequency || 'Day'}</span>
                     </div>
                   )}
                 </div>

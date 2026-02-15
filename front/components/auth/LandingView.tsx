@@ -16,7 +16,7 @@ const GoogleIcon = () => (
 )
 
 const AppleIcon = () => (
-  <svg viewBox="0 0 24 24" width="20" height="20" className="fill-white" xmlns="http://www.w3.org/2000/svg">
+  <svg viewBox="0 0 24 24" width="20" height="20" className="fill-gray-900 dark:fill-white" xmlns="http://www.w3.org/2000/svg">
     <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-.68-.3-1.3-.4-2.03-.4-.73 0-1.35.1-2.03.4-1.03.48-2.1.55-3.08-.4-1.98-1.95-2.95-5.38-1.45-8.1 1.08-1.95 3-2.9 4.95-2.9 1.25 0 2.25.4 2.95.68.7.28 1.15.28 1.85.03.88-.35 2.05-.7 3.3-.68 1.55.02 2.98.78 3.8 1.95-3.18 1.58-2.65 6.08.53 7.33-.25.7-.6 1.48-1.15 2.05-.75.75-1.6 1.38-2.58 1.65zm-1.85-11.8c-.28-1.58.9-3.23 2.45-3.95.23 1.7-1.18 3.4-2.45 3.95z" />
   </svg>
 )
@@ -35,7 +35,7 @@ export const LandingView: React.FC<LandingViewProps> = ({ onSignIn, onSignUp, on
         <div className="text-center space-y-6 animate-in slide-in-from-top-8 duration-700">
           <Logo size="xl" showText={false} className="justify-center" />
           <div>
-            <Text variant="hero" className="mb-2 text-white">Vemakin</Text>
+            <Text variant="hero" className="mb-2 text-gray-900 dark:text-white">Vemakin</Text>
             <Text variant="body" color="muted">Production OS</Text>
           </div>
         </div>
@@ -59,16 +59,16 @@ export const LandingView: React.FC<LandingViewProps> = ({ onSignIn, onSignUp, on
             variant="secondary"
             size="lg"
             fullWidth
-            className="h-14 text-base bg-[#16181D] border-white/5 text-white hover:bg-white/5"
+            className="h-14 text-base bg-gray-100 dark:bg-[#16181D] border-gray-200 dark:border-white/5 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-white/5"
           >
             Create Account
           </Button>
 
           {/* Divider */}
           <div className="py-4 flex items-center gap-4">
-            <div className="h-px bg-white/10 flex-1" />
+            <div className="h-px bg-gray-200 dark:bg-white/10 flex-1" />
             <Text variant="label" color="muted" className="text-[10px] uppercase tracking-widest">Or Continue With</Text>
-            <div className="h-px bg-white/10 flex-1" />
+            <div className="h-px bg-gray-200 dark:bg-white/10 flex-1" />
           </div>
 
           {/* Social Logins */}
@@ -78,7 +78,7 @@ export const LandingView: React.FC<LandingViewProps> = ({ onSignIn, onSignUp, on
               variant="secondary"
               size="md"
               leftIcon={<GoogleIcon />}
-              className="bg-[#16181D] border-white/5 text-white hover:bg-white/5"
+              className="bg-gray-100 dark:bg-[#16181D] border-gray-200 dark:border-white/5 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-white/5"
             >
               Google
             </Button>
@@ -87,7 +87,7 @@ export const LandingView: React.FC<LandingViewProps> = ({ onSignIn, onSignUp, on
               variant="secondary"
               size="md"
               leftIcon={<AppleIcon />}
-              className="bg-[#16181D] border-white/5 text-white hover:bg-white/5"
+              className="bg-gray-100 dark:bg-[#16181D] border-gray-200 dark:border-white/5 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-white/5"
             >
               Apple
             </Button>
@@ -99,7 +99,7 @@ export const LandingView: React.FC<LandingViewProps> = ({ onSignIn, onSignUp, on
               variant="ghost"
               size="sm"
               leftIcon={<User size={14} strokeWidth={2.5} />}
-              className="text-white/40 hover:text-white"
+              className="text-gray-500 dark:text-white/40 hover:text-gray-700 dark:hover:text-white"
             >
               Continue Without Account
             </Button>
@@ -108,7 +108,7 @@ export const LandingView: React.FC<LandingViewProps> = ({ onSignIn, onSignUp, on
 
         {/* Footer */}
         <div className="text-center opacity-40">
-          <p className="text-[10px] text-white leading-relaxed">
+          <p className="text-[10px] text-gray-900 dark:text-white leading-relaxed">
             By entering, you agree to our Terms of Service and Privacy Policy.
             <br />Designed for modern filmmakers.
           </p>

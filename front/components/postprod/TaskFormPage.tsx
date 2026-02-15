@@ -87,13 +87,13 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
                   onClick={() => setForm({ ...form, category: cat.id as any, metadata: {} })}
                   className={`flex flex-col items-center gap-4 p-5 rounded-2xl border transition-all duration-500 group ${isActive
                     ? 'bg-primary/10 border-primary/30 text-primary shadow-[0_0_20px_rgba(78,71,221,0.1)]'
-                    : 'bg-white/5 border-white/5 text-white/20 hover:border-white/10 hover:text-white/40'
+                    : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/5 text-gray-400 dark:text-white/20 hover:border-gray-300 dark:hover:border-white/10 hover:text-gray-600 dark:hover:text-white/40'
                     }`}
                 >
-                  <div className={`p-2.5 rounded-xl transition-all duration-500 ${isActive ? 'bg-primary/20 scale-110' : 'group-hover:scale-105 group-hover:bg-white/5'}`}>
+                  <div className={`p-2.5 rounded-xl transition-all duration-500 ${isActive ? 'bg-primary/20 scale-110' : 'group-hover:scale-105 group-hover:bg-white dark:group-hover:bg-white/5'}`}>
                     <CatIcon size={24} strokeWidth={isActive ? 3 : 2} />
                   </div>
-                  <span className={`text-[10px] font-medium uppercase tracking-widest transition-colors ${isActive ? 'text-primary/70' : 'text-white/20 group-hover:text-white/40'}`}>
+                  <span className={`text-[10px] font-medium uppercase tracking-widest transition-colors ${isActive ? 'text-primary/70' : 'text-gray-400 dark:text-white/20 group-hover:text-gray-600 dark:group-hover:text-white/40'}`}>
                     {cat.id}
                   </span>
                 </button>
@@ -106,7 +106,7 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
       <Card title="Core specification" className="mb-8">
         <div className="p-6 space-y-12">
           <div className="w-full">
-            <span className="text-[10px] text-white/40 font-medium mb-3 block">Task objective</span>
+            <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Task objective</span>
             <Input
               type="text"
               value={form.title}
@@ -119,7 +119,7 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
           </div>
 
           <div className="w-full">
-            <span className="text-[10px] text-white/40 font-medium mb-3 block">Briefing & requirements</span>
+            <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Briefing & requirements</span>
             <Textarea
               value={form.description || ''}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -130,7 +130,7 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-12">
             <div className="flex flex-col gap-1 min-w-0">
-              <span className="text-[10px] text-white/40 font-medium mb-3 block">Timeline deadline</span>
+              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Timeline deadline</span>
               <Input
                 type="date"
                 value={form.dueDate}
@@ -141,19 +141,19 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
             </div>
 
             <div className="flex flex-col gap-1 min-w-0">
-              <span className="text-[10px] text-white/40 font-medium mb-3 block">Priority level</span>
-              <div className="relative group">
+              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Priority level</span>
+                <div className="relative group">
                 <select
                   value={form.priority}
                   onChange={(e) => setForm({ ...form, priority: e.target.value as any })}
-                  className="w-full bg-transparent border-b border-white/10 py-3 text-white/80 focus:text-white focus:outline-none focus:border-primary appearance-none cursor-pointer pr-10 text-sm font-bold tracking-tight transition-all"
+                  className="w-full bg-transparent border-b border-gray-300 dark:border-white/10 py-3 text-gray-800 dark:text-white/80 focus:text-gray-900 dark:focus:text-white focus:outline-none focus:border-primary appearance-none cursor-pointer pr-10 text-sm font-bold tracking-tight transition-all"
                 >
-                  <option value="low" className="bg-[#0F1116]">Low Tier</option>
-                  <option value="medium" className="bg-[#0F1116]">Medium Tier</option>
-                  <option value="high" className="bg-[#0F1116]">High Priority</option>
-                  <option value="critical" className="bg-[#0F1116]">Mission Critical</option>
+                  <option value="low" className="bg-white dark:bg-[#0F1116]">Low Tier</option>
+                  <option value="medium" className="bg-white dark:bg-[#0F1116]">Medium Tier</option>
+                  <option value="high" className="bg-white dark:bg-[#0F1116]">High Priority</option>
+                  <option value="critical" className="bg-white dark:bg-[#0F1116]">Mission Critical</option>
                 </select>
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-white/20 group-hover:text-primary transition-colors pointer-events-none">
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 dark:text-white/20 group-hover:text-primary transition-colors pointer-events-none">
                   <ChevronDown size={16} strokeWidth={3} />
                 </div>
               </div>
@@ -167,13 +167,13 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-12">
             {form.category === 'Script' && (
               <div className="flex flex-col gap-1 min-w-0">
-                <span className="text-[10px] text-white/40 font-medium mb-3 block">Scene reference</span>
+                <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Scene reference</span>
                 <Input
                   type="text"
                   value={form.metadata['scene'] as string || ''}
                   onChange={(e) => setForm({ ...form, metadata: { ...form.metadata, scene: e.target.value } })}
                   placeholder="e.g. 14B"
-                  leftIcon={<Hash size={16} className="text-white/20" />}
+                  leftIcon={<Hash size={16} className="text-gray-400 dark:text-white/20" />}
                   variant="underline"
                   fullWidth
                 />
@@ -182,35 +182,35 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
             {form.category === 'Editing' && (
               <>
                 <div className="flex flex-col gap-1 min-w-0">
-                  <span className="text-[10px] text-white/40 font-medium mb-3 block">Target duration</span>
+                  <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Target duration</span>
                   <Input
                     type="text"
                     value={form.metadata['duration'] as string || ''}
                     onChange={(e) => setForm({ ...form, metadata: { ...form.metadata, duration: e.target.value } })}
                     placeholder="e.g. 2m 30s"
-                    leftIcon={<Clock size={16} className="text-white/20" />}
+                    leftIcon={<Clock size={16} className="text-gray-400 dark:text-white/20" />}
                     variant="underline"
                     fullWidth
                   />
                 </div>
                 <div className="flex flex-col gap-1 min-w-0">
-                  <span className="text-[10px] text-white/40 font-medium mb-3 block">Aspect ratio</span>
+                  <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Aspect ratio</span>
                   <div className="relative group">
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-white/20 group-hover:text-primary transition-colors pointer-events-none">
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 dark:text-white/20 group-hover:text-primary transition-colors pointer-events-none">
                       <Crop size={16} />
                     </div>
                     <select
                       value={form.metadata['aspectRatio'] as string || ''}
                       onChange={(e) => setForm({ ...form, metadata: { ...form.metadata, aspectRatio: e.target.value } })}
-                      className="w-full appearance-none bg-transparent border-b border-white/10 pl-10 pr-10 py-3 text-sm font-bold tracking-tight focus:outline-none focus:border-primary transition-all cursor-pointer text-white/80 focus:text-white"
+                      className="w-full appearance-none bg-transparent border-b border-gray-300 dark:border-white/10 pl-10 pr-10 py-3 text-sm font-bold tracking-tight focus:outline-none focus:border-primary transition-all cursor-pointer text-gray-800 dark:text-white/80 focus:text-gray-900 dark:focus:text-white"
                     >
-                      <option value="" className="bg-[#0F1116]">Select Ratio</option>
-                      <option value="16:9" className="bg-[#0F1116]">16:9 (Widescreen)</option>
-                      <option value="9:16" className="bg-[#0F1116]">9:16 (Vertical)</option>
-                      <option value="2.39:1" className="bg-[#0F1116]">2.39:1 (Cinema)</option>
-                      <option value="4:3" className="bg-[#0F1116]">4:3 (Classic)</option>
+                      <option value="" className="bg-white dark:bg-[#0F1116]">Select Ratio</option>
+                      <option value="16:9" className="bg-white dark:bg-[#0F1116]">16:9 (Widescreen)</option>
+                      <option value="9:16" className="bg-white dark:bg-[#0F1116]">9:16 (Vertical)</option>
+                      <option value="2.39:1" className="bg-white dark:bg-[#0F1116]">2.39:1 (Cinema)</option>
+                      <option value="4:3" className="bg-white dark:bg-[#0F1116]">4:3 (Classic)</option>
                     </select>
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-white/20 pointer-events-none group-hover:text-primary transition-colors">
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 dark:text-white/20 pointer-events-none group-hover:text-primary transition-colors">
                       <ChevronDown size={14} strokeWidth={3} />
                     </div>
                   </div>
@@ -219,10 +219,10 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
             )}
             {(!['Script', 'Editing'].includes(form.category)) && (
               <div className="col-span-2 py-16 flex flex-col items-center justify-center text-center opacity-10">
-                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-4">
                   <Layers size={24} />
                 </div>
-                <span className="text-[10px] font-medium">Standard parameters applied</span>
+                <span className="text-[10px] font-medium text-gray-900 dark:text-white">Standard parameters applied</span>
               </div>
             )}
           </div>

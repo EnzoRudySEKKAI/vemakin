@@ -95,3 +95,15 @@ func (r *ProjectRepository) CheckOwnership(ctx context.Context, projectID, userI
 	}
 	return nil
 }
+
+func (r *ProjectRepository) Ping(ctx context.Context) error {
+	return r.db.PingContext(ctx)
+}
+
+func (r *ProjectRepository) CountByUser(ctx context.Context, userID string) (int, error) {
+	var count int
+	err := r.db.GetContext(ctx, &count, `
+		SELECT COUNT(*) FROM projects WHERE user_id = $1
+	`, userID)
+	return count, err
+}

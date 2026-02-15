@@ -4,6 +4,7 @@ import { FormLayout, FormType } from '@/components/organisms/FormLayout'
 import { Text, Input, Button, IconContainer, Textarea } from '@/components/atoms'
 import { Card } from '@/components/ui/Card'
 import { TimeSelector } from '@/components/ui/TimeSelector'
+import { LocationAutocomplete, LocationSuggestion } from '@/components/ui/LocationAutocomplete'
 import { CATEGORY_ICONS } from '@/constants'
 import { Shot, Equipment } from '@/types'
 import { timeToMinutes, calculateEndTime } from '@/utils'
@@ -37,6 +38,8 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
     title: '',
     sceneNumber: '',
     location: '',
+    locationLat: undefined as number | undefined,
+    locationLng: undefined as number | undefined,
     date: toISODate(new Date().toLocaleDateString()),
     startTime: '08:00',
     endTime: '10:00',
@@ -91,6 +94,8 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
       title: form.title,
       sceneNumber: form.sceneNumber || `${existingShots.length + 1}X`,
       location: form.location || 'Location TBD',
+      locationLat: form.locationLat,
+      locationLng: form.locationLng,
       date: fromISODate(form.date),
       startTime: form.startTime,
       duration: duration,
@@ -129,7 +134,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
         <div className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-8">
             <div className="sm:col-span-3">
-              <span className="text-[10px] text-white/40 font-medium mb-2 block">Scene title</span>
+              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Scene title</span>
               <Input
                 type="text"
                 value={form.title}
@@ -141,13 +146,13 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
               />
             </div>
             <div>
-              <span className="text-[10px] text-white/40 font-medium mb-2 block">Number</span>
+              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Number</span>
               <Input
                 type="text"
                 value={form.sceneNumber}
                 onChange={e => setForm({ ...form, sceneNumber: e.target.value })}
                 placeholder="4C"
-                leftIcon={<span className="text-[10px] font-bold text-white/20">SC</span>}
+                leftIcon={<span className="text-[10px] font-bold text-gray-400 dark:text-white/20">SC</span>}
                 fullWidth
                 variant="underline"
                 className="font-mono text-primary/70"
@@ -161,7 +166,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
         <div className="p-6 space-y-10">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-12">
             <div className="relative">
-              <span className="text-[10px] text-white/40 font-medium mb-2 block">Filming date</span>
+              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Filming date</span>
               <Input
                 type="date"
                 value={form.date}
@@ -171,11 +176,11 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
               />
             </div>
             <div>
-              <span className="text-[10px] text-white/40 font-medium mb-2 block">Start time</span>
+              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Start time</span>
               <TimeSelector label="" value={form.startTime} onChange={(v) => setForm({ ...form, startTime: v })} />
             </div>
             <div>
-              <span className="text-[10px] text-white/40 font-medium mb-2 block">Estimated end</span>
+              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Estimated end</span>
               <TimeSelector label="" value={form.endTime} onChange={(v) => setForm({ ...form, endTime: v })} />
             </div>
           </div>
@@ -189,26 +194,25 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
                 <span className="text-[10px] font-medium text-red-400 block mb-0.5">
                   Schedule Conflict
                 </span>
-                <span className="text-sm text-white/70">
-                  This slot overlaps with "<span className="text-white font-medium">{shotConflict.title}</span>"
+                <span className="text-sm text-gray-600 dark:text-white/70">
+                  This slot overlaps with "<span className="text-gray-900 dark:text-white font-medium">{shotConflict.title}</span>"
                 </span>
               </div>
             </div>
           )}
 
           <div className="w-full">
-            <span className="text-[10px] text-white/40 font-medium mb-2 block">Location</span>
-            <div className="relative group">
-              <Input
-                type="text"
-                value={form.location}
-                onChange={e => setForm({ ...form, location: e.target.value })}
-                placeholder="Enter filming location..."
-                fullWidth
-                variant="underline"
-                leftIcon={<MapPin size={14} className="text-white/20 group-focus-within:text-primary transition-colors" />}
-              />
-            </div>
+            <LocationAutocomplete
+              value={form.location}
+              onChange={(value, location) => setForm(prev => ({ 
+                ...prev, 
+                location: value,
+                locationLat: location?.lat,
+                locationLng: location?.lng
+              }))}
+              placeholder="Search filming location..."
+              label="Location"
+            />
           </div>
         </div>
       </Card>
@@ -242,7 +246,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
                 placeholder="Search gear inventory..."
                 variant="underline"
                 fullWidth
-                leftIcon={<Search size={14} className="text-white/20" />}
+                leftIcon={<Search size={14} className="text-gray-400 dark:text-white/20" />}
               />
             </div>
 
@@ -255,7 +259,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
                     onClick={() => setShotGearCategory(cat)}
                     className={`px-4 py-2 rounded-xl text-[10px] font-medium transition-all border whitespace-nowrap ${isActive
                       ? 'bg-primary text-white border-primary shadow-[0_0_15px_rgba(78,71,221,0.3)]'
-                      : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10 hover:text-white/70 hover:border-white/10'
+                      : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/5 text-gray-500 dark:text-white/40 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-700 dark:hover:text-white/70 hover:border-gray-300 dark:hover:border-white/10'
                       }`}
                   >
                     {cat}
@@ -282,20 +286,20 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
                   <div className="flex items-center gap-4 min-w-0">
                     <div className={`p-2.5 rounded-xl transition-all ${isSelected
                       ? 'bg-primary/20 text-primary'
-                      : 'bg-white/5 text-white/20 group-hover:bg-white/10 group-hover:text-white/40'
+                      : 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/20 group-hover:bg-gray-200 dark:group-hover:bg-white/10 group-hover:text-gray-600 dark:group-hover:text-white/40'
                       }`}>
                       <Icon size={18} strokeWidth={2} />
                     </div>
                     <div className="min-w-0 text-left">
-                      <p className={`text-sm font-medium truncate transition-colors ${isSelected ? 'text-primary/10' : 'text-white/60 group-hover:text-white'}`}>
+                      <p className={`text-sm font-medium truncate transition-colors ${isSelected ? 'text-primary' : 'text-gray-600 dark:text-white/60 group-hover:text-gray-900 dark:group-hover:text-white'}`}>
                         {item.customName || item.name}
                       </p>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10px] font-medium text-white/30">
+                        <span className="text-[10px] font-medium text-gray-500 dark:text-white/30">
                           {item.category}
                         </span>
                         {item.status !== 'available' && (
-                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/30 font-medium">
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-white/30 font-medium">
                             {item.status}
                           </span>
                         )}
@@ -305,7 +309,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
 
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 ${isSelected
                     ? 'bg-primary text-white shadow-[0_0_10px_rgba(78,71,221,0.4)] scale-100'
-                    : 'bg-white/5 text-white/5 scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100'
+                    : 'bg-gray-100 dark:bg-white/5 text-gray-200 dark:text-white/5 scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100'
                     }`}>
                     <Check size={14} strokeWidth={3} />
                   </div>
@@ -313,11 +317,11 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
               )
             }) : (
               <div className="py-16 flex flex-col items-center justify-center text-center">
-                <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-4 text-white/20">
+                <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-4 text-gray-400 dark:text-white/20">
                   <Package size={32} strokeWidth={1.5} />
                 </div>
-                <h3 className="text-white/40 font-medium text-sm">No items found</h3>
-                <p className="text-white/20 text-xs mt-1">Try adjusting your search or category</p>
+                <h3 className="text-gray-500 dark:text-white/40 font-medium text-sm">No items found</h3>
+                <p className="text-gray-400 dark:text-white/20 text-xs mt-1">Try adjusting your search or category</p>
               </div>
             )}
           </div>

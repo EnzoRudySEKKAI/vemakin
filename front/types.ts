@@ -5,9 +5,11 @@ export type InventoryLayout = 'grid' | 'list';
 export type TransportMode = 'driving' | 'walking' | 'cycling' | 'train' | 'plane' | 'bus';
 
 export interface User {
+    id: string;
     name: string;
     email: string;
     avatar?: string;
+    darkMode?: boolean | null;
 }
 
 export interface Currency {
@@ -47,6 +49,8 @@ export interface Shot {
     startTime: string;
     duration: string;
     location: string;
+    locationLat?: number;
+    locationLng?: number;
     remarks: string;
     generalNotes?: string;
     equipmentIds: string[];

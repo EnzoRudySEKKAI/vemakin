@@ -21,6 +21,9 @@ interface UIState {
   // Theme
   darkMode: boolean
   
+  // Project Creation Prompt
+  showCreateProjectPrompt: boolean
+  
   // Actions
   setMainView: (view: MainView) => void
   setShotLayout: (layout: ShotLayout) => void
@@ -29,6 +32,7 @@ interface UIState {
   setPostProdFilters: (updater: (prev: PostProdFilters) => PostProdFilters) => void
   setNotesFilters: (updater: (prev: NotesFilters) => NotesFilters) => void
   toggleDarkMode: () => void
+  setShowCreateProjectPrompt: (show: boolean) => void
 }
 
 const defaultPostProdFilters: PostProdFilters = {
@@ -59,6 +63,7 @@ export const useUIStore = create<UIState>()(
       postProdFilters: defaultPostProdFilters,
       notesFilters: defaultNotesFilters,
       darkMode: true,
+      showCreateProjectPrompt: false,
 
       // Actions
       setMainView: (view) => set({ mainView: view }),
@@ -71,7 +76,8 @@ export const useUIStore = create<UIState>()(
       setNotesFilters: (updater) => set((state) => ({ 
         notesFilters: updater(state.notesFilters) 
       })),
-      toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode }))
+      toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
+      setShowCreateProjectPrompt: (show) => set({ showCreateProjectPrompt: show })
     }),
     {
       name: 'vemakin-ui',

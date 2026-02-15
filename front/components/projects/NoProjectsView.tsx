@@ -21,14 +21,14 @@ export const NoProjectsView: React.FC<NoProjectsViewProps> = ({ onCreateProject,
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-[#0F1116] text-white px-6">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-[#F2F2F7] dark:bg-[#0F1116] text-gray-900 dark:text-white px-6">
             <Card className="w-full max-w-md">
                 <div className="p-8 flex flex-col items-center text-center">
                     <Logo size="xl" showText={false} className="mb-6" />
 
                     <h1 className="text-xl font-semibold mb-2">Welcome to Vemakin</h1>
 
-                    <p className="text-white/30 mb-8 text-sm">
+                    <p className="text-gray-500 dark:text-white/30 mb-8 text-sm">
                         You don't have any projects yet. Create your first project to get started.
                     </p>
 
@@ -47,13 +47,13 @@ export const NoProjectsView: React.FC<NoProjectsViewProps> = ({ onCreateProject,
                                 value={projectName}
                                 onChange={(e) => setProjectName(e.target.value)}
                                 placeholder="Project Name (e.g., Short Film 2024)"
-                                className="w-full bg-[#0F1116] border border-white/[0.08] focus:border-primary text-white rounded-xl px-4 py-3 outline-none transition-colors"
+                                className="w-full bg-white dark:bg-[#0F1116] border border-gray-200 dark:border-white/[0.08] focus:border-primary text-gray-900 dark:text-white rounded-xl px-4 py-3 outline-none transition-colors"
                             />
                             <div className="flex gap-2">
                                 <button
                                     type="button"
                                     onClick={() => setIsCreating(false)}
-                                    className="flex-1 bg-white/5 border border-white/[0.08] text-white/50 font-medium py-3 rounded-xl hover:bg-white/10 transition-colors"
+                                    className="flex-1 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/[0.08] text-gray-600 dark:text-white/50 font-medium py-3 rounded-xl hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
                                 >
                                     Cancel
                                 </button>
@@ -68,8 +68,8 @@ export const NoProjectsView: React.FC<NoProjectsViewProps> = ({ onCreateProject,
                         </form>
                     )}
 
-                    <div className="mt-8 pt-6 border-t border-white/[0.05] w-full">
-                        <button onClick={onLogout} className="text-sm text-white/20 hover:text-white/40 transition-colors">
+                    <div className="mt-8 pt-6 border-t border-gray-200 dark:border-white/[0.05] w-full">
+                        <button onClick={onLogout} className="text-sm text-gray-400 dark:text-white/20 hover:text-gray-600 dark:hover:text-white/40 transition-colors">
                             Sign Out
                         </button>
                     </div>

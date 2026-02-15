@@ -105,15 +105,15 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
   if (totalShots === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-220px)] w-full overflow-hidden px-6 select-none">
-        <div className="w-14 h-14 bg-[#16181D] rounded-xl flex items-center justify-center mb-6 border border-white/[0.05]">
-          <Aperture size={24} className="text-white/40" />
+        <div className="w-14 h-14 bg-gray-100 dark:bg-[#16181D] rounded-xl flex items-center justify-center mb-6 border border-gray-200 dark:border-white/[0.05]">
+          <Aperture size={24} className="text-gray-500 dark:text-white/40" />
         </div>
 
         <div className="text-center max-w-sm">
-          <h2 className="text-xl font-semibold text-white mb-2">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             {searchQuery || statusFilter !== 'all' ? "No Matches Found" : "Empty Timeline"}
           </h2>
-          <p className="text-white/30 mb-8 text-sm">
+          <p className="text-gray-500 dark:text-white/30 mb-8 text-sm">
             {searchQuery || statusFilter !== 'all' ? "Try adjusting your filters." : "Begin your production by scheduling the first scene."}
           </p>
           <Button
@@ -169,7 +169,7 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
                     }
 
                     const status = getTimelineStatus(shot)
-                    const barColor = status === 'done' ? 'bg-primary' : status === 'current' ? 'bg-primary' : 'bg-white/20'
+                    const barColor = status === 'done' ? 'bg-primary' : status === 'current' ? 'bg-primary' : 'bg-gray-400 dark:bg-white/20'
                     const isChecklistOpen = expandedChecklist === shot.id
 
                     return (
@@ -179,6 +179,10 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
                             <TravelIndicator
                               from={dayShots[idx - 1].location}
                               to={shot.location}
+                              fromLat={dayShots[idx - 1].locationLat}
+                              fromLng={dayShots[idx - 1].locationLng}
+                              toLat={shot.locationLat}
+                              toLng={shot.locationLng}
                               availableMinutes={availableMinutes}
                             />
                             <GearTransition
@@ -190,7 +194,7 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
                         )}
 
                         <div
-                          className="group cursor-pointer rounded-xl transition-all duration-200 bg-[#16181D] border border-white/[0.05] hover:border-white/[0.1]"
+                          className="group cursor-pointer rounded-xl transition-all duration-200 bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] hover:border-gray-300 dark:hover:border-white/[0.1]"
                         >
                           <div className={shotLayout === 'list' ? "p-3" : "p-4"} onClick={() => onShotClick(shot)}>
                             <div className={shotLayout === 'list' ? "flex flex-col gap-2" : "flex flex-col gap-4"}>
@@ -198,19 +202,19 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
                                 <div className="flex items-center gap-2 min-w-[70px] pt-1">
                                   <div className={`w-1 ${shotLayout === 'list' ? 'h-6' : 'h-10'} rounded-full ${barColor}`} />
                                   <div className="text-xs">
-                                    <div className="text-white/50 font-mono">{shot.startTime}</div>
+                                    <div className="text-gray-500 dark:text-white/50 font-mono">{shot.startTime}</div>
                                     {shotLayout === 'timeline' && (
-                                      <div className="text-white/50 font-mono">{calculateEndTime(shot.startTime, shot.duration)}</div>
+                                      <div className="text-gray-500 dark:text-white/50 font-mono">{calculateEndTime(shot.startTime, shot.duration)}</div>
                                     )}
                                   </div>
                                 </div>
 
                                 <div className="flex-1 min-w-0">
-                                  <div className={`${shotLayout === 'list' ? 'text-xs' : 'text-sm'} text-white font-medium truncate`}>{shot.title}</div>
+                                  <div className={`${shotLayout === 'list' ? 'text-xs' : 'text-sm'} text-gray-900 dark:text-white font-medium truncate`}>{shot.title}</div>
                                   <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-[10px] text-white/20 uppercase tracking-wider shrink-0">Sc {shot.sceneNumber}</span>
-                                    <span className="text-white/5">|</span>
-                                    <div className="flex items-center gap-1 text-[11px] text-white/20 truncate">
+                                    <span className="text-[10px] text-gray-400 dark:text-white/20 uppercase tracking-wider shrink-0">Sc {shot.sceneNumber}</span>
+                                    <span className="text-gray-200 dark:text-white/5">|</span>
+                                    <div className="flex items-center gap-1 text-[11px] text-gray-400 dark:text-white/20 truncate">
                                       <MapPin size={10} className="shrink-0" />
                                       <span className="truncate">{shot.location}</span>
                                     </div>
@@ -227,8 +231,8 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
                                         handleToggleChecklist(shot.id)
                                       }}
                                       className={`h-9 pl-3 pr-2.5 rounded-xl flex items-center gap-2 text-xs font-semibold border transition-all ${isChecklistOpen
-                                        ? 'bg-white/10 text-white border-white/20'
-                                        : 'bg-[#1A1D21] text-white/70 border-white/[0.08] hover:border-white/20 hover:bg-white/10 hover:text-white'
+                                        ? 'bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white border-gray-300 dark:border-white/20'
+                                        : 'bg-gray-100 dark:bg-[#1A1D21] text-gray-700 dark:text-white/70 border-gray-200 dark:border-white/[0.08] hover:border-gray-300 dark:hover:border-white/20 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white'
                                         }`}
                                     >
                                       <span>Checklist</span>
@@ -245,7 +249,7 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
                                     onClick={(e) => { e.stopPropagation(); onToggleStatus(shot.id) }}
                                     className={`${shotLayout === 'list' ? 'w-7 h-7' : 'w-8 h-8'} rounded-lg flex items-center justify-center border transition-all ${shot.status === 'done'
                                       ? 'bg-primary text-white border-transparent'
-                                      : 'bg-transparent text-white/30 border-white/[0.08] hover:border-white/20'
+                                      : 'bg-transparent text-gray-400 dark:text-white/30 border-gray-200 dark:border-white/[0.08] hover:border-gray-300 dark:hover:border-white/20'
                                       }`}
                                   >
                                     <Check size={14} strokeWidth={3} />
@@ -276,13 +280,13 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
                                             onClick={(e) => { e.stopPropagation(); onToggleEquipment(shot.id, eId) }}
                                             className={`flex items-center justify-between p-2.5 rounded-lg text-xs font-medium border text-left transition-all ${isPrepared
                                               ? 'bg-primary/10 dark:bg-primary/10 border-primary/30 dark:border-primary/30 text-primary'
-                                              : 'bg-[#0F1116] border-white/[0.05] text-white/40 hover:border-white/10'
+                                              : 'bg-gray-100 dark:bg-[#0F1116] border-gray-200 dark:border-white/[0.05] text-gray-500 dark:text-white/40 hover:border-gray-300 dark:hover:border-white/10'
                                               }`}
                                           >
                                             <span className="truncate mr-2">{equip?.customName || equip?.name || 'Unknown Item'}</span>
                                             <div className={`w-4 h-4 rounded-full flex items-center justify-center border ${isPrepared
                                               ? 'bg-primary border-primary text-white'
-                                              : 'border-white/20'
+                                              : 'border-gray-300 dark:border-white/20'
                                               }`}>
                                               {isPrepared && <Check size={10} strokeWidth={4} />}
                                             </div>

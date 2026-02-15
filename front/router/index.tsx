@@ -22,21 +22,8 @@ const ProjectsRoute = lazy(() => import('@/routes/ProjectsRoute').then(m => ({ d
 import { rootLoader, shotsLoader, inventoryLoader, notesLoader, pipelineLoader, detailLoader } from './loaders'
 
 const PageLoader = () => (
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '100vh',
-    background: '#0F1116'
-  }}>
-    <div style={{
-      width: '24px',
-      height: '24px',
-      border: '2px solid rgba(255,255,255,0.2)',
-      borderTopColor: '#4E47DD',
-      borderRadius: '50%',
-      animation: 'spin 0.8s linear infinite'
-    }} />
+  <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#0F1116] flex items-center justify-center">
+    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
   </div>
 )
 

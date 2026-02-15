@@ -8,11 +8,11 @@ interface MetricBadgeProps {
 }
 
 const colorStyles = {
-  default: 'text-white/60',
+  default: 'text-gray-500 dark:text-white/60',
   primary: 'text-primary',
-  success: 'text-emerald-400',
-  warning: 'text-amber-400',
-  danger: 'text-red-400'
+  success: 'text-emerald-500 dark:text-emerald-400',
+  warning: 'text-amber-500 dark:text-amber-400',
+  danger: 'text-red-500 dark:text-red-400'
 }
 
 export const MetricBadge: React.FC<MetricBadgeProps> = ({
@@ -23,7 +23,7 @@ export const MetricBadge: React.FC<MetricBadgeProps> = ({
 }) => {
   return (
     <div className={`flex flex-col items-center ${className}`}>
-      <span className="text-[10px] text-white/30 uppercase tracking-wider leading-none mb-1">
+      <span className="text-[10px] text-gray-400 dark:text-white/30 uppercase tracking-wider leading-none mb-1">
         {label}
       </span>
       <span className={`text-lg font-semibold leading-none ${colorStyles[color]}`}>
@@ -56,7 +56,7 @@ export const MetricsGroup: React.FC<MetricsGroupProps> = ({
             color={metric.color}
           />
           {index < metrics.length - 1 && (
-            <div className="w-px h-6 bg-white/[0.05]" />
+            <div className="w-px h-6 bg-gray-200 dark:bg-white/[0.05]" />
           )}
         </React.Fragment>
       ))}

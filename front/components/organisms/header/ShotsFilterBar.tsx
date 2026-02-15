@@ -59,11 +59,11 @@ export const ShotsFilterBar: React.FC<ShotsFilterBarProps> = ({
       />
 
       <div className="flex flex-col gap-1.5 h-[42px] justify-center">
-        <div className="flex items-center justify-between text-xs uppercase tracking-wider font-medium text-white/40">
+        <div className="flex items-center justify-between text-xs uppercase tracking-wider font-medium text-gray-500 dark:text-white/40">
           <span>Progress</span>
           <span>{completedShots}/{totalShots} Finished</span>
         </div>
-        <div className="h-1.5 w-full bg-white/[0.06] rounded-full overflow-hidden">
+        <div className="h-1.5 w-full bg-gray-200 dark:bg-white/[0.06] rounded-full overflow-hidden">
           <motion.div
             className="h-full bg-primary rounded-full"
             initial={{ width: 0 }}

@@ -64,7 +64,7 @@ export const Logo: React.FC<LogoProps> = ({
   }
   
   const getTextColor = () => {
-     return 'text-white'
+     return 'text-gray-900 dark:text-white'
   }
 
   return (

@@ -13,6 +13,8 @@ export const SettingsRoute = () => {
             onNavigateToProjects={() => ctx.navigate('/dashboard/projects')}
             onOpenNews={ctx.showNews}
             onOpenTutorial={ctx.showTutorial}
+            darkMode={ctx.darkMode}
+            onToggleDarkMode={ctx.toggleDarkMode}
         />
     )
 }

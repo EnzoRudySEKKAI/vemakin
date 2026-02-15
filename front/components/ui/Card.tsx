@@ -17,13 +17,13 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   return (
     <motion.div
-      className={`bg-[#16181D] border border-white/[0.05] rounded-2xl overflow-hidden flex flex-col ${className}`}
+      className={`bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] rounded-2xl overflow-hidden flex flex-col ${className}`}
       {...props}
     >
       {(title || headerRight) && (
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.05] shrink-0">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-white/[0.05] shrink-0">
           {title && (
-            <span className="text-xs font-medium text-white/40 tracking-wider">
+            <span className="text-xs font-medium text-gray-500 dark:text-white/40 tracking-wider">
               {title}
             </span>
           )}
@@ -34,7 +34,7 @@ export const Card: React.FC<CardProps> = ({
           )}
         </div>
       )}
-      <div className="bg-[#0F1116] flex-1">
+      <div className="bg-gray-50 dark:bg-[#0F1116] flex-1">
         {children}
       </div>
     </motion.div>
@@ -49,7 +49,7 @@ export const SimpleCard: React.FC<CardProps> = ({
 }) => {
   return (
     <motion.div
-      className={`bg-[#16181D] border border-white/[0.05] rounded-xl p-4 ${className}`}
+      className={`bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] rounded-xl p-4 ${className}`}
       {...props}
     >
       {children}
@@ -65,7 +65,7 @@ export const ListItem: React.FC<CardProps> = ({
 }) => {
   return (
     <motion.div
-      className={`bg-[#16181D] border border-white/[0.05] rounded-xl p-3 hover:border-white/[0.1] transition-colors cursor-pointer ${className}`}
+      className={`bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] rounded-xl p-3 hover:border-gray-300 dark:hover:border-white/[0.1] transition-colors cursor-pointer ${className}`}
       {...props}
     >
       {children}

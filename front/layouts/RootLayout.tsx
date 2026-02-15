@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, Suspense } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, Suspense, useRef } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { InventoryFilters, Currency, InventoryLayout, PostProdFilters, MainView, NotesFilters } from '@/types'
@@ -15,6 +15,7 @@ import { SignInView } from '@/components/auth/SignInView'
 import { SignUpView } from '@/components/auth/SignUpView'
 import { NoProjectsView } from '@/components/projects/NoProjectsView'
 import { useProductionStore } from '@/hooks/useProductionStore'
+import { useUIStore } from '@/stores/useUIStore'
 import { LayoutProvider, useLayout } from '@/context/LayoutContext'
 import { useSyncLayout } from '@/hooks/useSyncLayout'
 import { useDrawerScroll } from '@/hooks/useDrawerScroll'
@@ -59,6 +60,7 @@ const RootLayoutInner = () => {
         currentUser,
         isGuest,
         isLoadingAuth,
+        isLoadingInitialData,
         login,
         enterGuest,
         logout,
@@ -100,11 +102,22 @@ const RootLayoutInner = () => {
         initAuth
     } = store
 
+    const uiStore = useUIStore()
+    const { showCreateProjectPrompt, setShowCreateProjectPrompt } = uiStore
+
     // Initialize Auth
     useEffect(() => {
         const unsubscribe = initAuth()
         return () => unsubscribe()
     }, [initAuth])
+
+    // Track when initial loading has completed to prevent dark mode flash
+    const hasInitialLoadCompleted = useRef(false)
+    useEffect(() => {
+        if (!isLoadingInitialData && !isLoadingAuth) {
+            hasInitialLoadCompleted.current = true
+        }
+    }, [isLoadingInitialData, isLoadingAuth])
 
     const [authView, setAuthView] = useState<'landing' | 'signin' | 'signup'>('landing')
     const [showOnboarding, setShowOnboarding] = useState(false)
@@ -160,14 +173,15 @@ const RootLayoutInner = () => {
         filterTranslateY: effectiveHeaderTranslateY,
     })
 
-    // Sync Dark Mode
+    // Sync Dark Mode - only after initial load completes to prevent flash
     useEffect(() => {
+        if (!hasInitialLoadCompleted.current) return
         if (darkMode) {
             document.documentElement.classList.add('dark')
         } else {
             document.documentElement.classList.remove('dark')
         }
-    }, [darkMode])
+    }, [darkMode, hasInitialLoadCompleted.current])
 
     // Navigation helper using router
     const handleNavigateToView = useCallback((view: MainView) => {
@@ -276,14 +290,21 @@ const RootLayoutInner = () => {
         )
     }
 
-    if (isLoadingAuth) {
-        return <div className="min-h-screen bg-[#0F1116] flex items-center justify-center text-white">
+    if (isLoadingAuth || isLoadingInitialData) {
+        return <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#0F1116] flex flex-col items-center justify-center gap-4 text-gray-900 dark:text-white">
             <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm text-gray-500 dark:text-white/40">Loading your projects...</span>
         </div>
     }
 
-    if (currentUser && !isGuest && projects.length === 0) {
-        return <NoProjectsView onCreateProject={(name) => addProject(name, {})} onLogout={logout} />
+    if (showCreateProjectPrompt && !isLoadingAuth && !isLoadingInitialData) {
+        return <NoProjectsView 
+            onCreateProject={(name) => {
+                addProject(name, {})
+                setShowCreateProjectPrompt(false)
+            }} 
+            onLogout={logout}
+        />
     }
 
     return (
@@ -333,8 +354,6 @@ const RootLayoutInner = () => {
                     setNotesLayout={setNotesLayout}
                     isWideMode={isWideMode}
                     onToggleWideMode={() => setIsWideMode(prev => !prev)}
-                    darkMode={darkMode}
-                    onToggleDarkMode={toggleDarkMode}
                     onAdd={handleMainAddClick}
                     inventory={allInventory}
                     tasks={activePostProdTasks}
@@ -406,6 +425,8 @@ const RootLayoutInner = () => {
                                         importProject,
                                         currentUser,
                                         logout,
+                                        darkMode,
+                                        toggleDarkMode,
                                         handleOpenActionSuite,
                                         navigate,
                                         showNews: () => setShowNews(true),
@@ -444,7 +465,7 @@ const RootLayoutInner = () => {
                 )}
 
                 {showOnboarding && currentUser && (
-                    <div className="fixed inset-0 z-[2000] bg-[#0F1116]">
+                    <div className="fixed inset-0 z-[2000] bg-[#F2F2F7] dark:bg-[#0F1116]">
                         <OnboardingView onComplete={() => setShowOnboarding(false)} />
                     </div>
                 )}

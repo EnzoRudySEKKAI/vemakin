@@ -128,6 +128,8 @@ func main() {
 	protected.Use(authMiddleware.Authenticate())
 
 	protected.GET("/users/me", h.GetMe)
+	protected.GET("/users/profile", h.GetUser)
+	protected.PATCH("/users/profile", h.UpdateUser)
 
 	// Projects
 	protected.GET("/projects", h.GetProjects)

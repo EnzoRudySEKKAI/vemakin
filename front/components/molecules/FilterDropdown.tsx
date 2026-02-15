@@ -41,9 +41,9 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         className={`
           w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium transition-all
-          bg-[#16181D] border border-white/[0.05]
-          ${isOpen ? 'border-white/[0.1]' : ''}
-          ${isActive ? 'text-white' : 'text-white/50 hover:text-white/70'}
+          bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05]
+          ${isOpen ? 'border-gray-300 dark:border-white/[0.1]' : ''}
+          ${isActive ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-white/50 hover:text-gray-700 dark:hover:text-white/70'}
         `}
       >
         <span>{selectedOption?.label || label}</span>
@@ -61,12 +61,12 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
               className="fixed inset-0 z-[60]" 
               onClick={() => setIsOpen(false)} 
             />
-            <motion.div
+              <motion.div
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15 }}
-              className="absolute top-full left-0 right-0 mt-2 bg-[#16181D] border border-white/[0.08] rounded-xl p-1.5 z-[70] overflow-hidden"
+              className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.08] rounded-xl p-1.5 z-[70] overflow-hidden"
             >
               {options.map((option) => {
                 const Icon = option.icon
@@ -87,7 +87,7 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
                       w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all
                       ${isSelected 
                         ? 'bg-primary text-white' 
-                        : 'text-white/50 hover:text-white hover:bg-white/5'
+                        : 'text-gray-600 dark:text-white/50 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
                       }
                     `}
                   >

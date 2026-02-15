@@ -1,5 +1,5 @@
 import React, { useState, forwardRef, useRef, useEffect } from 'react'
-import { Plus, Settings, ChevronLeft, Moon, Sun } from 'lucide-react'
+import { Plus, Settings, ChevronLeft } from 'lucide-react'
 import {
   MainView, ShotLayout, InventoryLayout,
   InventoryFilters, PostProdFilters, NotesFilters, Currency, Equipment, PostProdTask
@@ -16,9 +16,9 @@ import { ProjectSelector } from '@/components/molecules/ProjectSelector'
 
 interface HeaderProps {
   filterTranslateY?: number
-  currentProject: string
+  currentProject: string | null
   setCurrentProject: (name: string) => void
-  projects: Record<string, any>
+  projects: string[]
   onAddProject: (name: string) => void
   viewTitle: string
   mainView: MainView
@@ -65,10 +65,6 @@ interface HeaderProps {
   isWideMode: boolean
   onToggleWideMode: () => void
 
-  // Dark Mode
-  darkMode: boolean
-  onToggleDarkMode: () => void
-
   // Add Action
   onAdd: () => void
   inventory?: Equipment[]
@@ -85,8 +81,6 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
   onAddProject,
   projectProgress,
   groupedShots,
-  onToggleDarkMode,
-  darkMode,
   onAdd,
   setMainView,
   shotSearchQuery,
@@ -140,7 +134,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
       <header
         ref={ref}
         data-header-row="1"
-        className="fixed top-0 left-0 right-0 z-[51] bg-[#0F1116]"
+        className="fixed top-0 left-0 right-0 z-[51] bg-[#F2F2F7] dark:bg-[#0F1116]"
         style={{
           paddingTop: 'calc(env(safe-area-inset-top) + 12px)',
         }}
@@ -153,17 +147,17 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
                 {isSettingsView && (
                   <button
                     onClick={() => setMainView('overview')}
-                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white/70 transition-colors"
+                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-200/50 hover:bg-gray-300/50 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-white/70 transition-colors"
                   >
                     <ChevronLeft size={20} strokeWidth={2} />
                   </button>
                 )}
                 <div className="flex flex-col justify-center">
-                  <h1 className="text-lg font-semibold text-white">
+                  <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
                     {backAction ? (detailLabel || 'Detail View') : viewTitle}
                   </h1>
                   {!backAction && (
-                    <span className="text-xs text-white/40">
+                    <span className="text-xs text-gray-500 dark:text-white/40">
                       {getSubtitle()}
                     </span>
                   )}
@@ -172,17 +166,10 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
 
               {/* Right: Actions Group */}
               <div className="flex items-center gap-2">
-                <button
-                  onClick={onToggleDarkMode}
-                  className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white/70 transition-colors"
-                >
-                  {darkMode ? <Moon size={18} /> : <Sun size={18} />}
-                </button>
-
                 {!isSettingsView && (
                   <button
                     onClick={() => setMainView('settings')}
-                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white/70 transition-colors"
+                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-200/50 hover:bg-gray-300/50 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-white/70 transition-colors"
                   >
                     <Settings size={18} />
                   </button>
@@ -204,7 +191,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
       <div
         ref={headerBottomRef}
         data-header-row="2"
-        className="fixed left-0 right-0 z-[50] bg-[#0F1116] pt-2 overflow-visible"
+        className="fixed left-0 right-0 z-[50] bg-[#F2F2F7] dark:bg-[#0F1116] pt-2 overflow-visible"
         style={{
           top: 'calc(env(safe-area-inset-top) + 68px)',
           transform: `translateY(${filterTranslateY}px)`

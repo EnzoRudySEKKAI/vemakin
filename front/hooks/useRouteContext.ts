@@ -71,6 +71,10 @@ export interface RouteContext {
     currentUser: User | null
     logout: () => void
 
+    // Theme
+    darkMode: boolean
+    toggleDarkMode: () => void
+
     // Utilities
     handleOpenActionSuite: (config?: { view: string, link?: { type: 'shot' | 'task', id: string } }) => void
     navigate: (path: string) => void
