@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/vemakin/backend/internal/constants"
 	"github.com/vemakin/backend/internal/dto"
 	"github.com/vemakin/backend/internal/models"
 )
@@ -65,8 +66,8 @@ func (h *Handler) CreateTask(c echo.Context) error {
 		"project_id": projectID,
 		"category":   req.Category,
 		"title":      req.Title,
-		"status":     "todo",
-		"priority":   "medium",
+		"status":     constants.StatusTodo,
+		"priority":   constants.PriorityMedium,
 	}
 	if req.Status != "" {
 		reqMap["status"] = req.Status

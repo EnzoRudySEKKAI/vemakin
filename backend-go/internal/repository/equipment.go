@@ -10,6 +10,36 @@ import (
 	"github.com/vemakin/backend/internal/models"
 )
 
+var specsTableNames = map[string]string{
+	"camera":     "specs_cameras",
+	"lens":       "specs_lenses",
+	"audio":      "specs_audio",
+	"light":      "specs_lights",
+	"monitor":    "specs_monitoring",
+	"prop":       "specs_props",
+	"stabilizer": "specs_stabilizers",
+	"tripod":     "specs_tripods",
+	"wireless":   "specs_wireless",
+	"drone":      "specs_drones",
+	"filter":     "specs_filters",
+	"grip":       "specs_grip",
+}
+
+var specsColumns = map[string][]string{
+	"camera":     {"sensor", "resolution", "mount", "dynamic_range", "native_iso", "media", "frame_rate", "weight"},
+	"lens":       {"focal_length", "aperture", "mount", "coverage", "focus_type", "weight"},
+	"audio":      {"type", "pattern", "freq_response", "sensitivity", "max_spl", "power", "connector", "weight"},
+	"light":      {"type", "power_draw", "color_temp", "cri", "mount", "control", "weight"},
+	"monitor":    {"screen", "resolution", "brightness", "inputs", "power", "features", "dimensions", "weight"},
+	"prop":       {"type", "era", "material", "condition", "quantity", "dimensions", "power", "weight"},
+	"stabilizer": {"type", "max_payload", "axes", "battery_life", "connectivity", "dimensions", "weight"},
+	"tripod":     {"head_type", "max_payload", "bowl_size", "height_range", "material", "counterbalance", "weight"},
+	"wireless":   {"range", "delay", "resolution", "inputs", "freq", "power", "multicast", "weight"},
+	"drone":      {"type", "camera", "res", "flight_time", "transmission", "sensors", "speed", "weight"},
+	"filter":     {"type", "density", "size", "stops", "effect", "strength", "mount", "material", "weight"},
+	"grip":       {"type", "max_load", "max_height", "min_height", "footprint", "material", "mount", "weight"},
+}
+
 type EquipmentRepository struct {
 	db *sqlx.DB
 }
@@ -157,27 +187,23 @@ func (r *EquipmentRepository) GetSpecsBatch(ctx context.Context, catalogItemIDs 
 
 	result := make(map[string]map[string]interface{})
 
-	specsQueries := map[string]string{
-		"camera":     "SELECT gear_id, sensor, resolution, mount, dynamic_range, native_iso, media, frame_rate, weight FROM specs_cameras WHERE gear_id = ANY($1)",
-		"lens":       "SELECT gear_id, focal_length, aperture, mount, coverage, focus_type, weight FROM specs_lenses WHERE gear_id = ANY($1)",
-		"audio":      "SELECT gear_id, type, pattern, freq_response, sensitivity, max_spl, power, connector, weight FROM specs_audio WHERE gear_id = ANY($1)",
-		"light":      "SELECT gear_id, type, power_draw, color_temp, cri, mount, control, weight FROM specs_lights WHERE gear_id = ANY($1)",
-		"monitor":    "SELECT gear_id, screen, resolution, brightness, inputs, power, features, dimensions, weight FROM specs_monitoring WHERE gear_id = ANY($1)",
-		"prop":       "SELECT gear_id, type, era, material, condition, quantity, dimensions, power, weight FROM specs_props WHERE gear_id = ANY($1)",
-		"stabilizer": "SELECT gear_id, type, max_payload, axes, battery_life, connectivity, dimensions, weight FROM specs_stabilizers WHERE gear_id = ANY($1)",
-		"tripod":     "SELECT gear_id, head_type, max_payload, bowl_size, height_range, material, counterbalance, weight FROM specs_tripods WHERE gear_id = ANY($1)",
-		"wireless":   "SELECT gear_id, range, delay, resolution, inputs, freq, power, multicast, weight FROM specs_wireless WHERE gear_id = ANY($1)",
-		"drone":      "SELECT gear_id, type, camera, res, flight_time, transmission, sensors, speed, weight FROM specs_drones WHERE gear_id = ANY($1)",
-		"filter":     "SELECT gear_id, type, density, size, stops, effect, strength, mount, material, weight FROM specs_filters WHERE gear_id = ANY($1)",
-		"grip":       "SELECT gear_id, type, max_load, max_height, min_height, footprint, material, mount, weight FROM specs_grip WHERE gear_id = ANY($1)",
-	}
-
 	for categorySlug, itemIDs := range itemsByCategory {
-		sqlQuery, ok := specsQueries[categorySlug]
+		tableName, ok := specsTableNames[categorySlug]
 		if !ok {
 			continue
 		}
 
+		columns := specsColumns[categorySlug]
+		if len(columns) == 0 {
+			continue
+		}
+
+		columnList := "gear_id"
+		for _, col := range columns {
+			columnList += ", " + col
+		}
+
+		sqlQuery := fmt.Sprintf("SELECT %s FROM %s WHERE gear_id = ANY($1)", columnList, tableName)
 		rows, err := r.db.QueryxContext(ctx, sqlQuery, itemIDs)
 		if err != nil {
 			continue
@@ -215,27 +241,24 @@ func (r *EquipmentRepository) GetSpecsBatch(ctx context.Context, catalogItemIDs 
 func getSpecsByCategorySlug(ctx context.Context, db *sqlx.DB, categorySlug, catalogItemID string) (map[string]interface{}, error) {
 	specs := make(map[string]interface{})
 
-	specsQueries := map[string]string{
-		"camera":     "SELECT sensor, resolution, mount, dynamic_range, native_iso, media, frame_rate, weight FROM specs_cameras WHERE gear_id = $1",
-		"lens":       "SELECT focal_length, aperture, mount, coverage, focus_type, weight FROM specs_lenses WHERE gear_id = $1",
-		"audio":      "SELECT type, pattern, freq_response, sensitivity, max_spl, power, connector, weight FROM specs_audio WHERE gear_id = $1",
-		"light":      "SELECT type, power_draw, color_temp, cri, mount, control, weight FROM specs_lights WHERE gear_id = $1",
-		"monitor":    "SELECT screen, resolution, brightness, inputs, power, features, dimensions, weight FROM specs_monitoring WHERE gear_id = $1",
-		"prop":       "SELECT type, era, material, condition, quantity, dimensions, power, weight FROM specs_props WHERE gear_id = $1",
-		"stabilizer": "SELECT type, max_payload, axes, battery_life, connectivity, dimensions, weight FROM specs_stabilizers WHERE gear_id = $1",
-		"tripod":     "SELECT head_type, max_payload, bowl_size, height_range, material, counterbalance, weight FROM specs_tripods WHERE gear_id = $1",
-		"wireless":   "SELECT range, delay, resolution, inputs, freq, power, multicast, weight FROM specs_wireless WHERE gear_id = $1",
-		"drone":      "SELECT type, camera, res, flight_time, transmission, sensors, speed, weight FROM specs_drones WHERE gear_id = $1",
-		"filter":     "SELECT type, density, size, stops, effect, strength, mount, material, weight FROM specs_filters WHERE gear_id = $1",
-		"grip":       "SELECT type, max_load, max_height, min_height, footprint, material, mount, weight FROM specs_grip WHERE gear_id = $1",
-	}
-
-	query, ok := specsQueries[categorySlug]
+	tableName, ok := specsTableNames[categorySlug]
 	if !ok {
 		return specs, nil
 	}
 
-	rows, err := db.QueryxContext(ctx, query, catalogItemID)
+	columns := specsColumns[categorySlug]
+	if len(columns) == 0 {
+		return specs, nil
+	}
+
+	columnList := columns[0]
+	for i := 1; i < len(columns); i++ {
+		columnList += ", " + columns[i]
+	}
+
+	sqlQuery := fmt.Sprintf("SELECT %s FROM %s WHERE gear_id = $1", columnList, tableName)
+
+	rows, err := db.QueryxContext(ctx, sqlQuery, catalogItemID)
 	if err != nil {
 		return specs, nil
 	}

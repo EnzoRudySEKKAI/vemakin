@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/vemakin/backend/internal/constants"
 	"github.com/vemakin/backend/internal/dto"
 	"github.com/vemakin/backend/internal/models"
 )
@@ -12,8 +13,12 @@ import (
 func shotToResponse(s models.Shot) dto.ShotResponse {
 	equipmentIDs := []string{}
 	preparedIDs := []string{}
-	json.Unmarshal(s.EquipmentIDs, &equipmentIDs)
-	json.Unmarshal(s.PreparedEquipmentIDs, &preparedIDs)
+	if err := json.Unmarshal(s.EquipmentIDs, &equipmentIDs); err != nil {
+		equipmentIDs = []string{}
+	}
+	if err := json.Unmarshal(s.PreparedEquipmentIDs, &preparedIDs); err != nil {
+		preparedIDs = []string{}
+	}
 
 	return dto.ShotResponse{
 		ID:                   s.ID,
@@ -76,7 +81,7 @@ func (h *Handler) CreateShot(c echo.Context) error {
 		"project_id":  projectID,
 		"title":       req.Title,
 		"description": req.Description,
-		"status":      "pending",
+		"status":      constants.StatusPending,
 		"duration":    "1h",
 	}
 	if req.Status != "" {

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/vemakin/backend/internal/models"
@@ -46,12 +47,12 @@ func (r *CatalogRepository) GetItems(ctx context.Context, categoryID, brandID *s
 
 	if categoryID != nil && *categoryID != "" {
 		argCount++
-		query += " AND category_id = $" + string(rune('0'+argCount))
+		query += " AND category_id = $" + strconv.Itoa(argCount)
 		args = append(args, *categoryID)
 	}
 	if brandID != nil && *brandID != "" {
 		argCount++
-		query += " AND brand_id = $" + string(rune('0'+argCount))
+		query += " AND brand_id = $" + strconv.Itoa(argCount)
 		args = append(args, *brandID)
 	}
 	query += " ORDER BY name"
@@ -132,19 +133,29 @@ func ToCamelCase(s string) string {
 	if len(s) == 0 {
 		return s
 	}
-	result := ""
-	upperNext := false
-	for i, c := range s {
+
+	result := make([]rune, 0, len(s))
+	upperNext := true
+
+	for _, c := range s {
 		if c == '_' {
 			upperNext = true
 			continue
 		}
-		if upperNext || i == 0 {
-			result += string(c - 'a' + 'A')
+		if upperNext {
+			result = append(result, toUpper(c))
 			upperNext = false
 		} else {
-			result += string(c)
+			result = append(result, c)
 		}
 	}
-	return result
+
+	return string(result)
+}
+
+func toUpper(c rune) rune {
+	if c >= 'a' && c <= 'z' {
+		return c - 'a' + 'A'
+	}
+	return c
 }

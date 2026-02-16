@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -56,7 +57,11 @@ func (h *Handler) GetInitialData(c echo.Context) error {
 
 	specsMap := map[string]map[string]interface{}{}
 	if len(catalogItemIDs) > 0 {
-		specsMap, _ = h.equipmentRepo.GetSpecsBatch(ctx, catalogItemIDs)
+		var err error
+		specsMap, err = h.equipmentRepo.GetSpecsBatch(ctx, catalogItemIDs)
+		if err != nil {
+			log.Printf("Warning: Failed to fetch specs batch: %v", err)
+		}
 	}
 
 	equipmentResponses := make([]dto.EquipmentResponse, len(er.equipment))
@@ -71,21 +76,30 @@ func (h *Handler) GetInitialData(c echo.Context) error {
 	}
 
 	if projectID != "" {
-		shots, _ := h.shotRepo.GetByProjectAndUser(ctx, projectID, userID, 100, 0)
+		shots, err := h.shotRepo.GetByProjectAndUser(ctx, projectID, userID, 100, 0)
+		if err != nil {
+			log.Printf("Warning: Failed to fetch shots: %v", err)
+		}
 		shotResponses := make([]dto.ShotResponse, len(shots))
 		for i, s := range shots {
 			shotResponses[i] = shotToResponse(s)
 		}
 		response.Shots = shotResponses
 
-		notes, _ := h.noteRepo.GetByProjectAndUser(ctx, projectID, userID, 100, 0)
+		notes, err := h.noteRepo.GetByProjectAndUser(ctx, projectID, userID, 100, 0)
+		if err != nil {
+			log.Printf("Warning: Failed to fetch notes: %v", err)
+		}
 		noteResponses := make([]dto.NoteResponse, len(notes))
 		for i, n := range notes {
 			noteResponses[i] = noteToResponse(n)
 		}
 		response.Notes = noteResponses
 
-		tasks, _ := h.taskRepo.GetByProjectAndUser(ctx, projectID, userID, 100, 0)
+		tasks, err := h.taskRepo.GetByProjectAndUser(ctx, projectID, userID, 100, 0)
+		if err != nil {
+			log.Printf("Warning: Failed to fetch tasks: %v", err)
+		}
 		taskResponses := make([]dto.TaskResponse, len(tasks))
 		for i, t := range tasks {
 			taskResponses[i] = taskToResponse(t)

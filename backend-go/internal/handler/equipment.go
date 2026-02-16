@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/vemakin/backend/internal/constants"
 	"github.com/vemakin/backend/internal/dto"
 	"github.com/vemakin/backend/internal/models"
 )
@@ -51,7 +53,11 @@ func (h *Handler) GetInventory(c echo.Context) error {
 
 	specsMap := map[string]map[string]interface{}{}
 	if len(catalogItemIDs) > 0 {
-		specsMap, _ = h.equipmentRepo.GetSpecsBatch(ctx, catalogItemIDs)
+		var err error
+		specsMap, err = h.equipmentRepo.GetSpecsBatch(ctx, catalogItemIDs)
+		if err != nil {
+			log.Printf("Warning: Failed to fetch specs batch: %v", err)
+		}
 	}
 
 	response := make([]dto.EquipmentResponse, len(equipment))
@@ -78,7 +84,7 @@ func (h *Handler) CreateEquipment(c echo.Context) error {
 		"price_per_day": req.PricePerDay,
 		"quantity":      req.Quantity,
 		"is_owned":      req.IsOwned,
-		"status":        "operational",
+		"status":        constants.StatusOperational,
 	}
 	if req.CatalogItemID != nil {
 		reqMap["catalog_item_id"] = *req.CatalogItemID
@@ -105,7 +111,10 @@ func (h *Handler) CreateEquipment(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, errorResponse(err))
 	}
 
-	specs, _ := h.equipmentRepo.GetSpecsForCatalogItem(ctx, *equipment.CatalogItemID)
+	specs, err := h.equipmentRepo.GetSpecsForCatalogItem(ctx, *equipment.CatalogItemID)
+	if err != nil {
+		log.Printf("Warning: Failed to fetch specs for catalog item %s: %v", *equipment.CatalogItemID, err)
+	}
 
 	return c.JSON(http.StatusCreated, equipmentToResponse(*equipment, specs))
 }
@@ -123,7 +132,10 @@ func (h *Handler) GetEquipment(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, notFoundResponse("Equipment not found"))
 	}
 
-	specs, _ := h.equipmentRepo.GetSpecsForCatalogItem(ctx, *equipment.CatalogItemID)
+	specs, err := h.equipmentRepo.GetSpecsForCatalogItem(ctx, *equipment.CatalogItemID)
+	if err != nil {
+		log.Printf("Warning: Failed to fetch specs for catalog item %s: %v", *equipment.CatalogItemID, err)
+	}
 
 	return c.JSON(http.StatusOK, equipmentToResponse(*equipment, specs))
 }
@@ -181,7 +193,10 @@ func (h *Handler) UpdateEquipment(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, notFoundResponse("Equipment not found"))
 	}
 
-	specs, _ := h.equipmentRepo.GetSpecsForCatalogItem(ctx, *equipment.CatalogItemID)
+	specs, err := h.equipmentRepo.GetSpecsForCatalogItem(ctx, *equipment.CatalogItemID)
+	if err != nil {
+		log.Printf("Warning: Failed to fetch specs for catalog item %s: %v", *equipment.CatalogItemID, err)
+	}
 
 	return c.JSON(http.StatusOK, equipmentToResponse(*equipment, specs))
 }

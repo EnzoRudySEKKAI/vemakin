@@ -230,7 +230,7 @@ type UserResponse struct {
 }
 
 type UpdateUserRequest struct {
-	DarkMode *bool `json:"dark_mode"`
+	DarkMode *bool `json:"darkMode"`
 }
 
 type ErrorResponse struct {
