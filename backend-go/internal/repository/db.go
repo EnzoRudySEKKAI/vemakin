@@ -9,7 +9,6 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// DB wraps sqlx.DB
 type DB struct {
 	*sqlx.DB
 }

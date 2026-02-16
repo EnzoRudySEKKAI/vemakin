@@ -37,7 +37,6 @@ func (c *CatalogCache) Load() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	// Try to load from JSON file
 	if data, err := os.ReadFile(c.filePath); err == nil {
 		var cacheData CacheData
 		if err := json.Unmarshal(data, &cacheData); err == nil {
@@ -47,12 +46,6 @@ func (c *CatalogCache) Load() error {
 		}
 	}
 
-	return c.loadFromDB()
-}
-
-func (c *CatalogCache) loadFromDB() error {
-	// This will be called during startup to warm the cache
-	// Implementation depends on having db access
 	c.loaded = true
 	return nil
 }
@@ -63,14 +56,12 @@ func (c *CatalogCache) WarmFromDB(repo *repository.CatalogRepository) error {
 
 	ctx := context.Background()
 
-	// Load categories
 	categories, err := repo.GetCategories(ctx)
 	if err != nil {
 		return err
 	}
 	c.data.Categories = categories
 
-	// Load brands by category
 	brandsByCategory := make(map[string][]models.Brand)
 	for _, cat := range categories {
 		brands, _ := repo.GetBrands(ctx, &cat.ID)
@@ -78,7 +69,6 @@ func (c *CatalogCache) WarmFromDB(repo *repository.CatalogRepository) error {
 	}
 	c.data.BrandsByCategory = brandsByCategory
 
-	// Load items
 	items, err := repo.GetItems(ctx, nil, nil)
 	if err != nil {
 		return err
@@ -89,10 +79,8 @@ func (c *CatalogCache) WarmFromDB(repo *repository.CatalogRepository) error {
 	}
 	c.data.ItemsByID = itemsByID
 
-	// Load all specs
 	specsByGearID := make(map[string]map[string]interface{})
 	for _, item := range items {
-		// Get category slug for this item
 		var categorySlug string
 		for _, cat := range categories {
 			if cat.ID == item.CategoryID {
@@ -112,13 +100,11 @@ func (c *CatalogCache) WarmFromDB(repo *repository.CatalogRepository) error {
 	c.lastUpdate = time.Now()
 	c.loaded = true
 
-	// Save to JSON
 	return c.saveToJSON()
 }
 
 func (c *CatalogCache) saveToJSON() error {
-	// Ensure directory exists
-	dir := c.filePath[:len(c.filePath)-len("/catalog_cache.json")]
+	dir := c.filePath[:len(c.filePath)-len("catalog_cache.json")]
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
@@ -151,7 +137,6 @@ func (c *CatalogCache) GetBrands(categoryID *string) []models.Brand {
 		return c.data.BrandsByCategory[*categoryID]
 	}
 
-	// Return all unique brands
 	seen := make(map[string]bool)
 	var allBrands []models.Brand
 	for _, brands := range c.data.BrandsByCategory {

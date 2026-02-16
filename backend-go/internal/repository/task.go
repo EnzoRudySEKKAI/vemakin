@@ -10,33 +10,12 @@ import (
 	"github.com/vemakin/backend/internal/models"
 )
 
-// TaskRepository handles post-production task data access
 type TaskRepository struct {
 	db *sqlx.DB
 }
 
 func NewTaskRepository(db *sqlx.DB) *TaskRepository {
 	return &TaskRepository{db: db}
-}
-
-func (r *TaskRepository) CountByProject(ctx context.Context, projectID string) (int, error) {
-	var count int
-	err := r.db.GetContext(ctx, &count, `
-		SELECT COUNT(*) FROM post_prod_tasks WHERE project_id = $1
-	`, projectID)
-	return count, err
-}
-
-func (r *TaskRepository) GetByProject(ctx context.Context, projectID string, limit, offset int) ([]models.PostProdTask, error) {
-	var tasks []models.PostProdTask
-	err := r.db.SelectContext(ctx, &tasks, `
-		SELECT id, project_id, category, title, status, priority, due_date, description, created_at, updated_at
-		FROM post_prod_tasks 
-		WHERE project_id = $1 
-		ORDER BY created_at ASC 
-		LIMIT $2 OFFSET $3
-	`, projectID, limit, offset)
-	return tasks, err
 }
 
 func (r *TaskRepository) GetByProjectAndUser(ctx context.Context, projectID, userID string, limit, offset int) ([]models.PostProdTask, error) {
@@ -52,19 +31,6 @@ func (r *TaskRepository) GetByProjectAndUser(ctx context.Context, projectID, use
 		LIMIT $3 OFFSET $4
 	`, projectID, userID, limit, offset)
 	return tasks, err
-}
-
-func (r *TaskRepository) GetByID(ctx context.Context, id, projectID string) (*models.PostProdTask, error) {
-	var t models.PostProdTask
-	err := r.db.GetContext(ctx, &t, `
-		SELECT id, project_id, category, title, status, priority, due_date, description, created_at, updated_at
-		FROM post_prod_tasks 
-		WHERE id = $1 AND project_id = $2
-	`, id, projectID)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
-	return &t, err
 }
 
 func (r *TaskRepository) GetByIDAndUser(ctx context.Context, id, projectID, userID string) (*models.PostProdTask, error) {

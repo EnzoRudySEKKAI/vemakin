@@ -11,35 +11,12 @@ import (
 	"github.com/vemakin/backend/internal/models"
 )
 
-// ShotRepository handles shot data access
 type ShotRepository struct {
 	db *sqlx.DB
 }
 
 func NewShotRepository(db *sqlx.DB) *ShotRepository {
 	return &ShotRepository{db: db}
-}
-
-func (r *ShotRepository) CountByProject(ctx context.Context, projectID string) (int, error) {
-	var count int
-	err := r.db.GetContext(ctx, &count, `
-		SELECT COUNT(*) FROM shots WHERE project_id = $1
-	`, projectID)
-	return count, err
-}
-
-func (r *ShotRepository) GetByProject(ctx context.Context, projectID string, limit, offset int) ([]models.Shot, error) {
-	var shots []models.Shot
-	err := r.db.SelectContext(ctx, &shots, `
-		SELECT s.id, s.project_id, s.title, s.description, s.status, s.start_time, s.duration, 
-		       s.location, s.location_lat, s.location_lng, s.remarks, s.date, s.scene_number, s.equipment_ids, s.prepared_equipment_ids,
-		       s.created_at, s.updated_at
-		FROM shots s
-		WHERE s.project_id = $1 
-		ORDER BY s.created_at DESC 
-		LIMIT $2 OFFSET $3
-	`, projectID, limit, offset)
-	return shots, err
 }
 
 func (r *ShotRepository) GetByProjectAndUser(ctx context.Context, projectID, userID string, limit, offset int) ([]models.Shot, error) {
@@ -57,21 +34,6 @@ func (r *ShotRepository) GetByProjectAndUser(ctx context.Context, projectID, use
 		LIMIT $3 OFFSET $4
 	`, projectID, userID, limit, offset)
 	return shots, err
-}
-
-func (r *ShotRepository) GetByID(ctx context.Context, id, projectID string) (*models.Shot, error) {
-	var s models.Shot
-	err := r.db.GetContext(ctx, &s, `
-		SELECT id, project_id, title, description, status, start_time, duration, 
-		       location, location_lat, location_lng, remarks, date, scene_number, equipment_ids, prepared_equipment_ids,
-		       created_at, updated_at
-		FROM shots 
-		WHERE id = $1 AND project_id = $2
-	`, id, projectID)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
-	return &s, err
 }
 
 func (r *ShotRepository) GetByIDAndUser(ctx context.Context, id, projectID, userID string) (*models.Shot, error) {
@@ -112,85 +74,44 @@ func (r *ShotRepository) Create(ctx context.Context, req map[string]interface{})
 }
 
 func (r *ShotRepository) Update(ctx context.Context, id, projectID string, updates map[string]interface{}) (*models.Shot, error) {
-	// Build dynamic update query
 	query := "UPDATE shots SET "
 	var args []interface{}
 	argCount := 0
 
-	if v, ok := updates["title"]; ok && v != nil {
-		argCount++
-		query += fmt.Sprintf("title = $%d, ", argCount)
-		args = append(args, v)
-	}
-	if v, ok := updates["description"]; ok && v != nil {
-		argCount++
-		query += fmt.Sprintf("description = $%d, ", argCount)
-		args = append(args, v)
-	}
-	if v, ok := updates["status"]; ok && v != nil {
-		argCount++
-		query += fmt.Sprintf("status = $%d, ", argCount)
-		args = append(args, v)
-	}
-	if v, ok := updates["start_time"]; ok && v != nil {
-		argCount++
-		query += fmt.Sprintf("start_time = $%d, ", argCount)
-		args = append(args, v)
-	}
-	if v, ok := updates["duration"]; ok && v != nil {
-		argCount++
-		query += fmt.Sprintf("duration = $%d, ", argCount)
-		args = append(args, v)
-	}
-	if v, ok := updates["location"]; ok && v != nil {
-		argCount++
-		query += fmt.Sprintf("location = $%d, ", argCount)
-		args = append(args, v)
-	}
-	if v, ok := updates["location_lat"]; ok && v != nil {
-		argCount++
-		query += fmt.Sprintf("location_lat = $%d, ", argCount)
-		args = append(args, v)
-	}
-	if v, ok := updates["location_lng"]; ok && v != nil {
-		argCount++
-		query += fmt.Sprintf("location_lng = $%d, ", argCount)
-		args = append(args, v)
-	}
-	if v, ok := updates["remarks"]; ok && v != nil {
-		argCount++
-		query += fmt.Sprintf("remarks = $%d, ", argCount)
-		args = append(args, v)
-	}
-	if v, ok := updates["date"]; ok && v != nil {
-		argCount++
-		query += fmt.Sprintf("date = $%d, ", argCount)
-		args = append(args, v)
-	}
-	if v, ok := updates["scene_number"]; ok && v != nil {
-		argCount++
-		query += fmt.Sprintf("scene_number = $%d, ", argCount)
-		args = append(args, v)
-	}
-	if v, ok := updates["equipment_ids"]; ok && v != nil {
-		argCount++
-		ids, _ := json.Marshal(v)
-		query += fmt.Sprintf("equipment_ids = $%d, ", argCount)
-		args = append(args, ids)
-	}
-	if v, ok := updates["prepared_equipment_ids"]; ok && v != nil {
-		argCount++
-		preparedIds, _ := json.Marshal(v)
-		query += fmt.Sprintf("prepared_equipment_ids = $%d, ", argCount)
-		args = append(args, preparedIds)
+	fields := map[string]string{
+		"title":                  "title",
+		"description":            "description",
+		"status":                 "status",
+		"start_time":             "start_time",
+		"duration":               "duration",
+		"location":               "location",
+		"location_lat":           "location_lat",
+		"location_lng":           "location_lng",
+		"remarks":                "remarks",
+		"date":                   "date",
+		"scene_number":           "scene_number",
+		"equipment_ids":          "equipment_ids",
+		"prepared_equipment_ids": "prepared_equipment_ids",
 	}
 
-	// Always update updated_at
+	for key, column := range fields {
+		if v, ok := updates[key]; ok && v != nil {
+			argCount++
+			if key == "equipment_ids" || key == "prepared_equipment_ids" {
+				ids, _ := json.Marshal(v)
+				query += fmt.Sprintf("%s = $%d, ", column, argCount)
+				args = append(args, ids)
+			} else {
+				query += fmt.Sprintf("%s = $%d, ", column, argCount)
+				args = append(args, v)
+			}
+		}
+	}
+
 	argCount++
 	query += fmt.Sprintf("updated_at = $%d ", argCount)
 	args = append(args, time.Now())
 
-	// Add WHERE clause
 	argCount++
 	query += fmt.Sprintf("WHERE id = $%d AND project_id = $%d ", argCount, argCount+1)
 	args = append(args, id, projectID)

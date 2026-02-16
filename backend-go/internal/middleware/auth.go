@@ -19,20 +19,9 @@ func NewAuthMiddleware(firebaseAuth *auth.FirebaseAuth) *AuthMiddleware {
 func (m *AuthMiddleware) Authenticate() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			authHeader := c.Request().Header.Get("Authorization")
-			if authHeader == "" {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Missing authorization header")
-			}
-
-			parts := strings.SplitN(authHeader, " ", 2)
-			if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid authorization header format")
-			}
-
-			token := parts[1]
-			tokenData, err := m.firebaseAuth.VerifyIDToken(c.Request().Context(), token)
+			tokenData, err := m.verifyToken(c)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid or expired token")
+				return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 			}
 
 			c.Set("userID", tokenData.UID)
@@ -53,15 +42,9 @@ func (m *AuthMiddleware) OptionalAuth() echo.MiddlewareFunc {
 				return next(c)
 			}
 
-			parts := strings.SplitN(authHeader, " ", 2)
-			if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid authorization header format")
-			}
-
-			token := parts[1]
-			tokenData, err := m.firebaseAuth.VerifyIDToken(c.Request().Context(), token)
+			tokenData, err := m.verifyToken(c)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid or expired token")
+				return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 			}
 
 			c.Set("userID", tokenData.UID)
@@ -71,4 +54,24 @@ func (m *AuthMiddleware) OptionalAuth() echo.MiddlewareFunc {
 			return next(c)
 		}
 	}
+}
+
+func (m *AuthMiddleware) verifyToken(c echo.Context) (*auth.CachedToken, error) {
+	authHeader := c.Request().Header.Get("Authorization")
+	if authHeader == "" {
+		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Missing authorization header")
+	}
+
+	parts := strings.SplitN(authHeader, " ", 2)
+	if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
+		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Invalid authorization header format")
+	}
+
+	token := parts[1]
+	tokenData, err := m.firebaseAuth.VerifyIDToken(c.Request().Context(), token)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Invalid or expired token")
+	}
+
+	return tokenData, nil
 }

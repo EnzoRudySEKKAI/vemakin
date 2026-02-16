@@ -5,7 +5,6 @@ import (
 	"time"
 )
 
-// User represents a user in the system (Firebase UID)
 type User struct {
 	ID            string  `db:"id" json:"id"`
 	Email         string  `db:"email" json:"email"`
@@ -14,7 +13,6 @@ type User struct {
 	LastProjectID *string `db:"last_project_id" json:"lastProjectId"`
 }
 
-// Project represents a film project
 type Project struct {
 	ID        string       `db:"id" json:"id"`
 	Name      string       `db:"name" json:"name"`
@@ -23,7 +21,6 @@ type Project struct {
 	UpdatedAt sql.NullTime `db:"updated_at" json:"updatedAt"`
 }
 
-// Shot represents a shot in a project
 type Shot struct {
 	ID                   string          `db:"id" json:"id"`
 	ProjectID            string          `db:"project_id" json:"projectId"`
@@ -44,7 +41,6 @@ type Shot struct {
 	UpdatedAt            sql.NullTime    `db:"updated_at" json:"updatedAt"`
 }
 
-// Equipment represents user inventory items
 type Equipment struct {
 	ID              string       `db:"id" json:"id"`
 	UserID          string       `db:"user_id" json:"userId"`
@@ -63,7 +59,6 @@ type Equipment struct {
 	UpdatedAt       sql.NullTime `db:"updated_at" json:"updatedAt"`
 }
 
-// Note represents a note in a project
 type Note struct {
 	ID        string       `db:"id" json:"id"`
 	ProjectID string       `db:"project_id" json:"projectId"`
@@ -75,7 +70,6 @@ type Note struct {
 	UpdatedAt sql.NullTime `db:"updated_at" json:"updatedAt"`
 }
 
-// PostProdTask represents a post-production task
 type PostProdTask struct {
 	ID          string       `db:"id" json:"id"`
 	ProjectID   string       `db:"project_id" json:"projectId"`
@@ -89,20 +83,17 @@ type PostProdTask struct {
 	UpdatedAt   sql.NullTime `db:"updated_at" json:"updatedAt"`
 }
 
-// Brand represents a gear brand
 type Brand struct {
 	ID   string `db:"id" json:"id"`
 	Name string `db:"name" json:"name"`
 }
 
-// Category represents a gear category
 type Category struct {
 	ID   string `db:"id" json:"id"`
 	Name string `db:"name" json:"name"`
 	Slug string `db:"slug" json:"slug"`
 }
 
-// GearCatalog represents an item in the gear catalog
 type GearCatalog struct {
 	ID          string    `db:"id" json:"id"`
 	BrandID     string    `db:"brand_id" json:"brandId"`
@@ -113,7 +104,6 @@ type GearCatalog struct {
 	CreatedAt   time.Time `db:"created_at" json:"createdAt"`
 }
 
-// Specs tables
 type CameraSpecs struct {
 	GearID       string `db:"gear_id" json:"gearId"`
 	Sensor       string `db:"sensor" json:"sensor"`

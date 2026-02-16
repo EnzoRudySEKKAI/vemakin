@@ -10,30 +10,22 @@ import (
 )
 
 type Config struct {
-	// Server
-	Port        string
-	Environment string
-	LogLevel    string
-
-	// Database
-	DBHost      string
-	DBPort      string
-	DBUser      string
-	DBPass      string
-	DBName      string
-	DatabaseURL string
-
-	// Firebase
+	Port                         string
+	Environment                  string
+	LogLevel                     string
+	DBHost                       string
+	DBPort                       string
+	DBUser                       string
+	DBPass                       string
+	DBName                       string
+	DatabaseURL                  string
 	FirebaseProjectID            string
 	GoogleApplicationCredentials string
-
-	// Cache
-	CacheFile        string
-	CacheRefreshHour int
+	CacheFile                    string
+	CacheRefreshHour             int
 }
 
 func Load() *Config {
-	// Try to load .env from multiple locations
 	envFiles := []string{
 		".env",
 		"./.env",
@@ -53,22 +45,19 @@ func Load() *Config {
 	log.Printf("DATABASE_URL from env: %s", getEnv("DATABASE_URL", "not set"))
 
 	return &Config{
-		Port:        getEnv("PORT", "8080"),
-		Environment: getEnv("ENV", "development"),
-		LogLevel:    getEnv("LOG_LEVEL", "info"),
-
-		DBHost:      getEnv("DB_HOST", "localhost"),
-		DBPort:      getEnv("DB_PORT", "5432"),
-		DBUser:      getEnv("DB_USER", "postgres"),
-		DBPass:      getEnv("DB_PASS", "postgres"),
-		DBName:      getEnv("DB_NAME", "vemakin"),
-		DatabaseURL: getEnv("DATABASE_URL", ""),
-
+		Port:                         getEnv("PORT", "8080"),
+		Environment:                  getEnv("ENV", "development"),
+		LogLevel:                     getEnv("LOG_LEVEL", "info"),
+		DBHost:                       getEnv("DB_HOST", "localhost"),
+		DBPort:                       getEnv("DB_PORT", "5432"),
+		DBUser:                       getEnv("DB_USER", "postgres"),
+		DBPass:                       getEnv("DB_PASS", "postgres"),
+		DBName:                       getEnv("DB_NAME", "vemakin"),
+		DatabaseURL:                  getEnv("DATABASE_URL", ""),
 		FirebaseProjectID:            getEnv("FIREBASE_PROJECT_ID", "vemakin"),
 		GoogleApplicationCredentials: getEnv("GOOGLE_APPLICATION_CREDENTIALS", ""),
-
-		CacheFile:        getEnv("CATALOG_CACHE_FILE", "./data/catalog_cache.json"),
-		CacheRefreshHour: getEnvInt("CACHE_REFRESH_HOUR", 3),
+		CacheFile:                    getEnv("CATALOG_CACHE_FILE", "./data/catalog_cache.json"),
+		CacheRefreshHour:             getEnvInt("CACHE_REFRESH_HOUR", 3),
 	}
 }
 

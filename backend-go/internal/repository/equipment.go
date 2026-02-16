@@ -10,21 +10,12 @@ import (
 	"github.com/vemakin/backend/internal/models"
 )
 
-// EquipmentRepository handles equipment data access
 type EquipmentRepository struct {
 	db *sqlx.DB
 }
 
 func NewEquipmentRepository(db *sqlx.DB) *EquipmentRepository {
 	return &EquipmentRepository{db: db}
-}
-
-func (r *EquipmentRepository) CountByUser(ctx context.Context, userID string) (int, error) {
-	var count int
-	err := r.db.GetContext(ctx, &count, `
-		SELECT COUNT(*) FROM user_inventory WHERE user_id = $1
-	`, userID)
-	return count, err
 }
 
 func (r *EquipmentRepository) GetByUser(ctx context.Context, userID string, limit, offset int) ([]models.Equipment, error) {
@@ -120,11 +111,9 @@ func (r *EquipmentRepository) Delete(ctx context.Context, id, userID string) err
 	return nil
 }
 
-// GetSpecsForCatalogItem fetches specs for a catalog item based on its category
 func (r *EquipmentRepository) GetSpecsForCatalogItem(ctx context.Context, catalogItemID string) (map[string]interface{}, error) {
 	specs := make(map[string]interface{})
 
-	// Get category slug for the catalog item
 	var categorySlug string
 	err := r.db.GetContext(ctx, &categorySlug, `
 		SELECT c.slug 
@@ -139,13 +128,11 @@ func (r *EquipmentRepository) GetSpecsForCatalogItem(ctx context.Context, catalo
 	return getSpecsByCategorySlug(ctx, r.db, categorySlug, catalogItemID)
 }
 
-// GetSpecsBatch fetches specs for multiple catalog items in a single query per category
 func (r *EquipmentRepository) GetSpecsBatch(ctx context.Context, catalogItemIDs []string) (map[string]map[string]interface{}, error) {
 	if len(catalogItemIDs) == 0 {
 		return make(map[string]map[string]interface{}), nil
 	}
 
-	// Get category slugs for all catalog items
 	type itemCategory struct {
 		ItemID       string `db:"id"`
 		CategorySlug string `db:"slug"`
@@ -163,7 +150,6 @@ func (r *EquipmentRepository) GetSpecsBatch(ctx context.Context, catalogItemIDs 
 		return make(map[string]map[string]interface{}), nil
 	}
 
-	// Group items by category
 	itemsByCategory := make(map[string][]string)
 	for _, item := range items {
 		itemsByCategory[item.CategorySlug] = append(itemsByCategory[item.CategorySlug], item.ItemID)
@@ -171,7 +157,6 @@ func (r *EquipmentRepository) GetSpecsBatch(ctx context.Context, catalogItemIDs 
 
 	result := make(map[string]map[string]interface{})
 
-	// Query each category's specs table
 	specsQueries := map[string]string{
 		"camera":     "SELECT gear_id, sensor, resolution, mount, dynamic_range, native_iso, media, frame_rate, weight FROM specs_cameras WHERE gear_id = ANY($1)",
 		"lens":       "SELECT gear_id, focal_length, aperture, mount, coverage, focus_type, weight FROM specs_lenses WHERE gear_id = ANY($1)",
@@ -214,7 +199,7 @@ func (r *EquipmentRepository) GetSpecsBatch(ctx context.Context, catalogItemIDs 
 					continue
 				}
 				if i < len(values) {
-					specs[toCamelCase(col)] = values[i]
+					specs[ToCamelCase(col)] = values[i]
 				}
 			}
 			if gearID != "" {
@@ -264,7 +249,7 @@ func getSpecsByCategorySlug(ctx context.Context, db *sqlx.DB, categorySlug, cata
 		columns, _ := rows.Columns()
 		for i, col := range columns {
 			if i < len(values) {
-				specs[toCamelCase(col)] = values[i]
+				specs[ToCamelCase(col)] = values[i]
 			}
 		}
 	}

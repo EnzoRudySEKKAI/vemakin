@@ -9,7 +9,6 @@ import (
 	"github.com/vemakin/backend/internal/models"
 )
 
-// UserRepository handles user data access
 type UserRepository struct {
 	db *sqlx.DB
 }
@@ -36,7 +35,6 @@ func (r *UserRepository) Create(ctx context.Context, id, email, name string) (*m
 		RETURNING id, email, name, dark_mode, last_project_id
 	`, id, email, name)
 	if err == sql.ErrNoRows {
-		// User already exists, fetch it
 		return r.GetByID(ctx, id)
 	}
 	return &u, err

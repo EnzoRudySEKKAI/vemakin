@@ -10,7 +10,6 @@ import (
 	"github.com/vemakin/backend/internal/models"
 )
 
-// ProjectRepository handles project data access
 type ProjectRepository struct {
 	db *sqlx.DB
 }
@@ -94,16 +93,4 @@ func (r *ProjectRepository) CheckOwnership(ctx context.Context, projectID, userI
 		return fmt.Errorf("project not found")
 	}
 	return nil
-}
-
-func (r *ProjectRepository) Ping(ctx context.Context) error {
-	return r.db.PingContext(ctx)
-}
-
-func (r *ProjectRepository) CountByUser(ctx context.Context, userID string) (int, error) {
-	var count int
-	err := r.db.GetContext(ctx, &count, `
-		SELECT COUNT(*) FROM projects WHERE user_id = $1
-	`, userID)
-	return count, err
 }

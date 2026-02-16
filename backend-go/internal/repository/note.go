@@ -10,33 +10,12 @@ import (
 	"github.com/vemakin/backend/internal/models"
 )
 
-// NoteRepository handles note data access
 type NoteRepository struct {
 	db *sqlx.DB
 }
 
 func NewNoteRepository(db *sqlx.DB) *NoteRepository {
 	return &NoteRepository{db: db}
-}
-
-func (r *NoteRepository) CountByProject(ctx context.Context, projectID string) (int, error) {
-	var count int
-	err := r.db.GetContext(ctx, &count, `
-		SELECT COUNT(*) FROM notes WHERE project_id = $1
-	`, projectID)
-	return count, err
-}
-
-func (r *NoteRepository) GetByProject(ctx context.Context, projectID string, limit, offset int) ([]models.Note, error) {
-	var notes []models.Note
-	err := r.db.SelectContext(ctx, &notes, `
-		SELECT id, project_id, title, content, shot_id, task_id, created_at, updated_at
-		FROM notes 
-		WHERE project_id = $1 
-		ORDER BY updated_at DESC 
-		LIMIT $2 OFFSET $3
-	`, projectID, limit, offset)
-	return notes, err
 }
 
 func (r *NoteRepository) GetByProjectAndUser(ctx context.Context, projectID, userID string, limit, offset int) ([]models.Note, error) {
@@ -52,19 +31,6 @@ func (r *NoteRepository) GetByProjectAndUser(ctx context.Context, projectID, use
 		LIMIT $3 OFFSET $4
 	`, projectID, userID, limit, offset)
 	return notes, err
-}
-
-func (r *NoteRepository) GetByID(ctx context.Context, id, projectID string) (*models.Note, error) {
-	var n models.Note
-	err := r.db.GetContext(ctx, &n, `
-		SELECT id, project_id, title, content, shot_id, task_id, created_at, updated_at
-		FROM notes 
-		WHERE id = $1 AND project_id = $2
-	`, id, projectID)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
-	return &n, err
 }
 
 func (r *NoteRepository) GetByIDAndUser(ctx context.Context, id, projectID, userID string) (*models.Note, error) {

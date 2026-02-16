@@ -7,7 +7,6 @@ import (
 	"github.com/vemakin/backend/internal/models"
 )
 
-// CatalogRepository handles catalog data access
 type CatalogRepository struct {
 	db *sqlx.DB
 }
@@ -77,7 +76,6 @@ func (r *CatalogRepository) GetItemByID(ctx context.Context, itemID string) (*mo
 func (r *CatalogRepository) GetSpecs(ctx context.Context, itemID, categorySlug string) (map[string]interface{}, error) {
 	specs := make(map[string]interface{})
 
-	// Use provided categorySlug if available, otherwise look it up
 	slug := categorySlug
 	if slug == "" {
 		var category struct {
@@ -90,7 +88,6 @@ func (r *CatalogRepository) GetSpecs(ctx context.Context, itemID, categorySlug s
 		slug = category.Slug
 	}
 
-	// Query the appropriate specs table based on category
 	specsQueries := map[string]string{
 		"camera":     "SELECT sensor, resolution, mount, dynamic_range, native_iso, media, frame_rate, weight FROM specs_cameras WHERE gear_id = $1",
 		"lens":       "SELECT focal_length, aperture, mount, coverage, focus_type, weight FROM specs_lenses WHERE gear_id = $1",
@@ -124,14 +121,14 @@ func (r *CatalogRepository) GetSpecs(ctx context.Context, itemID, categorySlug s
 		}
 		columns, _ := rows.Columns()
 		for i, col := range columns {
-			specs[toCamelCase(col)] = values[i]
+			specs[ToCamelCase(col)] = values[i]
 		}
 	}
 
 	return specs, nil
 }
 
-func toCamelCase(s string) string {
+func ToCamelCase(s string) string {
 	if len(s) == 0 {
 		return s
 	}

@@ -4,7 +4,6 @@ import (
 	"time"
 )
 
-// Request DTOs
 type CreateProjectRequest struct {
 	Name string `json:"name" validate:"required"`
 }
@@ -104,7 +103,6 @@ type UpdateTaskRequest struct {
 	Description *string `json:"description"`
 }
 
-// Response DTOs
 type ProjectResponse struct {
 	ID        string     `json:"id"`
 	Name      string     `json:"name"`

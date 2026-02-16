@@ -55,7 +55,6 @@ func NewFirebaseAuth(credentialsPath string, projectID string) (*FirebaseAuth, e
 		return nil, err
 	}
 
-	// Initialize cache with 5 minute TTL
 	cache, err := bigcache.NewBigCache(bigcache.DefaultConfig(5 * time.Minute))
 	if err != nil {
 		log.Warn().Err(err).Msg("Failed to initialize token cache, proceeding without cache")
@@ -70,12 +69,10 @@ func NewFirebaseAuth(credentialsPath string, projectID string) (*FirebaseAuth, e
 }
 
 func (f *FirebaseAuth) VerifyIDToken(ctx context.Context, tokenString string) (*CachedToken, error) {
-	// Check cache first
 	if f.cache != nil {
 		if cached, err := f.cache.Get(tokenString); err == nil {
 			var cachedToken CachedToken
 			if json.Unmarshal(cached, &cachedToken) == nil {
-				// Check if token is still valid
 				if cachedToken.Expires > time.Now().Unix() {
 					return &cachedToken, nil
 				}
@@ -83,13 +80,11 @@ func (f *FirebaseAuth) VerifyIDToken(ctx context.Context, tokenString string) (*
 		}
 	}
 
-	// Verify with Firebase
 	token, err := f.client.VerifyIDToken(ctx, tokenString)
 	if err != nil {
 		return nil, err
 	}
 
-	// Extract user info
 	uid := token.UID
 	email, _ := token.Claims["email"].(string)
 	name, _ := token.Claims["name"].(string)
@@ -97,7 +92,6 @@ func (f *FirebaseAuth) VerifyIDToken(ctx context.Context, tokenString string) (*
 		name = email[:len(email)-len("@"+extractDomain(email))]
 	}
 
-	// Get more details from Firebase if needed
 	if email == "" || name == "" {
 		userRecord, err := f.client.GetUser(ctx, uid)
 		if err == nil {
@@ -120,7 +114,6 @@ func (f *FirebaseAuth) VerifyIDToken(ctx context.Context, tokenString string) (*
 		Expires: time.Now().Add(f.cacheTTL).Unix(),
 	}
 
-	// Cache the token
 	if f.cache != nil {
 		if data, err := json.Marshal(cachedToken); err == nil {
 			f.cache.Set(tokenString, data)
