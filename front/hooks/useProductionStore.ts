@@ -1,8 +1,7 @@
 import { create } from 'zustand';
 import {
   MainView, Shot, ShotLayout, Equipment, Note, PostProdTask,
-  PostProdFilters, NotesFilters, User, CatalogCategory,
-  CatalogBrand, CatalogItem
+  PostProdFilters, NotesFilters, User
 } from '../types.ts';
 import { timeToMinutes } from '../utils.ts';
 import { auth } from '../firebase';
@@ -72,11 +71,6 @@ interface ProductionStore {
   isLoadingInitialData: boolean;
   lastInitialDataFetch: number;
 
-  catalogCategories: CatalogCategory[];
-  catalogBrands: CatalogBrand[];
-  catalogItems: CatalogItem[];
-  hasFetchedCatalog: boolean;
-
   // Inventory Specs Loading State
   isLoadingInventorySpecs: boolean;
   hasLoadedInventorySpecs: boolean;
@@ -136,12 +130,6 @@ interface ProductionStore {
   toggleShotStatus: (id: string) => void;
   toggleEquipmentStatus: (shotId: string, equipmentId: string) => void;
 
-  // Catalog Actions
-  fetchCatalogCategories: () => Promise<void>;
-  fetchBrands: (categoryId: string) => Promise<void>;
-  fetchCatalogItems: (categoryId: string, brandId: string) => Promise<void>;
-  fetchItemSpecs: (itemId: string) => Promise<any>;
-
   refreshProjectData: () => void;
   prefetchProjectsData: (projectNames: string[]) => Promise<void>;
 
@@ -162,11 +150,6 @@ export const useStore = create<ProductionStore>((set, get) => ({
   isLoadingAuth: true,
   isLoadingInitialData: false,
   lastInitialDataFetch: 0,
-
-  catalogCategories: [],
-  catalogBrands: [],
-  catalogItems: [],
-  hasFetchedCatalog: false,
 
   // Inventory Specs Loading State
   isLoadingInventorySpecs: false,
@@ -347,11 +330,17 @@ export const useStore = create<ProductionStore>((set, get) => ({
           specs: i.specs || {}
         }));
 
+        // Check if inventory already has specs (initial data includes them)
+        const hasSpecs = fetchedInv.some((item: Equipment) =>
+          item.specs && Object.keys(item.specs).length > 0
+        );
+
         set((s) => ({
           projects: projectNames,
           projectData: { ...s.projectData, ...newProjectData },
           allInventory: fetchedInv,
-          currentProject: s.currentProject || useProjectStore.getState().currentProjectName || projectNames[0]
+          currentProject: s.currentProject || useProjectStore.getState().currentProjectName || projectNames[0],
+          hasLoadedInventorySpecs: hasSpecs
         }));
 
         // If the response includes project data (shots, notes, tasks), use it
@@ -384,12 +373,6 @@ export const useStore = create<ProductionStore>((set, get) => ({
           // Fallback: fetch project data separately if not included in initial response
           get().fetchProjectData(get().currentProject);
         }
-      }
-      
-      // Trigger background loading of inventory specs
-      if (!get().hasLoadedInventorySpecs && !get().isLoadingInventorySpecs) {
-        console.log('[fetchInitialData] Triggering background inventory specs loading');
-        get().fetchInventorySpecs();
       }
     } catch (err) {
       console.error("Initial fetch failed:", err);
@@ -828,44 +811,6 @@ export const useStore = create<ProductionStore>((set, get) => ({
         }
       };
     });
-  },
-
-  fetchCatalogCategories: async () => {
-    if (get().hasFetchedCatalog && get().catalogCategories.length > 0) return;
-    try {
-      const res = await apiClient.get<CatalogCategory[]>('/catalog/categories');
-      set({ catalogCategories: res, hasFetchedCatalog: true });
-    } catch (err) {
-      console.error("Failed to fetch catalog categories:", err);
-    }
-  },
-
-  fetchBrands: async (categoryId) => {
-    try {
-      const res = await apiClient.get<CatalogBrand[]>(`/catalog/brands?category_id=${categoryId}`);
-      set({ catalogBrands: res });
-    } catch (err) {
-      console.error("Failed to fetch catalog brands:", err);
-    }
-  },
-
-  fetchCatalogItems: async (categoryId, brandId) => {
-    try {
-      const res = await apiClient.get<CatalogItem[]>(`/catalog/items?category_id=${categoryId}&brand_id=${brandId}`);
-      set({ catalogItems: res });
-    } catch (err) {
-      console.error("Failed to fetch catalog items:", err);
-    }
-  },
-
-  fetchItemSpecs: async (itemId) => {
-    try {
-      const res = await apiClient.get<Record<string, unknown>>(`/catalog/items/${itemId}/specs`);
-      return res;
-    } catch (err) {
-      console.error("Failed to fetch item specs:", err);
-      return {};
-    }
   },
 
   refreshProjectData: () => {

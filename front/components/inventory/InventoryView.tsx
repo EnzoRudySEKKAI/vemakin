@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { Package, Camera, Lightbulb, Speaker, Wrench } from 'lucide-react'
 import { Equipment, Shot, InventoryFilters, Currency, InventoryLayout } from '@/types'
 import { Card } from '@/components/ui/Card'
-import { useProductionStore } from '@/hooks/useProductionStore'
+import { useCatalogCategories } from '@/hooks/useApi'
 
 interface InventoryViewProps {
   inventory: Equipment[]
@@ -60,21 +60,17 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
   currency,
   layout = 'grid',
 }) => {
-  const { catalogCategories, fetchCatalogCategories } = useProductionStore()
-
-  useEffect(() => {
-    fetchCatalogCategories()
-  }, [fetchCatalogCategories])
+  const { data: catalogCategories = [] } = useCatalogCategories()
 
   const getCategoryDisplayName = (categoryIdOrName: string): string => {
     if (!catalogCategories || !Array.isArray(catalogCategories)) {
       console.log('catalogCategories not loaded yet:', catalogCategories)
       return categoryIdOrName
     }
-    const match = catalogCategories.find(c => c.id === categoryIdOrName)
+    const match = catalogCategories.find((c: { id: string; name: string }) => c.id === categoryIdOrName)
     if (!match && categoryIdOrName.length > 20) {
       console.log('No match found for category:', categoryIdOrName)
-      console.log('Available categories:', catalogCategories.map(c => ({ id: c.id, name: c.name })))
+      console.log('Available categories:', catalogCategories.map((c: { id: string; name: string }) => ({ id: c.id, name: c.name })))
     }
     return match?.name || categoryIdOrName
   }

@@ -10,6 +10,7 @@ export interface User {
     email: string;
     avatar?: string;
     darkMode?: boolean | null;
+    lastProjectId?: string | null;
 }
 
 export interface Currency {

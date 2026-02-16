@@ -7,10 +7,11 @@ import (
 
 // User represents a user in the system (Firebase UID)
 type User struct {
-	ID       string `db:"id" json:"id"`
-	Email    string `db:"email" json:"email"`
-	Name     string `db:"name" json:"name"`
-	DarkMode *bool  `db:"dark_mode" json:"darkMode"`
+	ID            string  `db:"id" json:"id"`
+	Email         string  `db:"email" json:"email"`
+	Name          string  `db:"name" json:"name"`
+	DarkMode      *bool   `db:"dark_mode" json:"darkMode"`
+	LastProjectID *string `db:"last_project_id" json:"lastProjectId"`
 }
 
 // Project represents a film project

@@ -174,6 +174,9 @@ func main() {
 	protected.GET("/catalog/items/:id/specs", h.GetItemSpecs)
 	protected.GET("/catalog/health", h.GetCatalogHealth)
 
+	// Admin endpoints
+	protected.POST("/admin/catalog/refresh", h.RefreshCatalogCache)
+
 	// Bulk endpoints
 	protected.GET("/bulk/initial", h.GetInitialData)
 	protected.GET("/bulk/project/:id", h.GetProjectData)

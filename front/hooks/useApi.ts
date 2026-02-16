@@ -51,7 +51,7 @@ const STALE_TIMES = {
   projects: 5 * 60 * 1000,        // 5 minutes
   projectData: 2 * 60 * 1000,     // 2 minutes
   inventory: 5 * 60 * 1000,       // 5 minutes
-  catalog: 60 * 60 * 1000,        // 1 hour (rarely changes)
+  catalog: 24 * 60 * 60 * 1000,   // 24 hours - backend cache handles it
 }
 
 // Projects Hooks
@@ -299,12 +299,13 @@ export const useDeleteEquipment = () => {
   })
 }
 
-// Catalog Hooks
+// Catalog Hooks - Extended cache since backend handles catalog caching
 export const useCatalogCategories = (options?: UseQueryOptions<CatalogCategory[], Error>) => {
   return useQuery({
     queryKey: queryKeys.catalog.categories,
     queryFn: catalogApi.getCategories,
     staleTime: STALE_TIMES.catalog,
+    gcTime: 7 * 24 * 60 * 60 * 1000, // Keep in cache for 7 days
     ...options,
   })
 }
@@ -314,13 +315,14 @@ export const useCatalogBrands = (categoryId: string, options?: UseQueryOptions<C
     queryKey: queryKeys.catalog.brands(categoryId),
     queryFn: () => catalogApi.getBrands(categoryId),
     staleTime: STALE_TIMES.catalog,
+    gcTime: 7 * 24 * 60 * 60 * 1000, // Keep in cache for 7 days
     enabled: !!categoryId,
     ...options,
   })
 }
 
 export const useCatalogItems = (
-  categoryId: string, 
+  categoryId: string,
   brandId: string,
   options?: UseQueryOptions<CatalogItem[], Error>
 ) => {
@@ -328,6 +330,7 @@ export const useCatalogItems = (
     queryKey: queryKeys.catalog.items(categoryId, brandId),
     queryFn: () => catalogApi.getItems(categoryId, brandId),
     staleTime: STALE_TIMES.catalog,
+    gcTime: 7 * 24 * 60 * 60 * 1000, // Keep in cache for 7 days
     enabled: !!categoryId && !!brandId,
     ...options,
   })
@@ -338,6 +341,7 @@ export const useItemSpecs = (itemId: string, options?: UseQueryOptions<Record<st
     queryKey: queryKeys.catalog.specs(itemId),
     queryFn: () => catalogApi.getItemSpecs(itemId),
     staleTime: STALE_TIMES.catalog,
+    gcTime: 7 * 24 * 60 * 60 * 1000, // Keep in cache for 7 days
     enabled: !!itemId,
     ...options,
   })

@@ -89,9 +89,24 @@ func (c *CatalogCache) WarmFromDB(repo *repository.CatalogRepository) error {
 	}
 	c.data.ItemsByID = itemsByID
 
-	// Load specs
+	// Load all specs
 	specsByGearID := make(map[string]map[string]interface{})
-	// Note: In production, you'd load all specs in bulk
+	for _, item := range items {
+		// Get category slug for this item
+		var categorySlug string
+		for _, cat := range categories {
+			if cat.ID == item.CategoryID {
+				categorySlug = cat.Slug
+				break
+			}
+		}
+		if categorySlug != "" {
+			specs, _ := repo.GetSpecs(ctx, item.ID, categorySlug)
+			if len(specs) > 0 {
+				specsByGearID[item.ID] = specs
+			}
+		}
+	}
 	c.data.SpecsByGearID = specsByGearID
 
 	c.lastUpdate = time.Now()

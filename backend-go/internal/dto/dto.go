@@ -224,10 +224,11 @@ type UserInfoResponse struct {
 }
 
 type UserResponse struct {
-	ID       string `json:"id"`
-	Email    string `json:"email"`
-	Name     string `json:"name"`
-	DarkMode *bool  `json:"darkMode"`
+	ID            string  `json:"id"`
+	Email         string  `json:"email"`
+	Name          string  `json:"name"`
+	DarkMode      *bool   `json:"darkMode"`
+	LastProjectID *string `json:"lastProjectId"`
 }
 
 type UpdateUserRequest struct {

@@ -7,7 +7,7 @@ import {
 import { Text, Input, Button, IconContainer } from '@/components/atoms'
 import { Card } from '@/components/ui/Card'
 import { Equipment, CatalogCategory, CatalogBrand, CatalogItem } from '@/types'
-import { useProductionStore } from '@/hooks/useProductionStore'
+import { useCatalogCategories, useCatalogBrands, useCatalogItems, useItemSpecs } from '@/hooks/useApi'
 import { radius, typography } from '@/design-system'
 
 export interface GearFormData {
@@ -34,27 +34,26 @@ interface GearFormProps {
 }
 
 export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) => {
-  const {
-    catalogCategories,
-    catalogBrands,
-    catalogItems,
-    fetchCatalogCategories,
-    fetchBrands,
-    fetchCatalogItems,
-    fetchItemSpecs
-  } = useProductionStore()
-
-  // Lazy load catalog categories when form opens
-  useEffect(() => {
-    fetchCatalogCategories()
-  }, [fetchCatalogCategories])
+  // Use React Query hooks for catalog data
+  const { data: catalogCategories = [] } = useCatalogCategories()
+  const { data: catalogBrands = [] } = useCatalogBrands(form.category)
+  const { data: catalogItems = [] } = useCatalogItems(form.category, form.brand)
+  const itemSpecsQuery = useItemSpecs(form.model)
 
   const [showSpecsInForm, setShowSpecsInForm] = useState(false)
   const [currentModelSpecs, setCurrentModelSpecs] = useState<any>(null)
   const pendingModelId = useRef<string | null>(null)
 
+  // Update specs when model changes
+  useEffect(() => {
+    if (itemSpecsQuery.data && form.model === pendingModelId.current) {
+      setCurrentModelSpecs(itemSpecsQuery.data)
+      setForm(prev => ({ ...prev, specs: itemSpecsQuery.data || {} }))
+    }
+  }, [itemSpecsQuery.data, form.model])
+
   const handleCategoryChange = (catId: string) => {
-    const cat = catalogCategories.find(c => c.id === catId)
+    const cat = catalogCategories.find((c: CatalogCategory) => c.id === catId)
     setForm(prev => ({
       ...prev,
       category: catId,
@@ -65,11 +64,10 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
       modelName: '',
       mount: ''
     }))
-    if (catId) fetchBrands(catId)
   }
 
   const handleBrandChange = (brandId: string) => {
-    const brand = catalogBrands.find(b => b.id === brandId)
+    const brand = catalogBrands.find((b: CatalogBrand) => b.id === brandId)
     setForm(prev => ({
       ...prev,
       brand: brandId,
@@ -78,10 +76,9 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
       modelName: '',
       mount: ''
     }))
-    if (brandId && form.category) fetchCatalogItems(form.category, brandId)
   }
 
-  const handleModelChange = async (itemId: string) => {
+  const handleModelChange = (itemId: string) => {
     pendingModelId.current = itemId || null
     setCurrentModelSpecs(null)
 
@@ -90,19 +87,14 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
       return
     }
 
-    const item = catalogItems.find(i => i.id === itemId)
+    const item = catalogItems.find((i: CatalogItem) => i.id === itemId)
     const resolvedModelName = item?.name || ''
-    setForm(prev => ({ ...prev, model: itemId, modelName: resolvedModelName, specs: {} }))
-    let specs = item?.specs
+    setForm(prev => ({ ...prev, model: itemId, modelName: resolvedModelName, specs: item?.specs || {} }))
 
-    if (!specs) {
-      specs = await fetchItemSpecs(itemId)
+    // Specs will be fetched automatically by the useItemSpecs hook
+    if (item?.specs) {
+      setCurrentModelSpecs(item.specs)
     }
-
-    if (pendingModelId.current !== itemId) return
-
-    setCurrentModelSpecs(specs)
-    setForm(prev => ({ ...prev, model: itemId, modelName: resolvedModelName, specs: specs || {} }))
   }
 
   const isValid = form.category && (form.category === 'Other' || form.brand || catalogBrands.length === 0)

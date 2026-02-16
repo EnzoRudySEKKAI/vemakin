@@ -11,7 +11,7 @@ import { Input } from '../../components/atoms/Input'
 import { ConfirmModal } from '../ui/ConfirmModal'
 import { Card } from '../ui/Card'
 import { useClickOutside } from '../../hooks/useClickOutside'
-import { useProductionStore } from '@/hooks/useProductionStore'
+import { useCatalogCategories } from '@/hooks/useApi'
 
 import api from '@/api/client'
 
@@ -57,13 +57,13 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
 
   useClickOutside(menuRef, () => { }, false)
 
-  const { catalogCategories } = useProductionStore()
+  const { data: catalogCategories = [] } = useCatalogCategories()
 
   const brandName = item.brandName
   const modelName = item.modelName
 
   const categoryName = useMemo(() => {
-    return catalogCategories.find(c => c.id === item.category)?.name || item.category
+    return catalogCategories.find((c: { id: string; name: string }) => c.id === item.category)?.name || item.category
   }, [catalogCategories, item.category])
 
   const Icon = (CATEGORY_ICONS as any)[item.category] || Package

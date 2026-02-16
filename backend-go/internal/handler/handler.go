@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -1246,6 +1247,21 @@ func (h *Handler) GetCatalogHealth(c echo.Context) error {
 	return c.JSON(http.StatusOK, h.catalogCache.GetStats())
 }
 
+func (h *Handler) RefreshCatalogCache(c echo.Context) error {
+	log.Println("[ADMIN] Manual catalog cache refresh requested")
+
+	if err := h.catalogCache.WarmFromDB(h.catalogRepo); err != nil {
+		log.Printf("[ADMIN] Failed to refresh catalog cache: %v", err)
+		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "Failed to refresh cache: " + err.Error()})
+	}
+
+	log.Println("[ADMIN] Catalog cache refresh completed successfully")
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Catalog cache refreshed successfully",
+		"stats":   h.catalogCache.GetStats(),
+	})
+}
+
 // ============ Bulk ============
 
 func (h *Handler) GetInitialData(c echo.Context) error {
@@ -1497,10 +1513,11 @@ func (h *Handler) GetUser(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, dto.UserResponse{
-		ID:       user.ID,
-		Email:    user.Email,
-		Name:     user.Name,
-		DarkMode: user.DarkMode,
+		ID:            user.ID,
+		Email:         user.Email,
+		Name:          user.Name,
+		DarkMode:      user.DarkMode,
+		LastProjectID: user.LastProjectID,
 	})
 }
 

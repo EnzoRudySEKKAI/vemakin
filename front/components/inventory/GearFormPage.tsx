@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { FormLayout, FormType } from '../organisms/FormLayout';
 import { GearForm, GearFormData } from './GearForm';
-import { useProductionStore } from '../../hooks/useProductionStore';
+import { useCatalogBrands, useCatalogItems } from '@/hooks/useApi';
 import { Equipment } from '../../types';
 
 interface GearFormPageProps {
@@ -15,12 +15,6 @@ export const GearFormPage: React.FC<GearFormPageProps> = ({
   onSwitchForm,
   onSubmit
 }) => {
-  const {
-    fetchCatalogCategories,
-    catalogBrands,
-    catalogItems
-  } = useProductionStore();
-
   const [form, setForm] = useState<GearFormData>({
     name: '',
     serialNumber: '',
@@ -38,10 +32,9 @@ export const GearFormPage: React.FC<GearFormPageProps> = ({
     specs: {}
   });
 
-  // Lazy load catalog categories when form opens
-  useEffect(() => {
-    fetchCatalogCategories();
-  }, [fetchCatalogCategories]);
+  // Use React Query to get current brands and items based on form selections
+  const { data: catalogBrands = [] } = useCatalogBrands(form.category);
+  const { data: catalogItems = [] } = useCatalogItems(form.category, form.brand);
 
   const handleSubmit = () => {
     const newId = crypto.randomUUID();

@@ -77,13 +77,17 @@ func (r *CatalogRepository) GetItemByID(ctx context.Context, itemID string) (*mo
 func (r *CatalogRepository) GetSpecs(ctx context.Context, itemID, categorySlug string) (map[string]interface{}, error) {
 	specs := make(map[string]interface{})
 
-	// Get the category to determine which specs table to query
-	var category struct {
-		Slug string `db:"slug"`
-	}
-	err := r.db.GetContext(ctx, &category, `SELECT slug FROM categories WHERE id = (SELECT category_id FROM gear_catalog WHERE id = $1)`, itemID)
-	if err != nil {
-		return specs, nil
+	// Use provided categorySlug if available, otherwise look it up
+	slug := categorySlug
+	if slug == "" {
+		var category struct {
+			Slug string `db:"slug"`
+		}
+		err := r.db.GetContext(ctx, &category, `SELECT slug FROM categories WHERE id = (SELECT category_id FROM gear_catalog WHERE id = $1)`, itemID)
+		if err != nil {
+			return specs, nil
+		}
+		slug = category.Slug
 	}
 
 	// Query the appropriate specs table based on category
@@ -93,7 +97,7 @@ func (r *CatalogRepository) GetSpecs(ctx context.Context, itemID, categorySlug s
 		"audio":      "SELECT type, pattern, freq_response, sensitivity, max_spl, power, connector, weight FROM specs_audio WHERE gear_id = $1",
 		"light":      "SELECT type, power_draw, color_temp, cri, mount, control, weight FROM specs_lights WHERE gear_id = $1",
 		"monitor":    "SELECT screen, resolution, brightness, inputs, power, features, dimensions, weight FROM specs_monitoring WHERE gear_id = $1",
-		"prop":       "SELECT type, era, material, condition, quantity, dimensions, power, weight FROM specs_props WHERE gear_id = $1",
+		"props":      "SELECT type, era, material, condition, quantity, dimensions, power, weight FROM specs_props WHERE gear_id = $1",
 		"stabilizer": "SELECT type, max_payload, axes, battery_life, connectivity, dimensions, weight FROM specs_stabilizers WHERE gear_id = $1",
 		"tripod":     "SELECT head_type, max_payload, bowl_size, height_range, material, counterbalance, weight FROM specs_tripods WHERE gear_id = $1",
 		"wireless":   "SELECT range, delay, resolution, inputs, freq, power, multicast, weight FROM specs_wireless WHERE gear_id = $1",
@@ -102,7 +106,7 @@ func (r *CatalogRepository) GetSpecs(ctx context.Context, itemID, categorySlug s
 		"grip":       "SELECT type, max_load, max_height, min_height, footprint, material, mount, weight FROM specs_grip WHERE gear_id = $1",
 	}
 
-	query, ok := specsQueries[categorySlug]
+	query, ok := specsQueries[slug]
 	if !ok {
 		return specs, nil
 	}
