@@ -64,14 +64,9 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
 
   const getCategoryDisplayName = (categoryIdOrName: string): string => {
     if (!catalogCategories || !Array.isArray(catalogCategories)) {
-      console.log('catalogCategories not loaded yet:', catalogCategories)
       return categoryIdOrName
     }
     const match = catalogCategories.find((c: { id: string; name: string }) => c.id === categoryIdOrName)
-    if (!match && categoryIdOrName.length > 20) {
-      console.log('No match found for category:', categoryIdOrName)
-      console.log('Available categories:', catalogCategories.map((c: { id: string; name: string }) => ({ id: c.id, name: c.name })))
-    }
     return match?.name || categoryIdOrName
   }
   const assignedEquipmentIds = useMemo(() => {

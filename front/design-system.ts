@@ -5,174 +5,133 @@
  * All components should reference these tokens instead of using arbitrary values.
  */
 
-// ============================================================================
-// COLOR TOKENS
-// ============================================================================
-
 export const colors = {
-  // Primary Brand Colors
   primary: {
     light: '#3762E3',
     dark: '#4E47DD',
     lightHover: '#2952D1',
     darkHover: '#3F39D1',
   },
-
-  // Traffic Light Colors (macOS style)
   trafficLights: {
     red: '#FF5F56',
     yellow: '#FFBD2E',
     green: '#27CA40',
   },
-
-  // Background Colors - Pure black theme
   background: {
     light: '#F2F2F7',
-    dark: '#0F1116',      // Dark blue-grey background
-    darker: '#090A0D',    // Even darker for contrast
+    dark: '#0F1116',
+    darker: '#090A0D',
   },
-
-  // Surface/Card Colors
   surface: {
     light: '#FFFFFF',
     lightGlass: 'rgba(255, 255, 255, 0.8)',
-    dark: '#16181D',      // Slightly lighter than background for cards
-    darker: '#0F1116',    // For nested elements
+    dark: '#16181D',
+    darker: '#0F1116',
     darkGlass: 'rgba(22, 24, 29, 0.95)',
   },
-
-  // Border Colors
   border: {
     light: '#E5E5E5',
     lightGlass: 'rgba(255, 255, 255, 0.2)',
-    dark: 'rgba(255, 255, 255, 0.08)',      // Subtle borders
-    darkGlass: 'rgba(255, 255, 255, 0.05)', // Very subtle
-    darkHover: 'rgba(255, 255, 255, 0.12)', // Hover state
+    dark: 'rgba(255, 255, 255, 0.08)',
+    darkGlass: 'rgba(255, 255, 255, 0.05)',
+    darkHover: 'rgba(255, 255, 255, 0.12)',
   },
-
-  // Text Colors
   text: {
     primary: {
-      light: '#111827', // gray-900
+      light: '#111827',
       dark: '#FFFFFF',
     },
     secondary: {
-      light: '#374151', // gray-700
-      dark: '#E5E5E5', // gray-200
+      light: '#374151',
+      dark: '#E5E5E5',
     },
     muted: {
-      light: '#6B7280', // gray-500
-      dark: '#9CA3AF', // gray-400
+      light: '#6B7280',
+      dark: '#9CA3AF',
     },
     placeholder: {
-      light: '#9CA3AF', // gray-400
-      dark: '#6B7280', // gray-500
+      light: '#9CA3AF',
+      dark: '#6B7280',
     },
   },
-
-  // Semantic Colors
   success: {
     light: '#22C55E',
-    dark: '#27CA40',      // Match traffic light green
+    dark: '#27CA40',
   },
   warning: {
     light: '#F97316',
-    dark: '#FFBD2E',      // Match traffic light yellow
+    dark: '#FFBD2E',
   },
   danger: {
     light: '#EF4444',
-    dark: '#FF5F56',      // Match traffic light red
+    dark: '#FF5F56',
   },
   info: {
     light: '#3B82F6',
     dark: '#4E47DD',
   },
-
-  // Timeline Status Colors
   timeline: {
-    done: '#27CA40',      // Green for completed
-    current: '#4E47DD',   // Indigo for current/active
-    pending: '#3A3A3C',   // Gray for pending
+    done: '#27CA40',
+    current: '#4E47DD',
+    pending: '#3A3A3C',
   },
 } as const
-
-// ============================================================================
-// BORDER RADIUS TOKENS
-// ============================================================================
 
 export const radius = {
   none: 'rounded-none',
-  sm: 'rounded-xl',        // 12px - small buttons, tags
-  md: 'rounded-2xl',       // 16px - inputs, small cards
-  lg: 'rounded-[20px]',    // 20px - cards, containers
-  xl: 'rounded-[24px]',    // 24px - large cards, modals
-  '2xl': 'rounded-[32px]', // 32px - full modals, containers
-  full: 'rounded-full',    // pills, avatars
+  sm: 'rounded-xl',
+  md: 'rounded-2xl',
+  lg: 'rounded-[20px]',
+  xl: 'rounded-[24px]',
+  '2xl': 'rounded-[32px]',
+  full: 'rounded-full',
 } as const
-
-// ============================================================================
-// TYPOGRAPHY TOKENS
-// ============================================================================
 
 export const typography = {
-  // Font Sizes - 6 steps
   size: {
-    xs: 'text-[10px]',     // Labels, timestamps, badges
-    sm: 'text-xs',         // Captions, small buttons
-    base: 'text-sm',       // Body text, inputs
-    lg: 'text-base',       // Emphasis, larger body
-    xl: 'text-lg',         // Subheadings
-    '2xl': 'text-xl',      // Section headings
-    '3xl': 'text-2xl',     // Page headings
-    '4xl': 'text-3xl',     // Hero text
+    xs: 'text-[10px]',
+    sm: 'text-xs',
+    base: 'text-sm',
+    lg: 'text-base',
+    xl: 'text-lg',
+    '2xl': 'text-xl',
+    '3xl': 'text-2xl',
+    '4xl': 'text-3xl',
   },
-  
-  // Font Weights
   weight: {
-    normal: 'font-normal',   // 400
-    medium: 'font-medium',   // 500
-    semibold: 'font-semibold', // 600 - PRIMARY
-    bold: 'font-bold',       // 700
+    normal: 'font-normal',
+    medium: 'font-medium',
+    semibold: 'font-semibold',
+    bold: 'font-bold',
   },
-  
-  // Line Heights
   leading: {
-    tight: 'leading-tight',    // 1.25
-    snug: 'leading-snug',      // 1.375
-    normal: 'leading-normal',  // 1.5
-    relaxed: 'leading-relaxed', // 1.625
+    tight: 'leading-tight',
+    snug: 'leading-snug',
+    normal: 'leading-normal',
+    relaxed: 'leading-relaxed',
   },
 } as const
 
-// ============================================================================
-// SPACING TOKENS
-// ============================================================================
-
 export const spacing = {
-  // Gap/Space between elements
   gap: {
-    1: 'gap-1',    // 4px
-    2: 'gap-2',    // 8px
-    3: 'gap-3',    // 12px
-    4: 'gap-4',    // 16px
-    5: 'gap-5',    // 20px
-    6: 'gap-6',    // 24px
-    8: 'gap-8',    // 32px
-    10: 'gap-10',  // 40px
+    1: 'gap-1',
+    2: 'gap-2',
+    3: 'gap-3',
+    4: 'gap-4',
+    5: 'gap-5',
+    6: 'gap-6',
+    8: 'gap-8',
+    10: 'gap-10',
   },
-  
-  // Padding
   padding: {
-    1: 'p-1',      // 4px
-    2: 'p-2',      // 8px
-    3: 'p-3',      // 12px
-    4: 'p-4',      // 16px
-    5: 'p-5',      // 20px
-    6: 'p-6',      // 24px
-    8: 'p-8',      // 32px
+    1: 'p-1',
+    2: 'p-2',
+    3: 'p-3',
+    4: 'p-4',
+    5: 'p-5',
+    6: 'p-6',
+    8: 'p-8',
   },
-  
-  // Margin
   margin: {
     1: 'm-1',
     2: 'm-2',
@@ -183,10 +142,6 @@ export const spacing = {
     8: 'm-8',
   },
 } as const
-
-// ============================================================================
-// SHADOW TOKENS
-// ============================================================================
 
 export const shadows = {
   none: 'shadow-none',
@@ -199,26 +154,17 @@ export const shadows = {
   primarySm: 'shadow-md shadow-primary/10',
 } as const
 
-// ============================================================================
-// ICON TOKENS
-// ============================================================================
-
 export const icons = {
-  // Icon Sizes
   size: {
-    xs: 12,      // Inline, small buttons
-    sm: 14,      // Buttons, badges
-    md: 16,      // Inputs, list items
-    lg: 20,      // Navigation, actions
-    xl: 24,      // Featured icons
-    '2xl': 32,   // Empty states
-    '3xl': 40,   // Large empty states
+    xs: 12,
+    sm: 14,
+    md: 16,
+    lg: 20,
+    xl: 24,
+    '2xl': 32,
+    '3xl': 40,
   },
-  
-  // Stroke Width - Always 2.5 for consistency
   strokeWidth: 2.5,
-  
-  // Icon Container Sizes
   container: {
     sm: 'w-8 h-8',
     md: 'w-10 h-10',
@@ -227,17 +173,12 @@ export const icons = {
   },
 } as const
 
-// ============================================================================
-// COMPONENT-SPECIFIC TOKENS
-// ============================================================================
-
 export const componentTokens = {
-  // Button Heights
   button: {
     height: {
-      sm: 'h-9',     // 36px - Small buttons
-      md: 'h-11',    // 44px - Standard buttons
-      lg: 'h-12',    // 48px - Large buttons, header
+      sm: 'h-9',
+      md: 'h-11',
+      lg: 'h-12',
     },
     padding: {
       sm: 'px-3',
@@ -245,17 +186,13 @@ export const componentTokens = {
       lg: 'px-6',
     },
   },
-  
-  // Input Heights
   input: {
     height: {
-      sm: 'h-10',    // 40px
-      md: 'h-12',    // 48px - Standard
-      lg: 'h-14',    // 56px
+      sm: 'h-10',
+      md: 'h-12',
+      lg: 'h-14',
     },
   },
-  
-  // Card Padding
   card: {
     padding: {
       sm: 'p-4',
@@ -264,10 +201,6 @@ export const componentTokens = {
     },
   },
 } as const
-
-// ============================================================================
-// ANIMATION TOKENS
-// ============================================================================
 
 export const animations = {
   duration: {
@@ -285,19 +218,14 @@ export const animations = {
   },
 } as const
 
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
-
-/**
- * Get color class based on theme
- */
 export function getColorClass(
   token: keyof typeof colors,
   subtoken: string,
   type: 'text' | 'bg' | 'border' = 'text'
 ): string {
-  const colorValue = (colors as any)[token]?.[subtoken]
+  const colorGroup = colors[token]
+  if (!colorGroup || typeof colorGroup !== 'object') return ''
+  const colorValue = (colorGroup as Record<string, string>)[subtoken]
   if (!colorValue) return ''
   
   switch (type) {
@@ -310,33 +238,19 @@ export function getColorClass(
   }
 }
 
-/**
- * Format text with Pascal case
- * If it's a sentence, only the first word is capitalized
- * If it's a title/label, all words are capitalized
- */
 export function formatText(text: string, type: 'sentence' | 'title' = 'title'): string {
   if (!text) return ''
   
   if (type === 'sentence') {
-    // Only first word capitalized, rest lowercase
     return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase()
   }
   
-  // Title case - all words capitalized
   return text
     .split(' ')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ')
 }
 
-// ============================================================================
-// CSS CLASS BUILDERS
-// ============================================================================
-
-/**
- * Build glass effect classes
- */
 export function glassClasses(variant: 'light' | 'dark' = 'light'): string {
   if (variant === 'dark') {
     return 'bg-[#16181D]/90 backdrop-blur-xl border border-white/5'
@@ -344,9 +258,6 @@ export function glassClasses(variant: 'light' | 'dark' = 'light'): string {
   return 'bg-white/80 backdrop-blur-xl border border-white/20'
 }
 
-/**
- * Build primary button classes
- */
 export function primaryButtonClasses(size: 'sm' | 'md' | 'lg' = 'md'): string {
   const sizes = {
     sm: `${componentTokens.button.height.sm} ${componentTokens.button.padding.sm}`,
@@ -369,9 +280,6 @@ export function primaryButtonClasses(size: 'sm' | 'md' | 'lg' = 'md'): string {
   `.trim().replace(/\s+/g, ' ')
 }
 
-/**
- * Build secondary button classes
- */
 export function secondaryButtonClasses(size: 'sm' | 'md' | 'lg' = 'md'): string {
   const sizes = {
     sm: `${componentTokens.button.height.sm} ${componentTokens.button.padding.sm}`,
@@ -393,9 +301,6 @@ export function secondaryButtonClasses(size: 'sm' | 'md' | 'lg' = 'md'): string 
   `.trim().replace(/\s+/g, ' ')
 }
 
-/**
- * Build ghost button classes
- */
 export function ghostButtonClasses(size: 'sm' | 'md' | 'lg' = 'md'): string {
   const sizes = {
     sm: `${componentTokens.button.height.sm} ${componentTokens.button.padding.sm}`,
@@ -416,9 +321,6 @@ export function ghostButtonClasses(size: 'sm' | 'md' | 'lg' = 'md'): string {
   `.trim().replace(/\s+/g, ' ')
 }
 
-/**
- * Build danger button classes
- */
 export function dangerButtonClasses(size: 'sm' | 'md' | 'lg' = 'md'): string {
   const sizes = {
     sm: `${componentTokens.button.height.sm} ${componentTokens.button.padding.sm}`,
@@ -439,9 +341,6 @@ export function dangerButtonClasses(size: 'sm' | 'md' | 'lg' = 'md'): string {
   `.trim().replace(/\s+/g, ' ')
 }
 
-/**
- * Build input classes
- */
 export function inputClasses(variant: 'default' | 'glass' = 'default'): string {
   const base = `
     w-full
@@ -463,9 +362,6 @@ export function inputClasses(variant: 'default' | 'glass' = 'default'): string {
   return `${base} bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/10 focus:border-primary`
 }
 
-/**
- * Build card classes
- */
 export function cardClasses(
   variant: 'default' | 'glass' | 'hover' | 'flat' | 'window' = 'default',
   size: 'sm' | 'md' | 'lg' = 'md'
@@ -496,9 +392,6 @@ export function cardClasses(
   }
 }
 
-/**
- * Build window card header classes
- */
 export function windowCardHeaderClasses(): string {
   return `
     flex items-center justify-between
@@ -508,9 +401,6 @@ export function windowCardHeaderClasses(): string {
   `.trim().replace(/\s+/g, ' ')
 }
 
-/**
- * Build window card content classes
- */
 export function windowCardContentClasses(): string {
   return `
     p-4
@@ -518,16 +408,7 @@ export function windowCardContentClasses(): string {
   `.trim().replace(/\s+/g, ' ')
 }
 
-/**
- * Build timeline item classes
- */
 export function timelineItemClasses(status: 'done' | 'current' | 'pending' = 'pending'): string {
-  const barColors = {
-    done: 'bg-[#27CA40]',
-    current: 'bg-primary',
-    pending: 'bg-[#3A3A3C]',
-  }
-
   return `
     flex items-center gap-3
     p-3 rounded-xl
@@ -538,9 +419,6 @@ export function timelineItemClasses(status: 'done' | 'current' | 'pending' = 'pe
   `.trim().replace(/\s+/g, ' ')
 }
 
-/**
- * Get timeline bar color class
- */
 export function timelineBarColor(status: 'done' | 'current' | 'pending'): string {
   switch (status) {
     case 'done':
@@ -551,10 +429,6 @@ export function timelineBarColor(status: 'done' | 'current' | 'pending'): string
       return 'bg-[#3A3A3C]'
   }
 }
-
-// ============================================================================
-// EXPORT DEFAULT
-// ============================================================================
 
 export default {
   colors,

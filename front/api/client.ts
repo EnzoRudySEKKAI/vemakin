@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
-import { auth } from '../firebase'
+import { auth } from '@/firebase'
 import { camelizeKeys, decamelizeKeys } from 'humps'
 
 const api = axios.create({

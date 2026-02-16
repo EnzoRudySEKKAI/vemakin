@@ -116,10 +116,6 @@ export const formatDateToNumeric = (dateStr: string) => {
     return `${day}/${month}/${year}`;
 };
 
-// ============================================
-// SHARED STYLE UTILITIES
-// ============================================
-
 /** Get priority color classes for PostProd tasks */
 export const getPriorityColor = (priority: string): string => {
     switch (priority) {

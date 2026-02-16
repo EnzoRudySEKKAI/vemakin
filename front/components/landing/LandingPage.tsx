@@ -12,8 +12,6 @@ import { Button, Logo, Text, IconContainer } from '@/components/atoms'
 import { WindowCard } from '@/components/ui/WindowCard'
 import { GlassCard } from '@/components/ui/GlassCard'
 
-// --- REAL-DESIGN MOCK COMPONENTS ---
-
 const MockShotCard = ({ title, scene, time, location, status = 'pending', active = false }: any) => (
   <div className={`p-5 rounded-[28px] bg-white/80 dark:bg-[#16181D]/80 backdrop-blur-xl border border-white/20 dark:border-white/5 shadow-sm transition-all ${active ? 'ring-1 ring-primary/50 shadow-xl' : 'opacity-60'}`}>
     <div className="flex flex-col gap-2">

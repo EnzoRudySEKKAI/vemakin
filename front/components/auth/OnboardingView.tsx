@@ -18,8 +18,6 @@ interface OnboardingViewProps {
   onComplete: () => void
 }
 
-// --- HIGH FIDELITY MOCK UI COMPONENTS (DARK THEME) ---
-
 const MockTimeline = () => (
   <div className="w-full h-full bg-[#0F1116] flex flex-col items-center pt-36 md:pt-44 relative overflow-hidden select-none cursor-default pointer-events-none">
     <div className="w-full max-w-md md:max-w-xl px-6 space-y-6 scale-100 md:scale-110 origin-top opacity-100 transition-all duration-500">

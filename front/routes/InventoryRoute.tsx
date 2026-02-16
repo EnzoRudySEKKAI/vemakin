@@ -13,7 +13,6 @@ export const InventoryRoute = () => {
         )
         
         if (!hasSpecs && !ctx.isLoadingInventorySpecs) {
-            console.log('[InventoryRoute] Specs not loaded, fetching...')
             ctx.fetchInventorySpecs()
         }
     }, [])

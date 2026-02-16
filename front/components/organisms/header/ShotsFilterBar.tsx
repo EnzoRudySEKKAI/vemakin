@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Shot } from '../../../types'
+import { Shot } from '@/types'
 import { SearchBar } from '../../molecules/SearchBar'
 import { SegmentControl } from '../../molecules/SegmentControl'
 

@@ -12,10 +12,7 @@ export const ProjectsRoute = () => {
             onSelectProject={ctx.setCurrentProject}
             onDeleteProject={ctx.deleteProject}
             onRenameProject={(oldName, newName) => {
-                // Since our store might not have rename, we can implement it as export/import or add/delete if needed
-                // But for now let's assume it works or we just skip if not implemented in store
-                console.log('Rename from', oldName, 'to', newName)
-                // ctx.renameProject(oldName, newName) 
+                // TODO: Implement rename project
             }}
             onBack={() => ctx.navigate('/dashboard/settings')}
         />

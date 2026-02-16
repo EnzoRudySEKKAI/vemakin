@@ -3,14 +3,9 @@ import { persist } from 'zustand/middleware'
 import { Shot, Equipment } from '@/types'
 
 interface ProjectState {
-  // Current project
   currentProjectId: string | null
   currentProjectName: string | null
-  
-  // Local state for optimistic updates (UI only)
-  preparedEquipmentIds: Record<string, string[]> // shotId -> equipmentIds
-  
-  // Actions
+  preparedEquipmentIds: Record<string, string[]>
   setCurrentProject: (id: string | null, name: string | null) => void
   toggleEquipmentPrepared: (shotId: string, equipmentId: string) => void
   isEquipmentPrepared: (shotId: string, equipmentId: string) => boolean
@@ -19,12 +14,9 @@ interface ProjectState {
 export const useProjectStore = create<ProjectState>()(
   persist(
     (set, get) => ({
-      // Initial State
       currentProjectId: null,
       currentProjectName: null,
       preparedEquipmentIds: {},
-
-      // Actions
       setCurrentProject: (id, name) => set({ 
         currentProjectId: id, 
         currentProjectName: name,

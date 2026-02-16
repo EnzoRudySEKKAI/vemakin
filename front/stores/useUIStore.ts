@@ -6,25 +6,19 @@ import {
   PostProdFilters, 
   NotesFilters 
 } from '@/types'
+import { userService } from '@/api/services'
+import { useAuthStore } from './useAuthStore'
 
 interface UIState {
-  // View State
   mainView: MainView
   shotLayout: ShotLayout
   notesLayout: 'grid' | 'list'
-  
-  // Filters
   shotStatusFilter: 'all' | 'pending' | 'done'
   postProdFilters: PostProdFilters
   notesFilters: NotesFilters
-  
-  // Theme
   darkMode: boolean
-  
-  // Project Creation Prompt
   showCreateProjectPrompt: boolean
-  
-  // Actions
+
   setMainView: (view: MainView) => void
   setShotLayout: (layout: ShotLayout) => void
   setNotesLayout: (layout: 'grid' | 'list') => void
@@ -32,6 +26,7 @@ interface UIState {
   setPostProdFilters: (updater: (prev: PostProdFilters) => PostProdFilters) => void
   setNotesFilters: (updater: (prev: NotesFilters) => NotesFilters) => void
   toggleDarkMode: () => void
+  setDarkMode: (value: boolean) => void
   setShowCreateProjectPrompt: (show: boolean) => void
 }
 
@@ -54,18 +49,16 @@ const defaultNotesFilters: NotesFilters = {
 
 export const useUIStore = create<UIState>()(
   persist(
-    (set) => ({
-      // Initial State
+    (set, get) => ({
       mainView: 'overview',
       shotLayout: 'timeline',
       notesLayout: 'grid',
       shotStatusFilter: 'all',
       postProdFilters: defaultPostProdFilters,
       notesFilters: defaultNotesFilters,
-      darkMode: true,
+      darkMode: false,
       showCreateProjectPrompt: false,
 
-      // Actions
       setMainView: (view) => set({ mainView: view }),
       setShotLayout: (layout) => set({ shotLayout: layout }),
       setNotesLayout: (layout) => set({ notesLayout: layout }),
@@ -76,7 +69,18 @@ export const useUIStore = create<UIState>()(
       setNotesFilters: (updater) => set((state) => ({ 
         notesFilters: updater(state.notesFilters) 
       })),
-      toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
+      toggleDarkMode: () => {
+        const newMode = !get().darkMode
+        set({ darkMode: newMode })
+        
+        const { isGuest, currentUser } = useAuthStore.getState()
+        if (!isGuest && currentUser) {
+          userService.updateProfile({ darkMode: newMode }).catch((error) => {
+            console.error('Failed to sync theme preference:', error)
+          })
+        }
+      },
+      setDarkMode: (value) => set({ darkMode: value }),
       setShowCreateProjectPrompt: (show) => set({ showCreateProjectPrompt: show })
     }),
     {

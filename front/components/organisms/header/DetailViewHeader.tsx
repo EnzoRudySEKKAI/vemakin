@@ -1,6 +1,6 @@
 import React from 'react'
 import { ChevronLeft } from 'lucide-react'
-import { useHeaderActions } from '../../../context/HeaderActionsContext'
+import { useHeaderActions } from '@/context/HeaderActionsContext'
 
 interface DetailViewHeaderProps {
   className?: string

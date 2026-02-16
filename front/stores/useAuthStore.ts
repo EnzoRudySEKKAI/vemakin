@@ -1,33 +1,33 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { auth } from '../firebase'
+import { auth } from '@/firebase'
 import { onAuthStateChanged, signOut, User as FirebaseUser } from 'firebase/auth'
 import { User } from '@/types'
+import { userService } from '@/api/services'
 
 interface AuthState {
-  // State
   currentUser: User | null
+  isGuest: boolean
   isLoadingAuth: boolean
   authPromise: Promise<void> | null
   resolveAuth: (() => void) | null
 
-  // Actions
   initAuth: () => () => void
-  logout: () => Promise<void>
   login: (name: string, email: string) => void
+  enterGuest: () => void
+  logout: () => Promise<void>
   setLoading: (loading: boolean) => void
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
-      // Initial State
       currentUser: null,
+      isGuest: false,
       isLoadingAuth: true,
       authPromise: null,
       resolveAuth: null,
 
-      // Actions
       initAuth: () => {
         if (get().authPromise) return () => {}
 
@@ -40,13 +40,25 @@ export const useAuthStore = create<AuthState>()(
 
         const unsubscribe = onAuthStateChanged(auth, async (user: FirebaseUser | null) => {
           if (user) {
+            let userProfile: User | null = null
+            try {
+              userProfile = await userService.getProfile()
+            } catch (error) {
+              console.error('Failed to fetch user profile:', error)
+            }
+
             set({
               currentUser: {
-                name: user.displayName || user.email?.split('@')[0] || 'User',
-                email: user.email || ''
+                id: user.uid,
+                name: userProfile?.name || user.displayName || user.email?.split('@')[0] || 'User',
+                email: user.email || '',
+                darkMode: userProfile?.darkMode ?? false
               },
+              isGuest: false,
               isLoadingAuth: false
             })
+          } else if (get().isGuest) {
+            set({ isLoadingAuth: false })
           } else {
             set({ currentUser: null, isLoadingAuth: false })
           }
@@ -57,19 +69,21 @@ export const useAuthStore = create<AuthState>()(
         return unsubscribe
       },
 
+      login: (name: string, email: string) => {
+        set({ currentUser: { name, email } })
+      },
+
+      enterGuest: () => {
+        set({ isGuest: true, isLoadingAuth: false })
+      },
+
       logout: async () => {
         try {
           await signOut(auth)
-          set({ currentUser: null })
+          set({ currentUser: null, isGuest: false })
         } catch {
-          // Silently fail - user will see they're still logged in
+          // Silently fail
         }
-      },
-
-      login: (name: string, email: string) => {
-        set({
-          currentUser: { name, email }
-        })
       },
 
       setLoading: (loading: boolean) => {
@@ -78,7 +92,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'vemakin-auth',
-      partialize: (state) => ({ currentUser: state.currentUser })
+      partialize: (state) => ({ currentUser: state.currentUser, isGuest: state.isGuest })
     }
   )
 )
