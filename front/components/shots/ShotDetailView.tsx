@@ -14,6 +14,10 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal'
 import { TimeSelector } from '@/components/ui/TimeSelector'
 import { LocationAutocomplete } from '@/components/ui/LocationAutocomplete'
 
+const formatDate = (dateStr: string) => {
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
 interface ShotDetailViewProps {
   selectedShot: Shot
   allShots: Shot[]
@@ -513,7 +517,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
         onClose={() => setShowRetakeConfirm(false)}
         onConfirm={handleRetake}
         title="Schedule retake"
-        message={`Are you sure you want to schedule a retake for this shot on ${retakeDate} at ${retakeTime}?`}
+        message={`Are you sure you want to schedule a retake for this shot on ${formatDate(retakeDate)} at ${retakeTime}?`}
         confirmText="Schedule retake"
         cancelText="Cancel"
         variant="warning"

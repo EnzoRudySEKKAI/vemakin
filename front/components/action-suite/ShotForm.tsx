@@ -22,11 +22,6 @@ const toISODate = (dateStr: string) => {
   return isNaN(d.getTime()) ? new Date().toISOString().split('T')[0] : d.toISOString().split('T')[0]
 }
 
-const fromISODate = (isoStr: string) => {
-  if (!isoStr) return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-  return new Date(isoStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
-
 export const ShotForm = ({ inventory, existingShots, onSubmit }: ShotFormProps) => {
   const [title, setTitle] = useState('')
   const [sceneNumber, setSceneNumber] = useState('')
@@ -48,10 +43,8 @@ export const ShotForm = ({ inventory, existingShots, onSubmit }: ShotFormProps) 
     let endMins = timeToMinutes(endTime)
     if (endMins < startMins) endMins += 1440
 
-    const formattedDate = fromISODate(date)
-
     return existingShots.find(s => {
-      if (s.date !== formattedDate) return false
+      if (s.date !== date) return false
       const sStart = timeToMinutes(s.startTime)
       const sEnd = timeToMinutes(calculateEndTime(s.startTime, s.duration))
       return (startMins < sEnd && endMins > sStart)
@@ -80,7 +73,7 @@ export const ShotForm = ({ inventory, existingShots, onSubmit }: ShotFormProps) 
       title: title.trim(),
       sceneNumber: sceneNumber || `${existingShots.length + 1}X`,
       location: location || 'Location TBD',
-      date: fromISODate(date),
+      date: date,
       startTime,
       duration,
       description,

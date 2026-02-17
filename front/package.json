@@ -6,16 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "cap:sync": "npx cap sync",
-    "cap:ios": "npx cap open ios",
-    "cap:electron": "npx cap open @capacitor-community/electron"
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@capacitor-community/electron": "^5.0.1",
-    "@capacitor/cli": "^8.0.1",
-    "@capacitor/core": "^8.0.1",
-    "@capacitor/ios": "^8.0.1",
     "@emotion/is-prop-valid": "^1.4.0",
     "@emotion/styled": "^11.14.1",
     "@floating-ui/react": "^0.27.17",

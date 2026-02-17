@@ -22,11 +22,6 @@ const toISODate = (dateStr: string) => {
   return isNaN(d.getTime()) ? new Date().toISOString().split('T')[0] : d.toISOString().split('T')[0]
 }
 
-const fromISODate = (isoStr: string) => {
-  if (!isoStr) return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-  return new Date(isoStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
-
 export const ShotFormPage: React.FC<ShotFormPageProps> = ({
   onClose,
   onSwitchForm,
@@ -61,10 +56,8 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
     let endMins = timeToMinutes(form.endTime)
     if (endMins < startMins) endMins += 1440
 
-    const formattedDate = fromISODate(form.date)
-
     return existingShots.find(s => {
-      if (s.date !== formattedDate) return false
+      if (s.date !== form.date) return false
       const sStart = timeToMinutes(s.startTime)
       const sEnd = timeToMinutes(calculateEndTime(s.startTime, s.duration))
       return (startMins < sEnd && endMins > sStart)
@@ -100,7 +93,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
       location: currentForm.location || 'Location TBD',
       locationLat: currentForm.locationLat,
       locationLng: currentForm.locationLng,
-      date: fromISODate(currentForm.date),
+      date: currentForm.date,
       startTime: currentForm.startTime,
       duration: duration,
       description: currentForm.description,
