@@ -40,7 +40,7 @@ export const shotsApi = {
   update: (id: string, shot: Partial<Shot>) => 
     apiClient.patch<Shot>(`/shots/${id}`, shot),
   
-  delete: (id: string) => apiClient.delete<void>(`/shots/${id}`),
+  delete: (id: string, projectId: string) => apiClient.delete<void>(`/shots/${id}?project_id=${projectId}`),
 }
 
 // Notes API with pagination
@@ -54,7 +54,7 @@ export const notesApi = {
   update: (id: string, note: Partial<Note>) => 
     apiClient.patch<Note>(`/notes/${id}`, note),
   
-  delete: (id: string) => apiClient.delete<void>(`/notes/${id}`),
+  delete: (id: string, projectId: string) => apiClient.delete<void>(`/notes/${id}?project_id=${projectId}`),
 }
 
 // Post Production Tasks API with pagination
@@ -68,7 +68,7 @@ export const tasksApi = {
   update: (id: string, task: Partial<PostProdTask>) => 
     apiClient.patch<PostProdTask>(`/postprod/${id}`, task),
   
-  delete: (id: string) => apiClient.delete<void>(`/postprod/${id}`),
+  delete: (id: string, projectId: string) => apiClient.delete<void>(`/postprod/${id}?project_id=${projectId}`),
 }
 
 // Inventory API

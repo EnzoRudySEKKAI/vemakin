@@ -142,7 +142,7 @@ export const useDeleteShot = (projectId: string) => {
   const queryClient = useQueryClient()
   
   return useMutation({
-    mutationFn: (id: string) => shotsApi.delete(id),
+    mutationFn: (id: string) => shotsApi.delete(id, projectId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.shots(projectId) })
     },
@@ -195,7 +195,7 @@ export const useDeleteNote = (projectId: string) => {
   const queryClient = useQueryClient()
   
   return useMutation({
-    mutationFn: (id: string) => notesApi.delete(id),
+    mutationFn: (id: string) => notesApi.delete(id, projectId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.notes(projectId) })
     },
@@ -248,7 +248,7 @@ export const useDeleteTask = (projectId: string) => {
   const queryClient = useQueryClient()
   
   return useMutation({
-    mutationFn: (id: string) => tasksApi.delete(id),
+    mutationFn: (id: string) => tasksApi.delete(id, projectId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks(projectId) })
     },

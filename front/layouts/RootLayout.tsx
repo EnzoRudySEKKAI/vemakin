@@ -7,7 +7,11 @@ import {
   InventoryLayout, 
   PostProdFilters, 
   MainView, 
-  NotesFilters 
+  NotesFilters,
+  Shot,
+  PostProdTask,
+  Note,
+  Equipment
 } from '@/types'
 import { CURRENCIES } from '@/constants'
 import { Header } from '@/components/layout/Header'
@@ -31,13 +35,20 @@ import { useActiveData, useGroupedShots, useDynamicDates, useProjectProgress } f
 import {
   useProjects,
   useCreateProject,
+  useDeleteProject,
   useAllShots,
   useAllNotes,
   useAllTasks,
   useInventory,
   useCreateShot,
+  useUpdateShot,
+  useDeleteShot,
   useCreateNote,
+  useUpdateNote,
+  useDeleteNote,
   useCreateTask,
+  useUpdateTask,
+  useDeleteTask,
   useCreateEquipment,
   useUpdateEquipment,
   useDeleteEquipment
@@ -113,9 +124,16 @@ const RootLayoutInner = () => {
 
   // React Query - Mutations
   const createProjectMutation = useCreateProject()
+  const deleteProjectMutation = useDeleteProject()
   const createShotMutation = useCreateShot(currentProjectId || '')
+  const updateShotMutation = useUpdateShot(currentProjectId || '')
+  const deleteShotMutation = useDeleteShot(currentProjectId || '')
   const createNoteMutation = useCreateNote(currentProjectId || '')
+  const updateNoteMutation = useUpdateNote(currentProjectId || '')
+  const deleteNoteMutation = useDeleteNote(currentProjectId || '')
   const createTaskMutation = useCreateTask(currentProjectId || '')
+  const updateTaskMutation = useUpdateTask(currentProjectId || '')
+  const deleteTaskMutation = useDeleteTask(currentProjectId || '')
   const createEquipmentMutation = useCreateEquipment()
   const updateEquipmentMutation = useUpdateEquipment()
   const deleteEquipmentMutation = useDeleteEquipment()
@@ -332,9 +350,44 @@ const RootLayoutInner = () => {
     await createNoteMutation.mutateAsync(note)
   }, [createNoteMutation])
 
+  const handleDeleteProject = useCallback(async (name: string) => {
+    const project = projectsQuery.data?.find(p => p.name === name)
+    if (project) {
+      await deleteProjectMutation.mutateAsync(project.id)
+    }
+  }, [deleteProjectMutation, projectsQuery.data])
+
+  const handleUpdateShot = useCallback(async (shot: Shot) => {
+    await updateShotMutation.mutateAsync({ id: shot.id, data: shot })
+  }, [updateShotMutation])
+
+  const handleDeleteShot = useCallback(async (id: string) => {
+    await deleteShotMutation.mutateAsync(id)
+  }, [deleteShotMutation])
+
+  const handleUpdateTask = useCallback(async (task: PostProdTask) => {
+    await updateTaskMutation.mutateAsync({ id: task.id, data: task })
+  }, [updateTaskMutation])
+
+  const handleDeleteTask = useCallback(async (id: string) => {
+    await deleteTaskMutation.mutateAsync(id)
+  }, [deleteTaskMutation])
+
+  const handleUpdateNote = useCallback(async (note: Note) => {
+    await updateNoteMutation.mutateAsync({ id: note.id, data: note })
+  }, [updateNoteMutation])
+
+  const handleDeleteNote = useCallback(async (id: string) => {
+    await deleteNoteMutation.mutateAsync(id)
+  }, [deleteNoteMutation])
+
   const handleToggleShotStatus = useCallback((id: string) => {
-    // This would need an update mutation
-  }, [])
+    const shot = activeData.shots.find(s => s.id === id)
+    if (shot) {
+      const newStatus = shot.status === 'completed' ? 'pending' : 'completed'
+      updateShotMutation.mutateAsync({ id, data: { status: newStatus } })
+    }
+  }, [activeData.shots, updateShotMutation])
 
   // Data display
   const displayedDates = useMemo(() => 
@@ -481,11 +534,17 @@ const RootLayoutInner = () => {
                     toggleShotStatus: handleToggleShotStatus,
                     toggleEquipmentStatus: toggleEquipmentPrepared,
                     addShot: handleAddShot,
+                    updateShot: handleUpdateShot,
+                    deleteShot: handleDeleteShot,
                     addTask: handleAddTask,
+                    updateTask: handleUpdateTask,
+                    deleteTask: handleDeleteTask,
                     addGear: handleAddGear,
                     updateGear: handleUpdateGear,
                     deleteGear: handleDeleteGear,
                     addNote: handleAddNote,
+                    updateNote: handleUpdateNote,
+                    deleteNote: handleDeleteNote,
                     inventoryFilters,
                     inventoryLayout,
                     postProdFilters,
@@ -495,6 +554,7 @@ const RootLayoutInner = () => {
                     activePostProdTasks,
                     projects,
                     addProject: handleAddProject,
+                    deleteProject: handleDeleteProject,
                     currentUser,
                     logout,
                     darkMode,
