@@ -70,6 +70,8 @@ func (h *Handler) GetInitialData(c echo.Context) error {
 		if e.CatalogItemID != nil {
 			specs = specsMap[*e.CatalogItemID]
 		}
+		// Enrich with brand/model from cache
+		h.enrichEquipmentFromCache(&e)
 		equipmentResponses[i] = equipmentToResponse(e, specs)
 	}
 

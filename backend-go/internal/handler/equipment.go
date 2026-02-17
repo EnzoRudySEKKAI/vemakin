@@ -10,6 +10,29 @@ import (
 	"github.com/vemakin/backend/internal/models"
 )
 
+func (h *Handler) enrichEquipmentFromCache(e *models.Equipment) {
+	if e.CatalogItemID == nil || !h.catalogCache.IsLoaded() {
+		return
+	}
+
+	catalogItem := h.catalogCache.GetItem(*e.CatalogItemID)
+	if catalogItem == nil {
+		return
+	}
+
+	// Get model name from catalog
+	e.ModelName = &catalogItem.Name
+
+	// Get brand name from cache
+	brands := h.catalogCache.GetBrands(nil)
+	for _, brand := range brands {
+		if brand.ID == catalogItem.BrandID {
+			e.BrandName = &brand.Name
+			break
+		}
+	}
+}
+
 func equipmentToResponse(e models.Equipment, specs map[string]interface{}) dto.EquipmentResponse {
 	if specs == nil {
 		specs = map[string]interface{}{}
@@ -28,6 +51,8 @@ func equipmentToResponse(e models.Equipment, specs map[string]interface{}) dto.E
 		Quantity:        e.Quantity,
 		IsOwned:         e.IsOwned,
 		Status:          e.Status,
+		BrandName:       e.BrandName,
+		ModelName:       e.ModelName,
 		Specs:           specs,
 		CreatedAt:       e.CreatedAt,
 		UpdatedAt:       ptrTime(e.UpdatedAt),
@@ -66,6 +91,8 @@ func (h *Handler) GetInventory(c echo.Context) error {
 		if e.CatalogItemID != nil {
 			specs = specsMap[*e.CatalogItemID]
 		}
+		// Enrich with brand/model from cache
+		h.enrichEquipmentFromCache(&e)
 		response[i] = equipmentToResponse(e, specs)
 	}
 
@@ -114,6 +141,9 @@ func (h *Handler) CreateEquipment(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, errorResponse(err))
 	}
 
+	// Enrich with brand/model from cache
+	h.enrichEquipmentFromCache(equipment)
+
 	var specs map[string]interface{}
 	if equipment.CatalogItemID != nil {
 		specs, err = h.equipmentRepo.GetSpecsForCatalogItem(ctx, *equipment.CatalogItemID)
@@ -137,6 +167,9 @@ func (h *Handler) GetEquipment(c echo.Context) error {
 	if equipment == nil {
 		return c.JSON(http.StatusNotFound, notFoundResponse("Equipment not found"))
 	}
+
+	// Enrich with brand/model from cache
+	h.enrichEquipmentFromCache(equipment)
 
 	var specs map[string]interface{}
 	if equipment.CatalogItemID != nil {
@@ -201,6 +234,9 @@ func (h *Handler) UpdateEquipment(c echo.Context) error {
 	if equipment == nil {
 		return c.JSON(http.StatusNotFound, notFoundResponse("Equipment not found"))
 	}
+
+	// Enrich with brand/model from cache
+	h.enrichEquipmentFromCache(equipment)
 
 	var specs map[string]interface{}
 	if equipment.CatalogItemID != nil {

@@ -259,7 +259,7 @@ export const useDeleteTask = (projectId: string) => {
 export const useInventory = (options?: UseQueryOptions<Equipment[], Error>) => {
   return useQuery({
     queryKey: queryKeys.inventory,
-    queryFn: inventoryApi.getAll,
+    queryFn: () => bulkApi.getInitialData().then(d => d.inventory),
     staleTime: STALE_TIMES.inventory,
     ...options,
   })

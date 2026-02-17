@@ -35,7 +35,13 @@ echo "🔌 [1/4] Démarrage du proxy Cloud SQL..."
 ./cloud_sql_proxy -instances=vemakin:us-central1:vemakin=tcp:5432 &
 PROXY_PID=$!
 echo "    ✓ Proxy démarré (PID: $PROXY_PID)"
-sleep 2
+
+# Attendre que le proxy soit connecté
+echo "    ⏳ Attente de la connexion du proxy..."
+while ! lsof -i :5432 >/dev/null 2>&1; do
+    sleep 1
+done
+echo "    ✓ Proxy connecté"
 
 # 2. Build du backend
 echo ""

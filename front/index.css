@@ -285,6 +285,72 @@
   }
 }
 
+/* Safari Performance Optimization - Disable backdrop-filter */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari and macOS Safari */
+  .glass-card,
+  .glass-button,
+  .glass-header,
+  .glass-input,
+  .glass,
+  .glass-light,
+  .glass-dark,
+  .glass-ios,
+  .glass-highlight,
+  .glass-subtle,
+  .glass-inner,
+  .glass-card-weak,
+  .glass-card-medium,
+  .glass-card-strong,
+  .glass-floating,
+  .bottom-sheet,
+  .modal-overlay {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    /* Increase background opacity to compensate for missing blur */
+    background: rgba(255, 255, 255, 0.85);
+  }
+
+  .glass-dark,
+  .dark .glass-card,
+  .dark .glass-button,
+  .dark .glass-header,
+  .dark .glass-input,
+  .dark .glass,
+  .dark .glass-light,
+  .dark .glass-dark,
+  .dark .glass-ios,
+  .dark .glass-subtle,
+  .dark .glass-inner,
+  .dark .glass-card-weak,
+  .dark .glass-card-medium,
+  .dark .glass-card-strong,
+  .dark .glass-floating,
+  .dark .bottom-sheet {
+    background: rgba(22, 24, 29, 0.95);
+  }
+
+  .glass-highlight {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(255, 255, 255, 0.85) 100%
+    );
+  }
+
+  .dark .glass-highlight {
+    background: linear-gradient(
+      135deg,
+      rgb(var(--primary) / 0.95) 0%,
+      rgb(55 98 227 / 0.9) 100%
+    );
+  }
+
+  .modal-overlay {
+    background: rgba(0, 0, 0, 0.7);
+  }
+}
+
 @layer utilities {
   .round-xl {
     border-radius: 16px;

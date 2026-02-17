@@ -55,6 +55,8 @@ type Equipment struct {
 	Quantity        int          `db:"quantity" json:"quantity"`
 	IsOwned         bool         `db:"is_owned" json:"isOwned"`
 	Status          string       `db:"status" json:"status"`
+	BrandName       *string      `db:"brand_name" json:"brandName"`
+	ModelName       *string      `db:"model_name" json:"modelName"`
 	CreatedAt       time.Time    `db:"created_at" json:"createdAt"`
 	UpdatedAt       sql.NullTime `db:"updated_at" json:"updatedAt"`
 }

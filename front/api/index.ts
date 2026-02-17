@@ -73,7 +73,8 @@ export const tasksApi = {
 
 // Inventory API
 export const inventoryApi = {
-  getAll: () => apiClient.get<Equipment[]>('/inventory'),
+  // Use bulk endpoint for fetching all inventory (reduces API calls)
+  getAll: () => bulkApi.getInitialData().then(d => d.inventory),
   
   create: (equipment: Partial<Equipment>) => 
     apiClient.post<Equipment>('/inventory', equipment),

@@ -1,9 +1,11 @@
 import { apiClient } from '../client'
+import { bulkApi } from '../index'
 import { Equipment } from '@/types'
 
 export const equipmentService = {
-  getAll: async (skip = 0, limit = 100): Promise<Equipment[]> => {
-    return apiClient.get<Equipment[]>(`/inventory?skip=${skip}&limit=${limit}`)
+  // Use bulk endpoint for fetching all inventory (reduces API calls)
+  getAll: async (): Promise<Equipment[]> => {
+    return bulkApi.getInitialData().then(d => d.inventory)
   },
 
   getById: async (id: string): Promise<Equipment> => {

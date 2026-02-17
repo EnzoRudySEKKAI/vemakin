@@ -1,6 +1,18 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+
+// Throttle utility for Safari scroll performance
+const throttle = <T extends (...args: any[]) => any>(func: T, limit: number) => {
+  let inThrottle: boolean
+  return function(this: ThisParameterType<T>, ...args: Parameters<T>) {
+    if (!inThrottle) {
+      func.apply(this, args)
+      inThrottle = true
+      setTimeout(() => inThrottle = false, limit)
+    }
+  }
+}
 import { 
   ArrowRight, Check, Film, Package, Zap, StickyNote, 
   Menu, X, ChevronRight, Play, Layers, Smartphone, 
@@ -13,7 +25,7 @@ import { WindowCard } from '@/components/ui/WindowCard'
 import { GlassCard } from '@/components/ui/GlassCard'
 
 const MockShotCard = ({ title, scene, time, location, status = 'pending', active = false }: any) => (
-  <div className={`p-5 rounded-[28px] bg-white/80 dark:bg-[#16181D]/80 backdrop-blur-xl border border-white/20 dark:border-white/5 shadow-sm transition-all ${active ? 'ring-1 ring-primary/50 shadow-xl' : 'opacity-60'}`}>
+  <div className={`p-5 rounded-[28px] bg-white/95 dark:bg-[#16181D]/95 border border-white/20 dark:border-white/5 shadow-sm transition-all ${active ? 'ring-1 ring-primary/50 shadow-xl' : 'opacity-60'}`}>
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
         <span className="px-2.5 py-1 bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white text-[10px] font-bold rounded-lg border border-gray-200 dark:border-white/10">
@@ -50,7 +62,7 @@ const MockShotCard = ({ title, scene, time, location, status = 'pending', active
 )
 
 const MockInventoryCard = () => (
-  <div className="p-5 flex flex-col h-full rounded-[28px] bg-white/80 dark:bg-[#16181D]/80 backdrop-blur-xl border border-white/20 dark:border-white/5 shadow-xl ring-1 ring-primary/20">
+  <div className="p-5 flex flex-col h-full rounded-[28px] bg-white/95 dark:bg-[#16181D]/95 border border-white/20 dark:border-white/5 shadow-xl ring-1 ring-primary/20">
     <div className="flex justify-between items-start mb-4 gap-2">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
@@ -105,6 +117,7 @@ const FeatureCard = ({ icon: Icon, title, description, delay = 0 }: { icon: any,
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
     transition={{ duration: 0.5, delay }}
+    style={{ willChange: 'transform, opacity' }}
   >
     <GlassCard className="p-8 h-full hover:border-white/20 transition-all group">
       <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center mb-6 group-hover:bg-primary/10 group-hover:border-primary/20 transition-all">
@@ -122,8 +135,8 @@ export const LandingPage = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', handleScroll)
+    const handleScroll = throttle(() => setScrolled(window.scrollY > 20), 100)
+    window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -137,12 +150,13 @@ export const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-[#0F1116] text-white selection:bg-primary/30 font-sans overflow-x-hidden">
-      
+
       {/* --- NAVIGATION --- */}
-      <nav 
+      <nav
         className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
-          scrolled ? 'bg-[#0F1116]/80 backdrop-blur-xl border-b border-white/5 py-3' : 'py-6 bg-transparent'
+          scrolled ? 'bg-[#0F1116]/95 border-b border-white/5 py-3' : 'py-6 bg-transparent'
         }`}
+        style={{ willChange: 'background-color, padding' }}
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <Logo variant="default" size="md" />
@@ -171,7 +185,7 @@ export const LandingPage = () => {
 
         <AnimatePresence>
           {isMobileMenuOpen && (
-            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="md:hidden absolute top-full left-0 right-0 bg-[#16181D] border-b border-white/10 shadow-2xl overflow-hidden px-6 py-10 flex flex-col gap-8">
+            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} style={{ willChange: 'transform, opacity' }} className="md:hidden absolute top-full left-0 right-0 bg-[#16181D] border-b border-white/10 shadow-2xl overflow-hidden px-6 py-10 flex flex-col gap-8">
               {['Features', 'Timeline', 'Equipment'].map((item) => (
                 <button key={item} onClick={() => scrollToSection(item.toLowerCase())} className="text-xl font-bold text-white/80 text-left">{item}</button>
               ))}
@@ -188,13 +202,13 @@ export const LandingPage = () => {
       {/* --- HERO SECTION --- */}
       <section className="relative pt-40 pb-20 md:pt-60 md:pb-40 px-6">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none -z-10">
-          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[150px] opacity-40 mix-blend-screen" />
-          <div className="absolute top-20 right-1/4 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[130px] opacity-30 mix-blend-screen" />
+          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[60px] opacity-40 mix-blend-screen" />
+          <div className="absolute top-20 right-1/4 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[50px] opacity-30 mix-blend-screen" />
         </div>
 
         <div className="max-w-7xl mx-auto relative z-10 text-center">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}>
-            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-10 backdrop-blur-md">
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} style={{ willChange: 'transform, opacity' }}>
+            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-10">
               <span className="w-2 h-2 rounded-full bg-primary shadow-[0_0_12px_rgba(78,71,221,0.8)]" />
               <span className="text-xs font-bold text-white/70 uppercase tracking-widest">Cinema-Grade OS</span>
             </div>
@@ -215,10 +229,11 @@ export const LandingPage = () => {
           </motion.div>
 
           {/* Real App Preview Mock */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 100, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            style={{ willChange: 'transform, opacity' }}
             className="mt-24 md:mt-32 relative max-w-5xl mx-auto"
           >
             <div className="relative z-10 rounded-[32px] p-2 bg-gradient-to-b from-white/10 to-transparent border border-white/10 shadow-2xl overflow-hidden">
@@ -244,7 +259,7 @@ export const LandingPage = () => {
                 </div>
               </WindowCard>
             </div>
-            <div className="absolute -inset-20 bg-primary/20 blur-[150px] -z-10 opacity-50" />
+            <div className="absolute -inset-20 bg-primary/20 blur-[60px] -z-10 opacity-50" />
           </motion.div>
         </div>
       </section>
@@ -295,7 +310,7 @@ export const LandingPage = () => {
       {/* --- EQUIPMENT SECTION (REAL UI) --- */}
       <section id="equipment" className="py-32 md:py-60 px-6 overflow-hidden">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
-          <motion.div initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}>
+          <motion.div initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} style={{ willChange: 'transform, opacity' }}>
             <div className="inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest mb-8">
               Inventory Engine
             </div>
@@ -325,7 +340,7 @@ export const LandingPage = () => {
             </div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="relative lg:pl-10">
+          <motion.div initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} style={{ willChange: 'transform, opacity' }} className="relative lg:pl-10">
             <div className="relative z-10 transform lg:rotate-3">
               <MockInventoryCard />
               {/* Floating Status Detail */}
@@ -337,7 +352,7 @@ export const LandingPage = () => {
                  <div className="h-1 w-full bg-white/5 rounded-full"><div className="h-full w-full bg-emerald-500 rounded-full" /></div>
               </GlassCard>
             </div>
-            <div className="absolute inset-0 bg-primary/20 blur-[120px] -z-10 opacity-30" />
+            <div className="absolute inset-0 bg-primary/20 blur-[50px] -z-10 opacity-30" />
           </motion.div>
         </div>
       </section>
@@ -345,7 +360,7 @@ export const LandingPage = () => {
       {/* --- PIPELINE SECTION --- */}
       <section id="pipeline" className="py-32 md:py-48 px-6 bg-[#090A0D]">
         <div className="max-w-4xl mx-auto text-center">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.8 }}>
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.8 }} style={{ willChange: 'transform, opacity' }}>
             <h2 className="text-5xl md:text-7xl font-bold text-white mb-10 tracking-tighter leading-[1.1]">
               Elevate your <br /> production value.
             </h2>

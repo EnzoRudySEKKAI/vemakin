@@ -28,8 +28,8 @@ import { LayoutProvider, useLayout } from '@/context/LayoutContext'
 import { useSyncLayout } from '@/hooks/useSyncLayout'
 import { useDrawerScroll } from '@/hooks/useDrawerScroll'
 import { useActiveData, useGroupedShots, useDynamicDates, useProjectProgress } from '@/hooks/useSelectors'
-import { 
-  useProjects, 
+import {
+  useProjects,
   useCreateProject,
   useAllShots,
   useAllNotes,
@@ -38,7 +38,9 @@ import {
   useCreateShot,
   useCreateNote,
   useCreateTask,
-  useCreateEquipment
+  useCreateEquipment,
+  useUpdateEquipment,
+  useDeleteEquipment
 } from '@/hooks/useApi'
 import { getViewFromPath, ROUTE_PATHS } from '@/router'
 
@@ -115,6 +117,8 @@ const RootLayoutInner = () => {
   const createNoteMutation = useCreateNote(currentProjectId || '')
   const createTaskMutation = useCreateTask(currentProjectId || '')
   const createEquipmentMutation = useCreateEquipment()
+  const updateEquipmentMutation = useUpdateEquipment()
+  const deleteEquipmentMutation = useDeleteEquipment()
 
   // Derived data
   const projects = useMemo(() => 
@@ -316,6 +320,14 @@ const RootLayoutInner = () => {
     await createEquipmentMutation.mutateAsync(gear)
   }, [createEquipmentMutation])
 
+  const handleUpdateGear = useCallback(async (gear: Equipment) => {
+    await updateEquipmentMutation.mutateAsync({ id: gear.id, data: gear })
+  }, [updateEquipmentMutation])
+
+  const handleDeleteGear = useCallback(async (id: string) => {
+    await deleteEquipmentMutation.mutateAsync(id)
+  }, [deleteEquipmentMutation])
+
   const handleAddNote = useCallback(async (note: unknown) => {
     await createNoteMutation.mutateAsync(note)
   }, [createNoteMutation])
@@ -471,6 +483,8 @@ const RootLayoutInner = () => {
                     addShot: handleAddShot,
                     addTask: handleAddTask,
                     addGear: handleAddGear,
+                    updateGear: handleUpdateGear,
+                    deleteGear: handleDeleteGear,
                     addNote: handleAddNote,
                     inventoryFilters,
                     inventoryLayout,
