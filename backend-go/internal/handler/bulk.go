@@ -66,7 +66,10 @@ func (h *Handler) GetInitialData(c echo.Context) error {
 
 	equipmentResponses := make([]dto.EquipmentResponse, len(er.equipment))
 	for i, e := range er.equipment {
-		specs := specsMap[*e.CatalogItemID]
+		var specs map[string]interface{}
+		if e.CatalogItemID != nil {
+			specs = specsMap[*e.CatalogItemID]
+		}
 		equipmentResponses[i] = equipmentToResponse(e, specs)
 	}
 

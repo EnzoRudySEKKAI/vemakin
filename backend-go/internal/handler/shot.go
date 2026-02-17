@@ -78,11 +78,17 @@ func (h *Handler) CreateShot(c echo.Context) error {
 	}
 
 	reqMap := map[string]interface{}{
-		"project_id":  projectID,
-		"title":       req.Title,
-		"description": req.Description,
-		"status":      constants.StatusPending,
-		"duration":    "1h",
+		"project_id":             projectID,
+		"title":                  req.Title,
+		"description":            req.Description,
+		"status":                 constants.StatusPending,
+		"duration":               req.Duration,
+		"location":               req.Location,
+		"start_time":             req.StartTime,
+		"date":                   req.Date,
+		"scene_number":           req.SceneNumber,
+		"equipment_ids":          req.EquipmentIDs,
+		"prepared_equipment_ids": req.PreparedEquipmentIDs,
 	}
 	if req.Status != "" {
 		reqMap["status"] = req.Status
@@ -95,6 +101,18 @@ func (h *Handler) CreateShot(c echo.Context) error {
 	}
 	if req.Date != nil {
 		reqMap["date"] = *req.Date
+	}
+	if req.StartTime != nil {
+		reqMap["start_time"] = *req.StartTime
+	}
+	if req.SceneNumber != nil {
+		reqMap["scene_number"] = *req.SceneNumber
+	}
+	if req.EquipmentIDs != nil && len(req.EquipmentIDs) > 0 {
+		reqMap["equipment_ids"] = req.EquipmentIDs
+	}
+	if req.PreparedEquipmentIDs != nil && len(req.PreparedEquipmentIDs) > 0 {
+		reqMap["prepared_equipment_ids"] = req.PreparedEquipmentIDs
 	}
 
 	shot, err := h.shotRepo.Create(c.Request().Context(), reqMap)

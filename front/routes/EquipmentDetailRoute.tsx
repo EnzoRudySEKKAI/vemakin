@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { useRouteContext } from '@/hooks/useRouteContext'
 import { EquipmentDetailView } from '@/components/inventory/EquipmentDetailView'
 import { Equipment } from '@/types'
+import { equipmentService } from '@/api/services/equipment'
 
 export const EquipmentDetailRoute = () => {
     const { id } = useParams<{ id: string }>()
@@ -17,15 +18,19 @@ export const EquipmentDetailRoute = () => {
             // Check if we already have this item in store
             const existingItem = ctx.allInventory.find(e => e.id === id)
             
-            if (existingItem && Object.keys(existingItem.specs).length > 0) {
+            if (existingItem && existingItem.specs && Object.keys(existingItem.specs).length > 0) {
                 // Already have full details with specs
                 setItem(existingItem)
                 setIsLoading(false)
             } else {
-                // Fetch full details including specs
-                const detailedItem = await ctx.fetchEquipmentDetail(id)
-                if (detailedItem) {
-                    setItem(detailedItem)
+                // Fetch full details including specs from API
+                try {
+                    const detailedItem = await equipmentService.getById(id)
+                    if (detailedItem) {
+                        setItem(detailedItem)
+                    }
+                } catch (error) {
+                    console.error('Failed to load equipment:', error)
                 }
                 setIsLoading(false)
             }

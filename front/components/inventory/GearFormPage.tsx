@@ -40,12 +40,15 @@ export const GearFormPage: React.FC<GearFormPageProps> = ({
     const newId = crypto.randomUUID();
     const modelName = form.modelName || form.brandName || form.categoryName || 'New Equipment';
 
+    const serialNumberValue = form.serialNumber.trim() || null;
+    const customNameValue = form.name.trim() || null;
+
     const newEquipment: Equipment = {
       id: newId,
       name: modelName,
-      catalogItemId: form.model || undefined,
-      customName: form.name.trim() || undefined,
-      serialNumber: form.serialNumber.trim() || undefined,
+      catalogItemId: form.model || null,
+      customName: customNameValue,
+      serialNumber: serialNumberValue,
       category: (form.categoryName || form.category || 'Other') as any,
       pricePerDay: form.isOwned ? 0 : form.price,
       rentalPrice: form.isOwned ? undefined : form.price,

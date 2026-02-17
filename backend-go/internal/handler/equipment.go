@@ -62,7 +62,10 @@ func (h *Handler) GetInventory(c echo.Context) error {
 
 	response := make([]dto.EquipmentResponse, len(equipment))
 	for i, e := range equipment {
-		specs := specsMap[*e.CatalogItemID]
+		var specs map[string]interface{}
+		if e.CatalogItemID != nil {
+			specs = specsMap[*e.CatalogItemID]
+		}
 		response[i] = equipmentToResponse(e, specs)
 	}
 
@@ -111,9 +114,12 @@ func (h *Handler) CreateEquipment(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, errorResponse(err))
 	}
 
-	specs, err := h.equipmentRepo.GetSpecsForCatalogItem(ctx, *equipment.CatalogItemID)
-	if err != nil {
-		log.Printf("Warning: Failed to fetch specs for catalog item %s: %v", *equipment.CatalogItemID, err)
+	var specs map[string]interface{}
+	if equipment.CatalogItemID != nil {
+		specs, err = h.equipmentRepo.GetSpecsForCatalogItem(ctx, *equipment.CatalogItemID)
+		if err != nil {
+			log.Printf("Warning: Failed to fetch specs for catalog item %s: %v", *equipment.CatalogItemID, err)
+		}
 	}
 
 	return c.JSON(http.StatusCreated, equipmentToResponse(*equipment, specs))
@@ -132,9 +138,12 @@ func (h *Handler) GetEquipment(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, notFoundResponse("Equipment not found"))
 	}
 
-	specs, err := h.equipmentRepo.GetSpecsForCatalogItem(ctx, *equipment.CatalogItemID)
-	if err != nil {
-		log.Printf("Warning: Failed to fetch specs for catalog item %s: %v", *equipment.CatalogItemID, err)
+	var specs map[string]interface{}
+	if equipment.CatalogItemID != nil {
+		specs, err = h.equipmentRepo.GetSpecsForCatalogItem(ctx, *equipment.CatalogItemID)
+		if err != nil {
+			log.Printf("Warning: Failed to fetch specs for catalog item %s: %v", *equipment.CatalogItemID, err)
+		}
 	}
 
 	return c.JSON(http.StatusOK, equipmentToResponse(*equipment, specs))
@@ -193,9 +202,12 @@ func (h *Handler) UpdateEquipment(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, notFoundResponse("Equipment not found"))
 	}
 
-	specs, err := h.equipmentRepo.GetSpecsForCatalogItem(ctx, *equipment.CatalogItemID)
-	if err != nil {
-		log.Printf("Warning: Failed to fetch specs for catalog item %s: %v", *equipment.CatalogItemID, err)
+	var specs map[string]interface{}
+	if equipment.CatalogItemID != nil {
+		specs, err = h.equipmentRepo.GetSpecsForCatalogItem(ctx, *equipment.CatalogItemID)
+		if err != nil {
+			log.Printf("Warning: Failed to fetch specs for catalog item %s: %v", *equipment.CatalogItemID, err)
+		}
 	}
 
 	return c.JSON(http.StatusOK, equipmentToResponse(*equipment, specs))

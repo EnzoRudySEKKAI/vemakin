@@ -46,6 +46,7 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
 
   const filteredGroupedShots = useMemo(() => {
     const filtered: Record<string, Shot[]> = {}
+    if (!groupedShots) return filtered
 
     Object.keys(groupedShots).forEach(date => {
       let shots = groupedShots[date]
@@ -131,7 +132,7 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
 
   return (
     <div className="space-y-4">
-      {dates.map((dateString) => {
+      {(dates || []).map((dateString) => {
         const dayShots = filteredGroupedShots[dateString]
         if (!dayShots?.length) return null
 
@@ -241,7 +242,7 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
 
                                     <div className="flex items-center gap-2 text-xs font-bold text-indigo-400">
                                       <Package size={18} strokeWidth={2.5} />
-                                      <span>Gear {shot.preparedEquipmentIds.length}/{shot.equipmentIds.length}</span>
+                                      <span>Gear {(shot.preparedEquipmentIds || []).length}/{(shot.equipmentIds || []).length}</span>
                                     </div>
                                   </div>
 
@@ -260,7 +261,7 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
                           </div>
 
                           <AnimatePresence>
-                            {isChecklistOpen && shot.equipmentIds.length > 0 && (
+                            {isChecklistOpen && (shot.equipmentIds || []).length > 0 && (
                               <motion.div
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}

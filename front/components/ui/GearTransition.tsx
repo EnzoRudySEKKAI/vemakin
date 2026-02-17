@@ -14,15 +14,17 @@ export const GearTransition: React.FC<GearTransitionProps> = ({ prevShot, nextSh
   const [isOpen, setIsOpen] = useState(false)
 
   const gearDelta = useMemo(() => {
-    const prevSet = new Set(prevShot.equipmentIds)
-    const nextSet = new Set(nextShot.equipmentIds)
+    const prevIds = prevShot.equipmentIds || []
+    const nextIds = nextShot.equipmentIds || []
+    const prevSet = new Set(prevIds)
+    const nextSet = new Set(nextIds)
 
-    const toDrop = prevShot.equipmentIds
+    const toDrop = prevIds
       .filter(id => !nextSet.has(id))
       .map(id => inventory.find(item => item.id === id))
       .filter((item): item is Equipment => !!item)
 
-    const toAdd = nextShot.equipmentIds
+    const toAdd = nextIds
       .filter(id => !prevSet.has(id))
       .map(id => inventory.find(item => item.id === id))
       .filter((item): item is Equipment => !!item)

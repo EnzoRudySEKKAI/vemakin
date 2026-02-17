@@ -92,10 +92,11 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
   }, [editedItem.startTime, setEditedItem])
 
   const handleAddEquipment = (equipmentId: string) => {
-    if (!editedItem.equipmentIds.includes(equipmentId)) {
+    const currentIds = editedItem.equipmentIds || []
+    if (!currentIds.includes(equipmentId)) {
       setEditedItem(prev => ({
         ...prev,
-        equipmentIds: [...prev.equipmentIds, equipmentId]
+        equipmentIds: [...currentIds, equipmentId]
       }))
     }
   }
@@ -103,23 +104,25 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
   const handleRemoveEquipment = (equipmentId: string) => {
     setEditedItem(prev => ({
       ...prev,
-      equipmentIds: prev.equipmentIds.filter(id => id !== equipmentId)
+      equipmentIds: (prev.equipmentIds || []).filter(id => id !== equipmentId)
     }))
   }
 
   const currentEndTime = calculateEndTime(editedItem.startTime, editedItem.duration)
 
-  const currentEquipmentIds = isEditing ? editedItem.equipmentIds : selectedShot.equipmentIds
+  const currentEquipmentIds = isEditing ? editedItem.equipmentIds : (selectedShot.equipmentIds || [])
 
   const availableGear = inventory.filter(item =>
-    !editedItem.equipmentIds.includes(item.id) &&
+    !(editedItem.equipmentIds || []).includes(item.id) &&
     ((item.customName || item.name).toLowerCase().includes(gearSearchQuery.toLowerCase()) ||
       item.category.toLowerCase().includes(gearSearchQuery.toLowerCase())) &&
     (activeCategory === 'All' || item.category === activeCategory)
   )
 
-  const isChecklistComplete = selectedShot.equipmentIds.length > 0 &&
-    selectedShot.preparedEquipmentIds.length === selectedShot.equipmentIds.length
+  const selectedEquipmentIds = selectedShot.equipmentIds || []
+  const preparedEquipmentIds = selectedShot.preparedEquipmentIds || []
+  const isChecklistComplete = selectedEquipmentIds.length > 0 &&
+    preparedEquipmentIds.length === selectedEquipmentIds.length
 
   const associatedNotes = notes.filter(n => n.shotId === selectedShot.id)
 
@@ -165,7 +168,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
             title="Gear checklist"
             subtitle={!isEditing && (
               <span className="text-primary">
-                {selectedShot.preparedEquipmentIds.length}/{selectedShot.equipmentIds.length} ready
+                {(selectedShot.preparedEquipmentIds || []).length}/{(selectedShot.equipmentIds || []).length} ready
               </span>
             )}
           >
@@ -194,7 +197,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                       {currentEquipmentIds.map(eId => {
                         const item = inventory.find(i => i.id === eId)
                         const Icon = item ? (CATEGORY_ICONS as any)[item.category] || Package : Package
-                        const isReady = !isEditing && selectedShot.preparedEquipmentIds.includes(eId)
+                        const isReady = !isEditing && (selectedShot.preparedEquipmentIds || []).includes(eId)
 
                         return (
                           <div

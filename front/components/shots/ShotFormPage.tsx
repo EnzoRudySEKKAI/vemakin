@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback, useRef } from 'react'
 import { Film, Calendar, MapPin, FileText, Package, Check, Search, AlertCircle } from 'lucide-react'
 import { FormLayout, FormType } from '@/components/organisms/FormLayout'
 import { Text, Input, Button, IconContainer, Textarea } from '@/components/atoms'
@@ -47,6 +47,9 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
     equipmentIds: [] as string[]
   })
 
+  const formRef = useRef(form)
+  formRef.current = form
+
   const [shotGearSearch, setShotGearSearch] = useState('')
   const [shotGearCategory, setShotGearCategory] = useState('All')
 
@@ -81,28 +84,29 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
   }
 
   const handleSubmit = () => {
-    if (!form.title.trim() || shotConflict) return
+    const currentForm = formRef.current
+    if (!currentForm.title.trim() || shotConflict) return
 
-    const startMins = timeToMinutes(form.startTime)
-    let endMins = timeToMinutes(form.endTime)
+    const startMins = timeToMinutes(currentForm.startTime)
+    let endMins = timeToMinutes(currentForm.endTime)
     if (endMins < startMins) endMins += 1440
     const diffHours = (endMins - startMins) / 60
     const duration = `${diffHours.toFixed(1).replace('.0', '')}h`
 
     const newShot: Shot = {
       id: crypto.randomUUID(),
-      title: form.title,
-      sceneNumber: form.sceneNumber || `${existingShots.length + 1}X`,
-      location: form.location || 'Location TBD',
-      locationLat: form.locationLat,
-      locationLng: form.locationLng,
-      date: fromISODate(form.date),
-      startTime: form.startTime,
+      title: currentForm.title,
+      sceneNumber: currentForm.sceneNumber || `${existingShots.length + 1}X`,
+      location: currentForm.location || 'Location TBD',
+      locationLat: currentForm.locationLat,
+      locationLng: currentForm.locationLng,
+      date: fromISODate(currentForm.date),
+      startTime: currentForm.startTime,
       duration: duration,
-      description: form.description,
-      remarks: form.description,
+      description: currentForm.description,
+      remarks: currentForm.description,
       status: 'pending',
-      equipmentIds: form.equipmentIds,
+      equipmentIds: currentForm.equipmentIds,
       preparedEquipmentIds: []
     }
 
@@ -138,7 +142,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
               <Input
                 type="text"
                 value={form.title}
-                onChange={e => setForm({ ...form, title: e.target.value })}
+                onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="e.g. THE EXTERIOR CHASE"
                 fullWidth
                 variant="underline"
@@ -150,7 +154,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
               <Input
                 type="text"
                 value={form.sceneNumber}
-                onChange={e => setForm({ ...form, sceneNumber: e.target.value })}
+                onChange={e => setForm(prev => ({ ...prev, sceneNumber: e.target.value }))}
                 placeholder="4C"
                 leftIcon={<span className="text-[10px] font-bold text-gray-400 dark:text-white/20">SC</span>}
                 fullWidth
@@ -170,18 +174,18 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
               <Input
                 type="date"
                 value={form.date}
-                onChange={e => setForm({ ...form, date: e.target.value })}
+                onChange={e => setForm(prev => ({ ...prev, date: e.target.value }))}
                 fullWidth
                 variant="underline"
               />
             </div>
             <div>
               <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Start time</span>
-              <TimeSelector label="" value={form.startTime} onChange={(v) => setForm({ ...form, startTime: v })} />
+              <TimeSelector label="" value={form.startTime} onChange={(v) => setForm(prev => ({ ...prev, startTime: v }))} />
             </div>
             <div>
               <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Estimated end</span>
-              <TimeSelector label="" value={form.endTime} onChange={(v) => setForm({ ...form, endTime: v })} />
+              <TimeSelector label="" value={form.endTime} onChange={(v) => setForm(prev => ({ ...prev, endTime: v }))} />
             </div>
           </div>
 
@@ -221,7 +225,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
         <div className="p-6">
           <Textarea
             value={form.description}
-            onChange={e => setForm({ ...form, description: e.target.value })}
+            onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))}
             placeholder="Describe the action, atmosphere, and key visual elements..."
             className="min-h-[120px]"
           />

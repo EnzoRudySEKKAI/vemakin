@@ -13,59 +13,59 @@ type UpdateProjectRequest struct {
 }
 
 type CreateShotRequest struct {
-	ProjectID            string   `json:"projectId" validate:"required"`
+	ProjectID            string   `json:"project_id" validate:"required"`
 	Title                string   `json:"title" validate:"required"`
 	Description          string   `json:"description"`
 	Status               string   `json:"status"`
-	StartTime            *string  `json:"startTime"`
+	StartTime            *string  `json:"start_time"`
 	Duration             string   `json:"duration"`
 	Location             string   `json:"location"`
 	Remarks              *string  `json:"remarks"`
 	Date                 *string  `json:"date"`
-	SceneNumber          *string  `json:"sceneNumber"`
-	EquipmentIDs         []string `json:"equipmentIds"`
-	PreparedEquipmentIDs []string `json:"preparedEquipmentIds"`
+	SceneNumber          *string  `json:"scene_number"`
+	EquipmentIDs         []string `json:"equipment_ids"`
+	PreparedEquipmentIDs []string `json:"prepared_equipment_ids"`
 }
 
 type UpdateShotRequest struct {
 	Title                *string   `json:"title"`
 	Description          *string   `json:"description"`
 	Status               *string   `json:"status"`
-	StartTime            *string   `json:"startTime"`
+	StartTime            *string   `json:"start_time"`
 	Duration             *string   `json:"duration"`
 	Location             *string   `json:"location"`
 	Remarks              *string   `json:"remarks"`
 	Date                 *string   `json:"date"`
-	SceneNumber          *string   `json:"sceneNumber"`
-	EquipmentIDs         *[]string `json:"equipmentIds"`
-	PreparedEquipmentIDs *[]string `json:"preparedEquipmentIds"`
+	SceneNumber          *string   `json:"scene_number"`
+	EquipmentIDs         *[]string `json:"equipment_ids"`
+	PreparedEquipmentIDs *[]string `json:"prepared_equipment_ids"`
 }
 
 type CreateEquipmentRequest struct {
 	Name            string   `json:"name" validate:"required"`
-	CatalogItemID   *string  `json:"catalogItemId"`
-	CustomName      *string  `json:"customName"`
-	SerialNumber    *string  `json:"serialNumber"`
+	CatalogItemID   *string  `json:"catalog_item_id"`
+	CustomName      *string  `json:"custom_name"`
+	SerialNumber    *string  `json:"serial_number"`
 	Category        string   `json:"category"`
-	PricePerDay     float64  `json:"pricePerDay"`
-	RentalPrice     *float64 `json:"rentalPrice"`
-	RentalFrequency *string  `json:"rentalFrequency"`
+	PricePerDay     float64  `json:"price_per_day"`
+	RentalPrice     *float64 `json:"rental_price"`
+	RentalFrequency *string  `json:"rental_frequency"`
 	Quantity        int      `json:"quantity"`
-	IsOwned         bool     `json:"isOwned"`
+	IsOwned         bool     `json:"is_owned"`
 	Status          string   `json:"status"`
 }
 
 type UpdateEquipmentRequest struct {
 	Name            *string  `json:"name"`
-	CatalogItemID   *string  `json:"catalogItemId"`
-	CustomName      *string  `json:"customName"`
-	SerialNumber    *string  `json:"serialNumber"`
+	CatalogItemID   *string  `json:"catalog_item_id"`
+	CustomName      *string  `json:"custom_name"`
+	SerialNumber    *string  `json:"serial_number"`
 	Category        *string  `json:"category"`
-	PricePerDay     *float64 `json:"pricePerDay"`
-	RentalPrice     *float64 `json:"rentalPrice"`
-	RentalFrequency *string  `json:"rentalFrequency"`
+	PricePerDay     *float64 `json:"price_per_day"`
+	RentalPrice     *float64 `json:"rental_price"`
+	RentalFrequency *string  `json:"rental_frequency"`
 	Quantity        *int     `json:"quantity"`
-	IsOwned         *bool    `json:"isOwned"`
+	IsOwned         *bool    `json:"is_owned"`
 	Status          *string  `json:"status"`
 }
 
@@ -131,23 +131,23 @@ type ShotResponse struct {
 
 type EquipmentResponse struct {
 	ID              string                 `json:"id"`
-	UserID          string                 `json:"userId"`
+	UserID          string                 `json:"user_id"`
 	Name            string                 `json:"name"`
-	CatalogItemID   *string                `json:"catalogItemId"`
-	CustomName      *string                `json:"customName"`
-	SerialNumber    *string                `json:"serialNumber"`
+	CatalogItemID   *string                `json:"catalog_item_id"`
+	CustomName      *string                `json:"custom_name"`
+	SerialNumber    *string                `json:"serial_number"`
 	Category        string                 `json:"category"`
-	PricePerDay     float64                `json:"pricePerDay"`
-	RentalPrice     *float64               `json:"rentalPrice"`
-	RentalFrequency *string                `json:"rentalFrequency"`
+	PricePerDay     float64                `json:"price_per_day"`
+	RentalPrice     *float64               `json:"rental_price"`
+	RentalFrequency *string                `json:"rental_frequency"`
 	Quantity        int                    `json:"quantity"`
-	IsOwned         bool                   `json:"isOwned"`
+	IsOwned         bool                   `json:"is_owned"`
 	Status          string                 `json:"status"`
-	BrandName       *string                `json:"brandName,omitempty"`
-	ModelName       *string                `json:"modelName,omitempty"`
+	BrandName       *string                `json:"brand_name,omitempty"`
+	ModelName       *string                `json:"model_name,omitempty"`
 	Specs           map[string]interface{} `json:"specs"`
-	CreatedAt       time.Time              `json:"createdAt"`
-	UpdatedAt       *time.Time             `json:"updatedAt,omitempty"`
+	CreatedAt       time.Time              `json:"created_at"`
+	UpdatedAt       *time.Time             `json:"updated_at,omitempty"`
 }
 
 type NoteResponse struct {
