@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { ArrowLeft, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react'
-import { Button, Text, Input, IconContainer } from '@/components/atoms'
+import { Link } from 'react-router-dom'
+import { ArrowLeft, Mail, Lock, ArrowRight } from 'lucide-react'
+import { Button, Text, Input } from '@/components/atoms'
 import { SimpleCard } from '@/components/ui/Card'
 import { AuthLayout } from './AuthLayout'
 
@@ -65,9 +66,12 @@ export const SignInView: React.FC<SignInViewProps> = ({ onBack, onSignIn }) => {
               <div className="space-y-2">
                 <div className="flex justify-between items-center pr-1">
                   <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Password</span>
-                  <Button type="button" variant="ghost" size="sm" className="ml-auto text-primary hover:underline h-auto p-0 text-xs font-medium">
+                  <Link 
+                    to="/auth/forgot-password" 
+                    className="ml-auto text-primary hover:underline text-xs font-medium"
+                  >
                     Forgot Password?
-                  </Button>
+                  </Link>
                 </div>
                 <Input
                   type="password"

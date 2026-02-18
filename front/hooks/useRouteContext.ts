@@ -53,7 +53,6 @@ export interface RouteContext {
     toggleDarkMode: () => void
     handleOpenActionSuite: (config?: { view: string, link?: { type: 'shot' | 'task', id: string } }) => void
     navigate: (path: string) => void
-    showNews: () => void
     showTutorial: () => void
 }
 

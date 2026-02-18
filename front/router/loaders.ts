@@ -30,9 +30,9 @@ export const rootLoader = async () => {
   await ensureAuth()
   
   // Prefetch initial data in background
-  const { isGuest, currentUser } = useAuthStore.getState()
+  const { currentUser } = useAuthStore.getState()
   
-  if (currentUser || isGuest) {
+  if (currentUser) {
     // Check if we already have the data cached
     const cachedData = queryClient.getQueryData(queryKeys.initialData)
     if (!cachedData) {

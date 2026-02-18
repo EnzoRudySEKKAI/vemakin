@@ -1,8 +1,14 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, createRoutesFromElements, Route, Navigate } from 'react-router-dom'
 import { RootLayout } from '@/layouts/RootLayout'
+import { ProtectedRoute } from '@/routes/ProtectedRoute'
+import { AuthRoute } from '@/routes/AuthRoute'
 
 const LandingPage = lazy(() => import('@/components/landing/LandingPage'))
+const LandingView = lazy(() => import('@/components/auth/LandingView').then(m => ({ default: m.LandingView })))
+const SignInView = lazy(() => import('@/components/auth/SignInView').then(m => ({ default: m.SignInView })))
+const SignUpView = lazy(() => import('@/components/auth/SignUpView').then(m => ({ default: m.SignUpView })))
+const ForgotPasswordView = lazy(() => import('@/components/auth/ForgotPasswordView').then(m => ({ default: m.ForgotPasswordView })))
 const OverviewRoute = lazy(() => import('@/routes/OverviewRoute').then(m => ({ default: m.OverviewRoute })))
 const ShotsRoute = lazy(() => import('@/routes/ShotsRoute').then(m => ({ default: m.ShotsRoute })))
 const ShotDetailRoute = lazy(() => import('@/routes/ShotDetailRoute').then(m => ({ default: m.ShotDetailRoute })))
@@ -37,30 +43,73 @@ export const router = createBrowserRouter(
     createRoutesFromElements(
         <>
             <Route path="/" element={withSuspense(LandingPage)} />
-            <Route path="/auth" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<RootLayout />} loader={rootLoader}>
-                <Route index element={withSuspense(OverviewRoute)} />
-                <Route path="shots" element={withSuspense(ShotsRoute)} loader={shotsLoader} />
-                <Route path="shots/new" element={withSuspense(ShotFormRoute)} />
-                <Route path="shots/:id" element={withSuspense(ShotDetailRoute)} loader={detailLoader} />
-                <Route path="inventory" element={withSuspense(InventoryRoute)} loader={inventoryLoader} />
-                <Route path="inventory/new" element={withSuspense(GearFormRoute)} />
-                <Route path="inventory/:id" element={withSuspense(EquipmentDetailRoute)} loader={detailLoader} />
-                <Route path="notes" element={withSuspense(NotesRoute)} loader={notesLoader} />
-                <Route path="notes/new" element={withSuspense(NoteFormRoute)} />
-                <Route path="notes/:id" element={withSuspense(NoteDetailRoute)} loader={detailLoader} />
-                <Route path="pipeline" element={withSuspense(PipelineRoute)} loader={pipelineLoader} />
-                <Route path="pipeline/new" element={withSuspense(TaskFormRoute)} />
-                <Route path="pipeline/:id" element={withSuspense(TaskDetailRoute)} loader={detailLoader} />
-                <Route path="settings" element={withSuspense(SettingsRoute)} />
-                <Route path="projects" element={withSuspense(ProjectsRoute)} />
+            
+            <Route element={<AuthRoute />}>
+                <Route path="/auth" element={<AuthLandingRoute />} />
+                <Route path="/auth/login" element={<SignInPageRoute />} />
+                <Route path="/auth/register" element={<SignUpPageRoute />} />
+                <Route path="/auth/forgot-password" element={withSuspense(ForgotPasswordView)} />
             </Route>
+            
+            <Route element={<ProtectedRoute />}>
+                <Route path="/dashboard" element={<RootLayout />} loader={rootLoader}>
+                    <Route index element={withSuspense(OverviewRoute)} />
+                    <Route path="shots" element={withSuspense(ShotsRoute)} loader={shotsLoader} />
+                    <Route path="shots/new" element={withSuspense(ShotFormRoute)} />
+                    <Route path="shots/:id" element={withSuspense(ShotDetailRoute)} loader={detailLoader} />
+                    <Route path="inventory" element={withSuspense(InventoryRoute)} loader={inventoryLoader} />
+                    <Route path="inventory/new" element={withSuspense(GearFormRoute)} />
+                    <Route path="inventory/:id" element={withSuspense(EquipmentDetailRoute)} loader={detailLoader} />
+                    <Route path="notes" element={withSuspense(NotesRoute)} loader={notesLoader} />
+                    <Route path="notes/new" element={withSuspense(NoteFormRoute)} />
+                    <Route path="notes/:id" element={withSuspense(NoteDetailRoute)} loader={detailLoader} />
+                    <Route path="pipeline" element={withSuspense(PipelineRoute)} loader={pipelineLoader} />
+                    <Route path="pipeline/new" element={withSuspense(TaskFormRoute)} />
+                    <Route path="pipeline/:id" element={withSuspense(TaskDetailRoute)} loader={detailLoader} />
+                    <Route path="settings" element={withSuspense(SettingsRoute)} />
+                    <Route path="projects" element={withSuspense(ProjectsRoute)} />
+                </Route>
+            </Route>
+            
+            <Route path="*" element={<Navigate to="/" replace />} />
         </>
     )
 )
 
-// Route path mappings for navigation (used by header and other components)
-// Updated to include /dashboard prefix
+import { useNavigate } from 'react-router-dom'
+
+function SignInPageRoute() {
+  const navigate = useNavigate()
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <SignInView 
+        onBack={() => navigate('/')} 
+        onSignIn={() => navigate('/dashboard')} 
+      />
+    </Suspense>
+  )
+}
+
+function SignUpPageRoute() {
+  const navigate = useNavigate()
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <SignUpView 
+        onBack={() => navigate('/')} 
+        onSignUp={() => navigate('/dashboard')} 
+      />
+    </Suspense>
+  )
+}
+
+function AuthLandingRoute() {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <LandingView />
+    </Suspense>
+  )
+}
+
 export const ROUTE_PATHS = {
     overview: '/dashboard',
     shots: '/dashboard/shots',
@@ -77,9 +126,12 @@ export const ROUTE_PATHS = {
     'new-gear': '/dashboard/inventory/new',
     'new-task': '/dashboard/pipeline/new',
     'new-note': '/dashboard/notes/new',
+    auth: '/auth',
+    login: '/auth/login',
+    register: '/auth/register',
+    forgotPassword: '/auth/forgot-password',
 } as const
 
-// Helper to get current view from pathname (for header/nav styling)
 export function getViewFromPath(pathname: string): string {
     if (pathname === '/dashboard' || pathname === '/dashboard/') return 'overview'
     if (pathname === '/dashboard/shots/new') return 'new-shot'

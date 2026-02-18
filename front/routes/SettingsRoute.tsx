@@ -8,10 +8,9 @@ export const SettingsRoute = () => {
     return (
         <SettingsView
             user={ctx.currentUser}
-            onLogin={() => { }} // Handled by auth flow
+            onLogin={() => { }}
             onLogout={ctx.logout}
             onNavigateToProjects={() => ctx.navigate('/dashboard/projects')}
-            onOpenNews={ctx.showNews}
             onOpenTutorial={ctx.showTutorial}
             darkMode={ctx.darkMode}
             onToggleDarkMode={ctx.toggleDarkMode}

@@ -73,8 +73,8 @@ export const useUIStore = create<UIState>()(
         const newMode = !get().darkMode
         set({ darkMode: newMode })
         
-        const { isGuest, currentUser } = useAuthStore.getState()
-        if (!isGuest && currentUser) {
+        const { currentUser } = useAuthStore.getState()
+        if (currentUser) {
           userService.updateProfile({ darkMode: newMode }).catch((error) => {
             console.error('Failed to sync theme preference:', error)
           })

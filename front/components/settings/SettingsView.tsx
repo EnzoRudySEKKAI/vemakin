@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import {
   Moon, Sun, Globe, Download, Upload, Cloud,
   FileText, Briefcase, ChevronRight, Shield,
-  LogOut, User as UserIcon, Newspaper, BookOpen,
+  LogOut, User as UserIcon, BookOpen,
   Mail, ShieldCheck
 } from 'lucide-react'
 import { SimpleCard, ListItem } from '@/components/ui/Card'
@@ -15,7 +15,6 @@ interface SettingsViewProps {
   user: User | null
   onLogin: () => void
   onLogout: () => void
-  onOpenNews: () => void
   onOpenTutorial: () => void
   darkMode: boolean
   onToggleDarkMode: () => void
@@ -26,7 +25,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   user,
   onLogin,
   onLogout,
-  onOpenNews,
   onOpenTutorial,
   darkMode,
   onToggleDarkMode
@@ -235,17 +233,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         {/* Resources Section */}
         <motion.section variants={itemVariants} className="space-y-3">
           <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-white/30 px-1">Resources</h2>
-          <div className="grid grid-cols-2 gap-3">
-            <ListItem onClick={onOpenNews} className="p-5 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                <Newspaper size={20} strokeWidth={2.5} />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white">What's New</h3>
-                <p className="text-[10px] text-gray-500 dark:text-white/30">Latest updates</p>
-              </div>
-            </ListItem>
-
+          <div className="grid grid-cols-1 gap-3">
             <ListItem onClick={onOpenTutorial} className="p-5 flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                 <BookOpen size={20} strokeWidth={2.5} />

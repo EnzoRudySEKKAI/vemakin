@@ -9,6 +9,7 @@ interface ProjectState {
   setCurrentProject: (id: string | null, name: string | null) => void
   toggleEquipmentPrepared: (shotId: string, equipmentId: string) => void
   isEquipmentPrepared: (shotId: string, equipmentId: string) => boolean
+  reset: () => void
 }
 
 export const useProjectStore = create<ProjectState>()(
@@ -42,7 +43,13 @@ export const useProjectStore = create<ProjectState>()(
       isEquipmentPrepared: (shotId: string, equipmentId: string) => {
         const ids = get().preparedEquipmentIds[shotId] || []
         return ids.includes(equipmentId)
-      }
+      },
+
+      reset: () => set({
+        currentProjectId: null,
+        currentProjectName: null,
+        preparedEquipmentIds: {}
+      })
     }),
     {
       name: 'vemakin-project',

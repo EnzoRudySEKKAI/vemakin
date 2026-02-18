@@ -1,11 +1,9 @@
 import React from 'react'
-import { ArrowRight, User, Aperture } from 'lucide-react'
-import { Button, Text, IconContainer, Logo } from '@/components/atoms'
-import { SimpleCard } from '@/components/ui/Card'
-
+import { Link } from 'react-router-dom'
+import { ArrowRight } from 'lucide-react'
+import { Button, Text, Logo } from '@/components/atoms'
 import { AuthLayout } from './AuthLayout'
 
-// Icons as components
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.21H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -21,17 +19,10 @@ const AppleIcon = () => (
   </svg>
 )
 
-interface LandingViewProps {
-  onSignIn: () => void
-  onSignUp: () => void
-  onGuest: () => void
-}
-
-export const LandingView: React.FC<LandingViewProps> = ({ onSignIn, onSignUp, onGuest }) => {
+export function LandingView() {
   return (
     <AuthLayout>
       <div className="space-y-12">
-        {/* Logo Section */}
         <div className="text-center space-y-6 animate-in slide-in-from-top-8 duration-700">
           <Logo size="xl" showText={false} className="justify-center" />
           <div>
@@ -40,73 +31,62 @@ export const LandingView: React.FC<LandingViewProps> = ({ onSignIn, onSignUp, on
           </div>
         </div>
 
-
-        {/* Action Buttons - Clean Stack */}
         <div className="space-y-4 animate-in slide-in-from-bottom-8 duration-700 delay-150">
-          <Button
-            onClick={onSignIn}
-            variant="primary"
-            size="lg"
-            fullWidth
-            rightIcon={<ArrowRight size={18} strokeWidth={2.5} />}
-            className="h-14 text-base shadow-lg shadow-primary/20"
-          >
-            Sign In
-          </Button>
+          <Link to="/auth/login">
+            <Button
+              variant="primary"
+              size="lg"
+              fullWidth
+              rightIcon={<ArrowRight size={18} strokeWidth={2.5} />}
+              className="h-14 text-base shadow-lg shadow-primary/20"
+            >
+              Sign In
+            </Button>
+          </Link>
 
-          <Button
-            onClick={onSignUp}
-            variant="secondary"
-            size="lg"
-            fullWidth
-            className="h-14 text-base bg-gray-100 dark:bg-[#16181D] border-gray-200 dark:border-white/5 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-white/5"
-          >
-            Create Account
-          </Button>
+          <Link to="/auth/register">
+            <Button
+              variant="secondary"
+              size="lg"
+              fullWidth
+              className="h-14 text-base bg-gray-100 dark:bg-[#16181D] border-gray-200 dark:border-white/5 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-white/5"
+            >
+              Create Account
+            </Button>
+          </Link>
 
-          {/* Divider */}
           <div className="py-4 flex items-center gap-4">
             <div className="h-px bg-gray-200 dark:bg-white/10 flex-1" />
             <Text variant="label" color="muted" className="text-[10px] uppercase tracking-widest">Or Continue With</Text>
             <div className="h-px bg-gray-200 dark:bg-white/10 flex-1" />
           </div>
 
-          {/* Social Logins */}
           <div className="grid grid-cols-2 gap-3">
-            <Button
-              onClick={onSignIn}
-              variant="secondary"
-              size="md"
-              leftIcon={<GoogleIcon />}
-              className="bg-gray-100 dark:bg-[#16181D] border-gray-200 dark:border-white/5 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-white/5"
-            >
-              Google
-            </Button>
-            <Button
-              onClick={onSignIn}
-              variant="secondary"
-              size="md"
-              leftIcon={<AppleIcon />}
-              className="bg-gray-100 dark:bg-[#16181D] border-gray-200 dark:border-white/5 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-white/5"
-            >
-              Apple
-            </Button>
-          </div>
-
-          <div className="pt-6 flex justify-center">
-            <Button
-              onClick={onGuest}
-              variant="ghost"
-              size="sm"
-              leftIcon={<User size={14} strokeWidth={2.5} />}
-              className="text-gray-500 dark:text-white/40 hover:text-gray-700 dark:hover:text-white"
-            >
-              Continue Without Account
-            </Button>
+            <Link to="/auth/login">
+              <Button
+                variant="secondary"
+                size="md"
+                fullWidth
+                leftIcon={<GoogleIcon />}
+                className="bg-gray-100 dark:bg-[#16181D] border-gray-200 dark:border-white/5 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-white/5"
+              >
+                Google
+              </Button>
+            </Link>
+            <Link to="/auth/login">
+              <Button
+                variant="secondary"
+                size="md"
+                fullWidth
+                leftIcon={<AppleIcon />}
+                className="bg-gray-100 dark:bg-[#16181D] border-gray-200 dark:border-white/5 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-white/5"
+              >
+                Apple
+              </Button>
+            </Link>
           </div>
         </div>
 
-        {/* Footer */}
         <div className="text-center opacity-40">
           <p className="text-[10px] text-gray-900 dark:text-white leading-relaxed">
             By entering, you agree to our Terms of Service and Privacy Policy.

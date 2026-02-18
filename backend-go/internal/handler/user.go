@@ -20,13 +20,12 @@ func userToResponse(u models.User) dto.UserResponse {
 
 func (h *Handler) GetUser(c echo.Context) error {
 	userID := getUserID(c)
+	email := c.Get("userEmail").(string)
+	name := c.Get("userName").(string)
 
-	user, err := h.userRepo.GetByID(c.Request().Context(), userID)
+	user, err := h.userRepo.Upsert(c.Request().Context(), userID, email, name)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, errorResponse(err))
-	}
-	if user == nil {
-		return c.JSON(http.StatusNotFound, notFoundResponse("User not found"))
 	}
 
 	return c.JSON(http.StatusOK, userToResponse(*user))

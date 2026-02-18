@@ -1,11 +1,9 @@
 #!/bin/bash
 
-# Script de lancement complet pour Vemakin en local
-# - Démarre le proxy Cloud SQL
-# - Compile et lance le backend Go
-# - Lance le frontend avec VITE_API_URL pointant sur localhost:8080
+# Script de lancement pour le backend et frontend Vemakin en local
+# À utiliser après avoir démarré le proxy avec ./start-proxy.sh
 
-set -e  # Arrêt sur erreur
+set -e
 
 echo "🚀 Démarrage de l'environnement de développement Vemakin..."
 
@@ -22,7 +20,6 @@ echo ""
 function cleanup {
     echo ""
     echo "🧹 Nettoyage des processus..."
-    kill $PROXY_PID 2>/dev/null || true
     kill $BACKEND_PID 2>/dev/null || true
     kill $FRONTEND_PID 2>/dev/null || true
     exit 0
@@ -30,22 +27,17 @@ function cleanup {
 
 trap cleanup INT TERM EXIT
 
-# 1. Démarrage du proxy Cloud SQL
-echo "🔌 [1/4] Démarrage du proxy Cloud SQL..."
-./cloud_sql_proxy -instances=vemakin:us-central1:vemakin=tcp:5432 &
-PROXY_PID=$!
-echo "    ✓ Proxy démarré (PID: $PROXY_PID)"
+# Vérification du proxy
+if ! lsof -i :5432 >/dev/null 2>&1; then
+    echo "⚠️  Le proxy Cloud SQL ne semble pas démarrer."
+    echo "   Veuillez d'abord lancer: ./start-proxy.sh"
+    exit 1
+fi
+echo "✓ Proxy Cloud SQL détecté"
 
-# Attendre que le proxy soit connecté
-echo "    ⏳ Attente de la connexion du proxy..."
-while ! lsof -i :5432 >/dev/null 2>&1; do
-    sleep 1
-done
-echo "    ✓ Proxy connecté"
-
-# 2. Build du backend
+# 1. Build du backend
 echo ""
-echo "🔨 [2/4] Compilation du backend Go..."
+echo "🔨 [1/3] Compilation du backend Go..."
 cd backend-go
 if [ ! -f go.mod ]; then
     echo "    ❌ Erreur: Pas de go.mod trouvé dans backend-go/"
@@ -55,9 +47,9 @@ go build -o api ./cmd/api/
 cd ..
 echo "    ✓ Backend compilé"
 
-# 3. Lancement du backend
+# 2. Lancement du backend
 echo ""
-echo "⚙️  [3/4] Démarrage du backend..."
+echo "⚙️  [2/3] Démarrage du backend..."
 cd backend-go
 ./api &
 BACKEND_PID=$!
@@ -65,9 +57,9 @@ cd ..
 echo "    ✓ Backend démarré (PID: $BACKEND_PID)"
 sleep 2
 
-# 4. Lancement du frontend
+# 3. Lancement du frontend
 echo ""
-echo "🎨 [4/4] Démarrage du frontend..."
+echo "🎨 [3/3] Démarrage du frontend..."
 cd front
 VITE_API_URL=http://localhost:$BACKEND_PORT npm run dev &
 FRONTEND_PID=$!

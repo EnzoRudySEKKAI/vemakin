@@ -33,7 +33,6 @@
 **/.env.test
 **/.env.test.local
 **/.env.*.test.local
-*.pem
 
 # Project Documentation
 AGENTS.md
@@ -45,10 +44,11 @@ yarn-error.log*
 pnpm-debug.log*
 
 # IDEs
-.idea
-.vscode
+.idea/
+.vscode/
 *.swp
 *.swo
+*~
 
 # Mobile - Standard Capacitor ignores
 **/DerivedData/
@@ -76,14 +76,19 @@ brain/
 **/.pytest_cache/
 **/catalog_cache.json
 
+# Go
+**/api
+**/vendor/
+*.exe
+
+# Build Caches
+**/.parcel-cache/
+**/.turbo/
+**/.vite/
+**/.vite-env.d.ts
+
 # Credentials & Secrets
-*.key
-secrets.*
-**/*.json
-!package.json
-!tsconfig.json
-!composer.json
-!metadata.json
+*.pem
 
 # Electron
 **/electron/dist/
@@ -92,3 +97,6 @@ cloud_sql_proxy
 
 # OpenCode
 .opencode/
+
+# Temp files
+*.bak

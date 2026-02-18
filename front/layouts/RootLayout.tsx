@@ -18,12 +18,7 @@ import { Header } from '@/components/layout/Header'
 import { Navigation } from '@/components/layout/Navigation'
 import { ActionSuite } from '@/components/layout/ActionSuite'
 import { HeaderActionsProvider } from '@/context/HeaderActionsContext'
-import { NewsModal } from '@/components/modals/NewsModal'
 import { TutorialModal } from '@/components/modals/TutorialModal'
-import { OnboardingView } from '@/components/auth/OnboardingView'
-import { LandingView } from '@/components/auth/LandingView'
-import { SignInView } from '@/components/auth/SignInView'
-import { SignUpView } from '@/components/auth/SignUpView'
 import { NoProjectsView } from '@/components/projects/NoProjectsView'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { useUIStore } from '@/stores/useUIStore'
@@ -81,12 +76,8 @@ const RootLayoutInner = () => {
   // Auth Store
   const { 
     currentUser, 
-    isGuest, 
     isLoadingAuth, 
-    login, 
-    enterGuest, 
-    logout,
-    initAuth 
+    logout
   } = useAuthStore()
 
   // UI Store
@@ -159,10 +150,7 @@ const RootLayoutInner = () => {
   const allInventory = inventoryQuery.data || []
 
   // Local state
-  const [authView, setAuthView] = useState<'landing' | 'signin' | 'signup'>('landing')
-  const [showOnboarding, setShowOnboarding] = useState(false)
   const [showTutorial, setShowTutorial] = useState(false)
-  const [showNews, setShowNews] = useState(false)
   const [activeDate, setActiveDate] = useState(dynamicDates[0] || '')
   const [postProdLayout, setPostProdLayout] = useState<'grid' | 'list'>('grid')
   const [inventoryLayout, setInventoryLayout] = useState<InventoryLayout>('grid')
@@ -179,12 +167,6 @@ const RootLayoutInner = () => {
 
   const { headerRef } = useLayout()
   const hasInitialLoadCompleted = useRef(false)
-
-  // Initialize auth
-  useEffect(() => {
-    const unsubscribe = initAuth()
-    return () => unsubscribe()
-  }, [initAuth])
 
   // Track initial load
   useEffect(() => {
@@ -398,26 +380,6 @@ const RootLayoutInner = () => {
     dateFilter ? activeData.tasks.filter((t: { dueDate: string }) => t.dueDate === dateFilter) : activeData.tasks
   , [dateFilter, activeData.tasks])
 
-  // Auth screens
-  if (!currentUser && !isGuest) {
-    if (showOnboarding) {
-      return <OnboardingView onComplete={() => setShowOnboarding(false)} />
-    }
-    if (authView === 'signin') {
-      return <SignInView onBack={() => setAuthView('landing')} onSignIn={login} />
-    }
-    if (authView === 'signup') {
-      return <SignUpView onBack={() => setAuthView('landing')} onSignUp={login} />
-    }
-    return (
-      <LandingView
-        onSignIn={() => setAuthView('signin')}
-        onSignUp={() => setAuthView('signup')}
-        onGuest={enterGuest}
-      />
-    )
-  }
-
   const isLoading = isLoadingAuth || projectsQuery.isLoading
 
   if (isLoading) {
@@ -561,7 +523,6 @@ const RootLayoutInner = () => {
                     toggleDarkMode,
                     handleOpenActionSuite,
                     navigate,
-                    showNews: () => setShowNews(true),
                     showTutorial: () => setShowTutorial(true),
                   }} />
                 </Suspense>
@@ -596,14 +557,7 @@ const RootLayoutInner = () => {
           />
         )}
 
-        {showOnboarding && currentUser && (
-          <div className="fixed inset-0 z-[2000] bg-[#F2F2F7] dark:bg-[#0F1116]">
-            <OnboardingView onComplete={() => setShowOnboarding(false)} />
-          </div>
-        )}
-
         {showTutorial && <TutorialModal onClose={() => setShowTutorial(false)} />}
-        {showNews && <NewsModal onClose={() => setShowNews(false)} />}
       </div>
     </HeaderActionsProvider>
   )

@@ -4,17 +4,18 @@ import { auth } from '@/firebase'
 import { onAuthStateChanged, signOut, User as FirebaseUser } from 'firebase/auth'
 import { User } from '@/types'
 import { userService } from '@/api/services'
+import { useProjectStore } from './useProjectStore'
+import { queryClient } from '@/providers/QueryProvider'
 
 interface AuthState {
   currentUser: User | null
-  isGuest: boolean
   isLoadingAuth: boolean
   authPromise: Promise<void> | null
   resolveAuth: (() => void) | null
+  previousUserId: string | null
 
   initAuth: () => () => void
   login: (name: string, email: string) => void
-  enterGuest: () => void
   logout: () => Promise<void>
   setLoading: (loading: boolean) => void
 }
@@ -23,10 +24,10 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       currentUser: null,
-      isGuest: false,
       isLoadingAuth: true,
       authPromise: null,
       resolveAuth: null,
+      previousUserId: null,
 
       initAuth: () => {
         if (get().authPromise) return () => {}
@@ -39,6 +40,14 @@ export const useAuthStore = create<AuthState>()(
         set({ authPromise: promise, resolveAuth: () => resolver() })
 
         const unsubscribe = onAuthStateChanged(auth, async (user: FirebaseUser | null) => {
+          const previousUserId = get().previousUserId
+          const newUserId = user?.uid || null
+
+          if (previousUserId && previousUserId !== newUserId) {
+            useProjectStore.getState().reset()
+            queryClient.clear()
+          }
+
           if (user) {
             let userProfile: User | null = null
             try {
@@ -54,13 +63,15 @@ export const useAuthStore = create<AuthState>()(
                 email: user.email || '',
                 darkMode: userProfile?.darkMode ?? false
               },
-              isGuest: false,
+              previousUserId: user.uid,
               isLoadingAuth: false
             })
-          } else if (get().isGuest) {
-            set({ isLoadingAuth: false })
           } else {
-            set({ currentUser: null, isLoadingAuth: false })
+            set({
+              currentUser: null,
+              previousUserId: null,
+              isLoadingAuth: false
+            })
           }
 
           const { resolveAuth } = get()
@@ -73,17 +84,25 @@ export const useAuthStore = create<AuthState>()(
         set({ currentUser: { name, email } })
       },
 
-      enterGuest: () => {
-        set({ isGuest: true, isLoadingAuth: false })
-      },
-
       logout: async () => {
         try {
           await signOut(auth)
-          set({ currentUser: null, isGuest: false })
         } catch {
           // Silently fail
         }
+        
+        set({
+          currentUser: null,
+          previousUserId: null,
+          isLoadingAuth: false
+        })
+        
+        useProjectStore.getState().reset()
+        
+        queryClient.clear()
+
+        localStorage.removeItem('vemakin-auth')
+        localStorage.removeItem('vemakin-project')
       },
 
       setLoading: (loading: boolean) => {
@@ -92,7 +111,10 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'vemakin-auth',
-      partialize: (state) => ({ currentUser: state.currentUser, isGuest: state.isGuest })
+      partialize: (state) => ({
+        currentUser: state.currentUser,
+        previousUserId: state.previousUserId
+      })
     }
   )
 )
