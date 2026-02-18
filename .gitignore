@@ -97,6 +97,7 @@ cloud_sql_proxy
 
 # OpenCode
 .opencode/
+opencode.json
 
 # Temp files
 *.bak
