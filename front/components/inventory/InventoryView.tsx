@@ -39,7 +39,7 @@ const getEquipmentDisplayInfo = (item: Equipment) => {
   const model = item.modelName
   const custom = item.customName
 
-  const title = item.name
+  const title = custom || item.name
 
   let subtitle = ''
   if (custom) {
