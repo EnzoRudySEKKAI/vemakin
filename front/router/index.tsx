@@ -83,7 +83,7 @@ function SignInPageRoute() {
   return (
     <Suspense fallback={<PageLoader />}>
       <SignInView 
-        onBack={() => navigate('/')} 
+        onBack={() => navigate('/auth')} 
         onSignIn={() => navigate('/dashboard')} 
       />
     </Suspense>
@@ -95,7 +95,7 @@ function SignUpPageRoute() {
   return (
     <Suspense fallback={<PageLoader />}>
       <SignUpView 
-        onBack={() => navigate('/')} 
+        onBack={() => navigate('/auth')} 
         onSignUp={() => navigate('/dashboard')} 
       />
     </Suspense>

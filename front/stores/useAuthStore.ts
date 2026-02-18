@@ -103,6 +103,8 @@ export const useAuthStore = create<AuthState>()(
 
         localStorage.removeItem('vemakin-auth')
         localStorage.removeItem('vemakin-project')
+
+        window.location.href = '/auth'
       },
 
       setLoading: (loading: boolean) => {
