@@ -128,11 +128,53 @@ export const useCreateShot = (projectId: string) => {
 
 export const useUpdateShot = (projectId: string) => {
   const queryClient = useQueryClient()
+  const queryKey = [...queryKeys.shots(projectId), { limit: 1000 }]
   
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Shot> }) => 
-      shotsApi.update(id, data),
-    onSuccess: () => {
+      shotsApi.update(id, projectId, data),
+    // Optimistic update
+    onMutate: async ({ id, data }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: queryKeys.shots(projectId) })
+      
+      // Snapshot previous value
+      const previousData = queryClient.getQueryData(queryKey)
+      
+      // Optimistically update - handle both array and { data: [...] } structures
+      queryClient.setQueryData(queryKey, (old: any) => {
+        if (!old) return old
+        
+        // If it's an array, map directly
+        if (Array.isArray(old)) {
+          return old.map((shot: Shot) => 
+            shot.id === id ? { ...shot, ...data } : shot
+          )
+        }
+        
+        // If it has .data property (PaginatedResponse-like)
+        if (old.data && Array.isArray(old.data)) {
+          return {
+            ...old,
+            data: old.data.map((shot: Shot) => 
+              shot.id === id ? { ...shot, ...data } : shot
+            )
+          }
+        }
+        
+        return old
+      })
+      
+      return { previousData }
+    },
+    onError: (err, variables, context: any) => {
+      // Revert on error
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData)
+      }
+    },
+    onSettled: () => {
+      // Refetch to ensure sync
       queryClient.invalidateQueries({ queryKey: queryKeys.shots(projectId) })
     },
   })

@@ -58,18 +58,24 @@ export const EquipmentDetailRoute = () => {
         )
     }
 
-    // Find all projects that use this equipment
-    const involvedProjects = Array.from(new Set(
-        ctx.activeData.shots
-            .filter(s => s.equipmentIds && s.equipmentIds.includes(id!))
-            .map(() => ctx.currentProject)
-    ))
+    // Find shots that use this equipment in the current project
+    const shotsUsingEquipment = ctx.activeData.shots
+        .filter(s => s.equipmentIds && s.equipmentIds.includes(id!))
+
+    // Build projectData record with current project's shots
+    const projectData: Record<string, { shots: typeof shotsUsingEquipment }> = {}
+    if (shotsUsingEquipment.length > 0 && ctx.currentProject) {
+        projectData[ctx.currentProject] = { shots: shotsUsingEquipment }
+    }
+
+    // Get involved projects (currently only current project since we only have its shots)
+    const involvedProjects = shotsUsingEquipment.length > 0 ? [ctx.currentProject] : []
 
     return (
         <EquipmentDetailView
             item={item}
             onClose={() => ctx.navigate('/dashboard/inventory')}
-            projectData={ctx.projectData}
+            projectData={projectData}
             involvedProjects={involvedProjects}
             onNavigateToShot={(projectName, shotId) => {
                 ctx.setCurrentProject(projectName)

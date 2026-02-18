@@ -102,8 +102,7 @@ const RootLayoutInner = () => {
   const { 
     currentProjectId, 
     currentProjectName, 
-    setCurrentProject,
-    toggleEquipmentPrepared 
+    setCurrentProject
   } = useProjectStore()
 
   // React Query - Data
@@ -148,6 +147,14 @@ const RootLayoutInner = () => {
   const dynamicDates = useDynamicDates(activeData.shots)
   const projectProgress = useProjectProgress(activeData.shots)
   const allInventory = inventoryQuery.data || []
+
+  // Helper to set project by name (looks up the ID)
+  const setCurrentProjectByName = useCallback((name: string) => {
+    const project = projectsQuery.data?.find(p => p.name === name)
+    if (project) {
+      setCurrentProject(project.id, project.name)
+    }
+  }, [projectsQuery.data, setCurrentProject])
 
   // Local state
   const [showTutorial, setShowTutorial] = useState(false)
@@ -371,6 +378,23 @@ const RootLayoutInner = () => {
     }
   }, [activeData.shots, updateShotMutation])
 
+  // Handle gear toggle with proper state management
+  const handleToggleEquipmentPrepared = useCallback(async (shotId: string, equipmentId: string) => {
+    const shot = activeData.shots.find(s => s.id === shotId)
+    if (!shot) return
+    
+    const currentIds = shot.preparedEquipmentIds || []
+    const isPrepared = currentIds.includes(equipmentId)
+    const newPreparedIds = isPrepared
+      ? currentIds.filter(id => id !== equipmentId)
+      : [...currentIds, equipmentId]
+    
+    await updateShotMutation.mutateAsync({ 
+      id: shotId, 
+      data: { preparedEquipmentIds: newPreparedIds } 
+    })
+  }, [activeData.shots, updateShotMutation])
+
   // Data display
   const displayedDates = useMemo(() => 
     dateFilter ? [dateFilter] : dynamicDates
@@ -482,7 +506,7 @@ const RootLayoutInner = () => {
                     activeData,
                     allInventory,
                     currentProject: currentProjectName || '',
-                    setCurrentProject,
+                    setCurrentProject: setCurrentProjectByName,
                     currency,
                     projectData,
                     dynamicDates,
@@ -494,7 +518,7 @@ const RootLayoutInner = () => {
                     shotStatusFilter,
                     groupedShots,
                     toggleShotStatus: handleToggleShotStatus,
-                    toggleEquipmentStatus: toggleEquipmentPrepared,
+                    toggleEquipmentStatus: handleToggleEquipmentPrepared,
                     addShot: handleAddShot,
                     updateShot: handleUpdateShot,
                     deleteShot: handleDeleteShot,

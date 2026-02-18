@@ -37,8 +37,8 @@ export const shotsApi = {
   create: (projectId: string, shot: Partial<Shot>) => 
     apiClient.post<Shot>(`/shots?project_id=${projectId}`, shot),
   
-  update: (id: string, shot: Partial<Shot>) => 
-    apiClient.patch<Shot>(`/shots/${id}`, shot),
+  update: (id: string, projectId: string, shot: Partial<Shot>) => 
+    apiClient.patch<Shot>(`/shots/${id}?project_id=${projectId}`, shot),
   
   delete: (id: string, projectId: string) => apiClient.delete<void>(`/shots/${id}?project_id=${projectId}`),
 }
