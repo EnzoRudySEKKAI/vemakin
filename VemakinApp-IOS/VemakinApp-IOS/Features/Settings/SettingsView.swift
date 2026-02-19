@@ -2,7 +2,7 @@
 //  SettingsView.swift
 //  VemakinApp-IOS
 //
-//  Settings Screen
+//  Settings Screen with Export/Import functionality
 //
 
 import SwiftUI
@@ -21,6 +21,13 @@ struct SettingsView: View {
     @State private var showImportConfirmation = false
     @State private var showClearConfirmation = false
     @State private var showCloudMigration = false
+    @State private var showFilePicker = false
+    @State private var showSuccessAlert = false
+    @State private var showErrorAlert = false
+    @State private var successMessage = ""
+    @State private var errorMessage = ""
+    @State private var isExporting = false
+    @State private var isImporting = false
     
     var userModeManager = UserModeManager.shared
     
@@ -53,16 +60,26 @@ struct SettingsView: View {
                     Button(action: { showExportConfirmation = true }) {
                         HStack {
                             Image(systemName: "square.and.arrow.up")
+                            if isExporting {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                            }
                             Text("Exporter les données")
                         }
                     }
+                    .disabled(isExporting)
                     
                     Button(action: { showImportConfirmation = true }) {
                         HStack {
                             Image(systemName: "square.and.arrow.down")
+                            if isImporting {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                            }
                             Text("Importer des données")
                         }
                     }
+                    .disabled(isImporting)
                     
                     Button(action: { showClearConfirmation = true }) {
                         HStack {
@@ -105,15 +122,15 @@ struct SettingsView: View {
                     exportData()
                 }
             } message: {
-                Text("Cela créera un fichier JSON avec toutes vos données.")
+                Text("Cela créera un fichier JSON avec toutes vos données. Vous pourrez le partager ou le sauvegarder.")
             }
             .alert("Importer des données", isPresented: $showImportConfirmation) {
                 Button("Annuler", role: .cancel) {}
-                Button("Importer") {
-                    importData()
+                Button("Choisir un fichier") {
+                    showFilePicker = true
                 }
             } message: {
-                Text("Cela remplacera vos données actuelles.")
+                Text("Cela remplacera vos données actuelles. Assurez-vous d'avoir un backup.")
             }
             .alert("Effacer les données", isPresented: $showClearConfirmation) {
                 Button("Annuler", role: .cancel) {}
@@ -123,18 +140,100 @@ struct SettingsView: View {
             } message: {
                 Text("Cette action est irréversible. Toutes vos données seront supprimées.")
             }
+            .alert("Succès", isPresented: $showSuccessAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(successMessage)
+            }
+            .alert("Erreur", isPresented: $showErrorAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(errorMessage)
+            }
             .sheet(isPresented: $showCloudMigration) {
                 CloudMigrationView()
+            }
+            .fileImporter(
+                isPresented: $showFilePicker,
+                allowedContentTypes: [.json],
+                allowsMultipleSelection: false
+            ) { result in
+                handleFileImport(result: result)
             }
         }
     }
     
     private func exportData() {
-        // Implementation for exporting data
+        isExporting = true
+        
+        Task {
+            do {
+                let url = try await DataExportService.shared.exportToJSON(from: modelContext)
+                
+                // Present share sheet
+                await MainActor.run {
+                    isExporting = false
+                    showShareSheet(url: url)
+                }
+            } catch {
+                await MainActor.run {
+                    isExporting = false
+                    errorMessage = "Erreur lors de l'export: \(error.localizedDescription)"
+                    showErrorAlert = true
+                }
+            }
+        }
     }
     
-    private func importData() {
-        // Implementation for importing data
+    private func importData(from url: URL) {
+        isImporting = true
+        
+        Task {
+            do {
+                try await DataExportService.shared.importFromJSON(url, to: modelContext)
+                
+                await MainActor.run {
+                    isImporting = false
+                    successMessage = "Données importées avec succès !"
+                    showSuccessAlert = true
+                }
+            } catch {
+                await MainActor.run {
+                    isImporting = false
+                    errorMessage = "Erreur lors de l'import: \(error.localizedDescription)"
+                    showErrorAlert = true
+                }
+            }
+        }
+    }
+    
+    private func handleFileImport(result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            if let url = urls.first {
+                // Start accessing security-scoped resource
+                guard url.startAccessingSecurityScopedResource() else {
+                    errorMessage = "Impossible d'accéder au fichier"
+                    showErrorAlert = true
+                    return
+                }
+                
+                importData(from: url)
+                
+                // Stop accessing
+                url.stopAccessingSecurityScopedResource()
+            }
+        case .failure(let error):
+            errorMessage = "Erreur: \(error.localizedDescription)"
+            showErrorAlert = true
+        }
+    }
+    
+    private func showShareSheet(url: URL) {
+        // In a real app, you'd use UIActivityViewController
+        // For now, just show success
+        successMessage = "Export créé ! Le fichier est disponible dans le dossier temporaire."
+        showSuccessAlert = true
     }
     
     private func clearAllData() {
@@ -153,6 +252,9 @@ struct SettingsView: View {
         for item in notes {
             modelContext.delete(item)
         }
+        
+        successMessage = "Toutes les données ont été effacées."
+        showSuccessAlert = true
     }
 }
 
