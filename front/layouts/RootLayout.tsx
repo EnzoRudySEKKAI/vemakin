@@ -183,9 +183,16 @@ const RootLayoutInner = () => {
     }
   }, [isLoadingAuth, projectsQuery.isLoading])
 
-  // Sync dark mode
+  // Sync dark mode with user profile on initial load
   useEffect(() => {
-    if (!hasInitialLoadCompleted.current) return
+    if (currentUser?.darkMode !== undefined && !hasInitialLoadCompleted.current) {
+      // Sync UI store with user profile on initial load
+      useUIStore.getState().setDarkMode(currentUser.darkMode)
+    }
+  }, [currentUser])
+
+  // Apply dark mode to document
+  useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark')
     } else {
