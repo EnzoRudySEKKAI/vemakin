@@ -45,7 +45,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
               return (
                 <button
                   key={cat.id}
-                  onClick={() => setForm({ ...form, category: cat.id as any, metadata: {} })}
+                  onClick={() => setForm(prev => ({ ...prev, category: cat.id as any, metadata: {} }))}
                   className={`flex flex-col items-center gap-3 p-4 ${radius.xl} border-2 transition-all duration-300 group ${isActive
                     ? `bg-white dark:bg-[#2C2C30] border-primary dark:border-primary shadow-xl ring-8 ring-primary/5 dark:ring-primary/5 ${cat.color}`
                     : 'bg-white dark:bg-[#2C2C30] border-gray-100 dark:border-white/10 text-gray-300 dark:text-gray-600 hover:border-gray-200 dark:hover:border-white/20'
@@ -68,7 +68,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
             <Input
               type="text"
               value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              onChange={(e) => setForm(prev => ({ ...prev, title: e.target.value }))}
               fullWidth
               placeholder="E.g. Master Grade Assembly"
             />
@@ -79,7 +79,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
             <Text variant="label" color="muted" className="mb-2 block">Brief / Description</Text>
             <Textarea
               value={form.description || ''}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
               placeholder="Add specific instructions or context..."
             />
           </div>
@@ -93,7 +93,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
                 <Input
                   type="date"
                   value={form.dueDate}
-                  onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
+                  onChange={(e) => setForm(prev => ({ ...prev, dueDate: e.target.value }))}
                   fullWidth
                   className="pl-12"
                 />
@@ -106,7 +106,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
                 <Flag className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500" size={16} strokeWidth={2.5} />
                 <Select
                   value={form.priority}
-                  onChange={(e) => setForm({ ...form, priority: e.target.value as any })}
+                  onChange={(e) => setForm(prev => ({ ...prev, priority: e.target.value as any }))}
                   options={[
                     { value: 'low', label: 'Low' },
                     { value: 'medium', label: 'Medium' },
@@ -131,7 +131,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
                 <Input
                   type="text"
                   value={form.metadata['scene'] as string || ''}
-                  onChange={(e) => setForm({ ...form, metadata: { ...form.metadata, scene: e.target.value } })}
+                  onChange={(e) => setForm(prev => ({ ...prev, metadata: { ...prev.metadata, scene: e.target.value } }))}
                   placeholder="E.g. 14B"
                   leftIcon={<Hash size={14} strokeWidth={2.5} className="text-gray-400" />}
                   fullWidth
@@ -145,7 +145,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
                   <Input
                     type="text"
                     value={form.metadata['duration'] as string || ''}
-                    onChange={(e) => setForm({ ...form, metadata: { ...form.metadata, duration: e.target.value } })}
+                    onChange={(e) => setForm(prev => ({ ...prev, metadata: { ...prev.metadata, duration: e.target.value } }))}
                     placeholder="E.g. 2m 30s"
                     leftIcon={<Clock size={14} strokeWidth={2.5} className="text-gray-400" />}
                     fullWidth
@@ -155,7 +155,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
                   <Text variant="label" color="muted" className="mb-2 block">Aspect Ratio</Text>
                   <Select
                     value={form.metadata['aspectRatio'] as string || ''}
-                    onChange={(e) => setForm({ ...form, metadata: { ...form.metadata, aspectRatio: e.target.value } })}
+                    onChange={(e) => setForm(prev => ({ ...prev, metadata: { ...prev.metadata, aspectRatio: e.target.value } }))}
                     options={[
                       { value: '', label: 'Select Ratio' },
                       { value: '16:9', label: '16:9 (Widescreen)' },

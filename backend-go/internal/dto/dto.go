@@ -70,27 +70,27 @@ type UpdateEquipmentRequest struct {
 }
 
 type CreateNoteRequest struct {
-	ProjectID string  `json:"projectId" validate:"required"`
+	ProjectID string  `json:"project_id" validate:"required"`
 	Title     string  `json:"title" validate:"required"`
 	Content   string  `json:"content"`
-	ShotID    *string `json:"shotId"`
-	TaskID    *string `json:"taskId"`
+	ShotID    *string `json:"shot_id"`
+	TaskID    *string `json:"task_id"`
 }
 
 type UpdateNoteRequest struct {
 	Title   *string `json:"title"`
 	Content *string `json:"content"`
-	ShotID  *string `json:"shotId"`
-	TaskID  *string `json:"taskId"`
+	ShotID  *string `json:"shot_id"`
+	TaskID  *string `json:"task_id"`
 }
 
 type CreateTaskRequest struct {
-	ProjectID   string  `json:"projectId" validate:"required"`
+	ProjectID   string  `json:"project_id" validate:"required"`
 	Category    string  `json:"category" validate:"required"`
 	Title       string  `json:"title" validate:"required"`
 	Status      string  `json:"status"`
 	Priority    string  `json:"priority"`
-	DueDate     *string `json:"dueDate"`
+	DueDate     *string `json:"due_date"`
 	Description *string `json:"description"`
 }
 
@@ -99,7 +99,7 @@ type UpdateTaskRequest struct {
 	Title       *string `json:"title"`
 	Status      *string `json:"status"`
 	Priority    *string `json:"priority"`
-	DueDate     *string `json:"dueDate"`
+	DueDate     *string `json:"due_date"`
 	Description *string `json:"description"`
 }
 
@@ -230,7 +230,8 @@ type UserResponse struct {
 }
 
 type UpdateUserRequest struct {
-	DarkMode *bool `json:"dark_mode"`
+	DarkMode      *bool   `json:"dark_mode"`
+	LastProjectID *string `json:"last_project_id"`
 }
 
 type ErrorResponse struct {

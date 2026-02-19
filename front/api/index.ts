@@ -51,8 +51,8 @@ export const notesApi = {
   create: (projectId: string, note: Partial<Note>) => 
     apiClient.post<Note>(`/notes?project_id=${projectId}`, note),
   
-  update: (id: string, note: Partial<Note>) => 
-    apiClient.patch<Note>(`/notes/${id}`, note),
+  update: (id: string, projectId: string, note: Partial<Note>) => 
+    apiClient.patch<Note>(`/notes/${id}?project_id=${projectId}`, note),
   
   delete: (id: string, projectId: string) => apiClient.delete<void>(`/notes/${id}?project_id=${projectId}`),
 }
@@ -65,8 +65,8 @@ export const tasksApi = {
   create: (projectId: string, task: Partial<PostProdTask>) => 
     apiClient.post<PostProdTask>(`/postprod?project_id=${projectId}`, task),
   
-  update: (id: string, task: Partial<PostProdTask>) => 
-    apiClient.patch<PostProdTask>(`/postprod/${id}`, task),
+  update: (id: string, projectId: string, task: Partial<PostProdTask>) => 
+    apiClient.patch<PostProdTask>(`/postprod/${id}?project_id=${projectId}`, task),
   
   delete: (id: string, projectId: string) => apiClient.delete<void>(`/postprod/${id}?project_id=${projectId}`),
 }

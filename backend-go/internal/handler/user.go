@@ -43,6 +43,9 @@ func (h *Handler) UpdateUser(c echo.Context) error {
 	if req.DarkMode != nil {
 		updates["dark_mode"] = *req.DarkMode
 	}
+	if req.LastProjectID != nil {
+		updates["last_project_id"] = *req.LastProjectID
+	}
 
 	if len(updates) == 0 {
 		return c.JSON(http.StatusBadRequest, notFoundResponse("No fields to update"))

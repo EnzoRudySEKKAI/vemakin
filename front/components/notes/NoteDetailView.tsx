@@ -211,7 +211,7 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
                 <Input
                   type="text"
                   value={editedItem.title}
-                  onChange={(e) => setEditedItem({ ...editedItem, title: e.target.value })}
+                  onChange={(e) => setEditedItem(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Name your note..."
                   variant="underline"
                   fullWidth
@@ -231,7 +231,7 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
               <span className="text-[10px] text-white/40 font-medium mb-2">Remarks & observations</span>
               <Textarea
                 value={editedItem.content}
-                onChange={(e) => setEditedItem({ ...editedItem, content: e.target.value })}
+                onChange={(e) => setEditedItem(prev => ({ ...prev, content: e.target.value }))}
                 placeholder="Share your thoughts or observations..."
                 className="min-h-[250px]"
               />

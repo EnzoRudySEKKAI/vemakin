@@ -194,7 +194,7 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                 <Input
                   type="text"
                   value={editedItem.title}
-                  onChange={(e) => setEditedItem({ ...editedItem, title: e.target.value })}
+                  onChange={(e) => setEditedItem(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Task title"
                   variant="underline"
                   fullWidth
@@ -208,7 +208,7 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                   <div className="relative group">
                   <select
                     value={editedItem.priority}
-                    onChange={(e) => setEditedItem({ ...editedItem, priority: e.target.value as any })}
+                    onChange={(e) => setEditedItem(prev => ({ ...prev, priority: e.target.value as any }))}
                     className="w-full bg-transparent border-b border-gray-300 dark:border-white/10 py-3 text-gray-800 dark:text-white/80 focus:text-gray-900 dark:focus:text-white focus:outline-none focus:border-primary appearance-none cursor-pointer pr-10 text-sm font-bold tracking-tight transition-all"
                   >
                     <option value="low" className="bg-white dark:bg-[#0F1116]">Low Tier</option>
@@ -225,7 +225,7 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                   <Input
                     type="date"
                     value={editedItem.dueDate || ''}
-                    onChange={(e) => setEditedItem({ ...editedItem, dueDate: e.target.value })}
+                    onChange={(e) => setEditedItem(prev => ({ ...prev, dueDate: e.target.value }))}
                     variant="underline"
                     fullWidth
                   />
@@ -236,7 +236,7 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                 <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2">Description</span>
                 <Textarea
                   value={editedItem.description || ''}
-                  onChange={(e) => setEditedItem({ ...editedItem, description: e.target.value })}
+                  onChange={(e) => setEditedItem(prev => ({ ...prev, description: e.target.value }))}
                   placeholder="Define the scope and technical requirements..."
                   className="min-h-[160px]"
                 />

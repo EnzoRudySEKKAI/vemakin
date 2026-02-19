@@ -233,7 +233,7 @@ export const useUpdateNote = (projectId: string) => {
   
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Note> }) => 
-      notesApi.update(id, data),
+      notesApi.update(id, projectId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.notes(projectId) })
     },
@@ -286,7 +286,7 @@ export const useUpdateTask = (projectId: string) => {
   
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<PostProdTask> }) => 
-      tasksApi.update(id, data),
+      tasksApi.update(id, projectId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks(projectId) })
     },

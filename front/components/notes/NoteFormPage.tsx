@@ -87,7 +87,7 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
             <Input
               type="text"
               value={form.title}
-              onChange={e => setForm({ ...form, title: e.target.value })}
+              onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))}
               placeholder="Idea title..."
               variant="underline"
               fullWidth
@@ -99,7 +99,7 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
             <span className="text-[10px] text-white/40 font-medium mb-2 block">Remarks & observations</span>
             <Textarea
               value={form.content}
-              onChange={e => setForm({ ...form, content: e.target.value })}
+              onChange={e => setForm(prev => ({ ...prev, content: e.target.value }))}
               placeholder="What are you thinking? Describe your thoughts or observations..."
               className="min-h-[200px]"
             />
@@ -112,21 +112,21 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
             <div className="flex p-1 bg-white/5 rounded-2xl border border-white/5 mb-6">
               <button
                 type="button"
-                onClick={() => setForm({ ...form, linkType: 'none', linkedId: '' })}
+                onClick={() => setForm(prev => ({ ...prev, linkType: 'none', linkedId: '' }))}
                 className={`flex-1 py-2.5 rounded-xl text-[10px] font-medium transition-all ${form.linkType === 'none' ? 'bg-white/10 text-white shadow-xl' : 'text-white/30 hover:text-white/50'}`}
               >
                 Standalone
               </button>
               <button
                 type="button"
-                onClick={() => setForm({ ...form, linkType: 'shot', linkedId: '' })}
+                onClick={() => setForm(prev => ({ ...prev, linkType: 'shot', linkedId: '' }))}
                 className={`flex-1 py-2.5 rounded-xl text-[10px] font-medium transition-all ${form.linkType === 'shot' ? 'bg-primary/20 text-primary shadow-xl' : 'text-white/30 hover:text-primary/50'}`}
               >
                 Link Shot
               </button>
               <button
                 type="button"
-                onClick={() => setForm({ ...form, linkType: 'task', linkedId: '' })}
+                onClick={() => setForm(prev => ({ ...prev, linkType: 'task', linkedId: '' }))}
                 className={`flex-1 py-2.5 rounded-xl text-[10px] font-medium transition-all ${form.linkType === 'task' ? 'bg-orange-500/20 text-orange-400 shadow-xl' : 'text-white/30 hover:text-orange-400/50'}`}
               >
                 Link Task
@@ -140,7 +140,7 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
                 </div>
                 <select
                   value={form.linkedId}
-                  onChange={e => setForm({ ...form, linkedId: e.target.value })}
+                  onChange={e => setForm(prev => ({ ...prev, linkedId: e.target.value }))}
                   className="w-full appearance-none bg-transparent border-b border-white/5 pl-10 pr-10 py-4 text-sm font-bold focus:outline-none focus:border-primary/50 transition-all cursor-pointer text-white/80"
                 >
                   <option value="" className="bg-[#0F1116]">Choose a reference point...</option>

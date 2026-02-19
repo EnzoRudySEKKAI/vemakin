@@ -97,7 +97,7 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
 
   useEffect(() => {
     setActions(headerActions)
-  }, [formType, submitDisabled, submitLabel])
+  }, [formType, submitDisabled, submitLabel, onSubmit])
 
   return (
     <motion.div

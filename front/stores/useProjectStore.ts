@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { Shot, Equipment } from '@/types'
+import { userService } from '@/api/services/user'
 
 interface ProjectState {
   currentProjectId: string | null
@@ -18,11 +19,21 @@ export const useProjectStore = create<ProjectState>()(
       currentProjectId: null,
       currentProjectName: null,
       preparedEquipmentIds: {},
-      setCurrentProject: (id, name) => set({ 
-        currentProjectId: id, 
-        currentProjectName: name,
-        preparedEquipmentIds: {} // Reset when switching projects
-      }),
+      setCurrentProject: (id, name) => {
+        // Update local state
+        set({ 
+          currentProjectId: id, 
+          currentProjectName: name,
+          preparedEquipmentIds: {} // Reset when switching projects
+        })
+        
+        // Update lastProjectId on the server
+        if (id) {
+          userService.updateProfile({ lastProjectId: id }).catch(() => {
+            // Silently fail - the project switch still works
+          })
+        }
+      },
 
       toggleEquipmentPrepared: (shotId: string, equipmentId: string) => {
         set((state) => {

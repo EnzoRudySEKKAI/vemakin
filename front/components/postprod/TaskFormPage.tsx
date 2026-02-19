@@ -84,7 +84,7 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
               return (
                 <button
                   key={cat.id}
-                  onClick={() => setForm({ ...form, category: cat.id as any, metadata: {} })}
+                  onClick={() => setForm(prev => ({ ...prev, category: cat.id as any, metadata: {} }))}
                   className={`flex flex-col items-center gap-4 p-5 rounded-2xl border transition-all duration-500 group ${isActive
                     ? 'bg-primary/10 border-primary/30 text-primary shadow-[0_0_20px_rgba(78,71,221,0.1)]'
                     : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/5 text-gray-400 dark:text-white/20 hover:border-gray-300 dark:hover:border-white/10 hover:text-gray-600 dark:hover:text-white/40'
@@ -110,7 +110,7 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
             <Input
               type="text"
               value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              onChange={(e) => setForm(prev => ({ ...prev, title: e.target.value }))}
               placeholder="e.g. Master Grade Assembly"
               variant="underline"
               fullWidth
@@ -122,7 +122,7 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
             <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Briefing & requirements</span>
             <Textarea
               value={form.description || ''}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
               placeholder="Define specific technical instructions or creative context..."
               className="min-h-[160px]"
             />
@@ -134,7 +134,7 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
               <Input
                 type="date"
                 value={form.dueDate}
-                onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
+                onChange={(e) => setForm(prev => ({ ...prev, dueDate: e.target.value }))}
                 variant="underline"
                 fullWidth
               />
@@ -145,7 +145,7 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
                 <div className="relative group">
                 <select
                   value={form.priority}
-                  onChange={(e) => setForm({ ...form, priority: e.target.value as any })}
+                  onChange={(e) => setForm(prev => ({ ...prev, priority: e.target.value as any }))}
                   className="w-full bg-transparent border-b border-gray-300 dark:border-white/10 py-3 text-gray-800 dark:text-white/80 focus:text-gray-900 dark:focus:text-white focus:outline-none focus:border-primary appearance-none cursor-pointer pr-10 text-sm font-bold tracking-tight transition-all"
                 >
                   <option value="low" className="bg-white dark:bg-[#0F1116]">Low Tier</option>
@@ -171,7 +171,7 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
                 <Input
                   type="text"
                   value={form.metadata['scene'] as string || ''}
-                  onChange={(e) => setForm({ ...form, metadata: { ...form.metadata, scene: e.target.value } })}
+                  onChange={(e) => setForm(prev => ({ ...prev, metadata: { ...prev.metadata, scene: e.target.value } }))}
                   placeholder="e.g. 14B"
                   leftIcon={<Hash size={16} className="text-gray-400 dark:text-white/20" />}
                   variant="underline"
@@ -186,7 +186,7 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
                   <Input
                     type="text"
                     value={form.metadata['duration'] as string || ''}
-                    onChange={(e) => setForm({ ...form, metadata: { ...form.metadata, duration: e.target.value } })}
+                    onChange={(e) => setForm(prev => ({ ...prev, metadata: { ...prev.metadata, duration: e.target.value } }))}
                     placeholder="e.g. 2m 30s"
                     leftIcon={<Clock size={16} className="text-gray-400 dark:text-white/20" />}
                     variant="underline"
@@ -201,7 +201,7 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
                     </div>
                     <select
                       value={form.metadata['aspectRatio'] as string || ''}
-                      onChange={(e) => setForm({ ...form, metadata: { ...form.metadata, aspectRatio: e.target.value } })}
+                      onChange={(e) => setForm(prev => ({ ...prev, metadata: { ...prev.metadata, aspectRatio: e.target.value } }))}
                       className="w-full appearance-none bg-transparent border-b border-gray-300 dark:border-white/10 pl-10 pr-10 py-3 text-sm font-bold tracking-tight focus:outline-none focus:border-primary transition-all cursor-pointer text-gray-800 dark:text-white/80 focus:text-gray-900 dark:focus:text-white"
                     >
                       <option value="" className="bg-white dark:bg-[#0F1116]">Select Ratio</option>
