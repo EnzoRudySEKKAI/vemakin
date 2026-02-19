@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import {
   useQuery,
   useMutation,
@@ -129,6 +130,7 @@ export const useCreateShot = (projectId: string) => {
 export const useUpdateShot = (projectId: string) => {
   const queryClient = useQueryClient()
   const queryKey = [...queryKeys.shots(projectId), { limit: 1000 }]
+  const debounceRef = useRef<NodeJS.Timeout | null>(null)
   
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Shot> }) => 
@@ -173,9 +175,14 @@ export const useUpdateShot = (projectId: string) => {
         queryClient.setQueryData(queryKey, context.previousData)
       }
     },
+    // Debounced refetch to sync with server after rapid clicking stops
     onSettled: () => {
-      // Refetch to ensure sync
-      queryClient.invalidateQueries({ queryKey: queryKeys.shots(projectId) })
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
+      debounceRef.current = setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: queryKeys.shots(projectId) })
+      }, 2000) // Wait 2 seconds after last click before syncing
     },
   })
 }
