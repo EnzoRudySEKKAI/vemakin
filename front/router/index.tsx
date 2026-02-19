@@ -1,8 +1,9 @@
-import { lazy, Suspense } from 'react'
-import { createBrowserRouter, createRoutesFromElements, Route, Navigate } from 'react-router-dom'
+import { lazy, Suspense, useEffect } from 'react'
+import { createBrowserRouter, createRoutesFromElements, Route, Navigate, Outlet, useLocation, useNavigate, useOutletContext } from 'react-router-dom'
 import { RootLayout } from '@/layouts/RootLayout'
 import { ProtectedRoute } from '@/routes/ProtectedRoute'
 import { AuthRoute } from '@/routes/AuthRoute'
+import { prefetchLikelyRoutes } from '@/utils/prefetch'
 
 const LandingPage = lazy(() => import('@/components/landing/LandingPage'))
 const LandingView = lazy(() => import('@/components/auth/LandingView').then(m => ({ default: m.LandingView })))
@@ -34,6 +35,25 @@ const PageLoader = () => (
   </div>
 )
 
+// Prefetch likely routes after initial load - must forward Outlet context from RootLayout
+const RoutePrefetcher = () => {
+  const location = useLocation()
+  // Get context from parent Outlet (RootLayout)
+  const outletContext = useOutletContext()
+  
+  useEffect(() => {
+    // Prefetch likely routes after a short delay to not interfere with initial render
+    const timer = setTimeout(() => {
+      prefetchLikelyRoutes(location.pathname)
+    }, 2000)
+    
+    return () => clearTimeout(timer)
+  }, [location.pathname])
+  
+  // Forward context to children
+  return <Outlet context={outletContext} />
+}
+
 const withSuspense = (Component: React.LazyExoticComponent<React.FC>) => (
   <Suspense fallback={<PageLoader />}>
     <Component />
@@ -54,7 +74,8 @@ export const router = createBrowserRouter(
             
             <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<RootLayout />} loader={rootLoader} hydrateFallbackElement={<PageLoader />}>
-                    <Route index element={withSuspense(OverviewRoute)} />
+                    <Route element={<RoutePrefetcher />}>
+                        <Route index element={withSuspense(OverviewRoute)} />
                     <Route path="shots" element={withSuspense(ShotsRoute)} loader={shotsLoader} hydrateFallbackElement={<PageLoader />} />
                     <Route path="shots/new" element={withSuspense(ShotFormRoute)} />
                     <Route path="shots/:id" element={withSuspense(ShotDetailRoute)} loader={detailLoader} hydrateFallbackElement={<PageLoader />} />
@@ -70,6 +91,7 @@ export const router = createBrowserRouter(
                     <Route path="settings" element={withSuspense(SettingsRoute)} />
                     <Route path="projects" element={withSuspense(ProjectsRoute)} />
                     <Route path="projects/new" element={withSuspense(ProjectFormRoute)} />
+                    </Route>
                 </Route>
             </Route>
             
@@ -82,8 +104,6 @@ export const router = createBrowserRouter(
         },
     }
 )
-
-import { useNavigate } from 'react-router-dom'
 
 function SignInPageRoute() {
   const navigate = useNavigate()

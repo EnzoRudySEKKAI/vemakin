@@ -1,7 +1,9 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { LayoutDashboard, Zap, Package, StickyNote, Plus, Film } from 'lucide-react'
 import { MainView } from '@/types'
 import { Logo } from '@/components/atoms'
+import { prefetchRoute } from '@/utils/prefetch'
+import { ROUTE_PATHS } from '@/router'
 
 interface NavigationProps {
   mainView: MainView
@@ -14,9 +16,20 @@ interface NavigationProps {
 export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, setMainView, onPlusClick, scale = 1, isAnimating = false }) => {
   const NavItem = ({ view, icon: Icon, label, onClick }: { view?: MainView, icon: any, label: string, onClick: () => void }) => {
     const isActive = view ? mainView === view : false
+    
+    const handleMouseEnter = useCallback(() => {
+      // Prefetch route on hover
+      if (view && !isActive) {
+        const path = ROUTE_PATHS[view as keyof typeof ROUTE_PATHS]
+        if (path) prefetchRoute(path)
+      }
+    }, [view, isActive])
+    
     return (
       <button
         onClick={onClick}
+        onMouseEnter={handleMouseEnter}
+        onFocus={handleMouseEnter}
         className={`flex items-center lg:justify-center xl:justify-start gap-4 px-4 lg:px-2 xl:px-6 py-3.5 rounded-2xl text-[15px] font-semibold transition-all duration-200 group w-full xl:w-auto
           ${isActive
             ? 'text-primary dark:text-white bg-primary/10 dark:bg-white/10 shadow-sm shadow-primary/10 dark:shadow-white/5'
@@ -29,15 +42,26 @@ export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, set
     )
   }
 
-  const MobileNavItem = ({ icon: Icon, label, active, onClick }: { icon: any, label: string, active: boolean, onClick: () => void }) => (
-    <button
-      onClick={onClick}
-      className={`flex flex-col items-center justify-center flex-1 gap-1 py-2 transition-all duration-200 pointer-events-auto ${active ? 'text-primary dark:text-white' : 'text-gray-500 dark:text-white/30'}`}
-    >
-      <Icon size={20} strokeWidth={active ? 2.5 : 2} />
-      <span className={`text-[10px] font-medium ${active ? 'opacity-100' : 'opacity-70'}`}>{label}</span>
-    </button>
-  )
+  const MobileNavItem = ({ icon: Icon, label, active, onClick, view }: { icon: any, label: string, active: boolean, onClick: () => void, view?: MainView }) => {
+    const handleMouseEnter = useCallback(() => {
+      if (view && !active) {
+        const path = ROUTE_PATHS[view as keyof typeof ROUTE_PATHS]
+        if (path) prefetchRoute(path)
+      }
+    }, [view, active])
+    
+    return (
+      <button
+        onClick={onClick}
+        onMouseEnter={handleMouseEnter}
+        onTouchStart={handleMouseEnter}
+        className={`flex flex-col items-center justify-center flex-1 gap-1 py-2 transition-all duration-200 pointer-events-auto ${active ? 'text-primary dark:text-white' : 'text-gray-500 dark:text-white/30'}`}
+      >
+        <Icon size={20} strokeWidth={active ? 2.5 : 2} />
+        <span className={`text-[10px] font-medium ${active ? 'opacity-100' : 'opacity-70'}`}>{label}</span>
+      </button>
+    )
+  }
 
   const isInteractive = scale > 0.3
 
@@ -62,11 +86,11 @@ export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, set
           }}
         >
           <div className="flex items-center justify-between gap-1 p-2 px-4 bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.08] rounded-2xl pointer-events-auto w-full max-w-[400px]">
-            <MobileNavItem active={mainView === 'overview'} onClick={() => setMainView('overview')} icon={LayoutDashboard} label="Home" />
-            <MobileNavItem active={mainView === 'shots'} onClick={() => setMainView('shots')} icon={Film} label="Timeline" />
-            <MobileNavItem active={mainView === 'inventory'} onClick={() => setMainView('inventory')} icon={Package} label="Inventory" />
-            <MobileNavItem active={mainView === 'postprod'} onClick={() => setMainView('postprod')} icon={Zap} label="Pipeline" />
-            <MobileNavItem active={mainView === 'notes'} onClick={() => setMainView('notes')} icon={StickyNote} label="Notes" />
+            <MobileNavItem active={mainView === 'overview'} onClick={() => setMainView('overview')} icon={LayoutDashboard} label="Home" view="overview" />
+            <MobileNavItem active={mainView === 'shots'} onClick={() => setMainView('shots')} icon={Film} label="Timeline" view="shots" />
+            <MobileNavItem active={mainView === 'inventory'} onClick={() => setMainView('inventory')} icon={Package} label="Inventory" view="inventory" />
+            <MobileNavItem active={mainView === 'postprod'} onClick={() => setMainView('postprod')} icon={Zap} label="Pipeline" view="postprod" />
+            <MobileNavItem active={mainView === 'notes'} onClick={() => setMainView('notes')} icon={StickyNote} label="Notes" view="notes" />
           </div>
         </div>
       </nav>
