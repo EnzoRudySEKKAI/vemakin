@@ -1,40 +1,40 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react'
 
 interface ScrollFadeProps {
-  children: React.ReactNode;
-  className?: string;
-  scrollKey?: any;
+  children: React.ReactNode
+  className?: string
+  scrollKey?: any
 }
 
 export const ScrollFade: React.FC<ScrollFadeProps> = ({ children, className = '', scrollKey }) => {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
 
   const checkScroll = () => {
-    if (!scrollRef.current) return;
-    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-    setCanScrollLeft(scrollLeft > 0);
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 2); // 2px tolerance
-  };
+    if (!scrollRef.current) return
+    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
+    setCanScrollLeft(scrollLeft > 0)
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 2) // 2px tolerance
+  }
 
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollLeft = 0;
-      checkScroll();
+      scrollRef.current.scrollLeft = 0
+      checkScroll()
     }
-  }, [scrollKey]);
+  }, [scrollKey])
 
   useEffect(() => {
-    checkScroll();
+    checkScroll()
     // Check after a short delay to ensure layout is computed
-    const timer = setTimeout(checkScroll, 100);
-    window.addEventListener('resize', checkScroll);
+    const timer = setTimeout(checkScroll, 100)
+    window.addEventListener('resize', checkScroll)
     return () => {
-      window.removeEventListener('resize', checkScroll);
-      clearTimeout(timer);
-    };
-  }, [children]);
+      window.removeEventListener('resize', checkScroll)
+      clearTimeout(timer)
+    }
+  }, [children])
 
   return (
     <div className="relative min-w-0 w-full">
@@ -56,5 +56,5 @@ export const ScrollFade: React.FC<ScrollFadeProps> = ({ children, className = ''
         {children}
       </div>
     </div>
-  );
-};
+  )
+}

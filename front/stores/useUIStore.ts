@@ -1,0 +1,96 @@
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+import { 
+  MainView, 
+  ShotLayout, 
+  PostProdFilters, 
+  NotesFilters 
+} from '@/types'
+import { userService } from '@/api/services'
+import { useAuthStore } from './useAuthStore'
+
+interface UIState {
+  mainView: MainView
+  shotLayout: ShotLayout
+  notesLayout: 'grid' | 'list'
+  shotStatusFilter: 'all' | 'pending' | 'done'
+  postProdFilters: PostProdFilters
+  notesFilters: NotesFilters
+  darkMode: boolean
+  showCreateProjectPrompt: boolean
+
+  setMainView: (view: MainView) => void
+  setShotLayout: (layout: ShotLayout) => void
+  setNotesLayout: (layout: 'grid' | 'list') => void
+  setShotStatusFilter: (filter: 'all' | 'pending' | 'done') => void
+  setPostProdFilters: (updater: (prev: PostProdFilters) => PostProdFilters) => void
+  setNotesFilters: (updater: (prev: NotesFilters) => NotesFilters) => void
+  toggleDarkMode: () => void
+  setDarkMode: (value: boolean) => void
+  setShowCreateProjectPrompt: (show: boolean) => void
+}
+
+const defaultPostProdFilters: PostProdFilters = {
+  category: 'All',
+  searchQuery: '',
+  status: 'All',
+  priority: 'All',
+  date: 'All',
+  sortBy: 'status',
+  sortDirection: 'asc'
+}
+
+const defaultNotesFilters: NotesFilters = {
+  query: '',
+  category: 'All',
+  sortBy: 'updated',
+  sortDirection: 'desc'
+}
+
+export const useUIStore = create<UIState>()(
+  persist(
+    (set, get) => ({
+      mainView: 'overview',
+      shotLayout: 'timeline',
+      notesLayout: 'grid',
+      shotStatusFilter: 'all',
+      postProdFilters: defaultPostProdFilters,
+      notesFilters: defaultNotesFilters,
+      darkMode: false,
+      showCreateProjectPrompt: false,
+
+      setMainView: (view) => set({ mainView: view }),
+      setShotLayout: (layout) => set({ shotLayout: layout }),
+      setNotesLayout: (layout) => set({ notesLayout: layout }),
+      setShotStatusFilter: (filter) => set({ shotStatusFilter: filter }),
+      setPostProdFilters: (updater) => set((state) => ({ 
+        postProdFilters: updater(state.postProdFilters) 
+      })),
+      setNotesFilters: (updater) => set((state) => ({ 
+        notesFilters: updater(state.notesFilters) 
+      })),
+      toggleDarkMode: () => {
+        const newMode = !get().darkMode
+        set({ darkMode: newMode })
+        
+        const { currentUser } = useAuthStore.getState()
+        if (currentUser) {
+          userService.updateProfile({ darkMode: newMode }).catch((error) => {
+            console.error('Failed to sync theme preference:', error)
+          })
+        }
+      },
+      setDarkMode: (value) => set({ darkMode: value }),
+      setShowCreateProjectPrompt: (show) => set({ showCreateProjectPrompt: show })
+    }),
+    {
+      name: 'vemakin-ui',
+      partialize: (state) => ({
+        darkMode: state.darkMode,
+        shotLayout: state.shotLayout,
+        notesLayout: state.notesLayout,
+        shotStatusFilter: state.shotStatusFilter,
+      })
+    }
+  )
+)

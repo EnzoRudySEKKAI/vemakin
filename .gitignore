@@ -21,7 +21,21 @@
 **/.env
 **/.env.local
 **/.env.*.local
-*.pem
+**/.env.development
+**/.env.development.local
+**/.env.*.development.local
+**/.env.production
+**/.env.production.local
+**/.env.*.production.local
+**/.env.staging
+**/.env.staging.local
+**/.env.*.staging.local
+**/.env.test
+**/.env.test.local
+**/.env.*.test.local
+
+# Project Documentation
+AGENTS.md
 
 # Logs
 npm-debug.log*
@@ -30,10 +44,11 @@ yarn-error.log*
 pnpm-debug.log*
 
 # IDEs
-.idea
-.vscode
+.idea/
+.vscode/
 *.swp
 *.swo
+*~
 
 # Mobile - Standard Capacitor ignores
 **/DerivedData/
@@ -46,6 +61,43 @@ pnpm-debug.log*
 **/android/captures/
 **/android/local.properties
 
+# AI & Agent Frameworks
+.agent/
+.agents/
+.gemini/
+.antigravity/
+brain/
+**/brain/
+
+# Python / Backend
+**/venv/
+**/__pycache__/
+*.pyc
+**/.pytest_cache/
+**/catalog_cache.json
+
+# Go
+**/api
+**/vendor/
+*.exe
+
+# Build Caches
+**/.parcel-cache/
+**/.turbo/
+**/.vite/
+**/.vite-env.d.ts
+
+# Credentials & Secrets
+*.pem
+
 # Electron
 **/electron/dist/
 **/electron/release/
+cloud_sql_proxy
+
+# OpenCode
+.opencode/
+opencode.json
+
+# Temp files
+*.bak

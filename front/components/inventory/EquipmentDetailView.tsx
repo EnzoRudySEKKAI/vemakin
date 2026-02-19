@@ -1,35 +1,29 @@
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Package, ChevronDown, ChevronRight, DollarSign, ShieldCheck } from 'lucide-react'
+import { Equipment, Currency, Shot } from '../../types'
+import { CATEGORY_ICONS } from '../../constants'
+import { useDetailView } from '../../hooks/useDetailView'
+import { DetailViewLayout } from '../../components/organisms/DetailViewLayout'
+import { ActionButtonGroup } from '../../components/molecules/ActionButton'
+import { DetailItem } from '../../components/molecules'
+import { Input } from '../../components/atoms/Input'
+import { ConfirmModal } from '../ui/ConfirmModal'
+import { Card } from '../ui/Card'
+import { useClickOutside } from '../../hooks/useClickOutside'
+import { useCatalogCategories } from '@/hooks/useApi'
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  X, Package, ShieldCheck,
-  Info, DollarSign, Edit3, Trash2, Save,
-  Database, Sliders, Weight,
-  Film, Check, ListChecks, MessageSquare, ExternalLink,
-  ChevronDown, ChevronUp, Plus, Search, Layers, Box,
-  MoreVertical, FileText, Hourglass, MoreHorizontal, RotateCcw, CalendarPlus,
-  ArrowRight, ChevronLeft, ChevronRight, Home, Share2, Archive, ArrowLeft, Pencil, Calendar, Settings, User
-} from 'lucide-react';
-import { useHeaderActions } from '../../context/HeaderActionsContext';
-import { Equipment, Currency, Shot } from '../../types';
-import { GlassCard } from '../ui/GlassCard';
-import { HoverCard } from '../ui/HoverCard';
-import { EmptyState } from '../ui/EmptyState';
-import { ConfirmModal } from '../ui/ConfirmModal';
-import { CATEGORY_ICONS, GEAR_DATABASE } from '../../constants';
-import { IconButton } from '../ui/IconButton';
-
-import { useClickOutside } from '../../hooks/useClickOutside';
+import api from '@/api/client'
 
 interface EquipmentDetailViewProps {
-  item: Equipment;
-  involvedProjects?: string[];
-  projectData: Record<string, any>;
-  onClose: () => void;
-  onNavigateToShot: (projectName: string, shotId: string) => void;
-  currency: Currency;
-  onUpdate?: (updated: Equipment) => void;
-  onDelete?: (id: string) => void;
+  item: Equipment
+  involvedProjects?: string[]
+  projectData: Record<string, any>
+  onClose: () => void
+  onNavigateToShot: (projectName: string, shotId: string) => void
+  currency: Currency
+  onUpdate?: (updated: Equipment) => void
+  onDelete?: (id: string) => void
 }
 
 export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
@@ -42,327 +36,240 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
   onUpdate,
   onDelete
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [showMoreMenu, setShowMoreMenu] = useState(false);
-  const [expandedProjectShots, setExpandedProjectShots] = useState<string | null>(null);
-  const [editedItem, setEditedItem] = useState<Equipment>(item);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const {
+    isEditing,
+    setIsEditing,
+    editedItem,
+    setEditedItem,
+    showDeleteConfirm,
+    setShowDeleteConfirm,
+    handleSave,
+    handleCancel,
+    handleDelete
+  } = useDetailView<Equipment>({
+    item,
+    onUpdate,
+    onDelete
+  })
 
-  const handleSave = useCallback(() => {
-    if (onUpdate) {
-      onUpdate(editedItem);
-    }
-    setIsEditing(false);
-  }, [editedItem, onUpdate]);
+  const [expandedProject, setExpandedProject] = useState<string | null>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
 
-  const handleDelete = useCallback(() => {
-    if (onDelete) {
-      onDelete(item.id);
-    }
-    setShowDeleteConfirm(false);
-    onClose();
-  }, [onDelete, item.id, onClose]);
+  useClickOutside(menuRef, () => { }, false)
 
-  const menuRef = useRef<HTMLDivElement>(null);
-  const Icon = (CATEGORY_ICONS as any)[item.category] || Package;
+  const { data: catalogCategories = [] } = useCatalogCategories()
 
-  // Header integration
-  const { setActions, setTitle, setSubtitle, setOnBack, setDetailLabel } = useHeaderActions();
+  const brandName = item.brandName
+  const modelName = item.modelName
 
-  useClickOutside(menuRef, () => setShowMoreMenu(false), showMoreMenu);
+  const categoryName = useMemo(() => {
+    return catalogCategories.find((c: { id: string; name: string }) => c.id === item.category)?.name || item.category
+  }, [catalogCategories, item.category])
 
-  useEffect(() => {
-    setEditedItem(item);
-  }, [item]);
-
-  // Update header on mount and when interactions change
-  useEffect(() => {
-    setTitle(item.name);
-    setSubtitle(`${item.category} • ${item.location}`);
-    setDetailLabel('Equipment Detail');
-    setOnBack(onClose);
-
-    return () => {
-      setTitle(null);
-      setSubtitle(null);
-      setDetailLabel(null);
-      setActions(null);
-      setOnBack(undefined);
-    };
-  }, [item, setTitle, setSubtitle, setDetailLabel, setOnBack, setActions, onClose]);
-
-  useEffect(() => {
-    setActions(
-      <div className="flex items-center gap-2">
-        {!isEditing ? (
-          <div className="flex gap-3">
-            <button
-              onClick={() => setIsEditing(true)}
-              className="flex items-center justify-center w-10 h-10 rounded-xl bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-black dark:hover:text-white transition-all shadow-sm"
-              title="Edit gear"
-            >
-              <Edit3 size={20} strokeWidth={2.5} />
-            </button>
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center justify-center w-10 h-10 rounded-xl bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-white/10 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all shadow-sm"
-              title="Delete gear"
-            >
-              <Trash2 size={20} strokeWidth={2.5} />
-            </button>
-          </div>
-        ) : (
-          <div className="flex gap-3">
-            <button
-              onClick={() => { setIsEditing(false); setEditedItem(item); }}
-              className="flex items-center justify-center w-10 h-10 rounded-xl bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-all shadow-sm"
-              title="Cancel changes"
-            >
-              <X size={20} strokeWidth={2.5} />
-            </button>
-            <button
-              onClick={handleSave}
-              className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#3762E3] dark:bg-[#4E47DD] text-white shadow-lg shadow-[#3762E3]/20 dark:shadow-[#4E47DD]/20 hover:scale-105 active:scale-95 transition-all"
-              title="Save changes"
-            >
-              <Check size={20} strokeWidth={3} />
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  }, [isEditing, item, handleSave, setActions]);
-
-  const toggleProjectShots = (projectName: string) => {
-    setExpandedProjectShots(prev => prev === projectName ? null : projectName);
-  };
+  const Icon = (CATEGORY_ICONS as any)[item.category] || Package
 
   const getShotsForEquipmentInProject = (projectName: string): Shot[] => {
-    const projectShots = projectData[projectName]?.shots || [];
-    return projectShots.filter((s: Shot) => s.equipmentIds.includes(item.id));
-  };
+    const projectShots = projectData[projectName]?.shots || []
+    return projectShots.filter((s: Shot) => s.equipmentIds.includes(item.id))
+  }
 
-  const renderProjectItem = (pName: string) => {
-    const relatedShots = getShotsForEquipmentInProject(pName);
-    const isExpanded = expandedProjectShots === pName;
+  const toggleProject = (projectName: string) => {
+    setExpandedProject(prev => prev === projectName ? null : projectName)
+  }
 
-    return (
-      <div key={pName} className="border-b border-gray-100/50 dark:border-white/5 last:border-none bg-transparent">
-        <button
-          onClick={() => toggleProjectShots(pName)}
-          className={`w-full flex justify-between items-center py-4 px-4 hover:bg-white/50 dark:hover:bg-white/5 rounded-2xl transition-all group my-1 ${isExpanded ? 'bg-white/50 dark:bg-white/5' : ''}`}
-        >
-          <div className="flex items-center gap-4 min-w-0">
-            <span className={`text-sm font-semibold truncate ${isExpanded ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200'}`}>{pName}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            {relatedShots.length > 0 && (
-              <span className="text-[10px] font-medium px-2.5 py-1 rounded-lg bg-gray-50 dark:bg-white/5 text-gray-400 dark:text-gray-500">
-                {relatedShots.length} Scenes
-              </span>
-            )}
-            <div className={`transition-transform duration-300 text-gray-400 dark:text-gray-500 ${isExpanded ? 'rotate-180 text-blue-600 dark:text-indigo-400' : ''}`}>
-              <ChevronDown size={16} strokeWidth={2.5} />
-            </div>
-          </div>
-        </button>
-
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="overflow-hidden"
-            >
-              <div className="px-2 pb-4 pt-1 space-y-2">
-                {relatedShots.length > 0 ? (
-                  relatedShots.map(shot => (
-                    <button
-                      key={shot.id}
-                      onClick={() => onNavigateToShot(pName, shot.id)}
-                      className="w-full flex items-center justify-between p-3 pl-4 rounded-xl text-left hover:bg-gray-50 dark:hover:bg-white/5 transition-all group/shot"
-                    >
-                      <div className="flex items-center gap-4 truncate">
-                        <div className="truncate">
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300 group-hover/shot:text-gray-900 dark:group-hover/shot:text-white truncate transition-colors">{shot.title}</p>
-                          <p className="text-[11px] font-medium text-gray-400 dark:text-gray-500 mt-0.5 flex items-center gap-1.5">
-                            <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-400/30 dark:bg-indigo-400/30 group-hover/shot:bg-blue-500 dark:group-hover/shot:bg-indigo-400 transition-colors" />
-                            Sc. {shot.sceneNumber}
-                            <span className="text-gray-300 dark:text-gray-600">•</span>
-                            {shot.startTime}
-                          </p>
-                        </div>
-                      </div>
-                      <ChevronRight size={14} className="text-gray-300 dark:text-gray-600 group-hover/shot:text-blue-400 dark:text-indigo-400 mr-2" strokeWidth={2.5} />
-                    </button>
-                  ))
-                ) : (
-                  <p className="text-[11px] font-medium text-gray-400 dark:text-gray-500 py-3 italic pl-6 border-l-2 border-dashed border-gray-200 dark:border-white/10">
-                    No active shoots scheduled
-                  </p>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    );
-  };
+  const headerActions = (
+    <ActionButtonGroup
+      isEditing={isEditing}
+      onEdit={() => setIsEditing(true)}
+      onDelete={() => setShowDeleteConfirm(true)}
+      onSave={handleSave}
+      onCancel={handleCancel}
+    />
+  )
 
   return (
-    <div className="flex flex-col h-full bg-[#FAFAFA] dark:bg-[#141417] min-h-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <div className="max-w-[1920px] mx-auto p-4 md:p-8 pt-0 pb-32">
+    <DetailViewLayout
+      title={item.name}
+      subtitle={`${categoryName} • ${item.isOwned ? 'Owned' : 'Rented'}`}
+      detailLabel="Equipment Detail"
+      onBack={onClose}
+      actions={headerActions}
+      size="wide"
+      sidebar={
+        <div className="space-y-4">
+          <Card title="Project usage">
+            <div className="p-2 space-y-1">
+              {involvedProjects.length > 0 ? (
+                involvedProjects.map((pName) => {
+                  const relatedShots = getShotsForEquipmentInProject(pName)
+                  const isExpanded = expandedProject === pName
 
-          {/* FLUID CONTEXT BAR */}
-          <div className="flex flex-col gap-8 mb-12 pb-10 border-b border-gray-100 dark:border-white/5">
-            {/* Status Section - Ownership */}
-            <div className="w-full">
-              <span className="detail-subtitle mb-3 block text-center sm:text-left dark:text-white">Availability</span>
+                  return (
+                    <div key={pName} className="space-y-1">
+                      <button
+                        onClick={() => toggleProject(pName)}
+                        className={`w-full flex justify-between items-center p-3 rounded-xl transition-all group ${isExpanded ? 'bg-primary/5' : 'hover:bg-gray-100 dark:hover:bg-white/5'}`}
+                      >
+                        <div className="flex items-center gap-4 min-w-0">
+                          <div className={`w-1.5 h-1.5 rounded-full transition-all ${isExpanded ? 'bg-primary shadow-[0_0_8px_rgba(78,71,221,0.5)]' : 'bg-gray-300 dark:bg-white/10'}`} />
+                          <span className={`text-sm font-medium truncate transition-colors ${isExpanded ? 'text-primary/70' : 'text-gray-500 dark:text-white/40 group-hover:text-gray-700 dark:group-hover:text-white/60'}`}>
+                            {pName}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {relatedShots.length > 0 && (
+                            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-lg border transition-all ${isExpanded ? 'bg-primary/20 border-primary/30 text-primary' : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/5 text-gray-500 dark:text-white/20'}`}>
+                              {relatedShots.length}
+                            </span>
+                          )}
+                          <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180 text-primary' : 'text-gray-200 dark:text-white/10'}`}>
+                            <ChevronDown size={14} strokeWidth={2} />
+                          </div>
+                        </div>
+                      </button>
 
-              <div
-                className={`flex items-center justify-center gap-3 px-5 py-3 rounded-2xl border transition-all duration-300 w-full ${item.isOwned
-                  ? 'bg-[#3762E3]/5 dark:bg-[#4E47DD]/10 border-[#3762E3]/20 dark:border-[#4E47DD]/20 text-[#3762E3] dark:text-[#4E47DD]'
-                  : 'bg-orange-500/5 border-orange-500/20 text-orange-600 dark:text-orange-400'
-                  }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className={`w-2 h-2 rounded-full ${item.isOwned ? 'bg-[#3762E3] dark:bg-[#4E47DD] shadow-[0_0_8px_rgba(55,98,227,0.4)]' : 'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.4)]'}`} />
-                  <span className="detail-text">
-                    {item.isOwned ? 'Owned asset' : 'Rented equipment'}
-                  </span>
-                </div>
-                {item.isOwned ? <ShieldCheck size={16} className="opacity-40" /> : <DollarSign size={16} className="opacity-40" />}
-              </div>
-            </div>
-
-            {/* Metadata Row */}
-            <div className="grid grid-cols-2 lg:flex lg:flex-wrap items-start gap-x-8 lg:gap-x-16 gap-y-8">
-              {/* Internal Designation (Custom Name) */}
-              {(isEditing || item.customName) && (
-                <div className="flex flex-col gap-1 min-w-0">
-                  <span className="detail-subtitle dark:text-white">Name</span>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={editedItem.customName || ''}
-                      onChange={e => setEditedItem({ ...editedItem, customName: e.target.value })}
-                      placeholder="e.g. A-CAM"
-                      className="bg-transparent border-b border-gray-200 dark:border-white/10 py-1 text-lg font-semibold text-gray-900 dark:text-white focus:outline-none placeholder-gray-300 w-32"
-                    />
-                  ) : (
-                    <span className="detail-title block leading-tight py-1.5 truncate">
-                      {item.customName}
-                    </span>
-                  )}
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+                            className="overflow-hidden"
+                          >
+                            <div className="px-2 pb-3 pt-1 space-y-0.5">
+                              {relatedShots.length > 0 ? (
+                                relatedShots.map(shot => (
+                                  <button
+                                    key={shot.id}
+                                    onClick={() => onNavigateToShot(pName, shot.id)}
+                                    className="w-full flex items-center justify-between p-3 pl-8 rounded-xl text-left hover:bg-gray-100 dark:hover:bg-white/5 transition-all group/shot"
+                                  >
+                                    <div className="min-w-0">
+                                      <p className="text-sm font-medium text-gray-500 dark:text-white/40 group-hover/shot:text-primary/70 truncate transition-colors">
+                                        {shot.title}
+                                      </p>
+                                      <p className="text-[10px] text-gray-400 dark:text-white/20 mt-0.5">
+                                        Sc. {shot.sceneNumber} • {shot.startTime}
+                                      </p>
+                                    </div>
+                                    <ChevronRight size={12} className="text-gray-200 dark:text-white/5 group-hover/shot:text-primary transition-colors" />
+                                  </button>
+                                ))
+                              ) : (
+                                <div className="py-4 flex flex-col items-center justify-center text-center opacity-10">
+                                  <span className="text-[10px] font-medium">No active sequences</span>
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )
+                })
+              ) : (
+                <div className="py-12 flex flex-col items-center justify-center text-center opacity-10">
+                  <Package size={24} className="mb-2" />
+                  <span className="text-[10px] font-medium">Currently idle</span>
                 </div>
               )}
-
-              {/* Category */}
-              <div className="flex flex-col gap-1 min-w-0">
-                <span className="detail-subtitle dark:text-white">Category</span>
-                <span className="detail-title block leading-tight py-1.5">
-                  {item.category}
-                </span>
-              </div>
-
-              {/* Serial Number */}
-              <div className="flex flex-col gap-1 min-w-0">
-                <span className="detail-subtitle dark:text-white">Serial number</span>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={editedItem.serialNumber || ''}
-                    onChange={e => setEditedItem({ ...editedItem, serialNumber: e.target.value })}
-                    className="bg-transparent border-b border-gray-200 dark:border-white/10 py-1 text-lg font-semibold text-gray-900 dark:text-white focus:outline-none placeholder-gray-300"
-                    placeholder="S/N"
-                  />
-                ) : (
-                  <span className="detail-title block leading-tight py-1.5">
-                    {item.serialNumber || "No serial label"}
-                  </span>
-                )}
-              </div>
-
-              {/* Brand/Model (Detailed) */}
-              <div className="flex flex-col gap-1 min-w-0 flex-1">
-                <span className="detail-subtitle dark:text-white">Reference</span>
-                <span className="detail-title block leading-tight py-1.5 truncate">
-                  {item.name}
-                </span>
-              </div>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-12">
-            {/* MAIN CONTENT AREA */}
-            <div className="xl:col-span-8 space-y-16">
-              {/* Rental Rate (Conditional) */}
-              {!item.isOwned && (
-                <section className="bg-orange-50 dark:bg-orange-500/[0.03] border border-orange-100 dark:border-orange-500/20 rounded-[32px] p-8 flex items-center justify-between">
-                  <div className="flex items-center gap-6">
-                    <div className="w-12 h-12 flex items-center justify-center bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-2xl border border-orange-200 dark:border-orange-500/20">
-                      <DollarSign size={24} strokeWidth={2.5} />
-                    </div>
-                    <div>
-                      <span className="text-xs font-semibold text-orange-400 dark:text-orange-500 block mb-1">Rental rate</span>
-                      <p className="detail-title text-orange-900 dark:text-orange-50 leading-none">
-                        {currency.symbol}{item.rentalPrice?.toLocaleString()}
-                        <span className="detail-subtitle text-orange-400 dark:text-orange-500/50 ml-2">/ {item.rentalFrequency}</span>
-                      </p>
-                    </div>
-                  </div>
-                </section>
-              )}
+          </Card>
+        </div>
+      }
+    >
+      <Card title="Core information" className="mb-8">
+        <div className="p-6 space-y-12">
 
 
-
-              {/* Technical Details */}
-              <section className="">
-                <div className="mb-10">
-                  <h3 className="detail-subtitle mb-1 dark:text-white">Technical specifications</h3>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-y-12 gap-x-8">
-                  {Object.entries(item.specs).map(([key, val]) => (
-                    <div key={key} className="group">
-                      <span className="detail-subtitle block mb-2.5 leading-none dark:text-white">
-                        {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim()}
-                      </span>
-                      <p className="detail-title">
-                        {String(val || "—")}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            </div>
-
-            {/* RIGHT COLUMN: Project Usage */}
-            <aside className="xl:col-span-4 lg:sticky lg:top-8 self-start">
-              <div className="p-2">
-                <div className="mb-10">
-                  <h3 className="detail-title mb-2">Project usage</h3>
-                </div>
-
-                <div className="space-y-1">
-                  {involvedProjects.length > 0 ? (
-                    involvedProjects.map((pName) => renderProjectItem(pName))
-                  ) : (
-                    <div className="py-12 flex flex-col items-center justify-center text-center opacity-40">
-                      <Package size={32} className="mb-4 text-gray-300" />
-                      <p className="text-sm font-semibold text-gray-400 leading-tight">Currently<br />Unassigned</p>
-                    </div>
-                  )}
-                </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 items-start gap-12">
+            {isEditing ? (
+              <div className="flex flex-col gap-1 min-w-0">
+                <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Custom name</span>
+                <input
+                  type="text"
+                  value={editedItem.customName || ''}
+                  onChange={(e) => setEditedItem({ ...editedItem, customName: e.target.value })}
+                  className="bg-transparent border-b border-gray-300 dark:border-white/20 pb-1 text-sm text-gray-900 dark:text-white font-medium focus:border-primary focus:outline-none w-full"
+                  placeholder="Enter custom name"
+                />
               </div>
-            </aside>
+            ) : (
+              <DetailItem
+                label="Custom name"
+                value={item.customName || item.name}
+              />
+            )}
+
+            <DetailItem
+              label="Brand"
+              value={brandName || '—'}
+            />
+
+            <DetailItem
+              label="Model"
+              value={modelName || '—'}
+            />
+
+            <DetailItem
+              label="Category type"
+              value={categoryName}
+            />
+
+            {isEditing ? (
+              <div className="flex flex-col gap-1 min-w-0">
+                <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Serial identity</span>
+                <input
+                  type="text"
+                  value={editedItem.serialNumber || ''}
+                  onChange={(e) => setEditedItem({ ...editedItem, serialNumber: e.target.value })}
+                  className="bg-transparent border-b border-gray-300 dark:border-white/20 pb-1 text-sm text-gray-900 dark:text-white font-medium focus:border-primary focus:outline-none w-full"
+                  placeholder="Enter serial number"
+                />
+              </div>
+            ) : (
+              <DetailItem
+                label="Serial identity"
+                value={item.serialNumber || '—'}
+              />
+            )}
           </div>
         </div>
-      </div>
+      </Card>
+
+      <Card title="Ownership detail" className="mb-8">
+        <div className="p-6 space-y-6">
+          <div className="grid grid-cols-2 gap-12">
+            <DetailItem
+              label="Deployment registry"
+              value={item.isOwned ? 'Owned' : 'Rented'}
+            />
+
+            {!item.isOwned && (
+              <DetailItem
+                label="Rental cost rate"
+                value={`${currency.symbol}${(item.rentalPrice ?? 0).toLocaleString()}`}
+                subValue={`per ${item.rentalFrequency}`}
+              />
+            )}
+          </div>
+        </div>
+      </Card>
+
+      <Card title="Technical specifications">
+        <div className="p-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-12">
+            {Object.entries(item.specs).map(([key, val]) => (
+              <DetailItem
+                key={key}
+                label={key.replace(/([A-Z])/g, ' $1').trim()}
+                value={String(val || "UNDEFINED")}
+              />
+            ))}
+          </div>
+        </div>
+      </Card>
 
       <ConfirmModal
         isOpen={showDeleteConfirm}
@@ -374,6 +281,6 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
         cancelText="Cancel"
         variant="danger"
       />
-    </div>
-  );
-};
+    </DetailViewLayout>
+  )
+}

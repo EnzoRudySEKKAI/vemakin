@@ -1,21 +1,26 @@
+import React from 'react'
+import { Button } from '@/components/atoms/Button'
+import { radius, typography } from '@/design-system'
 
-import React from 'react';
+interface IconButtonProps {
+  icon: React.ComponentType<{ size?: number; strokeWidth?: number }>
+  active?: boolean
+  onClick?: React.MouseEventHandler<HTMLButtonElement>
+  className?: string
+}
 
-export const IconButton = ({
+export const IconButton: React.FC<IconButtonProps> = ({
   icon: Icon,
   active,
   onClick,
-  className =""
-}: {
-  icon: any,
-  active?: boolean,
-  onClick?: React.MouseEventHandler<HTMLButtonElement>,
-  className?: string
+  className = ''
 }) => (
-  <button
+  <Button
     onClick={onClick}
-    className={`p-3.5 rounded-2xl transition-all duration-300 ${active ? 'bg-blue-600 dark:bg-blue-600 dark:bg-indigo-600 text-white dark:text-white shadow-lg shadow-blue-200 dark:shadow-indigo-900/40' : 'bg-gray-100/80 dark:bg-white/10 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-white/20'} ${className}`}
+    variant={active ? 'primary' : 'ghost'}
+    size="sm"
+    className={`p-3.5 ${radius.md} ${className}`}
   >
-    <Icon size={20} />
-  </button>
-);
+    <Icon size={20} strokeWidth={2.5} />
+  </Button>
+)

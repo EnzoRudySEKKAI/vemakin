@@ -38,8 +38,8 @@ export const ShotCard: React.FC<ShotCardProps> = ({
  if (shotLayout === 'list') {
   return (
    <HoverCard
-    className="px-6 py-3 flex flex-col gap-0 rounded-[24px] cursor-pointer bg-white/80 dark:bg-[#1A1A1D]/80"
-    blobColor="from-blue-400 to-indigo-500 dark:from-indigo-400 dark:to-[#4E47DD]"
+    className="px-6 py-3 flex flex-col gap-0 rounded-[24px] cursor-pointer bg-white/80 dark:bg-[#16181D]/80"
+    blobColor="from-primary/70 to-primary dark:from-primary/70 dark:to-primary"
     enableHoverScale={!isChecklistOpen}
     onClick={() => onShotClick(shot)}
    >
@@ -77,7 +77,7 @@ export const ShotCard: React.FC<ShotCardProps> = ({
      <div className="hidden md:flex items-center gap-3 shrink-0">
       {/* Gear Badge (Visual) */}
       {shot.equipmentIds.length > 0 && (
-       <div className="hidden md:flex items-center gap-2 py-1.5 rounded-xl text-blue-600 dark:text-[#4E47DD] text-xs font-semibold">
+       <div className="hidden md:flex items-center gap-2 py-1.5 rounded-xl text-primary dark:text-primary text-xs font-semibold">
         <Package size={14} strokeWidth={2.5} />
         <span>Gear {shot.preparedEquipmentIds.length}/{shot.equipmentIds.length}</span>
        </div>
@@ -90,7 +90,7 @@ export const ShotCard: React.FC<ShotCardProps> = ({
         onToggleChecklist(shot.id);
        }}
        className={`h-10 px-4 rounded-xl flex items-center gap-2 text-xs font-semibold transition-all border ${isChecklistOpen
-        ? 'bg-blue-600 dark:bg-[#4E47DD] text-white border-blue-600 dark:border-[#4E47DD] shadow-lg shadow-blue-500/20'
+        ? 'bg-primary dark:bg-primary text-white border-blue-600 dark:border-primary shadow-lg shadow-primary/20'
         : 'bg-white/40 dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:bg-white dark:hover:bg-white/10'
         }`}
       >
@@ -102,7 +102,7 @@ export const ShotCard: React.FC<ShotCardProps> = ({
       <button
        onClick={(e) => { e.stopPropagation(); onToggleStatus(shot.id); }}
        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border ${shot.status === 'done'
-        ? 'bg-[#3762E3] dark:bg-[#4E47DD] text-white border-transparent shadow-lg shadow-blue-500/20'
+        ? 'bg-primary text-white border-transparent shadow-lg shadow-primary/20'
         : 'bg-white/40 dark:bg-white/5 text-gray-300 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-400 dark:hover:text-white border-gray-200 dark:border-white/10'
         }`}
       >
@@ -125,7 +125,7 @@ export const ShotCard: React.FC<ShotCardProps> = ({
           className={`
              flex items-center justify-between p-3 rounded-xl text-xs font-medium border text-left
              ${isPrepared
-            ? 'bg-blue-50 dark:bg-indigo-500/10 border-blue-200 dark:border-indigo-500/20 text-blue-700 dark:text-indigo-200'
+            ? 'bg-primary/10 border-primary/20 text-primary'
             : 'bg-gray-50/50 dark:bg-white/5 border-transparent text-gray-500 dark:text-gray-400'
            }
             `}
@@ -134,7 +134,7 @@ export const ShotCard: React.FC<ShotCardProps> = ({
           <div className={`
              w-4 h-4 rounded-full flex items-center justify-center border
              ${isPrepared
-            ? 'bg-blue-600 dark:bg-[#4E47DD] border-blue-600 dark:border-[#4E47DD] text-white'
+            ? 'bg-primary dark:bg-primary border-blue-600 dark:border-primary text-white'
             : 'border-gray-300 dark:border-white/20'
            }
             `}>
@@ -159,12 +159,12 @@ export const ShotCard: React.FC<ShotCardProps> = ({
    <HoverCard
     className={`
     ${isChecklistOpen
-      ? 'border-blue-500/50 dark:border-[#4E47DD]/50 shadow-xl ring-1 ring-blue-500/50 dark:ring-[#4E47DD]/50 rounded-[32px]'
+      ? 'border-primary/50 dark:border-primary/50 shadow-xl ring-1 ring-primary/50 dark:ring-primary/50 rounded-[32px]'
       : 'rounded-[32px] hover:shadow-lg shadow-sm'
      }
-    bg-white/80 dark:bg-[#1A1A1D]/80
+    bg-white/80 dark:bg-[#16181D]/80
    `}
-    blobColor="from-blue-400 to-indigo-500 dark:from-indigo-400 dark:to-[#4E47DD]"
+    blobColor="from-primary/70 to-primary dark:from-primary/70 dark:to-primary"
     enableHoverScale={!isChecklistOpen}
    >
 
@@ -212,7 +212,7 @@ export const ShotCard: React.FC<ShotCardProps> = ({
           onToggleChecklist(shot.id);
          }}
          className={`h-9 px-3 rounded-lg flex items-center gap-1.5 text-[10px] font-semibold border transition-colors ${isChecklistOpen
-          ? 'bg-blue-600 dark:bg-[#4E47DD] text-white border-transparent'
+          ? 'bg-primary dark:bg-primary text-white border-transparent'
           : 'bg-white/50 dark:bg-white/5 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-white/10 hover:bg-white dark:hover:bg-white/10'
           }`}
         >
@@ -222,7 +222,7 @@ export const ShotCard: React.FC<ShotCardProps> = ({
 
         {/* Gear Badge (Moved from top-right) */}
         {shot.equipmentIds.length > 0 && (
-         <div className="flex items-center gap-2 py-1.5 rounded-lg text-blue-600 dark:text-[#4E47DD] text-xs font-semibold">
+         <div className="flex items-center gap-2 py-1.5 rounded-lg text-primary dark:text-primary text-xs font-semibold">
           <Package size={14} strokeWidth={2.5} />
           <span className="hidden sm:inline">Gear {shot.preparedEquipmentIds.length}/{shot.equipmentIds.length}</span>
           <span className="sm:hidden">{shot.preparedEquipmentIds.length}/{shot.equipmentIds.length}</span>
@@ -234,7 +234,7 @@ export const ShotCard: React.FC<ShotCardProps> = ({
        <button
         onClick={(e) => { e.stopPropagation(); onToggleStatus(shot.id); }}
         className={`w-9 h-9 rounded-lg flex items-center justify-center border transition-all shrink-0 ${shot.status === 'done'
-         ? 'bg-[#3762E3] dark:bg-[#4E47DD] text-white border-transparent shadow-md'
+         ? 'bg-primary text-white border-transparent shadow-md'
          : 'bg-white/50 dark:bg-white/5 text-gray-400 dark:text-gray-600 border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/30 hover:text-gray-600 dark:hover:text-white'
          }`}
        >
@@ -258,7 +258,7 @@ export const ShotCard: React.FC<ShotCardProps> = ({
            className={`
             group flex items-center justify-between p-3 rounded-xl text-xs font-medium border text-left transition-all
             ${isPrepared
-             ? 'bg-blue-50 dark:bg-indigo-500/10 border-blue-200 dark:border-indigo-500/20 text-blue-700 dark:text-indigo-200'
+             ? 'bg-primary/10 border-primary/20 text-primary'
              : 'bg-gray-50/50 dark:bg-white/5 border-transparent text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-gray-300'
             }
            `}
@@ -267,7 +267,7 @@ export const ShotCard: React.FC<ShotCardProps> = ({
            <div className={`
             w-4 h-4 rounded-full flex items-center justify-center border transition-colors
             ${isPrepared
-             ? 'bg-blue-600 dark:bg-[#4E47DD] border-blue-600 dark:border-[#4E47DD] text-white'
+             ? 'bg-primary dark:bg-primary border-blue-600 dark:border-primary text-white'
              : 'border-gray-300 dark:border-white/20 group-hover:border-gray-400 dark:group-hover:border-white/40'
             }
            `}>

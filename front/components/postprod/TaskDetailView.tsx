@@ -1,399 +1,404 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
- X, Trash2, Calendar, Clock, AlertCircle, CheckCircle2,
- Hash, Zap, Layers, Activity, Check, Crop, Monitor,
- Share2, Archive, MoreHorizontal, ArrowLeft, Pencil, FileText, Volume2, Edit3, Plus, MessageSquare
-} from 'lucide-react';
-import { useHeaderActions } from '../../context/HeaderActionsContext';
-import { PostProdTask, Note } from '../../types';
-import { GlassCard } from '../ui/GlassCard';
-import { ConfirmModal } from '../ui/ConfirmModal';
-import { EmptyState } from '../ui/EmptyState';
-import { POST_PROD_CATEGORIES } from '../../constants';
+import React, { useCallback } from 'react'
+import { Plus, Check, Calendar, Hash, Clock, Crop, Activity, Volume2, Layers, Monitor, ChevronDown } from 'lucide-react'
+import { PostProdTask, Note } from '../../types'
+import { POST_PROD_CATEGORIES } from '../../constants'
+import { useDetailView } from '../../hooks/useDetailView'
+import { DetailViewLayout } from '../../components/organisms/DetailViewLayout'
+import { ActionButtonGroup } from '../../components/molecules/ActionButton'
+import { DetailItem } from '../../components/molecules'
+import { Text, Input, Textarea, Select } from '../../components/atoms'
 
-import { useClickOutside } from '../../hooks/useClickOutside';
+import { ConfirmModal } from '../ui/ConfirmModal'
+import { Card, SimpleCard, ListItem } from '../ui/Card'
+import { FileText, MessageSquare } from 'lucide-react'
 
 interface TaskDetailViewProps {
- task: PostProdTask;
- notes: Note[];
- onClose: () => void;
- onUpdateTask: (task: PostProdTask) => void;
- onDeleteTask: (id: string) => void;
- onAddNote: () => void;
- onOpenNote: (id: string) => void;
+  task: PostProdTask
+  notes: Note[]
+  onClose: () => void
+  onUpdateTask: (task: PostProdTask) => void
+  onDeleteTask: (id: string) => void
+  onAddNote: () => void
+  onOpenNote: (id: string) => void
+}
+
+const categoryFields: Record<string, Array<{ key: string; label: string; icon: any; type: 'text' | 'select'; options?: string[] }>> = {
+  Script: [
+    { key: 'scene', label: 'Scene reference', icon: Hash, type: 'text' }
+  ],
+  Editing: [
+    { key: 'duration', label: 'Target duration', icon: Clock, type: 'text' },
+    { key: 'aspectRatio', label: 'Aspect ratio', icon: Crop, type: 'select', options: ['16:9', '9:16', '2.39:1', '4:3'] }
+  ],
+  Sound: [
+    { key: 'sampleRate', label: 'Sample rate', icon: Activity, type: 'select', options: ['44.1kHz', '48kHz', '96kHz'] },
+    { key: 'bitDepth', label: 'Bit depth', icon: Volume2, type: 'select', options: ['16-bit', '24-bit', '32-bit float'] }
+  ],
+  VFX: [
+    { key: 'shotType', label: 'Shot type', icon: Layers, type: 'select', options: ['Cleanup', 'Keying', 'CGI', 'Compositing'] },
+    { key: 'resolution', label: 'Resolution', icon: Monitor, type: 'text' }
+  ]
 }
 
 export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
- task,
- notes,
- onClose,
- onUpdateTask,
- onDeleteTask,
- onAddNote,
- onOpenNote
+  task,
+  notes,
+  onClose,
+  onUpdateTask,
+  onDeleteTask,
+  onAddNote,
+  onOpenNote
 }) => {
- const [isEditing, setIsEditing] = useState(false);
- const [editedTask, setEditedTask] = useState<PostProdTask>(task);
- const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const {
+    isEditing,
+    setIsEditing,
+    editedItem,
+    setEditedItem,
+    showDeleteConfirm,
+    setShowDeleteConfirm,
+    handleCancel
+  } = useDetailView<PostProdTask>({
+    item: task,
+    onUpdate: onUpdateTask,
+    onDelete: onDeleteTask
+  })
 
- const { setActions, setOnBack, setTitle, setDetailLabel } = useHeaderActions();
+  const handleSave = useCallback(() => {
+    onUpdateTask({
+      ...editedItem,
+      updatedAt: new Date().toISOString()
+    })
+    setIsEditing(false)
+  }, [editedItem, onUpdateTask, setIsEditing])
 
- useEffect(() => {
-  setEditedTask(task);
- }, [task]);
+  const handleDelete = useCallback(() => {
+    onDeleteTask(task.id)
+    setShowDeleteConfirm(false)
+    onClose()
+  }, [onDeleteTask, task.id, onClose, setShowDeleteConfirm])
 
- const handleSave = useCallback(() => {
-  onUpdateTask({
-   ...editedTask,
-   updatedAt: new Date().toISOString()
-  });
-  setIsEditing(false);
- }, [editedTask, onUpdateTask]);
+  const updateMetadata = (key: string, value: string) => {
+    setEditedItem(prev => ({
+      ...prev,
+      metadata: {
+        ...(prev.metadata || {}),
+        [key]: value
+      }
+    }))
+  }
 
- const handleDelete = useCallback(() => {
-  onDeleteTask(task.id);
-  onClose();
- }, [onDeleteTask, task.id, onClose]);
+  const linkedNotes = notes.filter(n => n.taskId === task.id)
+  const categoryInfo = POST_PROD_CATEGORIES.find(c => c.label === task.category)
+  const CategoryIcon = categoryInfo ? categoryInfo.icon : () => null
 
- useEffect(() => {
-  setTitle(task.title);
-  setDetailLabel('Task Detail');
-  setOnBack(onClose);
+  const headerActions = (
+    <ActionButtonGroup
+      isEditing={isEditing}
+      onEdit={() => setIsEditing(true)}
+      onDelete={() => setShowDeleteConfirm(true)}
+      onSave={handleSave}
+      onCancel={handleCancel}
+    />
+  )
 
-  return () => {
-   setTitle(null);
-   setDetailLabel(null);
-   setActions(null);
-   setOnBack(undefined);
-  };
- }, [task.title, setTitle, setActions, setOnBack, onClose, setDetailLabel]);
+  const statusOptions = [
+    { key: 'todo', label: 'To do' },
+    { key: 'progress', label: 'In progress' },
+    { key: 'review', label: 'Review' },
+    { key: 'done', label: 'Done' }
+  ]
 
- useEffect(() => {
-  setActions(
-   <div className="flex items-center gap-2">
-    {!isEditing ? (
-     <div className="flex gap-3">
-      <button
-       onClick={() => setIsEditing(true)}
-       className="flex items-center justify-center w-10 h-10 rounded-xl bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-black dark:hover:text-white transition-all shadow-sm"
-       title="Edit task"
-      >
-       <Edit3 size={20} strokeWidth={2.5} />
-      </button>
-      <button
-       onClick={() => setShowDeleteConfirm(true)}
-       className="flex items-center justify-center w-10 h-10 rounded-xl bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-white/10 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all shadow-sm"
-       title="Delete task"
-      >
-       <Trash2 size={20} strokeWidth={2.5} />
-      </button>
-     </div>
-    ) : (
-     <div className="flex gap-3">
-      <button
-       onClick={() => { setIsEditing(false); setEditedTask(task); }}
-       className="flex items-center justify-center w-10 h-10 rounded-xl bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-all shadow-sm"
-       title="Cancel changes"
-      >
-       <X size={20} strokeWidth={2.5} />
-      </button>
-      <button
-       onClick={handleSave}
-       className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#3762E3] dark:bg-[#4E47DD] text-white shadow-lg shadow-[#3762E3]/20 dark:shadow-[#4E47DD]/20 hover:scale-105 active:scale-95 transition-all"
-       title="Save changes"
-      >
-       <Check size={20} strokeWidth={3} />
-      </button>
-     </div>
-    )}
-   </div>
-  );
- }, [isEditing, task, handleSave, setActions]);
+  const renderMetadataField = (field: typeof categoryFields['Script'][0]) => {
+    const Icon = field.icon
+    const value = editedItem.metadata?.[field.key] as string || ''
 
- const updateMetadata = (key: string, value: string) => {
-  setEditedTask(prev => ({
-   ...prev,
-   metadata: {
-    ...(prev.metadata || {}),
-    [key]: value
-   }
-  }));
- };
-
- const linkedNotes = notes.filter(n => n.taskId === task.id);
- const categoryInfo = POST_PROD_CATEGORIES.find(c => c.label === task.category);
- const CategoryIcon = categoryInfo ? categoryInfo.icon : Zap;
-
- return (
-  <div className="flex flex-col h-full bg-[#FAFAFA] dark:bg-[#141417] min-h-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
-   <div className="flex-1 overflow-y-auto custom-scrollbar">
-    <div className="max-w-[1920px] ml-0 p-4 md:p-6 pt-10 grid grid-cols-1 xl:grid-cols-3 gap-8 pb-32">
-     {/* LEFT COLUMN */}
-     <div className="xl:col-span-2 space-y-6">
-      <div className="bg-white dark:bg-[#1C1C1E] rounded-[28px] p-8 shadow-sm border border-gray-100/50 dark:border-white/5">
-       {isEditing ? (
-        <div className="space-y-4">
-         <input
-          type="text"
-          value={editedTask.title}
-          onChange={(e) => setEditedTask({ ...editedTask, title: e.target.value })}
-          className="w-full text-2xl font-semibold text-gray-900 border-b border-gray-200 pb-2 focus:outline-none focus:border-blue-500 dark:border-indigo-500 bg-transparent placeholder-gray-300"
-          placeholder="Task title"
-         />
-         <div className="flex gap-3">
-          <select
-           value={editedTask.priority}
-           onChange={(e) => setEditedTask({ ...editedTask, priority: e.target.value as any })}
-           className="bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-lg px-3 py-2 text-xs font-semibold text-gray-700 dark:text-white focus:outline-none"
-          >
-           <option value="low">Low</option>
-           <option value="medium">Medium</option>
-           <option value="high">High</option>
-           <option value="critical">Critical</option>
-          </select>
-          <input
-           type="date"
-           value={editedTask.dueDate || ''}
-           onChange={(e) => setEditedTask({ ...editedTask, dueDate: e.target.value })}
-           className="bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-lg px-3 py-2 text-xs font-semibold text-gray-700 dark:text-white focus:outline-none"
+    return (
+      <div key={field.key}>
+        <Text variant="subtitle" color="muted" className="mb-1.5 block">{field.label}</Text>
+        {field.type === 'select' ? (
+          <Select
+            value={value}
+            onChange={(e) => updateMetadata(field.key, e.target.value)}
+            options={[
+              { value: '', label: 'Select...' },
+              ...(field.options?.map(opt => ({ value: opt, label: opt })) || [])
+            ]}
+            leftIcon={<Icon size={14} strokeWidth={2.5} className="text-gray-400" />}
+            fullWidth
           />
-         </div>
-         <textarea
-          value={editedTask.description || ''}
-          onChange={(e) => setEditedTask({ ...editedTask, description: e.target.value })}
-          className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl p-3 text-sm font-medium text-gray-700 dark:text-gray-200 focus:outline-none min-h-[100px] resize-none"
-          placeholder="Add description..."
-         />
+        ) : (
+          <Input
+            type="text"
+            value={value}
+            onChange={(e) => updateMetadata(field.key, e.target.value)}
+            placeholder={`e.g. ${field.key === 'scene' ? '12A' : field.key === 'duration' ? '2m 30s' : '4K'}`}
+            leftIcon={<Icon size={14} strokeWidth={2.5} className="text-gray-400" />}
+            fullWidth
+          />
+        )}
+      </div>
+    )
+  }
 
-         <div className="pt-2">
-          <p className="detail-subtitle mb-3 ml-1">Pipeline parameters</p>
-          <div className="grid grid-cols-2 gap-4">
-           {editedTask.category === 'Script' && (
-            <div>
-             <label className="detail-subtitle mb-1.5 block">Scene reference</label>
-             <div className="relative">
-              <Hash className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"size={12} />
-              <input
-               type="text"
-               value={editedTask.metadata?.scene as string || ''}
-               onChange={(e) => updateMetadata('scene', e.target.value)}
-               className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl pl-8 pr-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white"
-               placeholder="e.g. 12A"
-              />
-             </div>
+  return (
+    <DetailViewLayout
+      title={task.title}
+      detailLabel="Task Detail"
+      onBack={onClose}
+      actions={headerActions}
+      size="wide"
+      sidebar={
+        <div className="space-y-4">
+          <Card title="Status">
+            <div className="p-3 space-y-1">
+              {statusOptions.map((status) => {
+                const isActive = task.status === status.key
+                return (
+                  <button
+                    key={status.key}
+                    onClick={() => onUpdateTask({ ...task, status: status.key as any })}
+                    className={`w-full flex items-center justify-between p-4 rounded-xl transition-all border ${isActive
+                      ? 'bg-primary/10 border-primary/20 text-primary shadow-[0_0_15px_rgba(78,71,221,0.1)]'
+                      : 'bg-transparent border-transparent text-gray-500 dark:text-white/20 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-700 dark:hover:text-white/40'
+                      }`}
+                  >
+                    <span className="text-sm font-medium">{status.label}</span>
+                    {isActive ? (
+                      <div className="w-5 h-5 rounded-lg bg-primary flex items-center justify-center text-white shadow-[0_0_10px_rgba(78,71,221,0.4)]">
+                        <Check size={12} strokeWidth={4} />
+                      </div>
+                    ) : (
+                      <div className="w-5 h-5 rounded-lg border border-gray-200 dark:border-white/5 bg-gray-100 dark:bg-white/5" />
+                    )}
+                  </button>
+                )
+              })}
             </div>
-           )}
+          </Card>
 
-           {editedTask.category === 'Editing' && (
-            <>
-             <div>
-              <label className="detail-subtitle mb-1.5 block">Target duration</label>
-              <div className="relative">
-               <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"size={12} />
-               <input
-                type="text"
-                value={editedTask.metadata?.duration as string || ''}
-                onChange={(e) => updateMetadata('duration', e.target.value)}
-                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl pl-8 pr-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white"
-                placeholder="e.g. 2m 30s"
-               />
-              </div>
-             </div>
-             <div>
-              <label className="detail-subtitle mb-1.5 block">Aspect ratio</label>
-              <div className="relative">
-               <Crop className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"size={12} />
-               <select
-                value={editedTask.metadata?.aspectRatio as string || ''}
-                onChange={(e) => updateMetadata('aspectRatio', e.target.value)}
-                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl pl-8 pr-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-blue-500 appearance-none dark:text-white"
-               >
-                <option value="">Select...</option>
-                <option value="16:9">16:9</option>
-                <option value="9:16">9:16</option>
-                <option value="2.39:1">2.39:1</option>
-                <option value="4:3">4:3</option>
-               </select>
-              </div>
-             </div>
-            </>
-           )}
-
-           {editedTask.category === 'Sound' && (
-            <>
-             <div>
-              <label className="detail-subtitle mb-1.5 block">Sample rate</label>
-              <div className="relative">
-               <Activity className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"size={12} />
-               <select
-                value={editedTask.metadata?.sampleRate as string || ''}
-                onChange={(e) => updateMetadata('sampleRate', e.target.value)}
-                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl pl-8 pr-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-blue-500 appearance-none dark:text-white"
-               >
-                <option value="">Select...</option>
-                <option value="44.1kHz">44.1kHz</option>
-                <option value="48kHz">48kHz</option>
-                <option value="96kHz">96kHz</option>
-               </select>
-              </div>
-             </div>
-             <div>
-              <label className="detail-subtitle mb-1.5 block">Bit depth</label>
-              <div className="relative">
-               <Volume2 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"size={12} />
-               <select
-                value={editedTask.metadata?.bitDepth as string || ''}
-                onChange={(e) => updateMetadata('bitDepth', e.target.value)}
-                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl pl-8 pr-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-blue-500 appearance-none dark:text-white"
-               >
-                <option value="">Select...</option>
-                <option value="16-bit">16-bit</option>
-                <option value="24-bit">24-bit</option>
-                <option value="32-bit float">32-bit float</option>
-               </select>
-              </div>
-             </div>
-            </>
-           )}
-
-           {editedTask.category === 'VFX' && (
-            <>
-             <div>
-              <label className="detail-subtitle mb-1.5 block">Shot type</label>
-              <div className="relative">
-               <Layers className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"size={12} />
-               <select
-                value={editedTask.metadata?.shotType as string || ''}
-                onChange={(e) => updateMetadata('shotType', e.target.value)}
-                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl pl-8 pr-3 py-2.5 text-xs font-semibold focus:outline-none appearance-none dark:text-white"
-               >
-                <option value="">Select...</option>
-                <option value="Cleanup">Cleanup</option>
-                <option value="Keying">Keying</option>
-                <option value="CGI">CGI integration</option>
-                <option value="Compositing">Compositing</option>
-               </select>
-              </div>
-             </div>
-             <div>
-              <label className="detail-subtitle mb-1.5 block">Resolution</label>
-              <div className="relative">
-               <Monitor className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"size={12} />
-               <input
-                type="text"
-                value={editedTask.metadata?.resolution as string || ''}
-                onChange={(e) => updateMetadata('resolution', e.target.value)}
-                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl pl-8 pr-3 py-2.5 text-xs font-semibold focus:outline-none dark:text-white"
-                placeholder="e.g. 4K"
-               />
-              </div>
-             </div>
-            </>
-           )}
-          </div>
-         </div>
+          <Card title="Recent feedback">
+            <div className="p-6 flex flex-col items-center justify-center text-center opacity-30">
+              <MessageSquare size={24} className="mb-2" />
+              <span className="text-[10px] font-medium">No reviews yet</span>
+            </div>
+          </Card>
         </div>
-       ) : (
-        <>
-         <h2 className="detail-title mb-4">
-          {task.title}
-         </h2>
-         <div className="flex items-center gap-3 mb-6">
-          <span className="px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 detail-subtitle">
-           {task.priority === 'critical' || task.priority === 'high' ? task.priority.charAt(0).toUpperCase() + task.priority.slice(1) : task.priority} priority
-          </span>
-          {task.dueDate && (
-           <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 detail-subtitle border border-gray-100 dark:border-white/10 normal-case">
-            <Calendar size={12} strokeWidth={2.5} /> {new Date(task.dueDate).toLocaleDateString()}
-           </span>
+      }
+    >
+      <Card title="Goal & details" className="mb-8">
+        <div className="p-6 space-y-12">
+          {isEditing ? (
+            <div className="space-y-10">
+              <div className="flex flex-col gap-1 min-w-0">
+                <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2">Production title</span>
+                <Input
+                  type="text"
+                  value={editedItem.title}
+                  onChange={(e) => setEditedItem(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Task title"
+                  variant="underline"
+                  fullWidth
+                  className="text-2xl font-bold tracking-tight"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+                <div className="flex flex-col gap-1 min-w-0">
+                  <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Priority tier</span>
+                  <div className="relative group">
+                  <select
+                    value={editedItem.priority}
+                    onChange={(e) => setEditedItem(prev => ({ ...prev, priority: e.target.value as any }))}
+                    className="w-full bg-transparent border-b border-gray-300 dark:border-white/10 py-3 text-gray-800 dark:text-white/80 focus:text-gray-900 dark:focus:text-white focus:outline-none focus:border-primary appearance-none cursor-pointer pr-10 text-sm font-bold tracking-tight transition-all"
+                  >
+                    <option value="low" className="bg-white dark:bg-[#0F1116]">Low Tier</option>
+                    <option value="medium" className="bg-white dark:bg-[#0F1116]">Medium Tier</option>
+                    <option value="high" className="bg-white dark:bg-[#0F1116]">High Priority</option>
+                    <option value="critical" className="bg-white dark:bg-[#0F1116]">Mission Critical</option>
+                  </select>
+                    <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/20 group-hover:text-primary pointer-events-none transition-colors" size={16} strokeWidth={3} />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1 min-w-0">
+                  <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2">Completion deadline</span>
+                  <Input
+                    type="date"
+                    value={editedItem.dueDate || ''}
+                    onChange={(e) => setEditedItem(prev => ({ ...prev, dueDate: e.target.value }))}
+                    variant="underline"
+                    fullWidth
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1 min-w-0">
+                <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2">Description</span>
+                <Textarea
+                  value={editedItem.description || ''}
+                  onChange={(e) => setEditedItem(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Define the scope and technical requirements..."
+                  className="min-h-[160px]"
+                />
+              </div>
+
+              {categoryFields[editedItem.category] && (
+                <div className="pt-8 border-t border-gray-200 dark:border-white/5">
+                  <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-6 block">Pipeline parameters</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                    {categoryFields[editedItem.category].map((field) => (
+                      <div key={field.key} className="group">
+                        <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block group-hover:text-primary transition-colors">{field.label}</span>
+                        {field.type === 'select' ? (
+                          <div className="relative">
+                          <select
+                            value={editedItem.metadata?.[field.key] as string || ''}
+                            onChange={(e) => updateMetadata(field.key, e.target.value)}
+                            className="w-full bg-transparent border-b border-gray-300 dark:border-white/10 py-3 text-gray-800 dark:text-white/80 focus:text-gray-900 dark:focus:text-white focus:outline-none focus:border-primary appearance-none cursor-pointer pr-10 text-sm font-bold tracking-tight transition-all"
+                          >
+                            <option value="" className="bg-white dark:bg-[#0F1116]">Select option...</option>
+                            {field.options?.map(opt => (
+                              <option key={opt} value={opt} className="bg-white dark:bg-[#0F1116]">{opt}</option>
+                            ))}
+                          </select>
+                            <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/20 pointer-events-none" size={16} strokeWidth={3} />
+                          </div>
+                        ) : (
+                          <Input
+                            type="text"
+                            value={editedItem.metadata?.[field.key] as string || ''}
+                            onChange={(e) => updateMetadata(field.key, e.target.value)}
+                            placeholder="..."
+                            variant="underline"
+                            fullWidth
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-12">
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-8">
+                <DetailItem
+                  label="Production objective"
+                  value={task.title}
+                />
+
+                <div className={`flex items-center gap-4 px-5 py-3 rounded-2xl border transition-all duration-500 ${task.priority === 'critical' || task.priority === 'high'
+                  ? 'bg-red-500/10 border-red-500/20 text-red-400'
+                  : task.priority === 'medium'
+                    ? 'bg-orange-500/10 border-orange-500/20 text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.05)]'
+                    : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/5 text-gray-500 dark:text-white/40'
+                  }`}>
+                  <div className={`w-2 h-2 rounded-full ${task.priority === 'critical' || task.priority === 'high'
+                    ? 'bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]'
+                    : task.priority === 'medium'
+                      ? 'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]'
+                      : 'bg-gray-400 dark:bg-white/20'
+                    }`} />
+                  <span className="text-[10px] font-medium">
+                    {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} Priority
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
+                <DetailItem
+                  label="Due date"
+                  value={task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'No deadline'}
+                />
+
+                <DetailItem
+                  label="Department"
+                  value={task.category}
+                />
+              </div>
+
+              <div className="max-w-3xl">
+                <DetailItem
+                  label="Description"
+                  value={task.description || "No specific objectives defined for this module."}
+                  valueClassName="whitespace-pre-wrap"
+                />
+              </div>
+
+              {task.metadata && Object.keys(task.metadata).length > 0 && (
+                <div className="pt-10 border-t border-gray-200 dark:border-white/5">
+                  <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium block mb-8 leading-none">Technical parameters</span>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-y-12 gap-x-12">
+                    {Object.entries(task.metadata).map(([key, val]) => (
+                      val ? (
+                        <DetailItem
+                          key={key}
+                          label={key.replace(/([A-Z])/g, ' $1').trim()}
+                          value={String(val)}
+                        />
+                      ) : null
+                    ))}
+                  </div>
+                </div>
+              )}
+
+            </div>
           )}
-         </div>
-         <p className="detail-text whitespace-pre-wrap">
-          {task.description ||"No description provided."}
-         </p>
-         {task.metadata && Object.keys(task.metadata).length > 0 && (
-          <div className="mt-6 pt-5 border-t border-gray-100 dark:border-white/10 grid grid-cols-2 gap-4">
-           {Object.entries(task.metadata).map(([key, val]) => (
-            val ? (
-             <div key={key}>
-              <span className="detail-subtitle block mb-1">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-              <span className="detail-text">{String(val)}</span>
-             </div>
-            ) : null
-           ))}
-          </div>
-         )}
-        </>
-       )}
-      </div>
-
-      <div className="px-2">
-       <div className="flex items-center justify-between mb-3">
-        <h4 className="detail-subtitle">Linked notes ({linkedNotes.length})</h4>
-        <button onClick={onAddNote} className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-white/10 rounded-lg text-[10px] font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 transition-all">
-         <Plus size={12} strokeWidth={3} /> Add note
-        </button>
-       </div>
-
-       {linkedNotes.length > 0 ? (
-        <div className="space-y-3">
-         {linkedNotes.map(note => (
-          <div key={note.id} onClick={() => onOpenNote(note.id)} className="p-4 bg-white dark:bg-[#1C1C1E] rounded-[20px] border border-gray-100 dark:border-white/10 shadow-sm flex items-start gap-4 cursor-pointer hover:border-blue-200 transition-all group">
-           <div className="p-2 bg-blue-50 dark:bg-blue-500/10 text-blue-500 rounded-xl">
-            <MessageSquare size={16} strokeWidth={2.5} />
-           </div>
-           <div className="min-w-0 flex-1 pt-0.5">
-            <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate group-hover:text-blue-600 transition-colors">{note.title}</h4>
-            <p className="text-xs text-gray-400 truncate">{note.content}</p>
-           </div>
-          </div>
-         ))}
         </div>
-       ) : (
-        <EmptyState title="No notes attached"icon={MessageSquare} compact iconColor="gray"/>
-       )}
-      </div>
-     </div>
+      </Card>
 
-     {/* RIGHT COLUMN */}
-     <div className="xl:col-span-1 space-y-6">
-      <div className="p-8 border border-white/60 dark:border-white/5 shadow-sm rounded-[32px] bg-white dark:bg-[#1C1C1E]">
-       <h5 className="detail-title mb-6">Status</h5>
-       <div className="space-y-2">
-        {['todo', 'progress', 'review', 'done'].map((status) => {
-         const isActive = task.status === status;
-         return (
-          <button
-           key={status}
-           onClick={() => onUpdateTask({ ...task, status: status as any })}
-           className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all border ${isActive ? 'bg-blue-50 dark:bg-blue-500/10 border-blue-100 dark:border-blue-500/20 text-blue-700 dark:text-blue-400' : 'bg-transparent border-transparent text-gray-500 hover:bg-gray-50'}`}
-          >
-           <span className="detail-text">{status === 'progress' ? 'In progress' : (status.charAt(0).toUpperCase() + status.slice(1))}</span>
-           {isActive ? (
-            <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white"><Check size={14} strokeWidth={4} /></div>
-           ) : (
-            <div className="w-6 h-6 rounded-full border-2 border-gray-200 dark:border-white/10"/>
-           )}
-          </button>
-         );
-        })}
-       </div>
-      </div>
-     </div>
-    </div>
-   </div>
+      <Card title="Related notes" headerRight={
+        <button
+          onClick={onAddNote}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-[10px] font-medium hover:bg-primary hover:text-white transition-all shadow-sm"
+        >
+          <Plus size={12} strokeWidth={3} /> New entry
+        </button>
+      }>
+        <div className="p-6">
+          {linkedNotes.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {linkedNotes.map(note => (
+                <div
+                  key={note.id}
+                  onClick={() => onOpenNote(note.id)}
+                  className="p-6 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 rounded-2xl cursor-pointer hover:border-primary/30 hover:bg-white dark:hover:bg-white/[0.07] transition-all group relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
+                    <FileText size={40} />
+                  </div>
+                  <h4 className="font-bold text-gray-900 dark:text-white/90 text-sm mb-2 line-clamp-1 group-hover:text-primary transition-colors">
+                    {note.title || "Untitled entry"}
+                  </h4>
+                  <p className="text-gray-500 dark:text-white/30 text-xs line-clamp-2 leading-relaxed">{note.content}</p>
+                  <div className="mt-4 flex items-center gap-2 text-[10px] font-medium text-gray-500 dark:text-white/40">
+                    <Clock size={10} />
+                    {new Date(note.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-20 flex flex-col items-center justify-center text-center opacity-10">
+              <div className="p-4 rounded-2xl bg-gray-100 dark:bg-white/5 mb-4">
+                <MessageSquare size={32} />
+              </div>
+              <span className="text-[10px] font-medium text-gray-900 dark:text-white">No documentation recorded</span>
+            </div>
+          )}
+        </div>
+      </Card>
 
-   <ConfirmModal
-    isOpen={showDeleteConfirm}
-    onClose={() => setShowDeleteConfirm(false)}
-    onConfirm={handleDelete}
-    title="Delete task"
-    message="Are you sure you want to delete this task? This action cannot be undone."
-    confirmText="Delete"
-    cancelText="Cancel"
-    variant="danger"
-   />
-  </div>
- );
-};
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDelete}
+        title="Delete task"
+        message="Are you sure you want to delete this task? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
+    </DetailViewLayout>
+  )
+}
