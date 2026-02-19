@@ -6,7 +6,7 @@ interface ProjectSelectorProps {
   currentProject: string | null
   projects: string[]
   onSelect: (name: string) => void
-  onCreate: (name: string) => void
+  onNavigateToCreate: () => void
   className?: string
 }
 
@@ -14,7 +14,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
   currentProject,
   projects,
   onSelect,
-  onCreate,
+  onNavigateToCreate,
   className = ''
 }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -22,7 +22,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
 
   const handleClick = () => {
     if (!hasProjects) {
-      onCreate("New Project")
+      onNavigateToCreate()
     } else {
       setIsOpen(!isOpen)
     }
@@ -81,7 +81,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
               </div>
               <div className="h-px bg-gray-200 dark:bg-white/[0.05] my-2" />
               <button
-                onClick={() => { onCreate("New Project"); setIsOpen(false); }}
+                onClick={() => { onNavigateToCreate(); setIsOpen(false); }}
                 className="w-full flex items-center gap-3 p-3 rounded-lg text-sm text-gray-700 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
               >
                 <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-white/5 flex items-center justify-center">

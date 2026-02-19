@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Briefcase, Trash2, Edit3, Check, X, FolderOpen, AlertCircle } from 'lucide-react'
+import { Briefcase, Trash2, Edit3, Check, X, FolderOpen, AlertCircle, Plus } from 'lucide-react'
 
 interface ProjectsManagerViewProps {
   projects: string[]
@@ -9,6 +9,7 @@ interface ProjectsManagerViewProps {
   onDeleteProject: (name: string) => void
   onRenameProject: (oldName: string, newName: string) => void
   onBack: () => void
+  onCreateProject?: () => void
 }
 
 export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
@@ -17,7 +18,8 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
   onSelectProject,
   onDeleteProject,
   onRenameProject,
-  onBack
+  onBack,
+  onCreateProject
 }) => {
   const [editingProject, setEditingProject] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
@@ -80,7 +82,18 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
         <motion.div variants={itemVariants} className="space-y-3">
           <div className="flex items-center justify-between px-1">
           <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-white/30">Active Workspaces</h2>
-          <span className="text-[10px] font-mono text-gray-400 dark:text-white/20">{projects.length} Projects</span>
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-mono text-gray-400 dark:text-white/20">{projects.length} Projects</span>
+            {onCreateProject && (
+              <button
+                onClick={onCreateProject}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-white text-[10px] font-bold uppercase tracking-wider hover:bg-primary/90 transition-all"
+              >
+                <Plus size={14} strokeWidth={2.5} />
+                New
+              </button>
+            )}
+          </div>
           </div>
 
           <div className="space-y-2">

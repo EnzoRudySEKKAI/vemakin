@@ -222,7 +222,8 @@ const RootLayoutInner = () => {
 
   // Drawer scroll effects
   const isDetailPage = mainView.includes('-detail')
-  const hideNavigationViews = ['settings', 'manage-projects']
+  const hideNavigationViews = ['settings', 'manage-projects', 'new-project']
+  const isFormView = mainView === 'new-shot' || mainView === 'new-gear' || mainView === 'new-task' || mainView === 'new-note' || mainView === 'new-project'
   const shouldHideNavigation = hideNavigationViews.includes(mainView)
 
   const { translateY: headerTranslateY } = useDrawerScroll({
@@ -265,7 +266,8 @@ const RootLayoutInner = () => {
     'new-shot': "New Scene",
     'new-gear': "New Equipment",
     'new-task': "New Task",
-    'new-note': "New Note"
+    'new-note': "New Note",
+    'new-project': "New Project"
   }), [])
 
   // Action handlers
@@ -448,7 +450,7 @@ const RootLayoutInner = () => {
             }
           }}
           projects={projects}
-          onAddProject={handleAddProject}
+          onNavigateToCreateProject={() => navigate('/dashboard/projects/new')}
           viewTitle={viewTitles[mainView as keyof typeof viewTitles] || "Vemakin"}
           mainView={mainView}
           setMainView={handleNavigateToView}

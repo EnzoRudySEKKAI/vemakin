@@ -19,7 +19,7 @@ interface HeaderProps {
   currentProject: string | null
   setCurrentProject: (name: string) => void
   projects: string[]
-  onAddProject: (name: string) => void
+  onNavigateToCreateProject: () => void
   viewTitle: string
   mainView: MainView
   setMainView: (view: MainView) => void
@@ -78,7 +78,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
   currentProject,
   setCurrentProject,
   projects,
-  onAddProject,
+  onNavigateToCreateProject,
   projectProgress,
   groupedShots,
   onAdd,
@@ -209,7 +209,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
                       currentProject={currentProject}
                       projects={projects}
                       onSelect={setCurrentProject}
-                      onCreate={onAddProject}
+                      onNavigateToCreate={onNavigateToCreateProject}
                     />
                   )}
 

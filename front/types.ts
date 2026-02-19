@@ -1,5 +1,5 @@
 
-export type MainView = 'overview' | 'shots' | 'shot-detail' | 'inventory' | 'equipment-detail' | 'notes' | 'note-detail' | 'postprod' | 'task-detail' | 'settings' | 'manage-projects' | 'new-shot' | 'new-gear' | 'new-task' | 'new-note';
+export type MainView = 'overview' | 'shots' | 'shot-detail' | 'inventory' | 'equipment-detail' | 'notes' | 'note-detail' | 'postprod' | 'task-detail' | 'settings' | 'manage-projects' | 'new-shot' | 'new-gear' | 'new-task' | 'new-note' | 'new-project';
 export type ShotLayout = 'timeline' | 'list';
 export type InventoryLayout = 'grid' | 'list';
 export type TransportMode = 'driving' | 'walking' | 'cycling' | 'train' | 'plane' | 'bus';

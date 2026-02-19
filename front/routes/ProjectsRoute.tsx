@@ -15,6 +15,7 @@ export const ProjectsRoute = () => {
                 // TODO: Implement rename project
             }}
             onBack={() => ctx.navigate('/dashboard/settings')}
+            onCreateProject={() => ctx.navigate('/dashboard/projects/new')}
         />
     )
 }

@@ -24,6 +24,7 @@ const TaskDetailRoute = lazy(() => import('@/routes/TaskDetailRoute').then(m => 
 const TaskFormRoute = lazy(() => import('@/routes/TaskFormRoute').then(m => ({ default: m.TaskFormRoute })))
 const SettingsRoute = lazy(() => import('@/routes/SettingsRoute').then(m => ({ default: m.SettingsRoute })))
 const ProjectsRoute = lazy(() => import('@/routes/ProjectsRoute').then(m => ({ default: m.ProjectsRoute })))
+const ProjectFormRoute = lazy(() => import('@/routes/ProjectFormRoute').then(m => ({ default: m.ProjectFormRoute })))
 
 import { rootLoader, shotsLoader, inventoryLoader, notesLoader, pipelineLoader, detailLoader } from './loaders'
 
@@ -68,6 +69,7 @@ export const router = createBrowserRouter(
                     <Route path="pipeline/:id" element={withSuspense(TaskDetailRoute)} loader={detailLoader} hydrateFallbackElement={<PageLoader />} />
                     <Route path="settings" element={withSuspense(SettingsRoute)} />
                     <Route path="projects" element={withSuspense(ProjectsRoute)} />
+                    <Route path="projects/new" element={withSuspense(ProjectFormRoute)} />
                 </Route>
             </Route>
             
@@ -131,6 +133,7 @@ export const ROUTE_PATHS = {
     'new-gear': '/dashboard/inventory/new',
     'new-task': '/dashboard/pipeline/new',
     'new-note': '/dashboard/notes/new',
+    'new-project': '/dashboard/projects/new',
     auth: '/auth',
     login: '/auth/login',
     register: '/auth/register',
@@ -153,5 +156,6 @@ export function getViewFromPath(pathname: string): string {
     if (pathname === '/dashboard/pipeline') return 'postprod'
     if (pathname === '/dashboard/settings') return 'settings'
     if (pathname === '/dashboard/projects') return 'manage-projects'
+    if (pathname === '/dashboard/projects/new') return 'new-project'
     return 'overview'
 }
