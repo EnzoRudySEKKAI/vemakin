@@ -7,10 +7,16 @@ import { router } from './router'
 import { QueryProvider } from './providers/QueryProvider'
 import { AuthProvider } from './providers/AuthProvider'
 
+const HydrateFallback = () => (
+  <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#0F1116] flex items-center justify-center">
+    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+)
+
 const App = () => (
   <QueryProvider>
     <AuthProvider>
-      <RouterProvider router={router} />
+      <RouterProvider router={router} hydrateFallbackElement={<HydrateFallback />} />
     </AuthProvider>
   </QueryProvider>
 )
