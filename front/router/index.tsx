@@ -73,7 +73,12 @@ export const router = createBrowserRouter(
             
             <Route path="*" element={<Navigate to="/" replace />} />
         </>
-    )
+    ),
+    {
+        future: {
+            v7_partialHydration: true,
+        },
+    }
 )
 
 import { useNavigate } from 'react-router-dom'
