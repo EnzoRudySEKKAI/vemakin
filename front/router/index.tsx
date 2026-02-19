@@ -52,20 +52,20 @@ export const router = createBrowserRouter(
             </Route>
             
             <Route element={<ProtectedRoute />}>
-                <Route path="/dashboard" element={<RootLayout />} loader={rootLoader}>
+                <Route path="/dashboard" element={<RootLayout />} loader={rootLoader} hydrateFallbackElement={<PageLoader />}>
                     <Route index element={withSuspense(OverviewRoute)} />
-                    <Route path="shots" element={withSuspense(ShotsRoute)} loader={shotsLoader} />
+                    <Route path="shots" element={withSuspense(ShotsRoute)} loader={shotsLoader} hydrateFallbackElement={<PageLoader />} />
                     <Route path="shots/new" element={withSuspense(ShotFormRoute)} />
-                    <Route path="shots/:id" element={withSuspense(ShotDetailRoute)} loader={detailLoader} />
-                    <Route path="inventory" element={withSuspense(InventoryRoute)} loader={inventoryLoader} />
+                    <Route path="shots/:id" element={withSuspense(ShotDetailRoute)} loader={detailLoader} hydrateFallbackElement={<PageLoader />} />
+                    <Route path="inventory" element={withSuspense(InventoryRoute)} loader={inventoryLoader} hydrateFallbackElement={<PageLoader />} />
                     <Route path="inventory/new" element={withSuspense(GearFormRoute)} />
-                    <Route path="inventory/:id" element={withSuspense(EquipmentDetailRoute)} loader={detailLoader} />
-                    <Route path="notes" element={withSuspense(NotesRoute)} loader={notesLoader} />
+                    <Route path="inventory/:id" element={withSuspense(EquipmentDetailRoute)} loader={detailLoader} hydrateFallbackElement={<PageLoader />} />
+                    <Route path="notes" element={withSuspense(NotesRoute)} loader={notesLoader} hydrateFallbackElement={<PageLoader />} />
                     <Route path="notes/new" element={withSuspense(NoteFormRoute)} />
-                    <Route path="notes/:id" element={withSuspense(NoteDetailRoute)} loader={detailLoader} />
-                    <Route path="pipeline" element={withSuspense(PipelineRoute)} loader={pipelineLoader} />
+                    <Route path="notes/:id" element={withSuspense(NoteDetailRoute)} loader={detailLoader} hydrateFallbackElement={<PageLoader />} />
+                    <Route path="pipeline" element={withSuspense(PipelineRoute)} loader={pipelineLoader} hydrateFallbackElement={<PageLoader />} />
                     <Route path="pipeline/new" element={withSuspense(TaskFormRoute)} />
-                    <Route path="pipeline/:id" element={withSuspense(TaskDetailRoute)} loader={detailLoader} />
+                    <Route path="pipeline/:id" element={withSuspense(TaskDetailRoute)} loader={detailLoader} hydrateFallbackElement={<PageLoader />} />
                     <Route path="settings" element={withSuspense(SettingsRoute)} />
                     <Route path="projects" element={withSuspense(ProjectsRoute)} />
                 </Route>
