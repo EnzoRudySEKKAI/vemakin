@@ -5,6 +5,7 @@ import { Text, Input, Button, IconContainer, Textarea } from '@/components/atoms
 import { Card } from '@/components/ui/Card'
 import { TimeSelector } from '@/components/ui/TimeSelector'
 import { LocationAutocomplete, LocationSuggestion } from '@/components/ui/LocationAutocomplete'
+import { ProjectRequiredBanner } from '@/components/molecules/ProjectRequiredBanner'
 import { CATEGORY_ICONS } from '@/constants'
 import { Shot, Equipment } from '@/types'
 import { timeToMinutes, calculateEndTime } from '@/utils'
@@ -15,6 +16,7 @@ interface ShotFormPageProps {
   onSubmit: (shot: Shot) => void
   inventory: Equipment[]
   existingShots: Shot[]
+  hasProjects?: boolean
 }
 
 const toISODate = (dateStr: string) => {
@@ -27,7 +29,8 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
   onSwitchForm,
   onSubmit,
   inventory,
-  existingShots
+  existingShots,
+  hasProjects = true
 }) => {
   const [form, setForm] = useState({
     title: '',
@@ -124,9 +127,15 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
       onBack={onClose}
       onSwitchForm={onSwitchForm}
       onSubmit={handleSubmit}
-      submitDisabled={!isValid}
-      submitLabel="Schedule Scene"
+      submitDisabled={!isValid || !hasProjects}
+      submitLabel={hasProjects ? "Schedule Scene" : "Create a project first"}
     >
+      {!hasProjects && (
+        <ProjectRequiredBanner
+          onCreateProject={() => onSwitchForm('gear')}
+          message="You need to create a project before you can save shots"
+        />
+      )}
       <Card title="Scene identity" className="mb-8">
         <div className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-8">

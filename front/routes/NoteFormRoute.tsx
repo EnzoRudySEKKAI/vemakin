@@ -5,6 +5,12 @@ import { NoteFormPage } from '@/components/notes/NoteFormPage'
 export const NoteFormRoute = () => {
     const ctx = useRouteContext()
 
+    // Redirect to project creation if no projects exist
+    if (!ctx.hasProjects) {
+        ctx.navigate('/dashboard/projects/new')
+        return null
+    }
+
     const handleSwitchForm = (formType: 'gear' | 'shot' | 'task' | 'note') => {
         const paths = {
             gear: '/dashboard/inventory/new',
@@ -31,6 +37,7 @@ export const NoteFormRoute = () => {
             })}
             existingShots={ctx.activeData.shots}
             existingTasks={ctx.activeData.tasks}
+            hasProjects={ctx.hasProjects}
         />
     )
 }

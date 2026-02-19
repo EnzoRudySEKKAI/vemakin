@@ -4,6 +4,7 @@ import { FormLayout, FormType } from '../organisms/FormLayout';
 import { Text } from '../atoms/Text';
 import { Input } from '../atoms/Input';
 import { Textarea } from '../atoms/Textarea';
+import { ProjectRequiredBanner } from '../molecules/ProjectRequiredBanner';
 import { Shot, PostProdTask, Attachment } from '../../types';
 import { Card } from '../ui/Card';
 import { Plus } from 'lucide-react';
@@ -14,6 +15,7 @@ interface NoteFormPageProps {
   onSubmit: (title: string, content: string, linkedId?: string, linkType?: 'shot' | 'task', attachments?: Attachment[]) => void;
   existingShots: Shot[];
   existingTasks: PostProdTask[];
+  hasProjects?: boolean;
 }
 
 export const NoteFormPage: React.FC<NoteFormPageProps> = ({
@@ -21,7 +23,8 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
   onSwitchForm,
   onSubmit,
   existingShots,
-  existingTasks
+  existingTasks,
+  hasProjects = true
 }) => {
   const [form, setForm] = useState({
     title: '',
@@ -76,9 +79,15 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
       onBack={onClose}
       onSwitchForm={onSwitchForm}
       onSubmit={handleSubmit}
-      submitDisabled={!isValid}
-      submitLabel="Save Note"
+      submitDisabled={!isValid || !hasProjects}
+      submitLabel={hasProjects ? "Save Note" : "Create a project first"}
     >
+      {!hasProjects && (
+        <ProjectRequiredBanner
+          onCreateProject={() => onSwitchForm('gear')}
+          message="You need to create a project before you can save notes"
+        />
+      )}
       <Card title="Note details" className="mb-8">
         <div className="p-6 space-y-10">
           {/* Title */}
