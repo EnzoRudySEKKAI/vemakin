@@ -78,30 +78,44 @@ export const PostProdFilterBar: React.FC<PostProdFilterBarProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className="flex-1 flex items-center gap-2 min-w-0">
-          <FilterDropdown
-            label="All status"
-            value={filters.status || 'All'}
-            options={statusOptions}
-            onChange={(status) => onFiltersChange({ status })}
-            className="flex-1"
-          />
+      <div className="flex items-start gap-3">
+        <div className="flex-1 flex items-start gap-2 min-w-0">
+          <div className="flex-1">
+            <div className="text-xs uppercase tracking-wider text-gray-500 dark:text-white/40 mb-1">
+              Status
+            </div>
+            <FilterDropdown
+              label="All status"
+              value={filters.status || 'All'}
+              options={statusOptions}
+              onChange={(status) => onFiltersChange({ status })}
+              className="w-full"
+            />
+          </div>
 
-          <FilterDropdown
-            label="All priority"
-            value={filters.priority || 'All'}
-            options={priorityOptions}
-            onChange={(priority) => onFiltersChange({ priority })}
-            className="flex-1"
-          />
+          <div className="flex-1">
+            <div className="text-xs uppercase tracking-wider text-gray-500 dark:text-white/40 mb-1">
+              Priority
+            </div>
+            <FilterDropdown
+              label="All priority"
+              value={filters.priority || 'All'}
+              options={priorityOptions}
+              onChange={(priority) => onFiltersChange({ priority })}
+              className="w-full"
+            />
+          </div>
         </div>
 
-
-        <LayoutToggle
-          value={layout}
-          onChange={onLayoutChange}
-        />
+        <div>
+          <div className="text-xs uppercase tracking-wider text-gray-500 dark:text-white/40 mb-1">
+            View
+          </div>
+          <LayoutToggle
+            value={layout}
+            onChange={onLayoutChange}
+          />
+        </div>
       </div>
     </div>
   )

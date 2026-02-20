@@ -50,8 +50,11 @@ export const ShotsFilterBar: React.FC<ShotsFilterBarProps> = ({
         onDateSelect={onDateSelect}
       />
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-start gap-3">
         <div className="flex-1">
+          <div className="text-xs uppercase tracking-wider text-gray-500 dark:text-white/40 mb-1">
+            Status
+          </div>
           <FilterDropdown
             label="Status"
             value={statusFilter}
@@ -61,6 +64,9 @@ export const ShotsFilterBar: React.FC<ShotsFilterBarProps> = ({
         </div>
 
         <div className="flex-1">
+          <div className="text-xs uppercase tracking-wider text-gray-500 dark:text-white/40 mb-1">
+            View
+          </div>
           <SegmentControl
             options={[
               { value: 'timeline', label: 'Timeline' },
