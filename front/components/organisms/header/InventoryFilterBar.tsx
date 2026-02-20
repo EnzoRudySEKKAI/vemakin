@@ -40,32 +40,36 @@ export const InventoryFilterBar: React.FC<InventoryFilterBarProps> = ({
       />
 
       <div className="flex items-center gap-3">
-        <Select
-          size="sm"
-          value={ownershipFilter}
-          onChange={(e) => onOwnershipChange(e.target.value as 'all' | 'owned' | 'rented')}
-          options={[
-            { value: 'all', label: 'All' },
-            { value: 'owned', label: 'Own' },
-            { value: 'rented', label: 'Rent' }
-          ]}
-          fullWidth={false}
-          className="w-28"
-        />
+        <div className="flex-1">
+          <Select
+            size="sm"
+            value={ownershipFilter}
+            onChange={(e) => onOwnershipChange(e.target.value as 'all' | 'owned' | 'rented')}
+            options={[
+              { value: 'all', label: 'All' },
+              { value: 'owned', label: 'Own' },
+              { value: 'rented', label: 'Rent' }
+            ]}
+            fullWidth={true}
+          />
+        </div>
 
-        <Select
-          size="sm"
-          value={categoryFilter}
-          onChange={(e) => onCategoryChange(e.target.value)}
-          options={INVENTORY_CATEGORIES.map(cat => ({ value: cat, label: cat }))}
-          fullWidth={false}
-          className="flex-1"
-        />
+        <div className="flex-1">
+          <Select
+            size="sm"
+            value={categoryFilter}
+            onChange={(e) => onCategoryChange(e.target.value)}
+            options={INVENTORY_CATEGORIES.map(cat => ({ value: cat, label: cat }))}
+            fullWidth={true}
+          />
+        </div>
 
-        <LayoutToggle
-          value={layout}
-          onChange={onLayoutChange}
-        />
+        <div className="flex-1">
+          <LayoutToggle
+            value={layout}
+            onChange={onLayoutChange}
+          />
+        </div>
       </div>
     </div>
   )
