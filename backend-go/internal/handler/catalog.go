@@ -28,6 +28,7 @@ func (h *Handler) GetCategories(c echo.Context) error {
 	if h.catalogCache.IsLoaded() {
 		categories := h.catalogCache.GetCategories()
 		if len(categories) > 0 {
+			c.Response().Header().Set("Cache-Control", "public, max-age=3600")
 			response := make([]dto.CategoryResponse, len(categories))
 			for i, cat := range categories {
 				response[i] = categoryToResponse(cat)
@@ -62,6 +63,7 @@ func (h *Handler) GetBrands(c echo.Context) error {
 		for i, brand := range brands {
 			response[i] = brandToResponse(brand)
 		}
+		c.Response().Header().Set("Cache-Control", "public, max-age=3600")
 		return c.JSON(http.StatusOK, response)
 	}
 
@@ -106,6 +108,7 @@ func (h *Handler) GetItems(c echo.Context) error {
 				CreatedAt:   item.CreatedAt,
 			}
 		}
+		c.Response().Header().Set("Cache-Control", "public, max-age=3600")
 		return c.JSON(http.StatusOK, response)
 	}
 
@@ -130,6 +133,29 @@ func (h *Handler) GetItems(c echo.Context) error {
 func (h *Handler) GetItem(c echo.Context) error {
 	itemID := c.Param("id")
 
+	// Try cache first
+	if h.catalogCache.IsLoaded() {
+		item := h.catalogCache.GetItem(itemID)
+		if item != nil {
+			// Add cache headers for browser caching
+			c.Response().Header().Set("Cache-Control", "public, max-age=3600")
+			c.Response().Header().Set("ETag", itemID)
+
+			specs := h.catalogCache.GetSpecs(itemID)
+			return c.JSON(http.StatusOK, dto.GearCatalogResponse{
+				ID:          item.ID,
+				BrandID:     item.BrandID,
+				CategoryID:  item.CategoryID,
+				Name:        item.Name,
+				Description: item.Description,
+				ImageURL:    item.ImageURL,
+				Specs:       specs,
+				CreatedAt:   item.CreatedAt,
+			})
+		}
+	}
+
+	// Fallback to database
 	item, err := h.catalogRepo.GetItemByID(c.Request().Context(), itemID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -154,6 +180,16 @@ func (h *Handler) GetItem(c echo.Context) error {
 
 func (h *Handler) GetItemSpecs(c echo.Context) error {
 	itemID := c.Param("id")
+
+	// Try cache first
+	if h.catalogCache.IsLoaded() {
+		specs := h.catalogCache.GetSpecs(itemID)
+		if specs != nil {
+			c.Response().Header().Set("Cache-Control", "public, max-age=3600")
+			c.Response().Header().Set("ETag", itemID)
+			return c.JSON(http.StatusOK, specs)
+		}
+	}
 
 	specs, err := h.catalogRepo.GetSpecs(c.Request().Context(), itemID, "")
 	if err != nil {

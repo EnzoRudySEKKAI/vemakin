@@ -22,6 +22,7 @@ type CatalogCache struct {
 type CacheData struct {
 	Categories       []models.Category                 `json:"categories"`
 	BrandsByCategory map[string][]models.Brand         `json:"brandsByCategory"`
+	BrandByID        map[string]models.Brand           `json:"brandByID"`
 	ItemsByID        map[string]models.GearCatalog     `json:"itemsByID"`
 	SpecsByGearID    map[string]map[string]interface{} `json:"specsByGearID"`
 }
@@ -62,12 +63,19 @@ func (c *CatalogCache) WarmFromDB(repo *repository.CatalogRepository) error {
 	}
 	c.data.Categories = categories
 
-	brandsByCategory := make(map[string][]models.Brand)
-	for _, cat := range categories {
-		brands, _ := repo.GetBrands(ctx, &cat.ID)
-		brandsByCategory[cat.ID] = brands
+	brandsByCategory, err := repo.GetAllBrandsGroupedByCategory(ctx)
+	if err != nil {
+		return err
 	}
 	c.data.BrandsByCategory = brandsByCategory
+
+	brandByID := make(map[string]models.Brand)
+	for _, brands := range brandsByCategory {
+		for _, brand := range brands {
+			brandByID[brand.ID] = brand
+		}
+	}
+	c.data.BrandByID = brandByID
 
 	items, err := repo.GetItems(ctx, nil, nil)
 	if err != nil {
@@ -79,21 +87,13 @@ func (c *CatalogCache) WarmFromDB(repo *repository.CatalogRepository) error {
 	}
 	c.data.ItemsByID = itemsByID
 
-	specsByGearID := make(map[string]map[string]interface{})
-	for _, item := range items {
-		var categorySlug string
-		for _, cat := range categories {
-			if cat.ID == item.CategoryID {
-				categorySlug = cat.Slug
-				break
-			}
-		}
-		if categorySlug != "" {
-			specs, _ := repo.GetSpecs(ctx, item.ID, categorySlug)
-			if len(specs) > 0 {
-				specsByGearID[item.ID] = specs
-			}
-		}
+	slugs := make([]string, len(categories))
+	for i, cat := range categories {
+		slugs[i] = cat.Slug
+	}
+	specsByGearID, err := repo.GetAllSpecsGroupedByGearID(ctx, slugs)
+	if err != nil {
+		return err
 	}
 	c.data.SpecsByGearID = specsByGearID
 
@@ -183,6 +183,17 @@ func (c *CatalogCache) GetSpecs(itemID string) map[string]interface{} {
 	defer c.mu.RUnlock()
 
 	return c.data.SpecsByGearID[itemID]
+}
+
+func (c *CatalogCache) GetBrandByID(brandID string) *models.Brand {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	brand, ok := c.data.BrandByID[brandID]
+	if !ok {
+		return nil
+	}
+	return &brand
 }
 
 func (c *CatalogCache) GetStats() map[string]interface{} {

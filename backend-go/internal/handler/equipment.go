@@ -23,13 +23,10 @@ func (h *Handler) enrichEquipmentFromCache(e *models.Equipment) {
 	// Get model name from catalog
 	e.ModelName = &catalogItem.Name
 
-	// Get brand name from cache
-	brands := h.catalogCache.GetBrands(nil)
-	for _, brand := range brands {
-		if brand.ID == catalogItem.BrandID {
-			e.BrandName = &brand.Name
-			break
-		}
+	// Get brand name from cache (O(1) lookup)
+	brand := h.catalogCache.GetBrandByID(catalogItem.BrandID)
+	if brand != nil {
+		e.BrandName = &brand.Name
 	}
 }
 
