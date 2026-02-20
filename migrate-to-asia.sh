@@ -117,22 +117,23 @@ else
     echo -e "${GREEN}✓ Bucket existe déjà${NC}"
 fi
 
-# Grant Cloud SQL service account permission to write to bucket
+# Grant permissions to Cloud SQL service accounts
 echo "   Configuration des permissions..."
-PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
-SERVICE_ACCOUNT="service-${PROJECT_NUMBER}@gcp-sa-cloud-sql.iam.gserviceaccount.com"
 
-# Wait for Cloud SQL service account to be created (it can take a minute)
-echo "   Attente de la création du compte de service Cloud SQL..."
-for i in {1..10}; do
-    if gcloud iam service-accounts describe $SERVICE_ACCOUNT --project=$PROJECT_ID &>/dev/null 2>&1; then
-        gsutil iam ch serviceAccount:$SERVICE_ACCOUNT:objectAdmin gs://$BUCKET_NAME
-        echo -e "${GREEN}✓ Permissions configurées${NC}"
-        break
-    fi
-    echo "   Tentative $i/10 - compte de service pas encore prêt..."
-    sleep 5
-done
+# Get the service account for the OLD instance (for export)
+OLD_SERVICE_ACCOUNT=$(gcloud sql instances describe $OLD_INSTANCE_NAME --project=$PROJECT_ID --format="value(serviceAccountEmailAddress)" 2>/dev/null || echo "")
+# Get the service account for the NEW instance (for import)
+NEW_SERVICE_ACCOUNT=$(gcloud sql instances describe $NEW_INSTANCE_NAME --project=$PROJECT_ID --format="value(serviceAccountEmailAddress)" 2>/dev/null || echo "")
+
+if [ -n "$OLD_SERVICE_ACCOUNT" ]; then
+    gsutil iam ch serviceAccount:$OLD_SERVICE_ACCOUNT:objectAdmin gs://$BUCKET_NAME
+    echo -e "${GREEN}✓ Permissions configurées pour l'instance US${NC}"
+fi
+
+if [ -n "$NEW_SERVICE_ACCOUNT" ] && [ "$OLD_SERVICE_ACCOUNT" != "$NEW_SERVICE_ACCOUNT" ]; then
+    gsutil iam ch serviceAccount:$NEW_SERVICE_ACCOUNT:objectAdmin gs://$BUCKET_NAME
+    echo -e "${GREEN}✓ Permissions configurées pour l'instance Asie${NC}"
+fi
 
 echo ""
 echo ""
