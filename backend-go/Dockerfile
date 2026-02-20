@@ -26,10 +26,13 @@ RUN apk --no-cache add ca-certificates tzdata
 
 # Copy binary from builder
 COPY --from=builder /api /app/api
-COPY --from=builder /app/data /app/data
+
+# Create data directory for cache
+RUN mkdir -p /app/data
 
 # Create non-root user
-RUN adduser -D -u 1000 appuser
+RUN adduser -D -u 1000 appuser && \
+    chown -R appuser:appuser /app/data
 USER appuser
 
 # Expose port
