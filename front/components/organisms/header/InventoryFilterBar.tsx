@@ -2,7 +2,7 @@ import React from 'react'
 import { Equipment } from '../../types'
 import { SearchBar } from '../../molecules/SearchBar'
 import { LayoutToggle } from '../../molecules/SegmentControl'
-import { Select } from '../../atoms/Select'
+import { FilterDropdown } from '../../molecules/FilterDropdown'
 
 const INVENTORY_CATEGORIES = ['All', 'Camera', 'Lens', 'Light', 'Filter', 'Audio', 'Tripod', 'Stabilizer', 'Grip', 'Monitoring', 'Wireless', 'Drone', 'Props', 'Other']
 
@@ -41,26 +41,24 @@ export const InventoryFilterBar: React.FC<InventoryFilterBarProps> = ({
 
       <div className="flex items-center gap-3">
         <div className="flex-1">
-          <Select
-            size="sm"
+          <FilterDropdown
+            label="All"
             value={ownershipFilter}
-            onChange={(e) => onOwnershipChange(e.target.value as 'all' | 'owned' | 'rented')}
+            onChange={(v) => onOwnershipChange(v as 'all' | 'owned' | 'rented')}
             options={[
               { value: 'all', label: 'All' },
               { value: 'owned', label: 'Own' },
               { value: 'rented', label: 'Rent' }
             ]}
-            fullWidth={true}
           />
         </div>
 
         <div className="flex-1">
-          <Select
-            size="sm"
+          <FilterDropdown
+            label="Category"
             value={categoryFilter}
-            onChange={(e) => onCategoryChange(e.target.value)}
+            onChange={onCategoryChange}
             options={INVENTORY_CATEGORIES.map(cat => ({ value: cat, label: cat }))}
-            fullWidth={true}
           />
         </div>
 
