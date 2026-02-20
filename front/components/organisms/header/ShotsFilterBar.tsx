@@ -60,7 +60,7 @@ export const ShotsFilterBar: React.FC<ShotsFilterBarProps> = ({
           />
         </div>
 
-        <div>
+        <div className="flex-1">
           <SegmentControl
             options={[
               { value: 'timeline', label: 'Timeline' },
@@ -68,6 +68,7 @@ export const ShotsFilterBar: React.FC<ShotsFilterBarProps> = ({
             ]}
             value={layout}
             onChange={(v) => onLayoutChange(v as any)}
+            variant="fluid"
           />
         </div>
       </div>
