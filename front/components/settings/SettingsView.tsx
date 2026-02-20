@@ -1,13 +1,12 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import {
-  Moon, Sun, Globe, Download, Upload, Cloud,
-  FileText, Briefcase, ChevronRight, Shield,
+  Moon, Sun, Globe, Download, Upload,
+  FileText, Briefcase, ChevronRight,
   LogOut, User as UserIcon, BookOpen,
   Mail, ShieldCheck
 } from 'lucide-react'
 import { SimpleCard, ListItem } from '@/components/ui/Card'
-import { GlassCard } from '@/components/ui/GlassCard'
 import { User } from '@/types'
 
 interface SettingsViewProps {
@@ -30,9 +29,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   onToggleDarkMode
 }) => {
   const [language, setLanguage] = useState('English')
-  const [autoBackup, setAutoBackup] = useState(true)
-
-  const toggleBackup = () => setAutoBackup(!autoBackup)
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
@@ -151,39 +147,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             </button>
           </div>
 
-          <GlassCard className="p-6 relative overflow-hidden">
-            <div className="absolute -top-6 -right-6 opacity-[0.03] text-primary pointer-events-none">
-              <Cloud size={160} strokeWidth={1} />
-            </div>
-
-            <div className="relative z-10 flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
-                  <Cloud size={20} strokeWidth={2.5} />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">iCloud Backup</h3>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <div className="w-1 h-1 rounded-full bg-emerald-500" />
-                    <span className="text-[10px] font-mono text-gray-500 dark:text-white/30">Last synced: 2m ago</span>
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={toggleBackup}
-                className={`w-11 h-6 rounded-full p-1 transition-colors duration-300 ${autoBackup ? 'bg-primary' : 'bg-gray-300 dark:bg-white/10'}`}
-              >
-                <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-300 ${autoBackup ? 'translate-x-5' : 'translate-x-0'}`} />
-              </button>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-white/[0.03] rounded-2xl border border-gray-200 dark:border-white/[0.05]">
-              <Shield size={14} className="text-primary/60" strokeWidth={2.5} />
-              <p className="text-[10px] leading-relaxed text-gray-500 dark:text-white/30 font-medium">
-                Your data is automatically encrypted and stored securely in your private iCloud container.
-              </p>
-            </div>
-          </GlassCard>
         </motion.section>
 
         {/* Appearance Section */}
