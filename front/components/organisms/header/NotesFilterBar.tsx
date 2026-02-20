@@ -7,8 +7,8 @@ import { FilterDropdown } from '../../molecules/FilterDropdown'
 const NOTES_CATEGORIES = ['All', 'General', 'Shots', 'Script', 'Editing', 'Sound', 'VFX', 'Color']
 
 const sortOptions = [
-  { value: 'updated', label: 'Last Modified' },
-  { value: 'created', label: 'Date Created' },
+  { value: 'updated', label: 'Modified' },
+  { value: 'created', label: 'Creation' },
   { value: 'alpha', label: 'Alphabetical' }
 ]
 
