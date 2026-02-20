@@ -59,7 +59,7 @@ export const InventoryFilterBar: React.FC<InventoryFilterBarProps> = ({
             value={categoryFilter}
             onChange={onCategoryChange}
             options={INVENTORY_CATEGORIES.map(cat => ({ value: cat, label: cat }))}
-            maxHeight="240px"
+            maxHeight="280px"
           />
         </div>
 
