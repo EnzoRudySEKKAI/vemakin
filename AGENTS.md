@@ -236,16 +236,19 @@ When making code changes, **always create a new branch** and use pull requests. 
 
 **Starting a new task:**
 ```bash
-# 1. Ensure you're on main and it's up to date
+# 1. CRITICAL: Always pull latest main first
+# This ensures your branch is created from the most recent code
 git checkout main
 git pull origin main
 
-# 2. Create a descriptive feature branch
+# 2. Create a descriptive feature branch from updated main
 git checkout -b feature/descriptive-name
 
 # Example: git checkout -b feature/add-user-authentication
 # Example: git checkout -b fix/resolve-login-error
 ```
+
+⚠️ **IMPORTANT:** Always run `git pull origin main` before creating a new branch. This prevents merge conflicts and ensures you're working with the latest codebase.
 
 **Making changes:**
 ```bash
