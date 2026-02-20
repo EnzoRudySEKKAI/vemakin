@@ -41,7 +41,7 @@ export const InventoryFilterBar: React.FC<InventoryFilterBarProps> = ({
 
       <div className="flex items-start gap-3">
         <div className="flex-1">
-          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-3">
+          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-2">
             Ownership
           </div>
           <FilterDropdown
@@ -57,7 +57,7 @@ export const InventoryFilterBar: React.FC<InventoryFilterBarProps> = ({
         </div>
 
         <div className="flex-1">
-          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-3">
+          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-2">
             Category
           </div>
           <FilterDropdown
@@ -70,7 +70,7 @@ export const InventoryFilterBar: React.FC<InventoryFilterBarProps> = ({
         </div>
 
         <div>
-          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-3">
+          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-2">
             View
           </div>
           <LayoutToggle
