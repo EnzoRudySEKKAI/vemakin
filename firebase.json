@@ -11,7 +11,7 @@
         "source": "/api/**",
         "run": {
           "serviceId": "backend-dev",
-          "region": "us-central1"
+          "region": "asia-east1"
         }
       },
       {
