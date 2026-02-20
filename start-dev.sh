@@ -61,7 +61,7 @@ sleep 2
 echo ""
 echo "🎨 [3/3] Démarrage du frontend..."
 cd front
-VITE_API_URL=http://localhost:$BACKEND_PORT npm run dev &
+VITE_API_URL=http://localhost:$BACKEND_PORT/api npm run dev &
 FRONTEND_PID=$!
 cd ..
 echo "    ✓ Frontend démarré (PID: $FRONTEND_PID)"
