@@ -64,7 +64,7 @@ export const InventoryFilterBar: React.FC<InventoryFilterBarProps> = ({
           />
         </div>
 
-        <div className="flex-1">
+        <div>
           <LayoutToggle
             value={layout}
             onChange={onLayoutChange}
