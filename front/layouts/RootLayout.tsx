@@ -307,22 +307,6 @@ const RootLayoutInner = () => {
     setNotesFilters(prev => ({ ...prev, ...filters }))
   }, [setNotesFilters])
 
-  const handleToggleNotesSort = useCallback(() => {
-    setNotesFilters(prev => {
-      const sorts: NotesFilters['sortBy'][] = ['updated', 'created', 'alpha']
-      const currentIndex = sorts.indexOf(prev.sortBy || 'updated')
-      const nextIndex = (currentIndex + 1) % sorts.length
-      const nextSort = sorts[nextIndex]
-      const nextDir = nextSort === 'alpha' ? 'asc' : 'desc'
-
-      return {
-        ...prev,
-        sortBy: nextSort,
-        sortDirection: nextDir
-      }
-    })
-  }, [setNotesFilters])
-
   // CRUD handlers
   const handleAddProject = useCallback(async (name: string) => {
     await createProjectMutation.mutateAsync(name)
@@ -471,7 +455,6 @@ const RootLayoutInner = () => {
           inventoryFilters={inventoryFilters}
           setInventoryFilters={setInventoryFilters}
           dates={dynamicDates}
-          groupedShots={groupedShots}
           currency={currency}
           setCurrency={setCurrency}
           shotSearchQuery={shotSearchQuery}
@@ -487,7 +470,6 @@ const RootLayoutInner = () => {
           setInventoryLayout={setInventoryLayout}
           notesFilters={notesFilters}
           setNotesFilters={handleSetNotesFilters}
-          onSortNotes={handleToggleNotesSort}
           notesLayout={notesLayout}
           setNotesLayout={setNotesLayout}
           isWideMode={isWideMode}

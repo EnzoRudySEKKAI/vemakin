@@ -1,9 +1,8 @@
 import React from 'react'
 import { Equipment } from '../../types'
 import { SearchBar } from '../../molecules/SearchBar'
-import { SegmentControl, LayoutToggle } from '../../molecules/SegmentControl'
-import { FilterPills } from '../../molecules/FilterPills'
-import { MetricsGroup } from '../../molecules/MetricBadge'
+import { LayoutToggle } from '../../molecules/SegmentControl'
+import { FilterDropdown } from '../../molecules/FilterDropdown'
 
 const INVENTORY_CATEGORIES = ['All', 'Camera', 'Lens', 'Light', 'Filter', 'Audio', 'Tripod', 'Stabilizer', 'Grip', 'Monitoring', 'Wireless', 'Drone', 'Props', 'Other']
 
@@ -40,35 +39,45 @@ export const InventoryFilterBar: React.FC<InventoryFilterBarProps> = ({
         onChange={onSearchChange}
       />
 
-      <div className="flex items-center gap-3">
-        <div className="flex-1 min-w-0 overflow-x-auto no-scrollbar">
-          <FilterPills
-            options={INVENTORY_CATEGORIES}
-            value={categoryFilter}
-            onChange={onCategoryChange}
-            scrollKey="inventory"
-          />
-        </div>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <div className="flex-1 flex items-center gap-2 min-w-0">
-          <SegmentControl
+      <div className="flex items-start gap-3">
+        <div className="flex-1">
+          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-1">
+            Ownership
+          </div>
+          <FilterDropdown
+            label="All"
+            value={ownershipFilter}
+            onChange={(v) => onOwnershipChange(v as 'all' | 'owned' | 'rented')}
             options={[
               { value: 'all', label: 'All' },
               { value: 'owned', label: 'Own' },
               { value: 'rented', label: 'Rent' }
             ]}
-            value={ownershipFilter}
-            onChange={(v) => onOwnershipChange(v as any)}
-            variant="fluid"
           />
         </div>
 
-        <LayoutToggle
-          value={layout}
-          onChange={onLayoutChange}
-        />
+        <div className="flex-1">
+          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-1">
+            Category
+          </div>
+          <FilterDropdown
+            label="Category"
+            value={categoryFilter}
+            onChange={onCategoryChange}
+            options={INVENTORY_CATEGORIES.map(cat => ({ value: cat, label: cat }))}
+            maxHeight="280px"
+          />
+        </div>
+
+        <div>
+          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-1">
+            View
+          </div>
+          <LayoutToggle
+            value={layout}
+            onChange={onLayoutChange}
+          />
+        </div>
       </div>
     </div>
   )
