@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, ArrowUpDown } from 'lucide-react'
 
@@ -34,11 +34,27 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
   maxHeight
 }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const selectedOption = options.find(opt => opt.value === value)
   const isActive = activeColor && value && value !== 'All'
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+      }
+    }
+  }, [isOpen])
+
   return (
-    <div className={`relative ${className}`}>
+    <div ref={dropdownRef} className={`relative ${className}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`
@@ -58,19 +74,14 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
 
       <AnimatePresence>
         {isOpen && (
-          <>
-            <div 
-              className="fixed inset-0 z-[60]" 
-              onClick={() => setIsOpen(false)} 
-            />
-              <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.15 }}
-              className={`absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.08] rounded-xl p-1.5 z-[70] overflow-hidden ${maxHeight ? 'overflow-y-auto' : ''}`}
-              style={maxHeight ? { maxHeight } : undefined}
-            >
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.15 }}
+            className={`absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.08] rounded-xl p-1.5 z-[70] overflow-hidden ${maxHeight ? 'overflow-y-auto' : ''}`}
+            style={maxHeight ? { maxHeight } : undefined}
+          >
               {options.map((option) => {
                 const Icon = option.icon
                 const isSelected = value === option.value
@@ -108,8 +119,7 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
                   </button>
                 )
               })}
-            </motion.div>
-          </>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
