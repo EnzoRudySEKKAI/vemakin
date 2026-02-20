@@ -1,11 +1,16 @@
 import React from 'react'
-import { ArrowUpDown } from 'lucide-react'
 import { NotesFilters } from '../../types'
 import { SearchBar } from '../../molecules/SearchBar'
 import { LayoutToggle } from '../../molecules/SegmentControl'
-import { FilterPills } from '../../molecules/FilterPills'
+import { FilterDropdown } from '../../molecules/FilterDropdown'
 
 const NOTES_CATEGORIES = ['All', 'General', 'Shots', 'Script', 'Editing', 'Sound', 'VFX', 'Color']
+
+const sortOptions = [
+  { value: 'updated', label: 'Last Modified' },
+  { value: 'created', label: 'Date Created' },
+  { value: 'alpha', label: 'Alphabetical' }
+]
 
 interface NotesFilterBarProps {
   searchQuery: string
@@ -14,7 +19,7 @@ interface NotesFilterBarProps {
   onCategoryChange: (category: string) => void
   layout: 'grid' | 'list'
   onLayoutChange: (layout: 'grid' | 'list') => void
-  onSort?: () => void
+  onSortChange?: (sortBy: 'updated' | 'created' | 'alpha') => void
   filters?: NotesFilters
   className?: string
 }
@@ -26,17 +31,10 @@ export const NotesFilterBar: React.FC<NotesFilterBarProps> = ({
   onCategoryChange,
   layout,
   onLayoutChange,
-  onSort,
+  onSortChange,
   filters,
   className = ''
 }) => {
-  const getSortLabel = () => {
-    switch (filters?.sortBy) {
-      case 'created': return 'Date Created'
-      case 'alpha': return 'Alphabetical'
-      default: return 'Last Modified'
-    }
-  }
   return (
     <div className={`flex flex-col gap-3 ${className}`}>
       <SearchBar
@@ -45,34 +43,32 @@ export const NotesFilterBar: React.FC<NotesFilterBarProps> = ({
         onChange={onSearchChange}
       />
 
-      <div className="flex items-center gap-3 overflow-x-auto">
-        <div className="flex-1 min-w-0">
-          <FilterPills
-            options={NOTES_CATEGORIES}
-            value={categoryFilter}
-            onChange={onCategoryChange}
-            scrollKey="notes"
+      <div className="flex items-center gap-3">
+        <div className="flex-1">
+          <FilterDropdown
+            label="Sort"
+            value={filters?.sortBy || 'updated'}
+            onChange={(v) => onSortChange?.(v as 'updated' | 'created' | 'alpha')}
+            options={sortOptions}
           />
         </div>
-      </div>
 
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onSort}
-          className="flex-1 flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] text-gray-600 dark:text-white/50 hover:text-gray-800 dark:hover:text-white/70 transition-colors"
-        >
-          <span>{getSortLabel()}</span>
-          <ArrowUpDown
-            size={16}
-            strokeWidth={2}
-            className={`transition-transform ${filters?.sortDirection === 'asc' ? 'rotate-180' : ''}`}
+        <div className="flex-1">
+          <FilterDropdown
+            label="Category"
+            value={categoryFilter}
+            onChange={onCategoryChange}
+            options={NOTES_CATEGORIES.map(cat => ({ value: cat, label: cat }))}
+            maxHeight="280px"
           />
-        </button>
+        </div>
 
-        <LayoutToggle
-          value={layout}
-          onChange={onLayoutChange}
-        />
+        <div>
+          <LayoutToggle
+            value={layout}
+            onChange={onLayoutChange}
+          />
+        </div>
       </div>
     </div>
   )

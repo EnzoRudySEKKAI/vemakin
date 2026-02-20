@@ -57,7 +57,6 @@ interface HeaderProps {
   // Notes Props
   notesFilters?: NotesFilters
   setNotesFilters?: (filters: Partial<NotesFilters>) => void
-  onSortNotes?: () => void
   notesLayout?: 'grid' | 'list'
   setNotesLayout?: (layout: 'grid' | 'list') => void
 
@@ -99,7 +98,6 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
   setPostProdLayout,
   notesFilters,
   setNotesFilters,
-  onSortNotes,
   notesLayout,
   setNotesLayout,
   isWideMode,
@@ -270,7 +268,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
                           filters={notesFilters}
                           layout={notesLayout}
                           onLayoutChange={setNotesLayout}
-                          onSort={onSortNotes}
+                          onSortChange={(sortBy) => setNotesFilters({ sortBy, sortDirection: sortBy === 'alpha' ? 'asc' : 'desc' })}
                         />
                       )}
                     </>
