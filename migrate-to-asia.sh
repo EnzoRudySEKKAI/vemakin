@@ -92,7 +92,7 @@ gcloud sql users set-password postgres \
 
 echo ""
 
-# Step 2: Create backup bucket
+# Step 2: Create backup bucket and set permissions
 echo -e "${YELLOW}[2/6] Préparation du bucket de sauvegarde...${NC}"
 if ! gsutil ls -b gs://$BUCKET_NAME &> /dev/null; then
     gsutil mb -p $PROJECT_ID gs://$BUCKET_NAME
@@ -100,6 +100,13 @@ if ! gsutil ls -b gs://$BUCKET_NAME &> /dev/null; then
 else
     echo -e "${GREEN}✓ Bucket existe déjà${NC}"
 fi
+
+# Grant Cloud SQL service account permission to write to bucket
+echo "   Configuration des permissions..."
+PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
+SERVICE_ACCOUNT="service-${PROJECT_NUMBER}@gcp-sa-cloud-sql.iam.gserviceaccount.com"
+gsutil iam ch serviceAccount:$SERVICE_ACCOUNT:objectAdmin gs://$BUCKET_NAME
+echo -e "${GREEN}✓ Permissions configurées${NC}"
 echo ""
 
 # Step 3: Export database from US
