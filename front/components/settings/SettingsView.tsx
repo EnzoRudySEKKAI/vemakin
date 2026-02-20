@@ -128,6 +128,27 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </ListItem>
         </motion.section>
 
+        {/* Appearance Section - Dark Mode */}
+        <motion.section variants={itemVariants} className="space-y-3">
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-white/30 px-1">Appearance</h2>
+          <SimpleCard className="p-5 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${darkMode ? 'bg-primary/10 text-primary' : 'bg-orange-500/10 text-orange-400'}`}>
+                {darkMode ? <Moon size={20} strokeWidth={2.5} /> : <Sun size={20} strokeWidth={2.5} />}
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white">Dark Mode</h3>
+              </div>
+            </div>
+            <button
+              onClick={onToggleDarkMode}
+              className={`w-11 h-6 rounded-full p-1 transition-colors duration-300 ${darkMode ? 'bg-primary' : 'bg-gray-300 dark:bg-white/10'}`}
+            >
+              <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-300 ${darkMode ? 'translate-x-5' : 'translate-x-0'}`} />
+            </button>
+          </SimpleCard>
+        </motion.section>
+
         {/* Data & Cloud Section */}
         <motion.section variants={itemVariants} className="space-y-3 opacity-40">
           <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-white/30 px-1">Data & Cloud</h2>
@@ -152,39 +173,20 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
         </motion.section>
 
-        {/* Appearance Section */}
+        {/* Language Section */}
         <motion.section variants={itemVariants} className="space-y-3">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-white/30 px-1">Appearance & Language</h2>
-          <SimpleCard className="p-0 overflow-hidden divide-y divide-gray-200 dark:divide-white/[0.05]">
-            <div className="p-5 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${darkMode ? 'bg-primary/10 text-primary' : 'bg-orange-500/10 text-orange-400'}`}>
-                  {darkMode ? <Moon size={20} strokeWidth={2.5} /> : <Sun size={20} strokeWidth={2.5} />}
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">Dark Mode</h3>
-                </div>
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-white/30 px-1">Language</h2>
+          <SimpleCard className="p-5 flex items-center justify-between opacity-40">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-400 dark:text-white/30">
+                <Globe size={20} strokeWidth={2.5} />
               </div>
-              <button
-                onClick={onToggleDarkMode}
-                className={`w-11 h-6 rounded-full p-1 transition-colors duration-300 ${darkMode ? 'bg-primary' : 'bg-gray-300 dark:bg-white/10'}`}
-              >
-                <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-300 ${darkMode ? 'translate-x-5' : 'translate-x-0'}`} />
-              </button>
+              <h3 className="text-sm font-bold text-gray-500 dark:text-white/50">Language</h3>
             </div>
-
-            <div className="p-5 flex items-center justify-between opacity-40">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-400 dark:text-white/30">
-                  <Globe size={20} strokeWidth={2.5} />
-                </div>
-                <h3 className="text-sm font-bold text-gray-500 dark:text-white/50">Language</h3>
-              </div>
-              <div className="relative">
-                <span className="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 text-gray-500 dark:text-white/40 text-[10px] font-bold py-2 px-4 rounded-xl uppercase tracking-wider">
-                  Coming Soon
-                </span>
-              </div>
+            <div className="relative">
+              <span className="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 text-gray-500 dark:text-white/40 text-[10px] font-bold py-2 px-4 rounded-xl uppercase tracking-wider">
+                Coming Soon
+              </span>
             </div>
           </SimpleCard>
         </motion.section>
