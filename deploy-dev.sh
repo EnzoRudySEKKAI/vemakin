@@ -9,7 +9,7 @@ set -e
 PROJECT_ID="vemakin"
 REGION="asia-east1"
 SERVICE_NAME="backend-dev"
-CLOUD_SQL_CONNECTION="vemakin:asia-east1:vemakin"
+CLOUD_SQL_CONNECTION="vemakin:asia-east1:vemakin-asia"
 FIREBASE_PROJECT_ID="vemakin"
 FRONTEND_URL="https://vemakin.web.app"
 
