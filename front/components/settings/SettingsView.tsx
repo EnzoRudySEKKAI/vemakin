@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import {
   Moon, Sun, Briefcase, ChevronRight,
   LogOut, User as UserIcon, BookOpen,
-  FileText, ShieldCheck
+  FileText, ShieldCheck, Globe, Download, Upload
 } from 'lucide-react'
 import { Card, ListItem } from '@/components/ui/Card'
 import { Button } from '@/components/atoms/Button'
@@ -136,6 +136,58 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${darkMode ? 'translate-x-4' : 'translate-x-0'}`} />
               </div>
             </ListItem>
+          </div>
+        </motion.section>
+
+        {/* Data & Cloud Section - Coming Soon */}
+        <motion.section variants={itemVariants} className="space-y-3 opacity-40">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-[11px] font-semibold text-gray-400 dark:text-white/40">
+              Data & Cloud
+            </h2>
+            <span className="text-[10px] text-gray-400 dark:text-white/30">
+              Coming Soon
+            </span>
+          </div>
+          
+          <div className="space-y-2">
+            <div className="p-4 flex items-center gap-3 bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] rounded-xl">
+              <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-400 dark:text-white/30 shrink-0">
+                <Download size={18} strokeWidth={2} />
+              </div>
+              <span className="text-sm font-medium text-gray-500 dark:text-white/50 flex-1">
+                Import Data
+              </span>
+            </div>
+            <div className="p-4 flex items-center gap-3 bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] rounded-xl">
+              <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-400 dark:text-white/30 shrink-0">
+                <Upload size={18} strokeWidth={2} />
+              </div>
+              <span className="text-sm font-medium text-gray-500 dark:text-white/50 flex-1">
+                Export Data
+              </span>
+            </div>
+          </div>
+        </motion.section>
+
+        {/* Language Section - Coming Soon */}
+        <motion.section variants={itemVariants} className="space-y-3 opacity-40">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-[11px] font-semibold text-gray-400 dark:text-white/40">
+              Language
+            </h2>
+            <span className="text-[10px] text-gray-400 dark:text-white/30">
+              Coming Soon
+            </span>
+          </div>
+          
+          <div className="p-4 flex items-center gap-3 bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] rounded-xl">
+            <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-400 dark:text-white/30 shrink-0">
+              <Globe size={18} strokeWidth={2} />
+            </div>
+            <span className="text-sm font-medium text-gray-500 dark:text-white/50 flex-1">
+              Language
+            </span>
           </div>
         </motion.section>
 
