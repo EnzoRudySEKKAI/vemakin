@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { motion } from 'framer-motion'
 import {
   Moon, Sun, Globe, Download, Upload,
@@ -28,7 +28,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   darkMode,
   onToggleDarkMode
 }) => {
-  const [language, setLanguage] = useState('English')
+
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
@@ -129,24 +129,27 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         </motion.section>
 
         {/* Data & Cloud Section */}
-        <motion.section variants={itemVariants} className="space-y-3">
+        <motion.section variants={itemVariants} className="space-y-3 opacity-40">
           <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-white/30 px-1">Data & Cloud</h2>
           
           <div className="grid grid-cols-2 gap-3">
-            <button className="flex flex-col items-center justify-center p-6 rounded-[24px] bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.08] hover:border-gray-300 dark:hover:border-white/[0.15] transition-all group">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-3 group-hover:scale-110 transition-transform">
+            <button disabled className="flex flex-col items-center justify-center p-6 rounded-[24px] bg-gray-100 dark:bg-white/[0.05] border border-gray-200 dark:border-white/[0.08] cursor-not-allowed">
+              <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-400 dark:text-white/30 mb-3">
                 <Download size={20} strokeWidth={2.5} />
               </div>
-              <span className="text-xs font-bold text-gray-900 dark:text-white">Import Data</span>
+              <span className="text-xs font-bold text-gray-500 dark:text-white/50">Import Data</span>
             </button>
-            <button className="flex flex-col items-center justify-center p-6 rounded-[24px] bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.08] hover:border-gray-300 dark:hover:border-white/[0.15] transition-all group">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-3 group-hover:scale-110 transition-transform">
+            <button disabled className="flex flex-col items-center justify-center p-6 rounded-[24px] bg-gray-100 dark:bg-white/[0.05] border border-gray-200 dark:border-white/[0.08] cursor-not-allowed">
+              <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-400 dark:text-white/30 mb-3">
                 <Upload size={20} strokeWidth={2.5} />
               </div>
-              <span className="text-xs font-bold text-gray-900 dark:text-white">Export Data</span>
+              <span className="text-xs font-bold text-gray-500 dark:text-white/50">Export Data</span>
             </button>
           </div>
 
+          <div className="flex items-center justify-center py-2">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-white/30">Coming Soon</span>
+          </div>
         </motion.section>
 
         {/* Appearance Section */}
@@ -170,24 +173,17 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               </button>
             </div>
 
-            <div className="p-5 flex items-center justify-between">
+            <div className="p-5 flex items-center justify-between opacity-40">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-400 dark:text-white/30">
                   <Globe size={20} strokeWidth={2.5} />
                 </div>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white">Language</h3>
+                <h3 className="text-sm font-bold text-gray-500 dark:text-white/50">Language</h3>
               </div>
               <div className="relative">
-                <select
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                  className="appearance-none bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 text-gray-900 dark:text-white text-[10px] font-bold py-2 pl-4 pr-10 rounded-xl focus:outline-none cursor-pointer hover:bg-gray-200 dark:hover:bg-white/10 transition-colors uppercase tracking-wider"
-                >
-                  <option value="English">English</option>
-                  <option value="French">Français</option>
-                  <option value="Spanish">Español</option>
-                </select>
-                <ChevronRight size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/20 pointer-events-none rotate-90" strokeWidth={3} />
+                <span className="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 text-gray-500 dark:text-white/40 text-[10px] font-bold py-2 px-4 rounded-xl uppercase tracking-wider">
+                  Coming Soon
+                </span>
               </div>
             </div>
           </SimpleCard>
