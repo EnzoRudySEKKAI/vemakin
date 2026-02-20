@@ -1,6 +1,6 @@
-# Migration Guide: Move to Asia (asia-east1)
+# Migration Guide: Move to Asia (asia-east1) + PostgreSQL 17
 
-This guide will help you migrate the entire Vemakin stack from `us-central1` (Iowa) to `asia-east1` (Taiwan) for better latency from China.
+This guide will help you migrate the entire Vemakin stack from `us-central1` (Iowa) to `asia-east1` (Taiwan) for better latency from China, and upgrade from PostgreSQL 15 to 17.
 
 ## ⚠️ Prerequisites
 
@@ -9,7 +9,24 @@ This guide will help you migrate the entire Vemakin stack from `us-central1` (Io
 - [ ] gcloud CLI installed and authenticated
 - [ ] Firebase CLI installed
 
-## 📋 Migration Steps
+## 🚀 Option 1: Automated Script (Recommended)
+
+Use the provided migration script that automates all steps:
+
+```bash
+# Make script executable and run
+chmod +x migrate-to-asia.sh
+./migrate-to-asia.sh YOUR_DB_PASSWORD
+```
+
+This script will:
+1. ✅ Create Cloud SQL instance with PostgreSQL 17
+2. ✅ Export database from US
+3. ✅ Import to Asia instance
+4. ✅ Deploy backend to asia-east1
+5. ✅ Verify deployment
+
+## 📋 Option 2: Manual Migration Steps
 
 ### Step 1: Create New Cloud SQL Instance in Asia (5 min)
 
@@ -20,7 +37,7 @@ REGION="asia-east1"
 INSTANCE_NAME="vemakin-asia"
 
 gcloud sql instances create $INSTANCE_NAME \
-  --database-version=POSTGRES_15 \
+  --database-version=POSTGRES_17 \
   --tier=db-f1-micro \
   --region=$REGION \
   --storage-size=10GB \
