@@ -121,8 +121,20 @@ fi
 echo "   Configuration des permissions..."
 PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
 SERVICE_ACCOUNT="service-${PROJECT_NUMBER}@gcp-sa-cloud-sql.iam.gserviceaccount.com"
-gsutil iam ch serviceAccount:$SERVICE_ACCOUNT:objectAdmin gs://$BUCKET_NAME
-echo -e "${GREEN}✓ Permissions configurées${NC}"
+
+# Wait for Cloud SQL service account to be created (it can take a minute)
+echo "   Attente de la création du compte de service Cloud SQL..."
+for i in {1..10}; do
+    if gcloud iam service-accounts describe $SERVICE_ACCOUNT --project=$PROJECT_ID &>/dev/null 2>&1; then
+        gsutil iam ch serviceAccount:$SERVICE_ACCOUNT:objectAdmin gs://$BUCKET_NAME
+        echo -e "${GREEN}✓ Permissions configurées${NC}"
+        break
+    fi
+    echo "   Tentative $i/10 - compte de service pas encore prêt..."
+    sleep 5
+done
+
+echo ""
 echo ""
 
 # Step 3: Export database from US
