@@ -61,11 +61,12 @@ fi
 
 gcloud sql instances create $NEW_INSTANCE_NAME \
   --database-version=POSTGRES_17 \
-  --tier=db-f1-micro \
+  --tier=db-g1-small \
   --region=$REGION \
   --storage-size=10GB \
   --storage-auto-increase \
   --availability-type=zonal \
+  --edition=enterprise \
   --project=$PROJECT_ID \
   --async
 
