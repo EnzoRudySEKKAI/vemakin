@@ -41,9 +41,31 @@ jobs:
 
       - name: Build Backend Image
         run: |
-          gcloud builds submit backend-go \
+          # Submit build and get build ID
+          BUILD_ID=$(gcloud builds submit backend-go \
             --tag gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }} \
-            --project ${{ env.PROJECT_ID }}
+            --project ${{ env.PROJECT_ID }} \
+            --async \
+            --format='value(id)')
+          
+          echo "Build ID: $BUILD_ID"
+          echo "Waiting for build to complete..."
+          
+          # Poll for build completion (max 10 minutes)
+          for i in {1..60}; do
+            STATUS=$(gcloud builds describe $BUILD_ID --project=${{ env.PROJECT_ID }} --format='value(status)')
+            echo "Build status: $STATUS"
+            
+            if [ "$STATUS" = "SUCCESS" ]; then
+              echo "Build completed successfully!"
+              break
+            elif [ "$STATUS" = "FAILURE" ] || [ "$STATUS" = "CANCELLED" ] || [ "$STATUS" = "EXPIRED" ]; then
+              echo "Build failed with status: $STATUS"
+              exit 1
+            fi
+            
+            sleep 10
+          done
 
       - name: Deploy Backend to Cloud Run
         run: |
