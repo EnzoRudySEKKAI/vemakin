@@ -18,6 +18,7 @@ interface FilterDropdownProps {
   direction?: 'asc' | 'desc'
   onDirectionChange?: () => void
   className?: string
+  maxHeight?: string
 }
 
 export const FilterDropdown: React.FC<FilterDropdownProps> = ({
@@ -29,7 +30,8 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
   showDirectionToggle = false,
   direction = 'asc',
   onDirectionChange,
-  className = ''
+  className = '',
+  maxHeight
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const selectedOption = options.find(opt => opt.value === value)
@@ -66,7 +68,8 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15 }}
-              className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.08] rounded-xl p-1.5 z-[70] overflow-hidden"
+              className={`absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.08] rounded-xl p-1.5 z-[70] overflow-hidden ${maxHeight ? 'overflow-y-auto' : ''}`}
+              style={maxHeight ? { maxHeight } : undefined}
             >
               {options.map((option) => {
                 const Icon = option.icon
