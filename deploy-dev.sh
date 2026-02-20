@@ -7,9 +7,9 @@ set -e
 
 # Configuration
 PROJECT_ID="vemakin"
-REGION="us-central1"
+REGION="asia-east1"
 SERVICE_NAME="backend-dev"
-CLOUD_SQL_CONNECTION="vemakin:us-central1:vemakin"
+CLOUD_SQL_CONNECTION="vemakin:asia-east1:vemakin"
 FIREBASE_PROJECT_ID="vemakin"
 FRONTEND_URL="https://vemakin.web.app"
 
