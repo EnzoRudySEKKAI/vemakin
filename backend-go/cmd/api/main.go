@@ -143,10 +143,15 @@ func main() {
 }
 
 func routes(e *echo.Echo, h *handler.Handler, authMiddleware *middleware.AuthMiddleware) {
+	// Public routes (no auth required)
 	e.GET("/", h.Root)
 	e.GET("/health", h.Health)
 
-	protected := e.Group("")
+	// API routes (all under /api prefix)
+	api := e.Group("/api")
+
+	// Protected API routes require authentication
+	protected := api.Group("")
 	protected.Use(authMiddleware.Authenticate())
 
 	protected.GET("/users/me", h.GetMe)
