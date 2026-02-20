@@ -131,7 +131,11 @@ if [ -n "$OLD_SERVICE_ACCOUNT" ]; then
 fi
 
 if [ -n "$NEW_SERVICE_ACCOUNT" ] && [ "$OLD_SERVICE_ACCOUNT" != "$NEW_SERVICE_ACCOUNT" ]; then
+    # Grant multiple permissions needed for import
+    gsutil iam ch serviceAccount:$NEW_SERVICE_ACCOUNT:objectViewer gs://$BUCKET_NAME
+    gsutil iam ch serviceAccount:$NEW_SERVICE_ACCOUNT:objectCreator gs://$BUCKET_NAME
     gsutil iam ch serviceAccount:$NEW_SERVICE_ACCOUNT:objectAdmin gs://$BUCKET_NAME
+    gsutil iam ch serviceAccount:$NEW_SERVICE_ACCOUNT:legacyBucketReader gs://$BUCKET_NAME
     echo -e "${GREEN}✓ Permissions configurées pour l'instance Asie${NC}"
 fi
 
@@ -151,10 +155,18 @@ echo ""
 # Step 4: Import to Asia instance
 echo -e "${YELLOW}[4/6] Import vers l'instance Asie...${NC}"
 echo "   Cela peut prendre 10-15 minutes selon la taille de la base..."
+# Find the latest export file
+EXPORT_FILE=$(gsutil ls gs://$BUCKET_NAME/vemakin-migration-*.sql | sort -V | tail -1)
+if [ -z "$EXPORT_FILE" ]; then
+    echo -e "${RED}❌ Aucun fichier d'export trouvé${NC}"
+    exit 1
+fi
+echo "   Fichier trouvé: $EXPORT_FILE"
 gcloud sql import sql $NEW_INSTANCE_NAME \
-  gs://$BUCKET_NAME/vemakin-migration-*.sql \
+  $EXPORT_FILE \
   --database=postgres \
-  --project=$PROJECT_ID
+  --project=$PROJECT_ID \
+  --quiet
 echo -e "${GREEN}✓ Import terminé${NC}"
 echo ""
 
