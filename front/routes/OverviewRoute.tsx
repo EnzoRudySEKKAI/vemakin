@@ -17,7 +17,13 @@ export const OverviewRoute = () => {
             currentProject={ctx.currentProject}
             onSelectProject={ctx.setCurrentProject}
             onAddProject={(name) => ctx.addProject(name, {})}
-            onAddClick={() => ctx.handleOpenActionSuite({ view: 'shot' })}
+            onAddClick={() => {
+                if (!ctx.hasProjects) {
+                    ctx.navigate('/dashboard/projects/new')
+                } else {
+                    ctx.handleOpenActionSuite({ view: 'shot' })
+                }
+            }}
             onNavigateToShot={(s) => {
                 ctx.setActiveDate(s.date)
                 ctx.navigate(`/dashboard/shots/${s.id}`)

@@ -19,6 +19,7 @@ export interface RouteContext {
     setActiveDate: (date: string) => void
     groupedShots: Record<string, Shot[]>
     projects: string[]
+    hasProjects: boolean
     shotLayout: ShotLayout
     inventoryLayout: InventoryLayout
     postProdLayout: 'grid' | 'list'

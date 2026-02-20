@@ -4,6 +4,7 @@ import { FormLayout, FormType } from '../organisms/FormLayout';
 import { Text } from '../atoms/Text';
 import { Input } from '../atoms/Input';
 import { Textarea } from '../atoms/Textarea';
+import { ProjectRequiredBanner } from '../molecules/ProjectRequiredBanner';
 import { PostProdTask } from '../../types';
 import { Card } from '../ui/Card';
 
@@ -11,6 +12,7 @@ interface TaskFormPageProps {
   onClose: () => void;
   onSwitchForm: (type: FormType) => void;
   onSubmit: (task: PostProdTask) => void;
+  hasProjects?: boolean;
 }
 
 const toISODate = (dateStr: string) => {
@@ -29,7 +31,8 @@ const TASK_CATEGORIES = [
 export const TaskFormPage: React.FC<TaskFormPageProps> = ({
   onClose,
   onSwitchForm,
-  onSubmit
+  onSubmit,
+  hasProjects = true
 }) => {
   const [form, setForm] = useState({
     title: '',
@@ -72,9 +75,15 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
       onBack={onClose}
       onSwitchForm={onSwitchForm}
       onSubmit={handleSubmit}
-      submitDisabled={!isValid}
-      submitLabel="Create Task"
+      submitDisabled={!isValid || !hasProjects}
+      submitLabel={hasProjects ? "Create Task" : "Create a project first"}
     >
+      {!hasProjects && (
+        <ProjectRequiredBanner
+          onCreateProject={() => onSwitchForm('gear')}
+          message="You need to create a project before you can save tasks"
+        />
+      )}
       <Card title="Department selection" className="mb-8">
         <div className="p-6">
           <div className="grid grid-cols-5 gap-3">

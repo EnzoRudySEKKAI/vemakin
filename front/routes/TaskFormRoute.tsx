@@ -5,6 +5,12 @@ import { TaskFormPage } from '@/components/postprod/TaskFormPage'
 export const TaskFormRoute = () => {
     const ctx = useRouteContext()
 
+    // Redirect to project creation if no projects exist
+    if (!ctx.hasProjects) {
+        ctx.navigate('/dashboard/projects/new')
+        return null
+    }
+
     const handleSwitchForm = (formType: 'gear' | 'shot' | 'task' | 'note') => {
         const paths = {
             gear: '/dashboard/inventory/new',
@@ -20,6 +26,7 @@ export const TaskFormRoute = () => {
             onClose={() => ctx.navigate('/dashboard/pipeline')}
             onSwitchForm={handleSwitchForm}
             onSubmit={ctx.addTask}
+            hasProjects={ctx.hasProjects}
         />
     )
 }

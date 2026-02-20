@@ -11,9 +11,10 @@ interface NavigationProps {
   onPlusClick: () => void
   scale?: number
   isAnimating?: boolean
+  hasProjects?: boolean
 }
 
-export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, setMainView, onPlusClick, scale = 1, isAnimating = false }) => {
+export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, setMainView, onPlusClick, scale = 1, isAnimating = false, hasProjects = true }) => {
   const NavItem = ({ view, icon: Icon, label, onClick }: { view?: MainView, icon: any, label: string, onClick: () => void }) => {
     const isActive = view ? mainView === view : false
     

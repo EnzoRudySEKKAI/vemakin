@@ -281,11 +281,15 @@ const RootLayoutInner = () => {
     setTimeout(() => setActionSuiteConfig(null), 300)
   }, [])
 
+  const hasProjects = projectsQuery.data && projectsQuery.data.length > 0
+
   const handleMainAddClick = useCallback(() => {
     if (mainView === 'settings' || mainView === 'manage-projects') {
       handleOpenActionSuite({ view: 'project' })
     } else if (mainView === 'inventory' || mainView === 'equipment-detail') {
       navigate('/dashboard/inventory/new')
+    } else if (!hasProjects) {
+      navigate('/dashboard/projects/new')
     } else if (mainView === 'postprod' || mainView === 'task-detail') {
       navigate('/dashboard/pipeline/new')
     } else if (mainView === 'notes' || mainView === 'note-detail') {
@@ -293,7 +297,7 @@ const RootLayoutInner = () => {
     } else {
       navigate('/dashboard/shots/new')
     }
-  }, [mainView, handleOpenActionSuite, navigate])
+  }, [mainView, hasProjects, handleOpenActionSuite, navigate])
 
   const handleSetPostProdFilters = useCallback((filters: Partial<PostProdFilters>) => {
     setPostProdFilters(prev => ({ ...prev, ...filters }))
@@ -500,6 +504,7 @@ const RootLayoutInner = () => {
             onPlusClick={handleMainAddClick}
             scale={1 - navScrollProgress}
             isAnimating={navIsAnimating}
+            hasProjects={hasProjects}
           />
         )}
 
@@ -548,6 +553,7 @@ const RootLayoutInner = () => {
                     notesLayout,
                     activePostProdTasks,
                     projects,
+                    hasProjects,
                     addProject: handleAddProject,
                     deleteProject: handleDeleteProject,
                     currentUser,
