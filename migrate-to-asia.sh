@@ -48,40 +48,56 @@ gcloud config set project $PROJECT_ID --quiet
 echo -e "${GREEN}✓ Prérequis OK${NC}"
 echo ""
 
-# Step 1: Create Cloud SQL instance with PostgreSQL 17
-echo -e "${YELLOW}[1/6] Création de l'instance Cloud SQL PostgreSQL 17...${NC}"
+# Step 1: Check Cloud SQL instance
+echo -e "${YELLOW}[1/6] Vérification de l'instance Cloud SQL...${NC}"
+echo "   Instance: $NEW_INSTANCE_NAME"
 echo "   Région: $REGION"
-echo "   Version: PostgreSQL 17"
 echo ""
 
+# Check if instance exists and is running
 if gcloud sql instances describe $NEW_INSTANCE_NAME --project=$PROJECT_ID &> /dev/null; then
-    echo -e "${YELLOW}⚠️  L'instance $NEW_INSTANCE_NAME existe déjà. Suppression...${NC}"
-    gcloud sql instances delete $NEW_INSTANCE_NAME --project=$PROJECT_ID --quiet
-fi
-
-gcloud sql instances create $NEW_INSTANCE_NAME \
-  --database-version=POSTGRES_17 \
-  --tier=db-g1-small \
-  --region=$REGION \
-  --storage-size=10GB \
-  --storage-auto-increase \
-  --availability-type=zonal \
-  --edition=enterprise \
-  --project=$PROJECT_ID \
-  --async
-
-# Wait for instance creation
-echo ""
-echo "⏳ Attente de la création de l'instance (peut prendre 5-10 minutes)..."
-while true; do
-    STATUS=$(gcloud sql instances describe $NEW_INSTANCE_NAME --project=$PROJECT_ID --format='value(state)' 2>/dev/null || echo "PENDING")
+    STATUS=$(gcloud sql instances describe $NEW_INSTANCE_NAME --project=$PROJECT_ID --format='value(state)' 2>/dev/null || echo "UNKNOWN")
     if [ "$STATUS" = "RUNNABLE" ]; then
-        echo -e "${GREEN}✓ Instance créée avec succès${NC}"
-        break
+        echo -e "${GREEN}✓ L'instance $NEW_INSTANCE_NAME existe déjà et est en cours d'exécution${NC}"
+    else
+        echo -e "${YELLOW}⚠️  L'instance existe mais a le statut: $STATUS${NC}"
+        echo "   Attente que l'instance soit prête..."
+        while true; do
+            STATUS=$(gcloud sql instances describe $NEW_INSTANCE_NAME --project=$PROJECT_ID --format='value(state)' 2>/dev/null || echo "PENDING")
+            if [ "$STATUS" = "RUNNABLE" ]; then
+                echo -e "${GREEN}✓ Instance prête${NC}"
+                break
+            fi
+            echo "   Statut: $STATUS - attente..."
+            sleep 10
+        done
     fi
-    echo "   Statut: $STATUS - attente..."
-    sleep 10
-done
+else
+    echo -e "${YELLOW}⚠️  L'instance n'existe pas. Création en cours...${NC}"
+    gcloud sql instances create $NEW_INSTANCE_NAME \
+      --database-version=POSTGRES_17 \
+      --tier=db-g1-small \
+      --region=$REGION \
+      --storage-size=10GB \
+      --storage-auto-increase \
+      --availability-type=zonal \
+      --edition=enterprise \
+      --project=$PROJECT_ID \
+      --async
+
+    # Wait for instance creation
+    echo ""
+    echo "⏳ Attente de la création de l'instance (peut prendre 5-10 minutes)..."
+    while true; do
+        STATUS=$(gcloud sql instances describe $NEW_INSTANCE_NAME --project=$PROJECT_ID --format='value(state)' 2>/dev/null || echo "PENDING")
+        if [ "$STATUS" = "RUNNABLE" ]; then
+            echo -e "${GREEN}✓ Instance créée avec succès${NC}"
+            break
+        fi
+        echo "   Statut: $STATUS - attente..."
+        sleep 10
+    done
+fi
 
 # Set password
 echo "   Configuration du mot de passe..."
