@@ -45,7 +45,7 @@ export const NotesFilterBar: React.FC<NotesFilterBarProps> = ({
 
       <div className="flex items-start gap-3">
         <div className="flex-1">
-          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1">
+          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-4">
             Sort By
           </div>
           <FilterDropdown
@@ -57,7 +57,7 @@ export const NotesFilterBar: React.FC<NotesFilterBarProps> = ({
         </div>
 
         <div className="flex-1">
-          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1">
+          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-4">
             Category
           </div>
           <FilterDropdown
@@ -70,7 +70,7 @@ export const NotesFilterBar: React.FC<NotesFilterBarProps> = ({
         </div>
 
         <div>
-          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1">
+          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-4">
             View
           </div>
           <LayoutToggle

@@ -81,7 +81,7 @@ export const PostProdFilterBar: React.FC<PostProdFilterBarProps> = ({
       <div className="flex items-start gap-3">
         <div className="flex-1 flex items-start gap-2 min-w-0">
           <div className="flex-1">
-            <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1">
+            <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-4">
               Status
             </div>
             <FilterDropdown
@@ -94,7 +94,7 @@ export const PostProdFilterBar: React.FC<PostProdFilterBarProps> = ({
           </div>
 
           <div className="flex-1">
-            <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1">
+            <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-4">
               Priority
             </div>
             <FilterDropdown
@@ -108,7 +108,7 @@ export const PostProdFilterBar: React.FC<PostProdFilterBarProps> = ({
         </div>
 
         <div>
-          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1">
+          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-4">
             View
           </div>
           <LayoutToggle
