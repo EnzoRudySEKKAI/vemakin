@@ -1,13 +1,12 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { motion } from 'framer-motion'
 import {
-  Moon, Sun, Globe, Download, Upload, Cloud,
-  FileText, Briefcase, ChevronRight, Shield,
+  Moon, Sun, Briefcase, ChevronRight,
   LogOut, User as UserIcon, BookOpen,
-  Mail, ShieldCheck
+  FileText, ShieldCheck, Globe, Download, Upload
 } from 'lucide-react'
-import { SimpleCard, ListItem } from '@/components/ui/Card'
-import { GlassCard } from '@/components/ui/GlassCard'
+import { Card, ListItem } from '@/components/ui/Card'
+import { Button } from '@/components/atoms/Button'
 import { User } from '@/types'
 
 interface SettingsViewProps {
@@ -29,11 +28,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   darkMode,
   onToggleDarkMode
 }) => {
-  const [language, setLanguage] = useState('English')
-  const [autoBackup, setAutoBackup] = useState(true)
-
-  const toggleBackup = () => setAutoBackup(!autoBackup)
-
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
   }
@@ -42,15 +36,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
+      transition: { staggerChildren: 0.08 }
     }
   }
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 30 } }
+    hidden: { opacity: 0, y: 15 },
+    show: { opacity: 1, y: 0 }
   }
 
   return (
@@ -58,204 +50,181 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="flex flex-col h-full w-full max-w-2xl mx-auto px-0"
+      className="flex flex-col h-full w-full max-w-2xl mx-auto px-4"
     >
-      <div className="flex-1 space-y-8 pb-32" style={{ paddingTop: '100px' }}>
+      <div className="flex-1 space-y-6 pb-24" style={{ paddingTop: '100px' }}>
         
         {/* Account Section */}
         <motion.section variants={itemVariants} className="space-y-3">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-white/30">Account</h2>
-          </div>
+          <h2 className="text-[11px] font-semibold text-gray-400 dark:text-white/40 px-1">
+            Account
+          </h2>
 
           {user ? (
-            <div className="space-y-2">
-              <div className="p-6 rounded-[32px] bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.08] flex items-center gap-5">
-                <div className="relative">
-                  <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xl border border-primary/30">
+            <Card>
+              <div className="p-4 flex items-center gap-4">
+                <div className="relative shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-base">
                     {getInitials(user.name)}
                   </div>
-                  <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-4 border-white dark:border-[#16181D] flex items-center justify-center">
-                    <ShieldCheck size={10} className="text-white" strokeWidth={3} />
+                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white dark:border-[#16181D] flex items-center justify-center">
+                    <ShieldCheck size={7} className="text-white" strokeWidth={3} />
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate">{user.name}</h3>
-                  <div className="flex items-center gap-3 mt-1">
-                    <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-white/40 font-medium">
-                      <Mail size={12} strokeWidth={2.5} />
-                      <span className="truncate">{user.email}</span>
-                    </div>
-                  </div>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                    {user.name}
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-white/40 truncate">
+                    {user.email}
+                  </p>
                 </div>
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={onLogout}
-                  className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-white/5 hover:bg-red-500/10 text-gray-500 dark:text-white/40 hover:text-red-400 flex items-center justify-center transition-all border border-gray-200 dark:border-white/5 hover:border-red-500/20"
-                >
-                  <LogOut size={18} strokeWidth={2.5} />
-                </button>
+                  leftIcon={<LogOut size={16} />}
+                  className="text-gray-400 hover:text-red-500 shrink-0"
+                />
               </div>
-            </div>
+            </Card>
           ) : (
-            <SimpleCard className="flex flex-col items-center text-center p-8 gap-6">
-              <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-400 dark:text-white/20">
-                <UserIcon size={32} strokeWidth={1.5} />
+            <Card>
+              <div className="p-5 flex flex-col items-center text-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-400 dark:text-white/20">
+                  <UserIcon size={24} strokeWidth={1.5} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Sign in to Vemakin</h3>
+                  <p className="text-xs text-gray-500 dark:text-white/40 mt-0.5">
+                    Sync across all your devices
+                  </p>
+                </div>
+                <Button variant="primary" size="sm" fullWidth onClick={onLogin}>
+                  Sign In
+                </Button>
               </div>
-              <div className="space-y-1">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Vemakin Account</h3>
-                <p className="text-sm text-gray-500 dark:text-white/40 max-w-[240px]">Sync your productions across all your devices.</p>
-              </div>
-              <div className="flex gap-3 w-full">
-                <button onClick={onLogin} className="flex-1 h-11 rounded-xl bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-900 dark:text-white font-semibold transition-all border border-gray-200 dark:border-white/10 text-sm">
-                  Log In
-                </button>
-                <button onClick={onLogin} className="flex-1 h-11 rounded-xl bg-primary hover:bg-[#3F39D1] text-white font-semibold transition-all shadow-lg shadow-primary/20 text-sm">
-                  Sign Up
-                </button>
-              </div>
-            </SimpleCard>
+            </Card>
           )}
         </motion.section>
 
-        {/* Workflow Section */}
+        {/* Preferences Section */}
         <motion.section variants={itemVariants} className="space-y-3">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-white/30 px-1">Production Workflow</h2>
-          <ListItem onClick={onNavigateToProjects} className="p-5 flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-              <Briefcase size={20} strokeWidth={2.5} />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-sm font-bold text-gray-900 dark:text-white">Project Management</h3>
-              <p className="text-xs text-gray-500 dark:text-white/30">Manage, delete, and organize productions</p>
-            </div>
-            <ChevronRight size={18} className="text-gray-400 dark:text-white/20" strokeWidth={2.5} />
-          </ListItem>
-        </motion.section>
-
-        {/* Data & Cloud Section */}
-        <motion.section variants={itemVariants} className="space-y-3">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-white/30 px-1">Data & Cloud</h2>
+          <h2 className="text-[11px] font-semibold text-gray-400 dark:text-white/40 px-1">
+            Preferences
+          </h2>
           
-          <div className="grid grid-cols-2 gap-3">
-            <button className="flex flex-col items-center justify-center p-6 rounded-[24px] bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.08] hover:border-gray-300 dark:hover:border-white/[0.15] transition-all group">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-3 group-hover:scale-110 transition-transform">
-                <Download size={20} strokeWidth={2.5} />
+          <div className="space-y-2">
+            <ListItem onClick={onNavigateToProjects} className="p-4 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                <Briefcase size={18} strokeWidth={2} />
               </div>
-              <span className="text-xs font-bold text-gray-900 dark:text-white">Import Data</span>
-            </button>
-            <button className="flex flex-col items-center justify-center p-6 rounded-[24px] bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.08] hover:border-gray-300 dark:hover:border-white/[0.15] transition-all group">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-3 group-hover:scale-110 transition-transform">
-                <Upload size={20} strokeWidth={2.5} />
-              </div>
-              <span className="text-xs font-bold text-gray-900 dark:text-white">Export Data</span>
-            </button>
-          </div>
+              <span className="text-sm font-medium text-gray-900 dark:text-white flex-1">
+                Project Management
+              </span>
+              <ChevronRight size={16} className="text-gray-300 dark:text-white/20 shrink-0" />
+            </ListItem>
 
-          <GlassCard className="p-6 relative overflow-hidden">
-            <div className="absolute -top-6 -right-6 opacity-[0.03] text-primary pointer-events-none">
-              <Cloud size={160} strokeWidth={1} />
-            </div>
-
-            <div className="relative z-10 flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
-                  <Cloud size={20} strokeWidth={2.5} />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">iCloud Backup</h3>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <div className="w-1 h-1 rounded-full bg-emerald-500" />
-                    <span className="text-[10px] font-mono text-gray-500 dark:text-white/30">Last synced: 2m ago</span>
-                  </div>
-                </div>
+            <ListItem onClick={onToggleDarkMode} className="p-4 flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${darkMode ? 'bg-primary/10 text-primary' : 'bg-orange-500/10 text-orange-400'}`}>
+                {darkMode ? <Moon size={18} strokeWidth={2} /> : <Sun size={18} strokeWidth={2} />}
               </div>
-              <button
-                onClick={toggleBackup}
-                className={`w-11 h-6 rounded-full p-1 transition-colors duration-300 ${autoBackup ? 'bg-primary' : 'bg-gray-300 dark:bg-white/10'}`}
-              >
-                <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-300 ${autoBackup ? 'translate-x-5' : 'translate-x-0'}`} />
-              </button>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-white/[0.03] rounded-2xl border border-gray-200 dark:border-white/[0.05]">
-              <Shield size={14} className="text-primary/60" strokeWidth={2.5} />
-              <p className="text-[10px] leading-relaxed text-gray-500 dark:text-white/30 font-medium">
-                Your data is automatically encrypted and stored securely in your private iCloud container.
-              </p>
-            </div>
-          </GlassCard>
-        </motion.section>
-
-        {/* Appearance Section */}
-        <motion.section variants={itemVariants} className="space-y-3">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-white/30 px-1">Appearance & Language</h2>
-          <SimpleCard className="p-0 overflow-hidden divide-y divide-gray-200 dark:divide-white/[0.05]">
-            <div className="p-5 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${darkMode ? 'bg-primary/10 text-primary' : 'bg-orange-500/10 text-orange-400'}`}>
-                  {darkMode ? <Moon size={20} strokeWidth={2.5} /> : <Sun size={20} strokeWidth={2.5} />}
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">Dark Mode</h3>
-                </div>
-              </div>
-              <button
-                onClick={onToggleDarkMode}
-                className={`w-11 h-6 rounded-full p-1 transition-colors duration-300 ${darkMode ? 'bg-primary' : 'bg-gray-300 dark:bg-white/10'}`}
-              >
-                <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-300 ${darkMode ? 'translate-x-5' : 'translate-x-0'}`} />
-              </button>
-            </div>
-
-            <div className="p-5 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                  <Globe size={20} strokeWidth={2.5} />
-                </div>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white">Language</h3>
-              </div>
-              <div className="relative">
-                <select
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                  className="appearance-none bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 text-gray-900 dark:text-white text-[10px] font-bold py-2 pl-4 pr-10 rounded-xl focus:outline-none cursor-pointer hover:bg-gray-200 dark:hover:bg-white/10 transition-colors uppercase tracking-wider"
-                >
-                  <option value="English">English</option>
-                  <option value="French">Français</option>
-                  <option value="Spanish">Español</option>
-                </select>
-                <ChevronRight size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/20 pointer-events-none rotate-90" strokeWidth={3} />
-              </div>
-            </div>
-          </SimpleCard>
-        </motion.section>
-
-        {/* Resources Section */}
-        <motion.section variants={itemVariants} className="space-y-3">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-white/30 px-1">Resources</h2>
-          <div className="grid grid-cols-1 gap-3">
-            <ListItem onClick={onOpenTutorial} className="p-5 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                <BookOpen size={20} strokeWidth={2.5} />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white">Tutorial</h3>
-                <p className="text-[10px] text-gray-500 dark:text-white/30">Learn more</p>
+              <span className="text-sm font-medium text-gray-900 dark:text-white flex-1">
+                Dark Mode
+              </span>
+              <div className={`w-9 h-5 rounded-full p-0.5 transition-colors ${darkMode ? 'bg-primary' : 'bg-gray-200 dark:bg-white/20'}`}>
+                <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${darkMode ? 'translate-x-4' : 'translate-x-0'}`} />
               </div>
             </ListItem>
           </div>
         </motion.section>
 
-        {/* Legal Section */}
-        <motion.section variants={itemVariants} className="flex flex-col items-center gap-6 pt-4">
-          <button className="flex items-center gap-2 px-6 py-3 rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-[10px] font-bold text-gray-500 dark:text-white/40 uppercase tracking-widest transition-all border border-gray-200 dark:border-white/5">
-            <FileText size={14} strokeWidth={2.5} />
-            <span>Terms & Privacy</span>
-          </button>
+        {/* Data & Cloud Section - Coming Soon */}
+        <motion.section variants={itemVariants} className="space-y-3 opacity-40">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-[11px] font-semibold text-gray-400 dark:text-white/40">
+              Data & Cloud
+            </h2>
+            <span className="text-[10px] text-gray-400 dark:text-white/30">
+              Coming Soon
+            </span>
+          </div>
           
-          <div className="text-center space-y-1">
-            <p className="text-[10px] font-bold text-gray-400 dark:text-white/20 uppercase tracking-[0.3em]">Vemakin OS v1.2.0</p>
-            <p className="text-[10px] font-medium text-gray-300 dark:text-white/10">Production Management System</p>
+          <div className="space-y-2">
+            <div className="p-4 flex items-center gap-3 bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] rounded-xl">
+              <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-400 dark:text-white/30 shrink-0">
+                <Download size={18} strokeWidth={2} />
+              </div>
+              <span className="text-sm font-medium text-gray-500 dark:text-white/50 flex-1">
+                Import Data
+              </span>
+            </div>
+            <div className="p-4 flex items-center gap-3 bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] rounded-xl">
+              <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-400 dark:text-white/30 shrink-0">
+                <Upload size={18} strokeWidth={2} />
+              </div>
+              <span className="text-sm font-medium text-gray-500 dark:text-white/50 flex-1">
+                Export Data
+              </span>
+            </div>
+          </div>
+        </motion.section>
+
+        {/* Language Section - Coming Soon */}
+        <motion.section variants={itemVariants} className="space-y-3 opacity-40">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-[11px] font-semibold text-gray-400 dark:text-white/40">
+              Language
+            </h2>
+            <span className="text-[10px] text-gray-400 dark:text-white/30">
+              Coming Soon
+            </span>
+          </div>
+          
+          <div className="p-4 flex items-center gap-3 bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] rounded-xl">
+            <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-400 dark:text-white/30 shrink-0">
+              <Globe size={18} strokeWidth={2} />
+            </div>
+            <span className="text-sm font-medium text-gray-500 dark:text-white/50 flex-1">
+              Language
+            </span>
+          </div>
+        </motion.section>
+
+        {/* Support Section */}
+        <motion.section variants={itemVariants} className="space-y-3">
+          <h2 className="text-[11px] font-semibold text-gray-400 dark:text-white/40 px-1">
+            Support
+          </h2>
+          
+          <ListItem onClick={onOpenTutorial} className="p-4 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+              <BookOpen size={18} strokeWidth={2} />
+            </div>
+            <span className="text-sm font-medium text-gray-900 dark:text-white flex-1">
+              Tutorial
+            </span>
+            <ChevronRight size={16} className="text-gray-300 dark:text-white/20 shrink-0" />
+          </ListItem>
+        </motion.section>
+
+        {/* About Section */}
+        <motion.section variants={itemVariants} className="pt-4 space-y-4">
+          <div className="flex items-center justify-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              leftIcon={<FileText size={14} />}
+              className="text-gray-400 dark:text-white/30"
+            >
+              Terms & Privacy
+            </Button>
+          </div>
+          
+          <div className="text-center">
+            <p className="text-[10px] text-gray-300 dark:text-white/20">
+              Vemakin OS v1.2.0
+            </p>
           </div>
         </motion.section>
       </div>
