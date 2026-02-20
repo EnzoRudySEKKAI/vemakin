@@ -67,7 +67,7 @@ export const PostProdFilterBar: React.FC<PostProdFilterBarProps> = ({
         onDateSelect={onDateSelect}
       />
 
-      <div className="flex items-center gap-3 overflow-x-auto lg:hidden">
+      <div className="flex items-center gap-3 lg:hidden">
         <div className="flex-1 min-w-0">
           <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-1">
             Category
