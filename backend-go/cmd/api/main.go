@@ -43,6 +43,14 @@ func main() {
 		log.Printf("Warning: Failed to load catalog cache: %v", err)
 	}
 
+	// Warm up cache from database on startup
+	log.Println("Warming up catalog cache from database...")
+	if err := catalogCache.WarmFromDB(catalogRepo); err != nil {
+		log.Printf("Warning: Failed to warm up catalog cache: %v", err)
+	} else {
+		log.Println("Catalog cache warmed up successfully")
+	}
+
 	firebaseAuth, err := auth.NewFirebaseAuth(cfg.GoogleApplicationCredentials, cfg.FirebaseProjectID)
 	if err != nil {
 		log.Fatalf("Failed to initialize Firebase: %v", err)
