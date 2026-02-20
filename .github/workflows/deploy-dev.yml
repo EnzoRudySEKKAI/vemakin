@@ -16,6 +16,9 @@ jobs:
   deploy:
     name: Deploy Backend & Frontend
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -25,7 +28,8 @@ jobs:
         id: auth
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+          workload_identity_provider: 'projects/827644761647/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+          service_account: 'github-action@vemakin.iam.gserviceaccount.com'
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
