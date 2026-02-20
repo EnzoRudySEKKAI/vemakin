@@ -67,7 +67,22 @@ export const PostProdFilterBar: React.FC<PostProdFilterBarProps> = ({
         onDateSelect={onDateSelect}
       />
 
-      <div className="flex items-center gap-3 overflow-x-auto">
+      <div className="flex items-center gap-3 overflow-x-auto lg:hidden">
+        <div className="flex-1 min-w-0">
+          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-1">
+            Category
+          </div>
+          <FilterDropdown
+            label="All"
+            value={filters.category || 'All'}
+            onChange={(cat) => onFiltersChange({ category: cat })}
+            options={POST_PROD_CATEGORIES.map(cat => ({ value: cat, label: cat }))}
+            maxHeight="280px"
+          />
+        </div>
+      </div>
+
+      <div className="hidden lg:flex items-center gap-3 overflow-x-auto">
         <div className="flex-1 min-w-0">
           <FilterPills
             options={POST_PROD_CATEGORIES}
