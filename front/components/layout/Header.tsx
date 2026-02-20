@@ -33,7 +33,6 @@ interface HeaderProps {
   inventoryFilters: InventoryFilters
   setInventoryFilters: (filters: InventoryFilters) => void
   dates: string[]
-  groupedShots: Record<string, any[]>
   currency: Currency
   setCurrency: (currency: Currency) => void
 
@@ -79,7 +78,6 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
   projects,
   onNavigateToCreateProject,
   projectProgress,
-  groupedShots,
   onAdd,
   setMainView,
   shotSearchQuery,
@@ -221,7 +219,6 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
                           onStatusChange={setShotStatusFilter}
                           layout={shotLayout}
                           onLayoutChange={setShotLayout}
-                          groupedShots={groupedShots}
                           activeDate={activeDate}
                           isDatePickerOpen={isDateSelectorOpen}
                           onDatePickerToggle={() => setIsDateSelectorOpen(!isDateSelectorOpen)}

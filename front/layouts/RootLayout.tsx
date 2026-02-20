@@ -455,7 +455,6 @@ const RootLayoutInner = () => {
           inventoryFilters={inventoryFilters}
           setInventoryFilters={setInventoryFilters}
           dates={dynamicDates}
-          groupedShots={groupedShots}
           currency={currency}
           setCurrency={setCurrency}
           shotSearchQuery={shotSearchQuery}
