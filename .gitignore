@@ -1,23 +1,114 @@
-# Dependencies
+# ============================================================================
+# OPERATING SYSTEM FILES
+# ============================================================================
+
+# macOS
+**/.DS_Store
+**/.AppleDouble
+**/.LSOverride
+**/.Spotlight-V100
+**/.Trashes
+**/.fseventsd
+
+# Windows
+*Thumbs.db
+*ehthumbs.db
+*Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+**/.Trash-*
+**/.directory
+
+# ============================================================================
+# IDE & EDITOR FILES
+# ============================================================================
+
+# VS Code
+.vscode/
+!.vscode/extensions.json
+*.code-workspace
+
+# JetBrains (IntelliJ, WebStorm, GoLand, etc.)
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Vim/Neovim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Other editors
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ============================================================================
+# DEPENDENCIES
+# ============================================================================
+
+# Node.js
 **/node_modules/
 **/.pnp
 **/.pnp.js
+.pnpm-store/
 
-# Testing
-**/coverage/
+# Go
+**/vendor/
 
-# Production
+# Python
+**/venv/
+**/.venv/
+**/__pycache__/
+**/*.py[cod]
+*$py.class
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+
+# ============================================================================
+# BUILD OUTPUTS
+# ============================================================================
+
+# Production builds
 **/dist/
 **/build/
 **/out/
 
-# Misc
-**/.DS_Store
-**/.AppleDouble
-**/.LSOverride
-*Thumbs.db
-*ehthumbs.db
-*Desktop.ini
+# Go binaries
+**/api
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Test coverage
+**/coverage/
+*.lcov
+
+# ============================================================================
+# ENVIRONMENT & SECRETS
+# ============================================================================
+
+# Environment files
 **/.env
 **/.env.local
 **/.env.*.local
@@ -34,70 +125,152 @@
 **/.env.test.local
 **/.env.*.test.local
 
-# Project Documentation
-AGENTS.md
+# Credentials & Secrets
+*.pem
+*.key
+*.crt
+*.cer
+*.der
+*.p12
+*.pfx
+**/*.env.json
+**/*.secrets.json
+**/.env.secret
 
-# Logs
+# ============================================================================
+# LOGS
+# ============================================================================
+
+*.log
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
 
-# IDEs
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
+# ============================================================================
+# FRAMEWORK-SPECIFIC
+# ============================================================================
 
-# Mobile - Standard Capacitor ignores
+# React/Vite/Build Tools
+**/.parcel-cache/
+**/.turbo/
+**/.vite/
+**/.vite-env.d.ts
+.cache/
+.eslintcache
+.stylelintcache
+
+# Go
+**/tmp/
+
+# Capacitor / Mobile
+ios/
+android/
+electron/
 **/DerivedData/
 **/App.xcworkspace/xcuserdata/
 **/.gradle/
 **/start_gradle_daemon_and_run_app.sh
-
-# Android specific
 **/android/app/build/
 **/android/captures/
 **/android/local.properties
 
-# AI & Agent Frameworks
+# iOS (Xcode)
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+*.xcworkspace/*
+!*.xcworkspace/contents.xcworkspacedata
+!*.xcworkspace/xcshareddata/
+**/*.xcuserstate
+**/*.xcscmblueprint
+**/xcuserdata/
+
+# Firebase
+.firebase/
+.firebaserc
+firebase-debug.log
+firebase-debug.*.log
+
+# ============================================================================
+# AI & AGENT FRAMEWORKS
+# ============================================================================
+
 .agent/
 .agents/
 .gemini/
 .antigravity/
 brain/
 **/brain/
+.opencode/
+opencode.json
 
-# Python / Backend
-**/venv/
-**/__pycache__/
-*.pyc
-**/.pytest_cache/
+# ============================================================================
+# CACHE FILES
+# ============================================================================
+
+# Application caches
 **/catalog_cache.json
+**/*.cache
 
-# Go
-**/api
-**/vendor/
-*.exe
+# System caches
+**/.fseventsd
+**/.TemporaryItems
+**/node_modules/.cache/
 
-# Build Caches
-**/.parcel-cache/
-**/.turbo/
-**/.vite/
-**/.vite-env.d.ts
+# ============================================================================
+# PROJECT-SPECIFIC
+# ============================================================================
 
-# Credentials & Secrets
-*.pem
+# Cloud SQL Proxy
+cloud_sql_proxy
+
+# Local data
+backend-go/data/local/
 
 # Electron
 **/electron/dist/
 **/electron/release/
-cloud_sql_proxy
 
-# OpenCode
-.opencode/
-opencode.json
+# Project Documentation (if needed locally)
+AGENTS.md
 
-# Temp files
+# ============================================================================
+# LOCKFILES (Uncomment if you want to ignore them)
+# ============================================================================
+# Note: Generally, lockfiles should be committed for reproducible builds
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+# go.sum
+
+# ============================================================================
+# TEMPORARY FILES
+# ============================================================================
+
 *.bak
+*.tmp
+*.temp
+*.orig
+*.rej
+*.old
+*.save
+
+# ============================================================================
+# TESTING & DEBUGGING
+# ============================================================================
+
+# Jest
+/coverage/
+.nyc_output/
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
