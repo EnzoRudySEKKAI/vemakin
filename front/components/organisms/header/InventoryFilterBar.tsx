@@ -1,9 +1,8 @@
 import React from 'react'
 import { Equipment } from '../../types'
 import { SearchBar } from '../../molecules/SearchBar'
-import { SegmentControl, LayoutToggle } from '../../molecules/SegmentControl'
-import { FilterPills } from '../../molecules/FilterPills'
-import { MetricsGroup } from '../../molecules/MetricBadge'
+import { LayoutToggle } from '../../molecules/SegmentControl'
+import { Select } from '../../atoms/Select'
 
 const INVENTORY_CATEGORIES = ['All', 'Camera', 'Lens', 'Light', 'Filter', 'Audio', 'Tripod', 'Stabilizer', 'Grip', 'Monitoring', 'Wireless', 'Drone', 'Props', 'Other']
 
@@ -41,29 +40,27 @@ export const InventoryFilterBar: React.FC<InventoryFilterBarProps> = ({
       />
 
       <div className="flex items-center gap-3">
-        <div className="flex-1 min-w-0 overflow-x-auto no-scrollbar">
-          <FilterPills
-            options={INVENTORY_CATEGORIES}
-            value={categoryFilter}
-            onChange={onCategoryChange}
-            scrollKey="inventory"
-          />
-        </div>
-      </div>
+        <Select
+          size="sm"
+          value={ownershipFilter}
+          onChange={(e) => onOwnershipChange(e.target.value as 'all' | 'owned' | 'rented')}
+          options={[
+            { value: 'all', label: 'All' },
+            { value: 'owned', label: 'Own' },
+            { value: 'rented', label: 'Rent' }
+          ]}
+          fullWidth={false}
+          className="w-28"
+        />
 
-      <div className="flex items-center gap-3">
-        <div className="flex-1 flex items-center gap-2 min-w-0">
-          <SegmentControl
-            options={[
-              { value: 'all', label: 'All' },
-              { value: 'owned', label: 'Own' },
-              { value: 'rented', label: 'Rent' }
-            ]}
-            value={ownershipFilter}
-            onChange={(v) => onOwnershipChange(v as any)}
-            variant="fluid"
-          />
-        </div>
+        <Select
+          size="sm"
+          value={categoryFilter}
+          onChange={(e) => onCategoryChange(e.target.value)}
+          options={INVENTORY_CATEGORIES.map(cat => ({ value: cat, label: cat }))}
+          fullWidth={false}
+          className="flex-1"
+        />
 
         <LayoutToggle
           value={layout}
