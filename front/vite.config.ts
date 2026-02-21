@@ -54,10 +54,7 @@ export default defineConfig(({ mode }) => {
       },
       // Minify for production (using esbuild which is built-in)
       minify: 'esbuild',
-      // Preload critical assets
-      modulePreload: {
-        polyfill: true,
-      },
+      // Let Vite handle module preloading automatically (no polyfill needed)
     },
     optimizeDeps: {
       include: ['react', 'react-dom', 'react-router-dom', 'framer-motion', 'firebase/app', 'firebase/auth', '@emotion/is-prop-valid', '@emotion/styled'],
