@@ -107,10 +107,31 @@ const RootLayoutInner = () => {
 
   // React Query - Data
   const projectsQuery = useProjects()
-  const shotsQuery = useAllShots(currentProjectId || '')
-  const notesQuery = useAllNotes(currentProjectId || '')
-  const tasksQuery = useAllTasks(currentProjectId || '')
-  const inventoryQuery = useInventory()
+  
+  // Defer non-critical data fetching to improve LCP
+  // These don't need to load immediately for the header to render
+  const [shouldLoadProjectData, setShouldLoadProjectData] = useState(false)
+  
+  useEffect(() => {
+    // Small delay to prioritize initial render
+    const timer = setTimeout(() => {
+      setShouldLoadProjectData(true)
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [])
+  
+  const shotsQuery = useAllShots(currentProjectId || '', { 
+    enabled: shouldLoadProjectData && !!currentProjectId 
+  })
+  const notesQuery = useAllNotes(currentProjectId || '', { 
+    enabled: shouldLoadProjectData && !!currentProjectId 
+  })
+  const tasksQuery = useAllTasks(currentProjectId || '', { 
+    enabled: shouldLoadProjectData && !!currentProjectId 
+  })
+  const inventoryQuery = useInventory({ 
+    enabled: shouldLoadProjectData 
+  })
 
   // React Query - Mutations
   const createProjectMutation = useCreateProject()
@@ -403,11 +424,58 @@ const RootLayoutInner = () => {
 
   const isLoading = isLoadingAuth || projectsQuery.isLoading
 
+  // Show Header immediately while data loads to improve LCP
+  // The Header contains the LCP element (h1 title)
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#0F1116] flex flex-col items-center justify-center gap-4 text-gray-900 dark:text-white">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm text-gray-500 dark:text-white/40">Loading your projects...</span>
+      <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#0F1116] text-[#16181D] dark:text-white">
+        <Header
+          ref={headerRef}
+          filterTranslateY={0}
+          currentProject={currentProjectName || ''}
+          setCurrentProject={() => {}}
+          projects={[]}
+          onNavigateToCreateProject={() => {}}
+          viewTitle={viewTitles[mainView as keyof typeof viewTitles] || "Vemakin"}
+          mainView={mainView}
+          setMainView={() => {}}
+          projectProgress={projectProgress}
+          activeDate={activeDate}
+          shotLayout={shotLayout}
+          setShotLayout={() => {}}
+          isDateSelectorOpen={isDateSelectorOpen}
+          setIsDateSelectorOpen={() => {}}
+          handleDateSelect={() => {}}
+          inventoryFilters={inventoryFilters}
+          setInventoryFilters={() => {}}
+          dates={[]}
+          currency={currency}
+          setCurrency={() => {}}
+          shotSearchQuery={shotSearchQuery}
+          setShotSearchQuery={() => {}}
+          shotStatusFilter={shotStatusFilter}
+          setShotStatusFilter={() => {}}
+          postProdFilters={postProdFilters}
+          setPostProdFilters={() => {}}
+          onAddPostProdTask={() => {}}
+          postProdLayout={postProdLayout}
+          setPostProdLayout={() => {}}
+          inventoryLayout={inventoryLayout}
+          setInventoryLayout={() => {}}
+          notesFilters={notesFilters}
+          setNotesFilters={() => {}}
+          notesLayout={notesLayout}
+          setNotesLayout={() => {}}
+          isWideMode={isWideMode}
+          onToggleWideMode={() => {}}
+          onAdd={() => {}}
+          inventory={[]}
+          tasks={[]}
+        />
+        <div className="flex flex-col items-center justify-center gap-4 pt-32">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm text-gray-500 dark:text-white/40">Loading your projects...</span>
+        </div>
       </div>
     )
   }
