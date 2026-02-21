@@ -1,9 +1,12 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useRef } from 'react'
 import { LayoutDashboard, Zap, Package, StickyNote, Plus, Film } from 'lucide-react'
 import { MainView } from '@/types'
 import { Logo } from '@/components/atoms'
 import { prefetchRoute } from '@/utils/prefetch'
 import { ROUTE_PATHS } from '@/router'
+
+// Track prefetched routes to avoid duplicate requests
+const prefetchedRoutes = new Set<string>()
 
 interface NavigationProps {
   mainView: MainView
@@ -15,20 +18,37 @@ interface NavigationProps {
 }
 
 export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, setMainView, onPlusClick, scale = 1, isAnimating = false, hasProjects = true }) => {
+  // Optimized prefetch handler - triggers on interaction start (mousedown/touchstart)
+  // This gives ~100ms head start before click event fires, improving perceived performance
+  const handlePrefetch = useCallback((view: MainView | undefined, isActive: boolean) => {
+    if (!view || isActive) return
+    
+    const path = ROUTE_PATHS[view as keyof typeof ROUTE_PATHS]
+    if (!path || prefetchedRoutes.has(path)) return
+    
+    // Mark as prefetched to avoid duplicate requests
+    prefetchedRoutes.add(path)
+    prefetchRoute(path)
+  }, [])
+
   const NavItem = ({ view, icon: Icon, label, onClick }: { view?: MainView, icon: any, label: string, onClick: () => void }) => {
     const isActive = view ? mainView === view : false
     
+    // Use mousedown for desktop to start prefetch ~100ms before click
+    // This is the key optimization for INP - start loading before user releases mouse
+    const handleMouseDown = useCallback(() => {
+      handlePrefetch(view, isActive)
+    }, [view, isActive, handlePrefetch])
+    
+    // Also prefetch on hover for users who hover before clicking
     const handleMouseEnter = useCallback(() => {
-      // Prefetch route on hover
-      if (view && !isActive) {
-        const path = ROUTE_PATHS[view as keyof typeof ROUTE_PATHS]
-        if (path) prefetchRoute(path)
-      }
-    }, [view, isActive])
+      handlePrefetch(view, isActive)
+    }, [view, isActive, handlePrefetch])
     
     return (
       <button
         onClick={onClick}
+        onMouseDown={handleMouseDown}
         onMouseEnter={handleMouseEnter}
         onFocus={handleMouseEnter}
         className={`flex items-center lg:justify-center xl:justify-start gap-4 px-4 lg:px-2 xl:px-6 py-3.5 rounded-2xl text-[15px] font-semibold transition-all duration-200 group w-full xl:w-auto
@@ -44,18 +64,22 @@ export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, set
   }
 
   const MobileNavItem = ({ icon: Icon, label, active, onClick, view }: { icon: any, label: string, active: boolean, onClick: () => void, view?: MainView }) => {
+    // Use touchstart for mobile to prefetch as early as possible
+    // touchstart fires before click, giving us precious milliseconds
+    const handleTouchStart = useCallback(() => {
+      handlePrefetch(view, active)
+    }, [view, active, handlePrefetch])
+    
+    // Also prefetch on mouseenter for hybrid devices
     const handleMouseEnter = useCallback(() => {
-      if (view && !active) {
-        const path = ROUTE_PATHS[view as keyof typeof ROUTE_PATHS]
-        if (path) prefetchRoute(path)
-      }
-    }, [view, active])
+      handlePrefetch(view, active)
+    }, [view, active, handlePrefetch])
     
     return (
       <button
         onClick={onClick}
         onMouseEnter={handleMouseEnter}
-        onTouchStart={handleMouseEnter}
+        onTouchStart={handleTouchStart}
         className={`flex flex-col items-center justify-center flex-1 gap-1 py-2 transition-all duration-200 pointer-events-auto ${active ? 'text-primary dark:text-white' : 'text-gray-500 dark:text-white/30'}`}
       >
         <Icon size={20} strokeWidth={active ? 2.5 : 2} />

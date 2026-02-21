@@ -547,3 +547,58 @@
 [data-header-row="1"] {
   contain: layout style;
 }
+
+/* 
+ * Page Transition Optimizations for INP
+ * Uses CSS animations on compositor thread instead of Framer Motion
+ * This prevents main thread blocking during navigation
+ */
+
+/* Optimized page transition - uses transform and opacity only for GPU acceleration */
+.page-transition-enter {
+  animation: pageEnter 0.2s cubic-bezier(0.25, 0.4, 0.25, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Disable animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-enter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Content visibility optimization for off-screen content */
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
+
+/* Optimize rendering for route content */
+.route-content {
+  contain: layout style paint;
+}
+
+/* Passive scroll optimization - ensures smooth scrolling */
+.scroll-container {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* GPU acceleration for animated elements */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}

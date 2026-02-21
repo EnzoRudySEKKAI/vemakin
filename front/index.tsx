@@ -1,12 +1,13 @@
 import './index.css'
 import './header_v2.css'
-import React, { useEffect } from 'react'
+import React, { useEffect, startTransition } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
 import { router } from './router'
 import { QueryProvider } from './providers/QueryProvider'
 import { AuthProvider } from './providers/AuthProvider'
 import { ErrorBoundary } from './providers/ErrorBoundary'
+import { initPerformanceTracking } from './utils/performance'
 
 // Dynamically inject preconnect for API endpoint
 const injectApiPreconnect = () => {
@@ -39,6 +40,12 @@ const HydrateFallback = () => (
 const AppContent = () => {
   useEffect(() => {
     injectApiPreconnect()
+    
+    // Initialize performance tracking for INP monitoring
+    // Use startTransition to avoid blocking initial render
+    startTransition(() => {
+      initPerformanceTracking()
+    })
   }, [])
 
   return (
