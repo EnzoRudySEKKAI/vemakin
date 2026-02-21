@@ -185,13 +185,10 @@
         }
     </style>
     
-    <!-- Non-critical CSS loaded asynchronously -->
-    <link rel="preload" href="./index.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="./header_v2.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript>
-        <link rel="stylesheet" href="./index.css">
-        <link rel="stylesheet" href="./header_v2.css">
-    </noscript>
+    <!-- Preload and load stylesheets (standard render-blocking approach) -->
+    <link rel="preload" href="./index.css" as="style">
+    <link rel="stylesheet" href="./index.css">
+    <link rel="stylesheet" href="./header_v2.css">
 </head>
 
 <body>
