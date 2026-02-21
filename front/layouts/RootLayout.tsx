@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback, useMemo, Suspense, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, Suspense, useRef, startTransition } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
 import { 
   InventoryFilters, 
   Currency, 
@@ -56,16 +55,15 @@ const RouteLoading = () => (
   </div>
 )
 
+// Optimized page transition using CSS instead of Framer Motion for better INP
+// CSS transitions run on the compositor thread and don't block the main thread
 const PageTransition = ({ children, ...props }: { children: React.ReactNode } & Record<string, unknown>) => (
-  <motion.div
-    initial={{ opacity: 0, y: 8 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -8 }}
-    transition={{ duration: 0.2, ease: 'easeOut' }}
+  <div
+    className="page-transition-enter"
     {...props}
   >
     {children}
-  </motion.div>
+  </div>
 )
 
 const RootLayoutInner = () => {
@@ -265,10 +263,13 @@ const RootLayoutInner = () => {
     filterTranslateY: effectiveHeaderTranslateY,
   })
 
-  // Navigation
+  // Navigation with startTransition for non-blocking updates
+  // This improves INP by marking navigation as non-urgent
   const handleNavigateToView = useCallback((view: MainView) => {
     const path = ROUTE_PATHS[view as keyof typeof ROUTE_PATHS] || '/'
-    navigate(path)
+    startTransition(() => {
+      navigate(path)
+    })
   }, [navigate])
 
   // View titles
@@ -563,10 +564,11 @@ const RootLayoutInner = () => {
           style={mainView === 'settings' || mainView === 'manage-projects' ? { paddingTop: 0 } : layoutStyle}
         >
           <main className={`mx-auto w-full transition-all duration-500 ease-in-out ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`} style={{ paddingBottom: shouldHideNavigation ? '24px' : '120px' }}>
-            <AnimatePresence mode="wait">
-              <PageTransition key={location.pathname}>
-                <Suspense fallback={<RouteLoading />}>
-                  <Outlet context={{
+            {/* Remove AnimatePresence mode="wait" to prevent blocking navigation
+                The key prop ensures React reconciles properly without waiting for exit animations */}
+            <PageTransition key={location.pathname}>
+              <Suspense fallback={<RouteLoading />}>
+                <Outlet context={{
                     activeData,
                     allInventory,
                     currentProject: currentProjectName || '',
@@ -615,8 +617,7 @@ const RootLayoutInner = () => {
                     showTutorial: () => setShowTutorial(true),
                   }} />
                 </Suspense>
-              </PageTransition>
-            </AnimatePresence>
+            </PageTransition>
           </main>
         </div>
 

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react'
+import React, { lazy, Suspense, useEffect } from 'react'
 import { createBrowserRouter, createRoutesFromElements, Route, Navigate, Outlet, useLocation, useNavigate, useOutletContext } from 'react-router-dom'
 import { RootLayout } from '@/layouts/RootLayout'
 import { ProtectedRoute } from '@/routes/ProtectedRoute'
