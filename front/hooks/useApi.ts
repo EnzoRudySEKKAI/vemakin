@@ -112,8 +112,8 @@ export const useShots = (
   })
 }
 
-export const useAllShots = (projectId: string) => {
-  return useShots(projectId, { limit: 1000 })
+export const useAllShots = (projectId: string, options?: UseQueryOptions<PaginatedResponse<Shot>, Error>) => {
+  return useShots(projectId, { limit: 1000 }, options)
 }
 
 export const useCreateShot = (projectId: string) => {
@@ -213,8 +213,8 @@ export const useNotes = (
   })
 }
 
-export const useAllNotes = (projectId: string) => {
-  return useNotes(projectId, { limit: 1000 })
+export const useAllNotes = (projectId: string, options?: UseQueryOptions<PaginatedResponse<Note>, Error>) => {
+  return useNotes(projectId, { limit: 1000 }, options)
 }
 
 export const useCreateNote = (projectId: string) => {
@@ -266,8 +266,8 @@ export const useTasks = (
   })
 }
 
-export const useAllTasks = (projectId: string) => {
-  return useTasks(projectId, { limit: 1000 })
+export const useAllTasks = (projectId: string, options?: UseQueryOptions<PaginatedResponse<PostProdTask>, Error>) => {
+  return useTasks(projectId, { limit: 1000 }, options)
 }
 
 export const useCreateTask = (projectId: string) => {
