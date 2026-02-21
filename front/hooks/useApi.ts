@@ -130,7 +130,6 @@ export const useCreateShot = (projectId: string) => {
 export const useUpdateShot = (projectId: string) => {
   const queryClient = useQueryClient()
   const queryKey = [...queryKeys.shots(projectId), { limit: 1000 }]
-  const debounceRef = useRef<NodeJS.Timeout | null>(null)
   
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Shot> }) => 
@@ -175,14 +174,28 @@ export const useUpdateShot = (projectId: string) => {
         queryClient.setQueryData(queryKey, context.previousData)
       }
     },
-    // Debounced refetch to sync with server after rapid clicking stops
-    onSettled: () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current)
-      }
-      debounceRef.current = setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: queryKeys.shots(projectId) })
-      }, 2000) // Wait 2 seconds after last click before syncing
+    // Update cache with server response - no invalidation to avoid heavy API call
+    onSuccess: (returnedShot, variables) => {
+      queryClient.setQueryData(queryKey, (old: any) => {
+        if (!old) return old
+        
+        if (Array.isArray(old)) {
+          return old.map((shot: Shot) => 
+            shot.id === variables.id ? returnedShot : shot
+          )
+        }
+        
+        if (old.data && Array.isArray(old.data)) {
+          return {
+            ...old,
+            data: old.data.map((shot: Shot) => 
+              shot.id === variables.id ? returnedShot : shot
+            )
+          }
+        }
+        
+        return old
+      })
     },
   })
 }
@@ -230,12 +243,33 @@ export const useCreateNote = (projectId: string) => {
 
 export const useUpdateNote = (projectId: string) => {
   const queryClient = useQueryClient()
+  const queryKey = [...queryKeys.notes(projectId), { limit: 1000 }]
   
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Note> }) => 
       notesApi.update(id, projectId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.notes(projectId) })
+    onSuccess: (returnedNote, variables) => {
+      // Update cache with server response - no invalidation to avoid heavy API call
+      queryClient.setQueryData(queryKey, (old: any) => {
+        if (!old) return old
+        
+        if (Array.isArray(old)) {
+          return old.map((note: Note) => 
+            note.id === variables.id ? returnedNote : note
+          )
+        }
+        
+        if (old.data && Array.isArray(old.data)) {
+          return {
+            ...old,
+            data: old.data.map((note: Note) => 
+              note.id === variables.id ? returnedNote : note
+            )
+          }
+        }
+        
+        return old
+      })
     },
   })
 }
@@ -283,12 +317,33 @@ export const useCreateTask = (projectId: string) => {
 
 export const useUpdateTask = (projectId: string) => {
   const queryClient = useQueryClient()
+  const queryKey = [...queryKeys.tasks(projectId), { limit: 1000 }]
   
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<PostProdTask> }) => 
       tasksApi.update(id, projectId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.tasks(projectId) })
+    onSuccess: (returnedTask, variables) => {
+      // Update cache with server response - no invalidation to avoid heavy API call
+      queryClient.setQueryData(queryKey, (old: any) => {
+        if (!old) return old
+        
+        if (Array.isArray(old)) {
+          return old.map((task: PostProdTask) => 
+            task.id === variables.id ? returnedTask : task
+          )
+        }
+        
+        if (old.data && Array.isArray(old.data)) {
+          return {
+            ...old,
+            data: old.data.map((task: PostProdTask) => 
+              task.id === variables.id ? returnedTask : task
+            )
+          }
+        }
+        
+        return old
+      })
     },
   })
 }
@@ -331,8 +386,12 @@ export const useUpdateEquipment = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Equipment> }) => 
       inventoryApi.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventory })
+    onSuccess: (returnedEquipment) => {
+      // Update cache immediately with returned data - no invalidation to avoid heavy API call
+      queryClient.setQueryData(queryKeys.inventory, (old: Equipment[] | undefined) => {
+        if (!old) return old
+        return old.map(item => item.id === returnedEquipment.id ? returnedEquipment : item)
+      })
     },
   })
 }
