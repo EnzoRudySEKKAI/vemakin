@@ -107,31 +107,10 @@ const RootLayoutInner = () => {
 
   // React Query - Data
   const projectsQuery = useProjects()
-  
-  // Defer non-critical data fetching to improve LCP
-  // These don't need to load immediately for the header to render
-  const [shouldLoadProjectData, setShouldLoadProjectData] = useState(false)
-  
-  useEffect(() => {
-    // Small delay to prioritize initial render
-    const timer = setTimeout(() => {
-      setShouldLoadProjectData(true)
-    }, 100)
-    return () => clearTimeout(timer)
-  }, [])
-  
-  const shotsQuery = useAllShots(currentProjectId || '', { 
-    enabled: shouldLoadProjectData && !!currentProjectId 
-  })
-  const notesQuery = useAllNotes(currentProjectId || '', { 
-    enabled: shouldLoadProjectData && !!currentProjectId 
-  })
-  const tasksQuery = useAllTasks(currentProjectId || '', { 
-    enabled: shouldLoadProjectData && !!currentProjectId 
-  })
-  const inventoryQuery = useInventory({ 
-    enabled: shouldLoadProjectData 
-  })
+  const shotsQuery = useAllShots(currentProjectId || '')
+  const notesQuery = useAllNotes(currentProjectId || '')
+  const tasksQuery = useAllTasks(currentProjectId || '')
+  const inventoryQuery = useInventory()
 
   // React Query - Mutations
   const createProjectMutation = useCreateProject()

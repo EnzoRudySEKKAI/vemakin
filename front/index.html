@@ -128,70 +128,12 @@
         }
 
         .animate-float { animation: float 3s ease-in-out infinite; }
-        
-        /* Critical header styles for immediate paint */
-        header {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            background-color: rgba(255, 255, 255, 0.7);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-        
-        .dark header {
-            background-color: rgba(22, 24, 29, 0.7);
-            border-bottom-color: rgba(255, 255, 255, 0.05);
-        }
-        
-        h1 {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: #111827;
-            line-height: 1.4;
-            margin: 0;
-        }
-        
-        .dark h1 {
-            color: #ffffff;
-        }
-        
-        p {
-            margin: 0;
-            line-height: 1.5;
-        }
-        
-        button {
-            font-family: inherit;
-            cursor: pointer;
-            border: none;
-            background: none;
-        }
-        
-        .app-container {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.3s ease-out forwards;
-        }
     </style>
     
-    <!-- Non-critical CSS loaded asynchronously -->
-    <link rel="preload" href="./index.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="./header_v2.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript>
-        <link rel="stylesheet" href="./index.css">
-        <link rel="stylesheet" href="./header_v2.css">
-    </noscript>
+    <!-- Preload and load stylesheets (standard render-blocking approach) -->
+    <link rel="preload" href="./index.css" as="style">
+    <link rel="stylesheet" href="./index.css">
+    <link rel="stylesheet" href="./header_v2.css">
 </head>
 
 <body>
