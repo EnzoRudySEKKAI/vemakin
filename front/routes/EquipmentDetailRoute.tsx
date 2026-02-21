@@ -10,37 +10,44 @@ export const EquipmentDetailRoute = () => {
     const { id } = useParams<{ id: string }>()
     const ctx = useRouteContext()
     const [isLoading, setIsLoading] = useState(true)
-    const [item, setItem] = useState<Equipment | null>(null)
+    const [itemWithSpecs, setItemWithSpecs] = useState<Equipment | null>(null)
+
+    // Get item from inventory cache - this updates automatically when mutations complete
+    const item = ctx.allInventory.find(e => e.id === id)
 
     useEffect(() => {
-        const loadEquipment = async () => {
-            if (!id) return
-            
-            // Check if we already have this item in store
-            const existingItem = ctx.allInventory.find(e => e.id === id)
-            
-            if (existingItem && existingItem.specs && Object.keys(existingItem.specs).length > 0) {
-                // Already have full details with specs
-                setItem(existingItem)
+        const loadSpecs = async () => {
+            if (!id || !item) {
                 setIsLoading(false)
-            } else {
-                // Fetch full details including specs from API
-                try {
-                    const detailedItem = await equipmentService.getById(id)
-                    if (detailedItem) {
-                        setItem(detailedItem)
-                    }
-                } catch (error) {
-                    console.error('Failed to load equipment:', error)
-                }
-                setIsLoading(false)
+                return
             }
+
+            // If we already have specs, use them
+            if (item.specs && Object.keys(item.specs).length > 0) {
+                setItemWithSpecs(item)
+                setIsLoading(false)
+                return
+            }
+
+            // Fetch full details including specs from API
+            try {
+                const detailedItem = await equipmentService.getById(id)
+                if (detailedItem) {
+                    setItemWithSpecs(detailedItem)
+                }
+            } catch (error) {
+                console.error('Failed to load equipment specs:', error)
+                // Fall back to item without specs
+                setItemWithSpecs(item)
+            }
+            setIsLoading(false)
         }
 
-        loadEquipment()
-    }, [id])
+        loadSpecs()
+    }, [id, item])
 
-    if (isLoading) {
+    // Show skeleton while data is loading
+    if (ctx.isLoading.inventory || isLoading) {
         return <DetailViewSkeleton />
     }
 
@@ -51,6 +58,9 @@ export const EquipmentDetailRoute = () => {
             </div>
         )
     }
+
+    // Use item with specs if available, otherwise use basic item
+    const displayItem = itemWithSpecs || item
 
     // Find shots that use this equipment in the current project
     const shotsUsingEquipment = ctx.activeData.shots
@@ -67,7 +77,7 @@ export const EquipmentDetailRoute = () => {
 
     return (
         <EquipmentDetailView
-            item={item}
+            item={displayItem}
             onClose={() => ctx.navigate('/dashboard/inventory')}
             projectData={projectData}
             involvedProjects={involvedProjects}
