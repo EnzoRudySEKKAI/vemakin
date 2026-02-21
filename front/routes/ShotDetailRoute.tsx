@@ -2,12 +2,18 @@ import React from 'react'
 import { useParams } from 'react-router-dom'
 import { useRouteContext } from '@/hooks/useRouteContext'
 import { ShotDetailView } from '@/components/shots/ShotDetailView'
+import { DetailViewSkeleton } from '@/components/ui/DetailViewSkeleton'
 
 export const ShotDetailRoute = () => {
     const { id } = useParams<{ id: string }>()
     const ctx = useRouteContext()
 
     const selectedShot = ctx.activeData.shots.find(s => s.id === id)
+
+    // Show skeleton while data is loading, not "not found" error
+    if (ctx.isLoading.shots) {
+        return <DetailViewSkeleton />
+    }
 
     if (!selectedShot) {
         return (

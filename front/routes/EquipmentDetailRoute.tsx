@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useRouteContext } from '@/hooks/useRouteContext'
 import { EquipmentDetailView } from '@/components/inventory/EquipmentDetailView'
+import { DetailViewSkeleton } from '@/components/ui/DetailViewSkeleton'
 import { Equipment } from '@/types'
 import { equipmentService } from '@/api/services/equipment'
 
@@ -40,14 +41,7 @@ export const EquipmentDetailRoute = () => {
     }, [id])
 
     if (isLoading) {
-        return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <div className="animate-pulse flex flex-col items-center">
-                    <div className="h-8 w-8 bg-white/10 rounded-full mb-4"></div>
-                    <p className="text-white/40 text-sm">Loading equipment details...</p>
-                </div>
-            </div>
-        )
+        return <DetailViewSkeleton />
     }
 
     if (!item) {
