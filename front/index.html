@@ -3,9 +3,38 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0F1116">
+    <meta name="description" content="Vemakin - Production OS for film and video production management. Plan shots, manage equipment, track post-production, and collaborate with your team.">
+    <meta name="keywords" content="film production, video production, production management, shot planning, equipment management, post-production">
+    <meta name="author" content="Vemakin">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://vemakin.web.app/">
+    <meta property="og:title" content="Vemakin - Production OS">
+    <meta property="og:description" content="Production OS for film and video production management. Plan shots, manage equipment, and collaborate.">
+    <meta property="og:image" content="https://vemakin.web.app/og-image.png">
+    <meta property="og:site_name" content="Vemakin">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://vemakin.web.app/">
+    <meta name="twitter:title" content="Vemakin - Production OS">
+    <meta name="twitter:description" content="Production OS for film and video production management. Plan shots, manage equipment, and collaborate.">
+    <meta name="twitter:image" content="https://vemakin.web.app/og-image.png">
+    
     <title>Vemakin - Production OS</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="mask-icon" href="/favicon.svg" color="#4E47DD">
+    <meta name="msapplication-TileColor" content="#0F1116">
+    
     <style>
         * {
             margin: 0;
@@ -100,45 +129,29 @@
 
         .animate-float { animation: float 3s ease-in-out infinite; }
     </style>
+    
+    <!-- Preload critical assets -->
     <link rel="modulepreload" href="./index.tsx">
     <link rel="stylesheet" href="./index.css">
     <link rel="stylesheet" href="./header_v2.css">
     
-    <!-- DNS Prefetch and Preconnect for API -->
-    <link rel="dns-prefetch" href="https://vemakin-api-1031827787794.europe-west1.run.app">
-    <link rel="preconnect" href="https://vemakin-api-1031827787794.europe-west1.run.app" crossorigin>
-    
-    <!-- Preload critical fonts (if using Google Fonts) -->
+    <!-- Preconnect for API (injected via JavaScript) -->
+    <!-- Preload critical fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 
 <body>
-    <div id="initial-loader">
-        <div class="loader-logo">
+    <div id="initial-loader" role="status" aria-live="polite" aria-busy="true" aria-label="Loading application">
+        <div class="loader-logo" aria-hidden="true">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/><path d="m14.31 8 5.74 9.94"/><path d="M9.69 8h11.48"/><path d="m7.38 12 5.74-9.94"/><path d="M9.69 16 3.95 6.06"/><path d="M14.31 16H2.83"/><path d="m16.62 12-5.74 9.94"/>
             </svg>
         </div>
-
-        <div class="loader-spinner"></div>
+        <div class="loader-spinner" aria-hidden="true"></div>
+        <span class="sr-only">Loading Vemakin...</span>
     </div>
     <div id="root"></div>
-    
-    <!-- Service Worker for offline support and caching -->
-    <script>
-        // Register service worker for better caching
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                // Prefetch hint for browser - warm up the connection
-                const link = document.createElement('link');
-                link.rel = 'prefetch';
-                link.as = 'document';
-                link.href = '/dashboard';
-                document.head.appendChild(link);
-            });
-        }
-    </script>
     
     <script type="module" src="./index.tsx"></script>
 </body>
