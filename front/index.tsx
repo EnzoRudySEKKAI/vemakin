@@ -1,11 +1,34 @@
 import './index.css'
 import './header_v2.css'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
 import { router } from './router'
 import { QueryProvider } from './providers/QueryProvider'
 import { AuthProvider } from './providers/AuthProvider'
+import { ErrorBoundary } from './providers/ErrorBoundary'
+
+// Dynamically inject preconnect for API endpoint
+const injectApiPreconnect = () => {
+  const apiUrl = import.meta.env.VITE_API_URL
+  if (apiUrl) {
+    try {
+      const url = new URL(apiUrl)
+      const link = document.createElement('link')
+      link.rel = 'preconnect'
+      link.href = `${url.protocol}//${url.hostname}`
+      link.crossOrigin = 'anonymous'
+      document.head.appendChild(link)
+      
+      const dnsPrefetch = document.createElement('link')
+      dnsPrefetch.rel = 'dns-prefetch'
+      dnsPrefetch.href = `${url.protocol}//${url.hostname}`
+      document.head.appendChild(dnsPrefetch)
+    } catch {
+      // Invalid URL, skip injection
+    }
+  }
+}
 
 const HydrateFallback = () => (
   <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#0F1116] flex items-center justify-center">
@@ -13,12 +36,24 @@ const HydrateFallback = () => (
   </div>
 )
 
+const AppContent = () => {
+  useEffect(() => {
+    injectApiPreconnect()
+  }, [])
+
+  return (
+    <QueryProvider>
+      <AuthProvider>
+        <RouterProvider router={router} hydrateFallbackElement={<HydrateFallback />} />
+      </AuthProvider>
+    </QueryProvider>
+  )
+}
+
 const App = () => (
-  <QueryProvider>
-    <AuthProvider>
-      <RouterProvider router={router} hydrateFallbackElement={<HydrateFallback />} />
-    </AuthProvider>
-  </QueryProvider>
+  <ErrorBoundary>
+    <AppContent />
+  </ErrorBoundary>
 )
 
 const container = document.getElementById('root')
