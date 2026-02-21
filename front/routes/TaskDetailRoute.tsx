@@ -2,12 +2,18 @@ import React from 'react'
 import { useParams } from 'react-router-dom'
 import { useRouteContext } from '@/hooks/useRouteContext'
 import { TaskDetailView } from '@/components/postprod/TaskDetailView'
+import { DetailViewSkeleton } from '@/components/ui/DetailViewSkeleton'
 
 export const TaskDetailRoute = () => {
     const { id } = useParams<{ id: string }>()
     const ctx = useRouteContext()
 
     const task = ctx.activeData.tasks.find(t => t.id === id)
+
+    // Show skeleton while data is loading, not "not found" error
+    if (ctx.isLoading.tasks) {
+        return <DetailViewSkeleton />
+    }
 
     if (!task) {
         return (

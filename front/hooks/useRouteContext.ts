@@ -8,6 +8,13 @@ export interface RouteContext {
         tasks: PostProdTask[]
         notes: Note[]
     }
+    isLoading: {
+        shots: boolean
+        tasks: boolean
+        notes: boolean
+        inventory: boolean
+        projects: boolean
+    }
     allInventory: Equipment[]
     currentProject: string
     setCurrentProject: (name: string) => void

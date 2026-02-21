@@ -615,6 +615,13 @@ const RootLayoutInner = () => {
                     handleOpenActionSuite,
                     navigate,
                     showTutorial: () => setShowTutorial(true),
+                    isLoading: {
+                      shots: shotsQuery.isLoading,
+                      tasks: tasksQuery.isLoading,
+                      notes: notesQuery.isLoading,
+                      inventory: inventoryQuery.isLoading,
+                      projects: projectsQuery.isLoading,
+                    },
                   }} />
                 </Suspense>
             </PageTransition>
