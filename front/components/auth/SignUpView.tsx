@@ -65,7 +65,7 @@ export const SignUpView: React.FC<SignUpViewProps> = ({ onBack, onSignUp }) => {
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-[10px] font-semibold text-muted-foreground  tracking-wider">
+                  <Label htmlFor="name" className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                     Full Name
                   </Label>
                   <div className="relative">
@@ -82,7 +82,7 @@ export const SignUpView: React.FC<SignUpViewProps> = ({ onBack, onSignUp }) => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-[10px] font-semibold text-muted-foreground  tracking-wider">
+                  <Label htmlFor="email" className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                     Email Address
                   </Label>
                   <div className="relative">
@@ -99,7 +99,7 @@ export const SignUpView: React.FC<SignUpViewProps> = ({ onBack, onSignUp }) => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-[10px] font-semibold text-muted-foreground  tracking-wider">
+                  <Label htmlFor="password" className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                     Password
                   </Label>
                   <div className="relative">

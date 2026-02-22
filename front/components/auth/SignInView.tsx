@@ -59,7 +59,7 @@ export const SignInView: React.FC<SignInViewProps> = ({ onBack, onSignIn }) => {
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-[10px] font-semibold text-muted-foreground  tracking-wider">
+                  <Label htmlFor="email" className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                     Email Address
                   </Label>
                   <div className="relative">
@@ -77,7 +77,7 @@ export const SignInView: React.FC<SignInViewProps> = ({ onBack, onSignIn }) => {
 
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <Label htmlFor="password" className="text-[10px] font-semibold text-muted-foreground  tracking-wider">
+                    <Label htmlFor="password" className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                       Password
                     </Label>
                     <Link 
