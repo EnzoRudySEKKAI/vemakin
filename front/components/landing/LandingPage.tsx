@@ -381,20 +381,20 @@ const Benefits = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
             >
-              <GlassCard className="p-6 h-full border-white/5 hover:border-primary/30 transition-all group">
+              <div className="p-6 h-full border border-white/10 bg-black/40 hover:border-primary/50 hover:bg-primary/5 transition-all group">
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 border border-white/10 flex items-center justify-center shrink-0 group-hover:border-primary/50 group-hover:bg-primary/5 transition-all">
-                    <benefit.icon size={20} className="text-white/60 group-hover:text-primary transition-colors" strokeWidth={1.5} />
+                  <div className="w-10 h-10 border border-white/20 flex items-center justify-center shrink-0 group-hover:border-primary group-hover:bg-primary/10 transition-all">
+                    <benefit.icon size={20} className="text-primary" strokeWidth={1.5} />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-2">
                       <h3 className="text-sm font-semibold text-white">{benefit.title}</h3>
-                      <span className="font-mono text-[10px] text-white/20">0{i + 1}</span>
+                      <span className="font-mono text-[10px] text-primary/60">0{i + 1}</span>
                     </div>
                     <p className="text-sm text-white/40 leading-relaxed">{benefit.description}</p>
                   </div>
                 </div>
-              </GlassCard>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -436,7 +436,7 @@ const HowItWorks = () => {
           <div className="flex-1 h-px bg-white/10" />
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           {steps.map((step, i) => (
             <motion.div
               key={step.number}
@@ -444,13 +444,20 @@ const HowItWorks = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="relative w-full"
+              className="relative"
             >
-              <div className="font-mono text-5xl font-bold text-white/5 mb-4">{step.number}</div>
-              <h3 className="text-base font-semibold text-white mb-2">{step.title}</h3>
-              <p className="text-sm text-white/40 leading-relaxed">{step.description}</p>
+              <div className="h-full border border-white/10 bg-black/40 p-6 hover:border-primary/50 transition-all group">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="font-mono text-xs text-primary/60">STEP_{step.number}</span>
+                  <div className="w-6 h-6 border border-white/20 flex items-center justify-center group-hover:border-primary group-hover:bg-primary/10 transition-all">
+                    <span className="font-mono text-[10px] text-white/60 group-hover:text-primary">{String(i + 1).padStart(2, '0')}</span>
+                  </div>
+                </div>
+                <h3 className="text-sm font-semibold text-white mb-3">{step.title}</h3>
+                <p className="text-sm text-white/40 leading-relaxed">{step.description}</p>
+              </div>
               {i < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-8 right-0 w-full h-px bg-gradient-to-r from-white/10 to-transparent" />
+                <div className="hidden lg:block absolute top-1/2 -right-2 w-4 h-px bg-white/20" />
               )}
             </motion.div>
           ))}
@@ -493,19 +500,19 @@ const FAQ = () => {
           <div className="flex-1 h-px bg-white/10" />
         </div>
 
-        <Accordion type="single" collapsible className="space-y-3">
+        <Accordion type="single" collapsible className="space-y-2">
           {faqs.map((faq, i) => (
-            <GlassCard key={i} className="border-0">
+            <div key={i} className="border border-white/10 bg-black/40">
               <AccordionItem value={`item-${i}`} className="border-0">
-                <AccordionTrigger className="text-sm font-medium text-white hover:no-underline px-6 py-5">
-                  <span className="font-mono text-xs text-white/30 mr-3">[{String(i + 1).padStart(2, '0')}]</span>
-                  {faq.question}
+                <AccordionTrigger className="text-sm font-medium text-white hover:no-underline px-5 py-4 hover:bg-white/5 transition-colors [&[data-state=open]]:bg-white/5 [&[data-state=open]]:border-b [&[data-state=open]]:border-white/10">
+                  <span className="font-mono text-xs text-primary/60 mr-3">[{String(i + 1).padStart(2, '0')}]</span>
+                  <span className="text-left">{faq.question}</span>
                 </AccordionTrigger>
-                <AccordionContent className="text-sm text-white/50 leading-relaxed px-6 pb-5">
+                <AccordionContent className="text-sm text-white/50 leading-relaxed px-5 pb-4 pt-2">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
-            </GlassCard>
+            </div>
           ))}
         </Accordion>
       </div>
