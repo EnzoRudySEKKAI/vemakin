@@ -2,6 +2,8 @@ import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useHeaderActions } from '../../context/HeaderActionsContext'
 import { Package, Film, Zap, StickyNote } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
 export type FormType = 'gear' | 'shot' | 'task' | 'note'
 
@@ -45,37 +47,36 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
   const headerActions = (
     <div className="flex items-center gap-3">
       {/* Form Type Tabs */}
-      <div className="flex items-center gap-1.5 bg-gray-100/50 dark:bg-white/5 rounded-full p-1">
+      <ToggleGroup 
+        type="single" 
+        value={formType} 
+        onValueChange={(value) => value && onSwitchForm(value as FormType)}
+        className="bg-muted/50 rounded-full p-1"
+      >
         {FORM_TYPES.map(ft => {
           const Icon = ft.icon
-          const isActive = formType === ft.id
           return (
-            <button
+            <ToggleGroupItem
               key={ft.id}
-              onClick={() => onSwitchForm(ft.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${isActive
-                ? 'bg-primary text-white shadow-sm'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
+              value={ft.id}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             >
               <Icon size={14} strokeWidth={2.5} />
               <span className="hidden sm:inline">{ft.label}</span>
-            </button>
+            </ToggleGroupItem>
           )
         })}
-      </div>
+      </ToggleGroup>
 
       {/* Submit Button */}
-      <button
+      <Button
         onClick={onSubmit}
         disabled={submitDisabled}
-        className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${submitDisabled
-          ? 'bg-gray-200 dark:bg-white/10 text-gray-400 cursor-not-allowed'
-          : 'bg-primary text-white hover:bg-primary shadow-sm'
-          }`}
+        size="sm"
+        className="rounded-full"
       >
         {submitLabel}
-      </button>
+      </Button>
     </div>
   )
 
@@ -106,7 +107,7 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
       transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
       className={`
         flex flex-col 
-        bg-[#F2F2F7] dark:bg-[#0F1116] 
+        bg-background
         ${className}
       `}
     >
@@ -170,7 +171,7 @@ export const FormFieldGroup: React.FC<FormFieldGroupProps> = ({
 }) => {
   return (
     <div className={`flex flex-col gap-1 min-w-0 ${className}`}>
-      <span className="detail-subtitle dark:text-white">{label}</span>
+      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
       {children}
     </div>
   )

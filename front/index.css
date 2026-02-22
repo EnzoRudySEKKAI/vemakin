@@ -1,6 +1,16 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Force Tailwind v4 to scan all component files */
+@source "./components/**/*.{tsx,ts}";
+@source "./routes/**/*.{tsx,ts}";
+@source "./layouts/**/*.{tsx,ts}";
+@source "./hooks/**/*.{tsx,ts}";
+@source "./providers/**/*.{tsx,ts}";
+@source "./stores/**/*.{tsx,ts}";
+@source "./components/landing/**/*.{tsx,ts}";
+@source "./*.{tsx,ts,html}";
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
