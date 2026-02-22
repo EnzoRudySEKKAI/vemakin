@@ -3,7 +3,7 @@ import { Briefcase, Check } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useHeaderActions } from '@/context/HeaderActionsContext'
 import { Input, Textarea } from '@/components/atoms'
-import { Card } from '@/components/ui/Card'
+import { TerminalCard } from '@/components/ui/TerminalCard'
 
 interface ProjectFormPageProps {
   onClose: () => void
@@ -71,8 +71,8 @@ export const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
       className="flex flex-col"
     >
       <div className="max-w-3xl w-full mx-auto py-4 md:py-8 px-0 pt-6 pb-32">
-        <Card title="Project identity" className="mb-8">
-          <div className="p-6 space-y-10">
+        <TerminalCard header="Project identity" className="mb-8">
+          <div className="space-y-8">
             <div className="w-full">
               <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Project name</span>
               <div className="relative">
@@ -100,10 +100,10 @@ export const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
               />
             </div>
           </div>
-        </Card>
+        </TerminalCard>
 
-        <div className="flex items-start gap-4 p-4 bg-primary/5 border border-primary/10 rounded-xl">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+        <div className="flex items-start gap-4 p-4 bg-primary/5 border border-primary/10">
+          <div className="w-10 h-10 bg-primary/10 flex items-center justify-center text-primary shrink-0">
             <Check size={20} strokeWidth={2.5} />
           </div>
           <div className="space-y-1">

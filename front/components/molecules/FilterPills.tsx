@@ -25,10 +25,10 @@ export const FilterPills: React.FC<FilterPillsProps> = ({
             key={option}
             onClick={() => onChange(option)}
             className={`
-              px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all
+              px-4 py-2 text-xs font-mono  tracking-wider whitespace-nowrap transition-all
               ${isActive 
-                ? 'bg-primary text-white' 
-                : 'bg-white dark:bg-[#16181D] text-gray-600 dark:text-white/50 border border-gray-200 dark:border-white/[0.05] hover:border-gray-300 dark:hover:border-white/[0.1] hover:text-gray-800 dark:hover:text-white/70'
+                ? 'bg-primary text-primary-foreground border border-primary' 
+                : 'bg-[#fafafa] dark:bg-[#16181D] text-gray-600 dark:text-white/50 border border-gray-300 dark:border-white/[0.05] hover:border-primary/30 dark:hover:border-white/[0.1] hover:text-gray-800 dark:hover:text-white/70'
               }
             `}
           >

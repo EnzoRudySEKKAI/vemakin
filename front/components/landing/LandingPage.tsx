@@ -5,7 +5,7 @@ import {
   ArrowRight, Check, Film, Package, Zap, StickyNote, 
   Menu, X, Play, Clock, MapPin,
   ChevronDown, Sun, Moon, Sparkles, Camera, Clapperboard,
-  FilmIcon
+  FilmIcon, Terminal, Cpu, Grid3X3, Command
 } from 'lucide-react'
 
 import { Logo } from '@/components/atoms'
@@ -31,90 +31,96 @@ const throttle = <T extends (...args: any[]) => any>(func: T, limit: number) => 
   }
 }
 
+// --- TERMINAL STYLE COMPONENTS ---
+
+const TerminalButton = ({ 
+  children, 
+  onClick, 
+  variant = 'primary',
+  className = '' 
+}: { 
+  children: React.ReactNode
+  onClick?: () => void
+  variant?: 'primary' | 'secondary'
+  className?: string
+}) => (
+  <button
+    onClick={onClick}
+    className={`
+      group relative px-6 py-3 font-mono text-sm tracking-wider 
+      border transition-all duration-300
+      ${variant === 'primary' 
+        ? 'border-primary text-primary hover:bg-primary hover:text-primary-foreground' 
+        : 'border-white/20 text-white/70 hover:border-white/40 hover:text-white'
+      }
+      ${className}
+    `}
+  >
+    <span className="flex items-center gap-3">
+      {children}
+      <span className="opacity-0 group-hover:opacity-100 transition-opacity">{'>>'}</span>
+    </span>
+  </button>
+)
+
+const StatusBadge = ({ text }: { text: string }) => (
+  <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-primary/30 bg-primary/5">
+    <span className="w-1.5 h-1.5 bg-primary animate-pulse rounded-full" />
+    <span className="font-mono text-[10px] text-primary tracking-widest ">{text}</span>
+  </div>
+)
+
 // --- MOCK UI COMPONENTS ---
 
 const MockShotCard = ({ title, scene, time, location, status = 'pending', active = false }: any) => (
-  <div className={`p-5 rounded-[28px] bg-white/95 dark:bg-[#16181D]/95 border border-white/20 dark:border-white/5 shadow-sm transition-all ${active ? 'ring-1 ring-primary/50 shadow-xl' : 'opacity-60'}`}>
+  <div className={`p-4 border transition-all ${active ? 'border-primary bg-primary/5' : 'border-white/10 bg-[#0a0a0a]/40'} backdrop-blur-sm`}>
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
-        <span className="px-2.5 py-1 bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white text-[10px] font-bold rounded-lg border border-gray-200 dark:border-white/10">
-          Scene {scene}
+        <span className="px-2 py-0.5 border border-white/20 text-white/80 text-[10px] font-mono  tracking-wider">
+          Scene_{scene}
         </span>
-        <span className="px-2.5 py-1 rounded-lg bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 border border-transparent flex items-center gap-1.5 text-[10px] font-bold">
-          <Clock size={10} strokeWidth={2.5} /> {time}
+        <span className="px-2 py-0.5 border border-white/10 text-white/50 text-[10px] font-mono flex items-center gap-1.5">
+          <Clock size={9} /> {time}
         </span>
       </div>
 
       <div className="my-1">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{title}</h3>
-        <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 font-medium text-sm mt-1">
-          <MapPin size={12} strokeWidth={2.5} />
+        <h3 className="text-base font-medium text-white leading-tight">{title}</h3>
+        <div className="flex items-center gap-2 text-white/40 text-xs mt-1 font-mono">
+          <MapPin size={10} />
           <span className="truncate">{location}</span>
         </div>
       </div>
 
       <div className="flex items-center justify-between mt-2">
         <div className="flex items-center gap-2">
-          <div className="h-8 px-3 rounded-lg flex items-center gap-1.5 text-[10px] font-bold border bg-white/50 dark:bg-white/5 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-white/10">
-            Checklist <ChevronDown size={12} />
+          <div className="px-2 py-1 border border-white/10 text-white/50 text-[9px] font-mono ">
+            Checklist
           </div>
-          <div className="flex items-center gap-1.5 text-primary text-[10px] font-bold">
-            <Package size={14} strokeWidth={2.5} /> <span>Gear 4/4</span>
+          <div className="flex items-center gap-1.5 text-primary text-[10px] font-mono">
+            <Package size={12} /> <span>Gear:4/4</span>
           </div>
         </div>
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center border ${status === 'done' ? 'bg-primary text-white border-transparent' : 'bg-white/50 dark:bg-white/5 border-gray-200 dark:border-white/10'}`}>
-          <Check size={14} strokeWidth={3} />
+        <div className={`w-6 h-6 flex items-center justify-center border ${status === 'done' ? 'bg-primary border-primary text-black' : 'border-white/20 text-white/40'}`}>
+          <Check size={12} strokeWidth={3} />
         </div>
-      </div>
-    </div>
-  </div>
-)
-
-const MockInventoryCard = () => (
-  <div className="p-5 flex flex-col h-full rounded-[28px] bg-white/95 dark:bg-[#16181D]/95 border border-white/20 dark:border-white/5 shadow-xl ring-1 ring-primary/20">
-    <div className="flex justify-between items-start mb-4 gap-2">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-          <Film size={18} className="text-primary" />
-        </div>
-        <div>
-          <h3 className="text-sm font-bold text-white leading-tight uppercase tracking-tight">RED V-RAPTOR</h3>
-          <p className="text-[10px] text-white/40 font-medium mt-0.5 tracking-wider uppercase">A-CAM Unit</p>
-        </div>
-      </div>
-      <div className="text-right">
-        <div className="text-sm font-bold text-white leading-none">$1,200</div>
-        <div className="text-[10px] text-white/40 font-bold mt-1 uppercase tracking-widest">/ Day</div>
-      </div>
-    </div>
-
-    <div className="flex gap-2 mb-5">
-      <span className="px-2 py-1 rounded-md text-[9px] font-bold bg-white/5 text-white/50 uppercase tracking-widest border border-white/5">Camera</span>
-      <span className="px-2 py-1 rounded-md text-[9px] font-bold bg-primary/10 text-primary uppercase tracking-widest border border-primary/20">Owned</span>
-    </div>
-
-    <div className="mt-auto grid grid-cols-2 gap-2 bg-white/5 p-3 rounded-xl border border-white/10">
-      <div className="flex flex-col">
-        <span className="text-white/20 text-[9px] font-bold uppercase tracking-widest leading-none mb-1.5">Sensor</span>
-        <span className="text-white text-xs font-semibold">8K VV</span>
-      </div>
-      <div className="flex flex-col">
-        <span className="text-white/20 text-[9px] font-bold uppercase tracking-widest leading-none mb-1.5">Mount</span>
-        <span className="text-white text-xs font-semibold">PL Mount</span>
       </div>
     </div>
   </div>
 )
 
 const MockTimelineHeader = () => (
-  <div className="px-6 py-4 flex items-center justify-between bg-[#16181D] border-b border-white/[0.05]">
-    <div className="text-sm font-bold text-white tracking-tight uppercase">Monday, Oct 24</div>
-    <div className="flex items-center gap-4">
-      <div className="flex items-center gap-1.5 text-[10px] font-bold text-orange-400/80">
-        <Sun size={12} strokeWidth={2.5} /> 06:12
+  <div className="px-4 py-3 flex items-center justify-between bg-[#0a0a0a]/60 border-b border-white/10">
+    <div className="flex items-center gap-2">
+      <Terminal size={12} className="text-primary" />
+      <span className="text-xs font-mono text-white/60  tracking-wider">Monday_Oct_24</span>
+    </div>
+    <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1.5 text-[10px] font-mono text-orange-400">
+        <Sun size={10} /> 06:12
       </div>
-      <div className="flex items-center gap-1.5 text-[10px] font-bold text-primary/80">
-        <Moon size={12} strokeWidth={2.5} /> 18:45
+      <div className="flex items-center gap-1.5 text-[10px] font-mono text-primary">
+        <Moon size={10} /> 18:45
       </div>
     </div>
   </div>
@@ -136,34 +142,43 @@ const Navbar = ({ scrolled, onNavigate }: { scrolled: boolean, onNavigate: (path
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
-        scrolled ? 'bg-[#0F1116]/95 backdrop-blur-xl border-b border-white/5 py-3' : 'py-6 bg-transparent'
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 border-b ${
+        scrolled ? 'bg-[#0a0a0a]/90 border-white/10 py-3 backdrop-blur-xl' : 'bg-transparent border-transparent py-6'
       }`}
-      style={{ willChange: 'background-color, padding' }}
     >
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-        <Logo variant="default" size="md" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Logo variant="default" size="md" />
+        </div>
         
-        <div className="hidden md:flex items-center gap-10">
+        <div className="hidden md:flex items-center gap-8">
           {['Features', 'How it Works', 'FAQ'].map((item) => (
             <button 
               key={item}
               onClick={() => scrollToSection(item.toLowerCase().replace(/\s+/g, '-'))}
-              className="text-sm font-semibold text-white/50 hover:text-white transition-colors tracking-tight"
+              className="text-xs font-mono text-white/40 hover:text-white transition-colors tracking-widest "
             >
               {item}
             </button>
           ))}
         </div>
 
-        <div className="hidden md:flex items-center gap-6">
-          <button onClick={() => navigate('/auth')} className="text-sm font-semibold text-white/70 hover:text-white transition-colors">Sign In</button>
-          <Button size="default" onClick={() => navigate('/auth')} className="shadow-2xl shadow-primary/20 px-6">
-            Get Started
-          </Button>
+        <div className="hidden md:flex items-center gap-4">
+          <button 
+            onClick={() => navigate('/auth')} 
+            className="text-xs font-mono text-white/50 hover:text-white transition-colors  tracking-widest"
+          >
+            Sign In
+          </button>
+          <TerminalButton onClick={() => navigate('/auth')}>
+            Initialize
+          </TerminalButton>
         </div>
 
-        <button className="md:hidden p-2 text-white/60 hover:text-white" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+        <button 
+          className="md:hidden p-2 text-white/60 hover:text-white" 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
@@ -174,16 +189,22 @@ const Navbar = ({ scrolled, onNavigate }: { scrolled: boolean, onNavigate: (path
             initial={{ opacity: 0, y: -20 }} 
             animate={{ opacity: 1, y: 0 }} 
             exit={{ opacity: 0, y: -20 }} 
-            style={{ willChange: 'transform, opacity' }} 
-            className="md:hidden absolute top-full left-0 right-0 bg-[#16181D] border-b border-white/10 shadow-2xl overflow-hidden px-6 py-10 flex flex-col gap-8"
+            className="md:hidden absolute top-full left-0 right-0 bg-[#0a0a0a] border-b border-white/10 p-6"
           >
-            {['Features', 'How it Works', 'FAQ'].map((item) => (
-              <button key={item} onClick={() => scrollToSection(item.toLowerCase().replace(/\s+/g, '-'))} className="text-xl font-bold text-white/80 text-left">{item}</button>
-            ))}
-            <div className="h-px bg-white/5 w-full" />
             <div className="flex flex-col gap-4">
-              <Button variant="outline" onClick={() => navigate('/auth')}>Sign In</Button>
-              <Button onClick={() => navigate('/auth')}>Get Started Free</Button>
+              {['Features', 'How it Works', 'FAQ'].map((item) => (
+                <button 
+                  key={item} 
+                  onClick={() => scrollToSection(item.toLowerCase().replace(/\s+/g, '-'))} 
+                  className="text-sm font-mono text-white/60 text-left  tracking-widest hover:text-white"
+                >
+                  {item}
+                </button>
+              ))}
+              <div className="h-px bg-white/10 my-2" />
+              <TerminalButton onClick={() => navigate('/auth')} className="w-full">
+                Initialize
+              </TerminalButton>
             </div>
           </motion.div>
         )}
@@ -199,99 +220,119 @@ const HeroSection = ({ onNavigate }: { onNavigate: (path: string) => void }) => 
   }
 
   return (
-    <section className="relative pt-40 pb-20 md:pt-56 md:pb-32 px-6 overflow-hidden">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none -z-10">
-        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[80px] opacity-40 mix-blend-screen" />
-        <div className="absolute top-20 right-1/4 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[60px] opacity-30 mix-blend-screen" />
-      </div>
+    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0a0a0a]/80" />
 
-      <div className="max-w-7xl mx-auto relative z-10">
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} 
-          style={{ willChange: 'transform, opacity' }}
-          className="text-center"
-        >
-          {/* Pre-headline */}
-          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8">
-            <Sparkles size={14} className="text-primary" />
-            <span className="text-xs font-bold text-white/70 uppercase tracking-widest">Coming Soon</span>
-          </div>
-          
-          {/* Headline */}
-          <h1 className="text-5xl md:text-7xl lg:text-[100px] font-bold tracking-tight text-white mb-6 leading-[0.95]">
-            The Production <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/20">Operating System.</span>
-          </h1>
-          
-          {/* Sub-headline */}
-          <p className="text-lg md:text-xl text-white/40 mb-12 max-w-2xl mx-auto leading-relaxed">
-            Plan your timeline with automated travel calculations, manage technical gear specs, 
-            and bridge the gap between set and post-production.
-          </p>
-          
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button 
-              size="lg" 
-              onClick={() => onNavigate('/auth')} 
-              className="h-14 px-10 text-lg shadow-[0_20px_40px_rgba(78,71,221,0.3)] w-full sm:w-auto"
-            >
-              Join the Waitlist
-              <ArrowRight size={20} className="ml-2" />
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              onClick={() => scrollToSection('how-it-works')} 
-              className="h-14 px-10 text-lg bg-white/5 border-white/10 w-full sm:w-auto hover:bg-white/10"
-            >
-              <Play size={20} fill="currentColor" className="mr-2" />
-              See How It Works
-            </Button>
-          </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* Left - Content */}
+          <motion.div 
+            initial={{ opacity: 0, x: -30 }} 
+            animate={{ opacity: 1, x: 0 }} 
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} 
+          >
+            {/* Status Line */}
+            <div className="mb-6">
+              <StatusBadge text="System Online" />
+            </div>
+            
+            {/* Pre-headline */}
+            <div className="font-mono text-[10px] text-white/30  tracking-[0.3em] mb-4">
+              // VEMAKIN_FEED_ACTIVE — PRODUCTION_OS: READY
+            </div>
+            
+            {/* Headline */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-4 leading-[1.1] break-words">
+              Production
+              <br />
+              <span className="font-mono text-primary">[Operating_System]</span>
+            </h1>
+            
+            {/* Sub-headline */}
+            <p className="text-base md:text-lg text-white/40 mb-8 max-w-md leading-relaxed font-mono">
+              Automated timeline intelligence, gear tracking, and predictive analytics.
+              <br />
+              Engineered for those who move.
+            </p>
+            
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-start gap-4">
+              <TerminalButton onClick={() => onNavigate('/auth')}>
+                Initialize Production
+              </TerminalButton>
+              
+              <TerminalButton 
+                variant="secondary" 
+                onClick={() => scrollToSection('how-it-works')}
+              >
+                View Documentation
+              </TerminalButton>
+            </div>
 
-          {/* Trust badges */}
-          <div className="mt-8 flex items-center justify-center gap-8 text-white/30 text-xs font-bold uppercase tracking-[0.2em]">
-            <span className="flex items-center gap-2"><Check size={14} className="text-emerald-500" /> Free for Early Adopters</span>
-            <span className="flex items-center gap-2"><Check size={14} className="text-emerald-500" /> No Credit Card Required</span>
-          </div>
-        </motion.div>
+            {/* Trust badges */}
+            <div className="mt-8 flex flex-wrap items-center gap-4 sm:gap-6 text-white/30 text-[10px] font-mono  tracking-wider">
+              <span className="flex items-center gap-2">
+                <span className="w-1 h-1 bg-emerald-500 rounded-full" /> 
+                Free for Early Adopters
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="w-1 h-1 bg-emerald-500 rounded-full" /> 
+                No Credit Card
+              </span>
+            </div>
+          </motion.div>
 
-        {/* Hero Visual / Video Placeholder */}
-        <motion.div
-          initial={{ opacity: 0, y: 100, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          style={{ willChange: 'transform, opacity' }}
-          className="mt-16 md:mt-24 relative max-w-5xl mx-auto"
-        >
-          <div className="relative z-10 rounded-[32px] p-2 bg-gradient-to-b from-white/10 to-transparent border border-white/10 shadow-2xl overflow-hidden">
-            <WindowCard 
-              showTrafficLights={true}
-              className="shadow-2xl border-white/5 rounded-[24px]"
-              contentClassName="bg-[#0F1116] overflow-hidden"
-            >
-              <MockTimelineHeader />
-              <div className="p-8 space-y-4">
-                <MockShotCard active title="Opening Scene - Wide Rooftop" scene="12A" time="08:00" location="Grand Central Roof" />
-                
-                {/* Travel Indicator Mock */}
-                <div className="flex items-center justify-center gap-4 py-2 opacity-40">
-                  <div className="h-px flex-1 bg-white/10" />
-                  <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/50">
-                    <MapPin size={10} /> 15m Travel Time
+          {/* Right - Terminal Preview */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="relative w-full"
+          >
+            <div className="relative border border-white/10 bg-[#0a0a0a]/60 backdrop-blur-sm">
+              {/* Terminal Header */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-white/5">
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
                   </div>
-                  <div className="h-px flex-1 bg-white/10" />
+                  <span className="ml-3 text-[10px] font-mono text-white/40">production_timeline.exe</span>
                 </div>
-
-                <MockShotCard title="Dialogue Sequence - Interior" scene="12B" time="10:30" location="Studio B" />
+                <Grid3X3 size={12} className="text-white/20" />
               </div>
-            </WindowCard>
-          </div>
-          <div className="absolute -inset-20 bg-primary/20 blur-[60px] -z-10 opacity-50" />
-        </motion.div>
+              
+              {/* Terminal Content */}
+              <div className="p-6 space-y-3">
+                <MockTimelineHeader />
+                <div className="space-y-2">
+                  <MockShotCard active title="Opening Scene - Wide Rooftop" scene="12A" time="08:00" location="Grand Central Roof" />
+                  
+                  <div className="flex items-center justify-center gap-4 py-1">
+                    <div className="h-px flex-1 bg-white/5" />
+                    <span className="text-[9px] font-mono text-white/30  tracking-widest">15m_travel_time</span>
+                    <div className="h-px flex-1 bg-white/5" />
+                  </div>
+
+                  <MockShotCard title="Dialogue Sequence - Interior" scene="12B" time="10:30" location="Studio B" />
+                </div>
+              </div>
+              
+              {/* Terminal Footer */}
+              <div className="px-4 py-2 border-t border-white/10 bg-white/5 flex items-center justify-between">
+                <span className="text-[9px] font-mono text-white/30">2 shots scheduled</span>
+                <div className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+                  <span className="text-[9px] font-mono text-primary">LIVE</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Glow effect */}
+            <div className="absolute -inset-1 bg-primary/10 blur-3xl -z-10 opacity-50" />
+          </motion.div>
+        </div>
       </div>
     </section>
   )
@@ -322,14 +363,16 @@ const Benefits = () => {
   ]
 
   return (
-    <section id="features" className="py-24 md:py-32 px-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tighter">Everything you need to ship.</h2>
-          <p className="text-lg text-white/40 max-w-2xl mx-auto">Built by filmmakers to solve the fragmentation of modern production management.</p>
+    <section id="features" className="py-24 md:py-32 px-4 sm:px-6 relative">
+      <div className="max-w-7xl mx-auto relative z-10">
+        <div className="flex items-center gap-4 mb-12">
+          <Cpu size={20} className="text-primary" />
+          <h2 className="text-2xl font-bold text-white">Core Modules</h2>
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="font-mono text-xs text-white/30  tracking-widest">V.2.0</span>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-4">
           {benefits.map((benefit, i) => (
             <motion.div
               key={benefit.title}
@@ -337,15 +380,21 @@ const Benefits = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              style={{ willChange: 'transform, opacity' }}
             >
-              <GlassCard className="p-8 h-full hover:border-white/20 transition-all group">
-                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center mb-6 group-hover:bg-primary/10 group-hover:border-primary/20 transition-all">
-                  <benefit.icon size={24} className="text-white/60 group-hover:text-primary transition-colors" strokeWidth={1.5} />
+              <div className="p-6 h-full border border-white/10 bg-black/40 hover:border-primary/50 hover:bg-primary/5 transition-all group">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 border border-white/20 flex items-center justify-center shrink-0 group-hover:border-primary group-hover:bg-primary/10 transition-all">
+                    <benefit.icon size={20} className="text-primary" strokeWidth={1.5} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-sm font-semibold text-white">{benefit.title}</h3>
+                      <span className="font-mono text-[10px] text-primary/60">0{i + 1}</span>
+                    </div>
+                    <p className="text-sm text-white/40 leading-relaxed">{benefit.description}</p>
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-3">{benefit.title}</h3>
-                <p className="text-base text-white/50 leading-relaxed">{benefit.description}</p>
-              </GlassCard>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -358,35 +407,36 @@ const HowItWorks = () => {
   const steps = [
     {
       number: '01',
-      title: 'Plan Your Production',
+      title: 'Initialize Production',
       description: 'Create your project, add locations, and build your shot list with automatic travel time calculations.'
     },
     {
       number: '02',
-      title: 'Manage Your Gear',
+      title: 'Configure Assets',
       description: 'Catalog your equipment with technical specs, track rentals, and link gear to specific shots.'
     },
     {
       number: '03',
-      title: 'Track Post-Production',
-      description: 'Monitor VFX, Color, and Sound tasks through your pipeline with priority-based organization.'
+      title: 'Monitor Pipeline',
+      description: 'Track VFX, Color, and Sound tasks through your pipeline with priority-based organization.'
     },
     {
       number: '04',
-      title: 'Ship Your Film',
+      title: 'Execute Delivery',
       description: 'Export deliverables, share notes with your team, and deliver on time, every time.'
     }
   ]
 
   return (
-    <section id="how-it-works" className="py-24 md:py-32 px-6 bg-[#090A0D]">
+    <section id="how-it-works" className="py-24 md:py-32 px-4 sm:px-6 relative bg-[#0a0a0a]/50">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tighter">How it works?</h2>
-          <p className="text-lg text-white/40 max-w-2xl mx-auto">Get started in minutes and transform your production workflow.</p>
+        <div className="flex items-center gap-4 mb-12">
+          <Command size={20} className="text-primary" />
+          <h2 className="text-2xl font-bold text-white">Execution Protocol</h2>
+          <div className="flex-1 h-px bg-white/10" />
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           {steps.map((step, i) => (
             <motion.div
               key={step.number}
@@ -396,11 +446,18 @@ const HowItWorks = () => {
               transition={{ duration: 0.5, delay: i * 0.1 }}
               className="relative"
             >
-              <div className="text-6xl font-bold text-white/5 mb-4">{step.number}</div>
-              <h3 className="text-xl font-semibold text-white mb-3">{step.title}</h3>
-              <p className="text-white/40 leading-relaxed">{step.description}</p>
+              <div className="h-full border border-white/10 bg-black/40 p-6 hover:border-primary/50 transition-all group">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="font-mono text-xs text-primary/60">STEP_{step.number}</span>
+                  <div className="w-6 h-6 border border-white/20 flex items-center justify-center group-hover:border-primary group-hover:bg-primary/10 transition-all">
+                    <span className="font-mono text-[10px] text-white/60 group-hover:text-primary">{String(i + 1).padStart(2, '0')}</span>
+                  </div>
+                </div>
+                <h3 className="text-sm font-semibold text-white mb-3">{step.title}</h3>
+                <p className="text-sm text-white/40 leading-relaxed">{step.description}</p>
+              </div>
               {i < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-8 right-0 w-full h-px bg-gradient-to-r from-white/10 to-transparent" />
+                <div className="hidden lg:block absolute top-1/2 -right-2 w-4 h-px bg-white/20" />
               )}
             </motion.div>
           ))}
@@ -435,25 +492,27 @@ const FAQ = () => {
   ]
 
   return (
-    <section id="faq" className="py-24 md:py-32 px-6">
+    <section id="faq" className="py-24 md:py-32 px-4 sm:px-6 relative">
       <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tighter">FAQ</h2>
-          <p className="text-lg text-white/40">Got questions? We've got answers.</p>
+        <div className="flex items-center gap-4 mb-12">
+          <Terminal size={20} className="text-primary" />
+          <h2 className="text-2xl font-bold text-white">System Documentation</h2>
+          <div className="flex-1 h-px bg-white/10" />
         </div>
 
-        <Accordion type="single" collapsible className="space-y-4">
+        <Accordion type="single" collapsible className="space-y-2">
           {faqs.map((faq, i) => (
-            <GlassCard key={i} className="border-0">
+            <div key={i} className="border border-white/10 bg-black/40">
               <AccordionItem value={`item-${i}`} className="border-0">
-                <AccordionTrigger className="text-lg font-semibold text-white hover:no-underline px-6 py-6">
-                  {faq.question}
+                <AccordionTrigger className="text-sm font-medium text-white hover:no-underline px-5 py-4 hover:bg-white/5 transition-colors [&[data-state=open]]:bg-white/5 [&[data-state=open]]:border-b [&[data-state=open]]:border-white/10">
+                  <span className="font-mono text-xs text-primary/60 mr-3">[{String(i + 1).padStart(2, '0')}]</span>
+                  <span className="text-left">{faq.question}</span>
                 </AccordionTrigger>
-                <AccordionContent className="text-white/50 leading-relaxed px-6 pb-6">
+                <AccordionContent className="text-sm text-white/50 leading-relaxed px-5 pb-4 pt-2">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
-            </GlassCard>
+            </div>
           ))}
         </Accordion>
       </div>
@@ -463,37 +522,44 @@ const FAQ = () => {
 
 const CTASection = ({ onNavigate }: { onNavigate: (path: string) => void }) => {
   return (
-    <section className="py-24 md:py-32 px-6 bg-[#090A0D]">
+    <section className="py-24 md:py-32 px-4 sm:px-6 relative bg-[#0a0a0a]/50 border-y border-white/5">
       <div className="max-w-4xl mx-auto text-center">
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }} 
           whileInView={{ opacity: 1, scale: 1 }} 
           viewport={{ once: true }} 
           transition={{ duration: 0.8 }}
-          style={{ willChange: 'transform, opacity' }}
-          className="relative"
+          className="relative w-full"
         >
-          <div className="absolute -inset-20 bg-primary/20 blur-[80px] -z-10 opacity-50" />
+          <div className="absolute -inset-20 bg-primary/10 blur-3xl -z-10 opacity-30" />
           
-          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tighter leading-tight">
-            Ready to transform your production workflow?
+          <div className="font-mono text-xs text-white/20  tracking-[0.3em] mb-6">
+            // READY_TO_INITIALIZE
+          </div>
+          
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">
+            Ready to optimize
+            <br />
+            <span className="text-primary">your workflow?</span>
           </h2>
-          <p className="text-xl text-white/40 mb-10 leading-relaxed max-w-2xl mx-auto">
-            Join the waitlist today and be the first to experience the future of production management.
+          
+          <p className="text-base text-white/40 mb-10 max-w-lg mx-auto font-mono">
+            Join the waitlist today and be the first to experience production management reimagined.
           </p>
           
-          <Button 
-            size="lg" 
-            className="h-16 px-12 text-lg shadow-2xl shadow-primary/30 w-full sm:w-auto font-bold"
-            onClick={() => onNavigate('/auth')}
-          >
-            Join the Waitlist
-            <ArrowRight size={20} className="ml-2" />
-          </Button>
+          <TerminalButton onClick={() => onNavigate('/auth')} className="px-8 py-4">
+            Initialize Access
+          </TerminalButton>
           
-          <div className="mt-8 flex items-center justify-center gap-8 text-white/30 text-xs font-bold uppercase tracking-[0.2em]">
-            <span className="flex items-center gap-2"><Check size={14} className="text-emerald-500" /> Free for Early Adopters</span>
-            <span className="flex items-center gap-2"><Check size={14} className="text-emerald-500" /> No Credit Card</span>
+          <div className="mt-8 flex items-center justify-center gap-8 text-white/30 text-[10px] font-mono  tracking-wider">
+            <span className="flex items-center gap-2">
+              <span className="w-1 h-1 bg-emerald-500 rounded-full" /> 
+              Free for Early Adopters
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="w-1 h-1 bg-emerald-500 rounded-full" /> 
+              No Credit Card
+            </span>
           </div>
         </motion.div>
       </div>
@@ -505,60 +571,58 @@ const Footer = () => {
   const navigate = useNavigate()
 
   return (
-    <footer className="bg-[#0F1116] pt-20 pb-12 px-6 border-t border-white/5">
+    <footer className="bg-[#0a0a0a] pt-20 pb-12 px-4 sm:px-6 border-t border-white/5">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-12 gap-12 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:grid-cols-12 gap-8 sm:gap-12 mb-16">
           <div className="col-span-2 md:col-span-4 lg:col-span-4">
             <Logo size="lg" className="mb-6" />
-            <p className="text-white/30 text-base leading-relaxed max-w-xs mb-6">
-              The high-performance operating system for modern film production. Built by filmmakers, for filmmakers.
+            <p className="text-white/30 text-sm leading-relaxed max-w-xs mb-6 font-mono">
+              Production OS for modern filmmaking.
+              <br />
+              Built by filmmakers, for filmmakers.
             </p>
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               {[FilmIcon, Clapperboard, Camera].map((Icon, i) => (
-                <a key={i} href="#" className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/10 transition-all border border-white/5">
-                  <Icon size={18} />
+                <a 
+                  key={i} 
+                  href="#" 
+                  className="w-9 h-9 border border-white/10 flex items-center justify-center text-white/30 hover:text-white hover:border-white/30 transition-all"
+                >
+                  <Icon size={16} />
                 </a>
               ))}
             </div>
           </div>
           
           <div className="lg:col-start-7 lg:col-span-2">
-            <h4 className="text-white font-bold mb-6 text-xs uppercase tracking-[0.2em] opacity-40">Product</h4>
-            <ul className="space-y-4 text-sm font-semibold text-white/40">
-              <li><button onClick={() => navigate('/auth')} className="hover:text-white transition-colors">Timeline Engine</button></li>
-              <li><button onClick={() => navigate('/auth')} className="hover:text-white transition-colors">Gear Database</button></li>
-              <li><button onClick={() => navigate('/auth')} className="hover:text-white transition-colors">Post Pipeline</button></li>
-              <li><button onClick={() => navigate('/auth')} className="hover:text-white transition-colors">Mobile OS</button></li>
+            <h4 className="text-white font-semibold mb-6 text-xs  tracking-widest">Product</h4>
+            <ul className="space-y-3 text-sm text-white/40 font-mono">
+              <li><button onClick={() => navigate('/auth')} className="hover:text-white transition-colors">Timeline</button></li>
+              <li><button onClick={() => navigate('/auth')} className="hover:text-white transition-colors">Inventory</button></li>
+              <li><button onClick={() => navigate('/auth')} className="hover:text-white transition-colors">Pipeline</button></li>
             </ul>
           </div>
           
           <div className="lg:col-span-2">
-            <h4 className="text-white font-bold mb-6 text-xs uppercase tracking-[0.2em] opacity-40">Resources</h4>
-            <ul className="space-y-4 text-sm font-semibold text-white/40">
+            <h4 className="text-white font-semibold mb-6 text-xs  tracking-widest">Resources</h4>
+            <ul className="space-y-3 text-sm text-white/40 font-mono">
               <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">API Reference</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Tutorials</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Support</a></li>
             </ul>
           </div>
           
           <div className="lg:col-span-2">
-            <h4 className="text-white font-bold mb-6 text-xs uppercase tracking-[0.2em] opacity-40">Company</h4>
-            <ul className="space-y-4 text-sm font-semibold text-white/40">
-              <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Security</a></li>
+            <h4 className="text-white font-semibold mb-6 text-xs  tracking-widest">Legal</h4>
+            <ul className="space-y-3 text-sm text-white/40 font-mono">
               <li><a href="#" className="hover:text-white transition-colors">Privacy</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Terms</a></li>
             </ul>
           </div>
         </div>
         
-        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-bold uppercase tracking-[0.2em] text-white/20">
-          <p>© 2026 Vemakin Inc. All rights reserved.</p>
-          <div className="flex gap-8">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-          </div>
+        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono text-white/20">
+          <p>© 2026 Vemakin Inc.</p>
+          <p>System Version 1.2.0</p>
         </div>
       </div>
     </footer>
@@ -578,14 +642,19 @@ export const LandingPage = () => {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#0F1116] text-white selection:bg-primary/30 font-sans overflow-x-hidden">
-      <Navbar scrolled={scrolled} onNavigate={navigate} />
-      <HeroSection onNavigate={navigate} />
-      <Benefits />
-      <HowItWorks />
-      <FAQ />
-      <CTASection onNavigate={navigate} />
-      <Footer />
+    <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-primary/30 font-sans overflow-x-hidden relative">
+      {/* Global Grid Background */}
+      <div className="fixed inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px] pointer-events-none z-0" />
+      
+      <div className="relative z-10">
+        <Navbar scrolled={scrolled} onNavigate={navigate} />
+        <HeroSection onNavigate={navigate} />
+        <Benefits />
+        <HowItWorks />
+        <FAQ />
+        <CTASection onNavigate={navigate} />
+        <Footer />
+      </div>
     </div>
   )
 }

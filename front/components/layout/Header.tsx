@@ -143,7 +143,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
                 {isSettingsView && (
                   <button
                     onClick={() => setMainView('overview')}
-                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-200/50 hover:bg-gray-300/50 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-white/70 transition-colors"
+                    className="w-9 h-9 flex items-center justify-center border border-gray-300 hover:border-primary/30 bg-[#f5f5f5] hover:bg-[#eeeeee] dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-white/70 transition-colors"
                   >
                     <ChevronLeft size={20} strokeWidth={2} />
                   </button>
@@ -153,7 +153,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
                     {backAction ? (detailLabel || 'Detail View') : viewTitle}
                   </h1>
                   {!backAction && (
-                    <span className="text-xs text-gray-500 dark:text-white/40">
+                    <span className="text-[10px] font-mono  tracking-wider text-muted-foreground">
                       {getSubtitle()}
                     </span>
                   )}
@@ -165,7 +165,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
                 {!isSettingsView && (
                   <button
                     onClick={() => setMainView('settings')}
-                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-200/50 hover:bg-gray-300/50 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-white/70 transition-colors"
+                    className="w-9 h-9 flex items-center justify-center border border-gray-300 hover:border-primary/30 bg-[#f5f5f5] hover:bg-[#eeeeee] dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-white/70 transition-colors"
                   >
                     <Settings size={18} />
                   </button>
@@ -173,7 +173,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
 
                 <button
                   onClick={onAdd}
-                  className="w-9 h-9 flex items-center justify-center rounded-xl bg-primary hover:bg-primary text-white transition-colors"
+                  className="w-9 h-9 flex items-center justify-center border border-primary bg-primary/10 hover:bg-primary hover:text-primary-foreground text-primary transition-colors"
                 >
                   <Plus size={20} strokeWidth={2.5} />
                 </button>

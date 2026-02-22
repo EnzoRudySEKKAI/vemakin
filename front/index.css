@@ -138,6 +138,10 @@
 }
 
 @theme inline {
+  /* Font Family - Menlo everywhere */
+  --font-sans: Menlo, monospace;
+  --font-mono: Menlo, monospace;
+  
   /* Color mappings */
   --color-background: var(--background);
   --color-foreground: var(--foreground);

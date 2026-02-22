@@ -9,15 +9,15 @@ import { FilterDropdown } from '../../molecules/FilterDropdown'
 const POST_PROD_CATEGORIES = ['All', 'Script', 'Editing', 'Sound', 'VFX', 'Color']
 
 const statusOptions = [
-  { value: 'All', label: 'All status' },
+  { value: 'All', label: 'All' },
   { value: 'todo', label: 'To do' },
-  { value: 'progress', label: 'In progress' },
+  { value: 'progress', label: 'Progress' },
   { value: 'review', label: 'In review' },
   { value: 'done', label: 'Done' }
 ]
 
 const priorityOptions = [
-  { value: 'All', label: 'All priority' },
+  { value: 'All', label: 'All' },
   { value: 'low', label: 'Low' },
   { value: 'medium', label: 'Medium' },
   { value: 'high', label: 'High' },
@@ -69,7 +69,7 @@ export const PostProdFilterBar: React.FC<PostProdFilterBarProps> = ({
 
       <div className="flex items-center gap-3 lg:hidden">
         <div className="flex-1 min-w-0">
-          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-1">
+          <div className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-1 px-1">
             Category
           </div>
           <FilterDropdown
@@ -96,11 +96,11 @@ export const PostProdFilterBar: React.FC<PostProdFilterBarProps> = ({
       <div className="flex items-start gap-3">
         <div className="flex-1 flex items-start gap-2 min-w-0">
           <div className="flex-1">
-            <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-1">
+            <div className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-1 px-1">
               Status
             </div>
             <FilterDropdown
-              label="All status"
+              label="All"
               value={filters.status || 'All'}
               options={statusOptions}
               onChange={(status) => onFiltersChange({ status })}
@@ -109,11 +109,11 @@ export const PostProdFilterBar: React.FC<PostProdFilterBarProps> = ({
           </div>
 
           <div className="flex-1">
-            <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-1">
+            <div className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-1 px-1">
               Priority
             </div>
             <FilterDropdown
-              label="All priority"
+              label="All"
               value={filters.priority || 'All'}
               options={priorityOptions}
               onChange={(priority) => onFiltersChange({ priority })}
@@ -123,7 +123,7 @@ export const PostProdFilterBar: React.FC<PostProdFilterBarProps> = ({
         </div>
 
         <div>
-          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-1">
+          <div className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-1 px-1">
             View
           </div>
           <LayoutToggle

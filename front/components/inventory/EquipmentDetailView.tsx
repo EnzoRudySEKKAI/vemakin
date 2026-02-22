@@ -9,7 +9,7 @@ import { ActionButtonGroup } from '../../components/molecules/ActionButton'
 import { DetailItem } from '../../components/molecules'
 import { Input } from '../../components/atoms/Input'
 import { ConfirmModal } from '../ui/ConfirmModal'
-import { Card } from '../ui/Card'
+import { TerminalCard } from '../ui/TerminalCard'
 import { useClickOutside } from '../../hooks/useClickOutside'
 import { useCatalogCategories } from '@/hooks/useApi'
 
@@ -97,7 +97,7 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
       size="wide"
       sidebar={
         <div className="space-y-4">
-          <Card title="Project usage">
+          <TerminalCard header="Project usage">
             <div className="p-2 space-y-1">
               {involvedProjects.length > 0 ? (
                 involvedProjects.map((pName) => {
@@ -108,21 +108,21 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
                     <div key={pName} className="space-y-1">
                       <button
                         onClick={() => toggleProject(pName)}
-                        className={`w-full flex justify-between items-center p-3 rounded-xl transition-all group ${isExpanded ? 'bg-primary/5' : 'hover:bg-gray-100 dark:hover:bg-white/5'}`}
+                        className={`w-full flex justify-between items-center p-3 transition-all group ${isExpanded ? 'bg-primary/5 border border-primary/30' : 'hover:bg-secondary/50 border border-transparent'}`}
                       >
                         <div className="flex items-center gap-4 min-w-0">
-                          <div className={`w-1.5 h-1.5 rounded-full transition-all ${isExpanded ? 'bg-primary shadow-[0_0_8px_rgba(78,71,221,0.5)]' : 'bg-gray-300 dark:bg-white/10'}`} />
-                          <span className={`text-sm font-medium truncate transition-colors ${isExpanded ? 'text-primary/70' : 'text-gray-500 dark:text-white/40 group-hover:text-gray-700 dark:group-hover:text-white/60'}`}>
+                          <div className={`w-1.5 h-1.5 transition-all ${isExpanded ? 'bg-primary' : 'bg-muted-foreground'}`} />
+                          <span className={`text-sm font-medium truncate transition-colors ${isExpanded ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`}>
                             {pName}
                           </span>
                         </div>
                         <div className="flex items-center gap-3">
                           {relatedShots.length > 0 && (
-                            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-lg border transition-all ${isExpanded ? 'bg-primary/20 border-primary/30 text-primary' : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/5 text-gray-500 dark:text-white/20'}`}>
+                            <span className={`text-[10px] font-mono  tracking-wider px-2 py-0.5 border transition-all ${isExpanded ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-secondary border-border text-muted-foreground'}`}>
                               {relatedShots.length}
                             </span>
                           )}
-                          <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180 text-primary' : 'text-gray-200 dark:text-white/10'}`}>
+                          <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180 text-primary' : 'text-muted-foreground'}`}>
                             <ChevronDown size={14} strokeWidth={2} />
                           </div>
                         </div>
@@ -143,22 +143,22 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
                                   <button
                                     key={shot.id}
                                     onClick={() => onNavigateToShot(pName, shot.id)}
-                                    className="w-full flex items-center justify-between p-3 pl-8 rounded-xl text-left hover:bg-gray-100 dark:hover:bg-white/5 transition-all group/shot"
+                                    className="w-full flex items-center justify-between p-3 pl-8 text-left hover:bg-secondary/50 transition-all group/shot"
                                   >
                                     <div className="min-w-0">
-                                      <p className="text-sm font-medium text-gray-500 dark:text-white/40 group-hover/shot:text-primary/70 truncate transition-colors">
+                                      <p className="text-sm font-medium text-muted-foreground group-hover/shot:text-primary truncate transition-colors">
                                         {shot.title}
                                       </p>
-                                      <p className="text-[10px] text-gray-400 dark:text-white/20 mt-0.5">
+                                      <p className="text-[10px] font-mono  tracking-wider text-muted-foreground mt-0.5">
                                         Sc. {shot.sceneNumber} • {shot.startTime}
                                       </p>
                                     </div>
-                                    <ChevronRight size={12} className="text-gray-200 dark:text-white/5 group-hover/shot:text-primary transition-colors" />
+                                    <ChevronRight size={12} className="text-border group-hover/shot:text-primary transition-colors" />
                                   </button>
                                 ))
                               ) : (
                                 <div className="py-4 flex flex-col items-center justify-center text-center opacity-10">
-                                  <span className="text-[10px] font-medium">No active sequences</span>
+                                  <span className="text-[10px] font-mono  tracking-wider">No active sequences</span>
                                 </div>
                               )}
                             </div>
@@ -171,27 +171,27 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
               ) : (
                 <div className="py-12 flex flex-col items-center justify-center text-center opacity-10">
                   <Package size={24} className="mb-2" />
-                  <span className="text-[10px] font-medium">Currently idle</span>
+                  <span className="text-[10px] font-mono  tracking-wider">Currently idle</span>
                 </div>
               )}
             </div>
-          </Card>
+          </TerminalCard>
         </div>
       }
     >
-      <Card title="Core information" className="mb-8">
+      <TerminalCard header="Core information" className="mb-8">
         <div className="p-6 space-y-12">
 
 
           <div className="grid grid-cols-2 lg:grid-cols-4 items-start gap-12">
             {isEditing ? (
               <div className="flex flex-col gap-1 min-w-0">
-                <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Custom name</span>
+                <span className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-2 block">Custom name</span>
                 <input
                   type="text"
                   value={editedItem.customName || ''}
                   onChange={(e) => setEditedItem({ ...editedItem, customName: e.target.value })}
-                  className="bg-transparent border-b border-gray-300 dark:border-white/20 pb-1 text-sm text-gray-900 dark:text-white font-medium focus:border-primary focus:outline-none w-full"
+                  className="bg-transparent border border-border px-3 py-2 text-sm text-foreground font-medium focus:border-primary focus:outline-none w-full"
                   placeholder="Enter custom name"
                 />
               </div>
@@ -219,12 +219,12 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
 
             {isEditing ? (
               <div className="flex flex-col gap-1 min-w-0">
-                <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Serial identity</span>
+                <span className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-2 block">Serial identity</span>
                 <input
                   type="text"
                   value={editedItem.serialNumber || ''}
                   onChange={(e) => setEditedItem({ ...editedItem, serialNumber: e.target.value })}
-                  className="bg-transparent border-b border-gray-300 dark:border-white/20 pb-1 text-sm text-gray-900 dark:text-white font-medium focus:border-primary focus:outline-none w-full"
+                  className="bg-transparent border border-border px-3 py-2 text-sm text-foreground font-medium focus:border-primary focus:outline-none w-full"
                   placeholder="Enter serial number"
                 />
               </div>
@@ -236,9 +236,9 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
             )}
           </div>
         </div>
-      </Card>
+      </TerminalCard>
 
-      <Card title="Ownership detail" className="mb-8">
+      <TerminalCard header="Ownership detail" className="mb-8">
         <div className="p-6 space-y-6">
           <div className="grid grid-cols-2 gap-12">
             <DetailItem
@@ -255,9 +255,9 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
             )}
           </div>
         </div>
-      </Card>
+      </TerminalCard>
 
-      <Card title="Technical specifications">
+      <TerminalCard header="Technical specifications">
         <div className="p-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-12">
             {Object.entries(item.specs).map(([key, val]) => (
@@ -269,7 +269,7 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
             ))}
           </div>
         </div>
-      </Card>
+      </TerminalCard>
 
       <ConfirmModal
         isOpen={showDeleteConfirm}

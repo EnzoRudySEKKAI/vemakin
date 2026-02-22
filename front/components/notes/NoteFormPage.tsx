@@ -6,7 +6,7 @@ import { Input } from '../atoms/Input';
 import { Textarea } from '../atoms/Textarea';
 import { ProjectRequiredBanner } from '../molecules/ProjectRequiredBanner';
 import { Shot, PostProdTask, Attachment } from '../../types';
-import { Card } from '../ui/Card';
+import { TerminalCard } from '../ui/TerminalCard';
 import { Plus } from 'lucide-react';
 
 interface NoteFormPageProps {
@@ -88,11 +88,11 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
           message="You need to create a project before you can save notes"
         />
       )}
-      <Card title="Note details" className="mb-8">
-        <div className="p-6 space-y-10">
+      <TerminalCard header="Note details" className="mb-8">
+        <div className="space-y-8">
           {/* Title */}
           <div className="w-full">
-            <span className="text-[10px] text-white/40 font-medium mb-2 block">Note title</span>
+            <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Note title</span>
             <Input
               type="text"
               value={form.title}
@@ -105,7 +105,7 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
 
           {/* Content */}
           <div className="w-full">
-            <span className="text-[10px] text-white/40 font-medium mb-2 block">Remarks & observations</span>
+            <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Remarks & observations</span>
             <Textarea
               value={form.content}
               onChange={e => setForm(prev => ({ ...prev, content: e.target.value }))}
@@ -116,27 +116,27 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
 
           {/* Context Link */}
           <div className="w-full">
-            <span className="text-[10px] text-white/40 font-medium mb-4 block">Context association</span>
+            <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-4 block">Context association</span>
 
-            <div className="flex p-1 bg-white/5 rounded-2xl border border-white/5 mb-6">
+            <div className="flex p-1 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-6">
               <button
                 type="button"
                 onClick={() => setForm(prev => ({ ...prev, linkType: 'none', linkedId: '' }))}
-                className={`flex-1 py-2.5 rounded-xl text-[10px] font-medium transition-all ${form.linkType === 'none' ? 'bg-white/10 text-white shadow-xl' : 'text-white/30 hover:text-white/50'}`}
+                className={`flex-1 py-2.5 text-[10px] font-medium transition-all ${form.linkType === 'none' ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white border border-gray-300 dark:border-white/20' : 'text-gray-500 dark:text-white/30 hover:text-gray-700 dark:hover:text-white/50'}`}
               >
                 Standalone
               </button>
               <button
                 type="button"
                 onClick={() => setForm(prev => ({ ...prev, linkType: 'shot', linkedId: '' }))}
-                className={`flex-1 py-2.5 rounded-xl text-[10px] font-medium transition-all ${form.linkType === 'shot' ? 'bg-primary/20 text-primary shadow-xl' : 'text-white/30 hover:text-primary/50'}`}
+                className={`flex-1 py-2.5 text-[10px] font-medium transition-all ${form.linkType === 'shot' ? 'bg-primary/20 text-primary border border-primary/30' : 'text-gray-500 dark:text-white/30 hover:text-primary/50'}`}
               >
                 Link Shot
               </button>
               <button
                 type="button"
                 onClick={() => setForm(prev => ({ ...prev, linkType: 'task', linkedId: '' }))}
-                className={`flex-1 py-2.5 rounded-xl text-[10px] font-medium transition-all ${form.linkType === 'task' ? 'bg-orange-500/20 text-orange-400 shadow-xl' : 'text-white/30 hover:text-orange-400/50'}`}
+                className={`flex-1 py-2.5 text-[10px] font-medium transition-all ${form.linkType === 'task' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'text-gray-500 dark:text-white/30 hover:text-orange-400/50'}`}
               >
                 Link Task
               </button>
@@ -144,66 +144,67 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
 
             {form.linkType !== 'none' && (
               <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-white/20">
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-gray-400 dark:text-white/20">
                   <LinkIcon size={16} />
                 </div>
                 <select
                   value={form.linkedId}
                   onChange={e => setForm(prev => ({ ...prev, linkedId: e.target.value }))}
-                  className="w-full appearance-none bg-transparent border-b border-white/5 pl-10 pr-10 py-4 text-sm font-bold focus:outline-none focus:border-primary/50 transition-all cursor-pointer text-white/80"
+                  className="w-full appearance-none bg-transparent border-b border-gray-300 dark:border-white/10 pl-10 pr-10 py-4 text-sm font-bold focus:outline-none focus:border-primary/50 transition-all cursor-pointer text-gray-800 dark:text-white/80"
                 >
-                  <option value="" className="bg-[#0F1116]">Choose a reference point...</option>
+                  <option value="" className="bg-white dark:bg-[#0F1116]">Choose a reference point...</option>
                   {form.linkType === 'shot' && existingShots.map(s => (
-                    <option key={s.id} value={s.id} className="bg-[#0F1116]">SCENE {s.sceneNumber}: {s.title}</option>
+                    <option key={s.id} value={s.id} className="bg-white dark:bg-[#0F1116]">SCENE {s.sceneNumber}: {s.title}</option>
                   ))}
                   {form.linkType === 'task' && existingTasks.map(t => (
-                    <option key={t.id} value={t.id} className="bg-[#0F1116]">[{t.category}] {t.title}</option>
+                    <option key={t.id} value={t.id} className="bg-white dark:bg-[#0F1116]">[{t.category}] {t.title}</option>
                   ))}
                 </select>
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-white/20 pointer-events-none">
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-gray-400 dark:text-white/20 pointer-events-none">
                   <ChevronDown size={16} />
                 </div>
               </div>
             )}
           </div>
         </div>
-      </Card>
+      </TerminalCard>
 
-      <Card title="Reference assets"
-        subtitle={
-          <span className="text-white/40">
-            {form.attachments.length} Required
-          </span>
-        }
+      <TerminalCard
+        header="Reference assets"
         headerRight={
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 text-[10px] font-medium text-primary hover:text-primary/70 transition-colors"
-          >
-            <Plus size={12} strokeWidth={3} />
-            Add Image/PDF
-          </button>
+          <div className="flex items-center gap-4">
+            <span className="text-gray-500 dark:text-white/40 text-xs">
+              {form.attachments.length} Required
+            </span>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-2 text-[10px] font-medium text-primary hover:text-primary/70 transition-colors"
+            >
+              <Plus size={12} strokeWidth={3} />
+              Add Image/PDF
+            </button>
+          </div>
         }
       >
-        <div className="p-6">
+        <div>
           <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {form.attachments.length > 0 ? (
               form.attachments.map(att => (
-                <div key={att.id} className="group relative bg-white/5 p-4 rounded-xl border border-white/5 hover:border-primary/30 transition-all flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-white/5 text-white/20 group-hover:text-primary transition-all">
+                <div key={att.id} className="group relative bg-gray-50 dark:bg-white/5 p-4 border border-gray-200 dark:border-white/10 hover:border-primary/30 transition-all flex items-center gap-4">
+                  <div className="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/20 group-hover:text-primary transition-all">
                     {att.type === 'image' ? <ImageIcon size={18} /> : <File size={18} />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span className="text-sm font-bold text-white/80 group-hover:text-white block truncate">{att.name}</span>
-                    <span className="text-[10px] text-white/40 font-medium">{att.size || 'N/A'}</span>
+                    <span className="text-sm font-bold text-gray-700 dark:text-white/80 group-hover:text-gray-900 dark:group-hover:text-white block truncate">{att.name}</span>
+                    <span className="text-[10px] text-gray-400 dark:text-white/40 font-medium">{att.size || 'N/A'}</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => removeAttachment(att.id)}
-                    className="p-2 text-white/5 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                    className="p-2 text-gray-300 dark:text-white/30 hover:text-red-400 hover:bg-red-400/10 transition-all"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -211,7 +212,7 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
               ))
             ) : (
               <div className="col-span-full py-16 flex flex-col items-center justify-center text-center opacity-10">
-                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-4">
                   <Paperclip size={24} />
                 </div>
                 <span className="text-[10px] font-medium">No documentation attached</span>
@@ -219,7 +220,7 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
             )}
           </div>
         </div>
-      </Card>
+      </TerminalCard>
     </FormLayout>
   );
 };

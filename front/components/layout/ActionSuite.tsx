@@ -6,9 +6,6 @@ import { TaskForm, TaskFormData } from '@/components/postprod/TaskForm'
 import { GearForm, GearFormData } from '@/components/inventory/GearForm'
 import { ShotForm } from '@/components/action-suite/ShotForm'
 import { ProjectForm } from '@/components/action-suite/ProjectForm'
-import { Button } from '@/components/atoms/Button'
-import { Text } from '@/components/atoms/Text'
-import { Card } from '@/components/atoms/Card'
 
 interface ActionSuiteProps {
   onClose: () => void
@@ -108,7 +105,7 @@ export const ActionSuite = ({
 
   return (
     <div
-      className="fixed inset-0 z-[2000] bg-black/80 backdrop-blur-3xl flex flex-col items-center justify-center p-4 sm:p-6 animate-in fade-in duration-500 overflow-hidden"
+      className="fixed inset-0 z-[2000] bg-[#F2F2F7] dark:bg-[#0F1116] flex flex-col items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300 overflow-hidden"
       style={{
         paddingTop: 'max(16px, env(safe-area-inset-top))',
         paddingBottom: 'max(16px, env(safe-area-inset-bottom))'
@@ -119,37 +116,40 @@ export const ActionSuite = ({
         className="w-full md:w-[85vw] lg:max-w-5xl xl:max-w-6xl h-full md:h-auto flex flex-col justify-center"
         onClick={e => e.stopPropagation()}
       >
-        <Card variant="glass" className="relative max-h-[95vh] md:max-h-[92vh] lg:max-h-[90vh] flex flex-col overflow-hidden rounded-[32px] sm:rounded-[48px]">
-          <div className="px-6 py-6 sm:px-10 sm:py-8 border-b border-gray-50 dark:border-white/5 flex flex-col gap-6 shrink-0 bg-white dark:bg-[#16181D] z-20">
+        <div className="relative max-h-[95vh] md:max-h-[92vh] lg:max-h-[90vh] flex flex-col overflow-hidden border border-gray-300 dark:border-white/10 bg-[#fafafa] dark:bg-[#0a0a0a]/40">
+          <div className="px-6 py-6 sm:px-10 sm:py-8 border-b border-gray-300 dark:border-white/10 flex flex-col gap-6 shrink-0 bg-[#fafafa] dark:bg-[#0a0a0a]/40 z-20">
             <div className="flex items-center justify-between">
-              <div className="flex gap-2 overflow-x-auto no-scrollbar">
+              <div className="flex gap-1 p-1 bg-[#f5f5f5] dark:bg-[#16181D] border border-gray-300 dark:border-white/10 overflow-x-auto no-scrollbar">
                 {view !== 'project' && VIEWS.map(v => {
                   const Icon = v.icon
                   const isActive = view === v.id
                   return (
-                    <Button
+                    <button
                       key={v.id}
-                      variant={isActive ? 'primary' : 'secondary'}
-                      size="sm"
                       onClick={() => setView(v.id)}
-                      leftIcon={<Icon size={14} strokeWidth={2.5} />}
+                      className={`flex items-center gap-1.5 px-3 py-2 text-xs font-mono uppercase tracking-wider transition-all whitespace-nowrap
+                        ${isActive
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-gray-600 dark:text-white/50 hover:text-gray-800 dark:hover:text-white/70 hover:bg-white dark:hover:bg-white/5'
+                        }`}
                     >
-                      {v.label}
-                    </Button>
+                      <Icon size={14} strokeWidth={2.5} />
+                      <span>{v.label}</span>
+                    </button>
                   )
                 })}
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
                 onClick={onClose}
-                leftIcon={<X size={20} strokeWidth={2.5} />}
-              />
+                className="w-9 h-9 flex items-center justify-center border border-gray-300 dark:border-white/10 hover:border-primary/30 dark:hover:border-primary/30 transition-colors"
+              >
+                <X size={20} strokeWidth={2.5} />
+              </button>
             </div>
 
             <div>
-              <Text variant="label" color="accent">Create New</Text>
-              <Text variant="h1">{VIEW_TITLES[view]}</Text>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-primary">Create New</span>
+              <h1 className="text-2xl font-semibold mt-1">{VIEW_TITLES[view]}</h1>
             </div>
           </div>
 
@@ -224,7 +224,7 @@ export const ActionSuite = ({
               />
             )}
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   )

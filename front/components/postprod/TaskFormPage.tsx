@@ -6,7 +6,7 @@ import { Input } from '../atoms/Input';
 import { Textarea } from '../atoms/Textarea';
 import { ProjectRequiredBanner } from '../molecules/ProjectRequiredBanner';
 import { PostProdTask } from '../../types';
-import { Card } from '../ui/Card';
+import { TerminalCard } from '../ui/TerminalCard';
 
 interface TaskFormPageProps {
   onClose: () => void;
@@ -84,9 +84,9 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
           message="You need to create a project before you can save tasks"
         />
       )}
-      <Card title="Department selection" className="mb-8">
-        <div className="p-6">
-          <div className="grid grid-cols-5 gap-3">
+      <TerminalCard header="Department selection" className="mb-8">
+        <div className>
+          <div className="grid grid-cols-5 gap-2">
             {TASK_CATEGORIES.map((cat) => {
               const CatIcon = cat.icon;
               const isActive = form.category === cat.id;
@@ -94,15 +94,15 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
                 <button
                   key={cat.id}
                   onClick={() => setForm(prev => ({ ...prev, category: cat.id as any, metadata: {} }))}
-                  className={`flex flex-col items-center gap-4 p-5 rounded-2xl border transition-all duration-500 group ${isActive
-                    ? 'bg-primary/10 border-primary/30 text-primary shadow-[0_0_20px_rgba(78,71,221,0.1)]'
-                    : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/5 text-gray-400 dark:text-white/20 hover:border-gray-300 dark:hover:border-white/10 hover:text-gray-600 dark:hover:text-white/40'
+                  className={`flex flex-col items-center gap-3 p-4 border transition-all duration-300 group ${isActive
+                    ? 'bg-primary/10 border-primary/50 text-primary'
+                    : 'bg-[#fafafa] dark:bg-[#0a0a0a]/40 border-gray-300 dark:border-white/10 text-gray-500 dark:text-white/30 hover:border-gray-400 dark:hover:border-white/20 hover:text-gray-700 dark:hover:text-white/50'
                     }`}
                 >
-                  <div className={`p-2.5 rounded-xl transition-all duration-500 ${isActive ? 'bg-primary/20 scale-110' : 'group-hover:scale-105 group-hover:bg-white dark:group-hover:bg-white/5'}`}>
-                    <CatIcon size={24} strokeWidth={isActive ? 3 : 2} />
+                  <div className={`p-2 border transition-all duration-300 ${isActive ? 'bg-primary/20 border-primary/30' : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 group-hover:border-gray-300 dark:group-hover:border-white/20'}`}>
+                    <CatIcon size={20} strokeWidth={isActive ? 2.5 : 2} />
                   </div>
-                  <span className={`text-[10px] font-medium uppercase tracking-widest transition-colors ${isActive ? 'text-primary/70' : 'text-gray-400 dark:text-white/20 group-hover:text-gray-600 dark:group-hover:text-white/40'}`}>
+                  <span className={`text-[10px] font-mono tracking-widest uppercase transition-colors ${isActive ? 'text-primary' : 'text-gray-400 dark:text-white/30 group-hover:text-gray-600 dark:group-hover:text-white/50'}`}>
                     {cat.id}
                   </span>
                 </button>
@@ -110,9 +110,9 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
             })}
           </div>
         </div>
-      </Card>
+      </TerminalCard>
 
-      <Card title="Core specification" className="mb-8">
+      <TerminalCard header="Core specification" className="mb-8">
         <div className="p-6 space-y-12">
           <div className="w-full">
             <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Task objective</span>
@@ -169,9 +169,9 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
             </div>
           </div>
         </div>
-      </Card>
+      </TerminalCard>
 
-      <Card title="Pipeline parameters">
+      <TerminalCard header="Pipeline parameters">
         <div className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-12">
             {form.category === 'Script' && (
@@ -236,7 +236,7 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
             )}
           </div>
         </div>
-      </Card>
+      </TerminalCard>
     </FormLayout>
   );
 };

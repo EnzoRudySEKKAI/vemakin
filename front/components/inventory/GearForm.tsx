@@ -5,7 +5,7 @@ import {
   Package, Info, DollarSign, Aperture
 } from 'lucide-react'
 import { Text, Input, Button, IconContainer } from '@/components/atoms'
-import { Card } from '@/components/ui/Card'
+import { TerminalCard } from '@/components/ui/TerminalCard'
 import { Equipment, CatalogCategory, CatalogBrand, CatalogItem } from '@/types'
 import { useCatalogCategories, useCatalogBrands, useCatalogItems, useItemSpecs } from '@/hooks/useApi'
 import { radius, typography } from '@/design-system'
@@ -101,8 +101,8 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <Card title="Identity & registry" className="mb-8">
-        <div className="p-6 space-y-10">
+      <TerminalCard header="Identity & registry" className="mb-8">
+        <div className="space-y-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-10">
             <div className="sm:col-span-2">
               <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Custom name</span>
@@ -128,10 +128,10 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
             </div>
           </div>
         </div>
-      </Card>
+      </TerminalCard>
 
-      <Card title="Categorization & model" className="mb-8">
-        <div className="p-6 space-y-12">
+      <TerminalCard header="Categorization & model" className="mb-8">
+        <div className="space-y-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
             <div>
               <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Deployment type</span>
@@ -196,7 +196,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
                 onClick={() => setShowSpecsInForm(!showSpecsInForm)}
                 className="flex items-center gap-3 text-[10px] font-medium text-gray-500 dark:text-white/20 hover:text-primary transition-all mb-6"
               >
-                <div className={`p-1.5 rounded-lg border transition-all ${showSpecsInForm ? 'bg-primary/20 border-primary/30 text-primary' : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/5'}`}>
+                <div className={`p-1.5 border transition-all ${showSpecsInForm ? 'bg-primary/20 border-primary/30 text-primary' : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/5'}`}>
                   <Info size={12} strokeWidth={3} />
                 </div>
                 {showSpecsInForm ? "Hide Technical Details" : "View Technical Specifications"}
@@ -230,20 +230,20 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
             </div>
           )}
         </div>
-      </Card>
+      </TerminalCard>
 
-      <Card title="Ownership & acquisitions">
-        <div className="p-6 space-y-10">
-          <div className="flex p-1 bg-gray-100 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5">
+      <TerminalCard header="Ownership & acquisitions">
+        <div className="space-y-8">
+          <div className="flex p-1 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
             <button
               onClick={() => setForm(prev => ({ ...prev, isOwned: true }))}
-              className={`flex-1 py-3 text-[10px] font-medium rounded-xl transition-all ${form.isOwned ? 'bg-primary text-white shadow-[0_0_20px_rgba(78,71,221,0.3)]' : 'text-gray-500 dark:text-white/20 hover:text-gray-700 dark:hover:text-white/40'}`}
+              className={`flex-1 py-3 text-[10px] font-medium transition-all ${form.isOwned ? 'bg-primary text-primary-foreground border border-primary' : 'text-gray-500 dark:text-white/30 hover:text-gray-700 dark:hover:text-white/50'}`}
             >
               Internal Production Asset
             </button>
             <button
               onClick={() => setForm(prev => ({ ...prev, isOwned: false }))}
-              className={`flex-1 py-3 text-[10px] font-medium rounded-xl transition-all ${!form.isOwned ? 'bg-orange-500 text-white shadow-[0_0_20px_rgba(249,115,22,0.3)]' : 'text-gray-500 dark:text-white/20 hover:text-gray-700 dark:hover:text-white/40'}`}
+              className={`flex-1 py-3 text-[10px] font-medium transition-all ${!form.isOwned ? 'bg-orange-500 text-white border border-orange-500' : 'text-gray-500 dark:text-white/30 hover:text-gray-700 dark:hover:text-white/50'}`}
             >
               External Rental Service
             </button>
@@ -282,7 +282,7 @@ export const GearForm: React.FC<GearFormProps> = ({ form, setForm, onSubmit }) =
             </div>
           )}
         </div>
-      </Card>
+      </TerminalCard>
     </div>
   )
 }

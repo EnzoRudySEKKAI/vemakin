@@ -56,14 +56,14 @@ export const Input: React.FC<InputProps> = ({
       {label && (
         <label
           htmlFor={inputId}
-          className={`block mb-2 ${typography.size.xs} ${typography.weight.semibold} text-gray-500 dark:text-gray-400`}
+          className={`block mb-2 ${typography.size.xs} font-mono  tracking-wider text-muted-foreground`}
         >
           {formatLabel(label, sentenceLabel)}
         </label>
       )}
       <div className="relative">
         {leftIcon && (
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
             {leftIcon}
           </div>
         )}
@@ -73,39 +73,28 @@ export const Input: React.FC<InputProps> = ({
             ${widthStyles}
             ${sizeClasses.height}
             ${sizeClasses.padding}
-            bg-transparent
-            border-0 border-b-2 border-gray-200 dark:border-white/10
-            text-lg font-semibold
-            text-gray-900 dark:text-white
-            placeholder:text-gray-400 dark:placeholder:text-gray-500
+            bg-[#f5f5f5] dark:bg-[#16181D]
+            border border-gray-300 dark:border-white/10
+            text-base font-mono
+            text-foreground
+            placeholder:text-muted-foreground
             focus:outline-none
-            focus:border-primary dark:focus:border-primary
-            focus:bg-transparent
-            focus-visible:bg-transparent
-            focus-visible:outline-none
-            focus-visible:ring-0
-            active:bg-transparent
-            -webkit-tap-highlight-color: transparent
-            tap-highlight-color: transparent
-            autofill:bg-transparent
-            autofill:text-inherit
-            ${leftIcon ? 'pl-8' : ''}
-            ${rightIcon ? 'pr-8' : ''}
+            focus:border-primary
+            focus:ring-1 focus:ring-primary/20
+            disabled:pointer-events-none disabled:opacity-50
+            ${leftIcon ? 'pl-10' : 'px-3'}
+            ${rightIcon ? 'pr-10' : ''}
           `}
-          style={{
-            WebkitTapHighlightColor: 'transparent',
-            caretColor: 'currentColor'
-          }}
           {...props}
         />
         {rightIcon && (
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
             {rightIcon}
           </div>
         )}
       </div>
       {error && (
-        <p className={`mt-1.5 ${typography.size.xs} ${typography.weight.semibold} text-red-500`}>
+        <p className={`mt-1.5 ${typography.size.xs} font-mono  tracking-wider text-destructive`}>
           {error}
         </p>
       )}

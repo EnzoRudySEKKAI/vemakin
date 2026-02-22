@@ -23,7 +23,7 @@ export const MetricBadge: React.FC<MetricBadgeProps> = ({
 }) => {
   return (
     <div className={`flex flex-col items-center ${className}`}>
-      <span className="text-[10px] text-gray-400 dark:text-white/30 uppercase tracking-wider leading-none mb-1">
+      <span className="text-[10px] text-gray-400 dark:text-white/30  tracking-wider leading-none mb-1">
         {label}
       </span>
       <span className={`text-lg font-semibold leading-none ${colorStyles[color]}`}>
