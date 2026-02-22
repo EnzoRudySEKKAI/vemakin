@@ -1,8 +1,6 @@
 import React from 'react'
 import { Input, InputProps } from '@/components/atoms/Input'
 import { Textarea } from '@/components/atoms/Textarea'
-import { Text } from '@/components/atoms/Text'
-import { radius, typography } from '@/design-system'
 
 interface FormFieldProps extends InputProps {
   label: string
@@ -19,12 +17,14 @@ export const FormField: React.FC<FormFieldProps> = ({
 }) => {
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-1">
-        <Text variant="label" color="muted">
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
           {label}
-        </Text>
+        </span>
         {required && (
-          <span className="text-red-500">*</span>
+          <span className="inline-flex items-center justify-center w-4 h-4 text-[10px] font-mono border border-red-500/50 bg-red-500/10 text-red-500">
+            *
+          </span>
         )}
       </div>
       
@@ -34,9 +34,9 @@ export const FormField: React.FC<FormFieldProps> = ({
       />
       
       {hint && !error && (
-        <Text variant="caption" color="muted">
+        <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
           {hint}
-        </Text>
+        </span>
       )}
     </div>
   )
@@ -61,12 +61,14 @@ export const FormTextarea: React.FC<FormTextareaProps> = ({
 }) => {
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-1">
-        <Text variant="label" color="muted">
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
           {label}
-        </Text>
+        </span>
         {required && (
-          <span className="text-red-500">*</span>
+          <span className="inline-flex items-center justify-center w-4 h-4 text-[10px] font-mono border border-red-500/50 bg-red-500/10 text-red-500">
+            *
+          </span>
         )}
       </div>
       
@@ -77,13 +79,13 @@ export const FormTextarea: React.FC<FormTextareaProps> = ({
       />
       
       {error ? (
-        <Text variant="caption" color="danger">
+        <span className="text-[10px] font-mono uppercase tracking-wider text-destructive">
           {error}
-        </Text>
+        </span>
       ) : hint ? (
-        <Text variant="caption" color="muted">
+        <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
           {hint}
-        </Text>
+        </span>
       ) : null}
     </div>
   )

@@ -2,8 +2,7 @@ import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useHeaderActions } from '../../context/HeaderActionsContext'
 import { Package, Film, Zap, StickyNote } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { TerminalButton } from '@/components/ui/TerminalButton'
 
 export type FormType = 'gear' | 'shot' | 'task' | 'note'
 
@@ -43,40 +42,40 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
 }) => {
   const { setActions, setTitle, setSubtitle, setOnBack, setDetailLabel } = useHeaderActions()
 
-  // Custom header actions with tabs and submit button
+  // Custom header actions with SegmentControl style tabs and submit button
   const headerActions = (
     <div className="flex items-center gap-3">
-      {/* Form Type Tabs */}
-      <ToggleGroup 
-        type="single" 
-        value={formType} 
-        onValueChange={(value) => value && onSwitchForm(value as FormType)}
-        className="bg-muted/50 rounded-full p-1"
-      >
+      {/* Form Type Tabs - SegmentControl Style */}
+      <div className="flex items-center gap-1 p-1 bg-[#f5f5f5] dark:bg-[#16181D] border border-gray-300 dark:border-white/10">
         {FORM_TYPES.map(ft => {
           const Icon = ft.icon
+          const isActive = formType === ft.id
           return (
-            <ToggleGroupItem
+            <button
               key={ft.id}
-              value={ft.id}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+              onClick={() => onSwitchForm(ft.id)}
+              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-mono uppercase tracking-wider transition-all whitespace-nowrap
+                ${isActive
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-gray-600 dark:text-white/50 hover:text-gray-800 dark:hover:text-white/70 hover:bg-white dark:hover:bg-white/5'
+                }`
+              }
             >
               <Icon size={14} strokeWidth={2.5} />
               <span className="hidden sm:inline">{ft.label}</span>
-            </ToggleGroupItem>
+            </button>
           )
         })}
-      </ToggleGroup>
+      </div>
 
       {/* Submit Button */}
-      <Button
+      <TerminalButton
+        variant="primary"
         onClick={onSubmit}
         disabled={submitDisabled}
-        size="sm"
-        className="rounded-full"
       >
         {submitLabel}
-      </Button>
+      </TerminalButton>
     </div>
   )
 
@@ -107,7 +106,6 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
       transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
       className={`
         flex flex-col 
-        bg-background
         ${className}
       `}
     >
@@ -118,15 +116,32 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
   )
 }
 
+import { TerminalCard } from '@/components/ui/TerminalCard'
+
 interface FormSectionProps {
   children: React.ReactNode
+  title?: string
   className?: string
 }
 
 export const FormSection: React.FC<FormSectionProps> = ({
   children,
+  title,
   className = ''
 }) => {
+  if (title) {
+    return (
+      <TerminalCard 
+        header={title}
+        className={`mb-8 ${className}`}
+      >
+        <div className="space-y-6">
+          {children}
+        </div>
+      </TerminalCard>
+    )
+  }
+  
   return (
     <div className={`
       flex flex-col gap-8 
@@ -171,7 +186,7 @@ export const FormFieldGroup: React.FC<FormFieldGroupProps> = ({
 }) => {
   return (
     <div className={`flex flex-col gap-1 min-w-0 ${className}`}>
-      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
+      <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{label}</span>
       {children}
     </div>
   )

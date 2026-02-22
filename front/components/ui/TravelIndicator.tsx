@@ -85,7 +85,7 @@ export const TravelIndicator: React.FC<TravelIndicatorProps> = ({
       >
         <div className={`h-px flex-1 transition-colors ${isTimeCritical ? 'bg-red-500/30' : 'bg-gray-200 dark:bg-white/10 group-hover:bg-gray-300 dark:group-hover:bg-white/20'}`} />
         
-        <div className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-colors ${
+        <div className={`flex items-center gap-2 text-[10px] font-bold  tracking-widest transition-colors ${
           isTimeCritical ? 'text-red-500' : 'text-gray-400 dark:text-white/40 group-hover:text-gray-600 dark:group-hover:text-white/60'
         }`}>
           <ModeIcon size={12} />

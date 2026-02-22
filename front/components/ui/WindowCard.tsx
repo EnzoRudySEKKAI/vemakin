@@ -47,7 +47,7 @@ export const WindowCard: React.FC<WindowCardProps> = ({
 
           {/* Center: Title */}
           {title && (
-            <span className="text-xs font-medium text-gray-500 dark:text-white/40 uppercase tracking-wider">
+            <span className="text-xs font-medium text-gray-500 dark:text-white/40  tracking-wider">
               {title}
             </span>
           )}

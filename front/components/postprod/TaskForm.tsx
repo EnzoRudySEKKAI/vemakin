@@ -4,7 +4,8 @@ import {
   PenLine, Scissors, Music, Layers, Palette, Crop
 } from 'lucide-react'
 import { PostProdTask } from '@/types'
-import { Button, Text, Input, Card, IconContainer, Textarea, Select } from '@/components/atoms'
+import { Button, Text, Input, IconContainer, Textarea, Select } from '@/components/atoms'
+import { TerminalCard } from '@/components/ui/TerminalCard'
 import { radius, typography } from '@/design-system'
 
 export interface TaskFormData {
@@ -122,8 +123,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
         </div>
 
         {/* Metadata Fields */}
-        <Card variant="flat" className="p-6 animate-in slide-in-from-top-4 duration-500">
-          <Text variant="label" color="accent" className="mb-4">Pipeline Parameters</Text>
+        <TerminalCard header="Pipeline parameters" className="animate-in slide-in-from-top-4 duration-500">
+          <div className="p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6">
             {form.category === 'Script' && (
               <div>
@@ -170,7 +171,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
               </>
             )}
           </div>
-        </Card>
+          </div>
+        </TerminalCard>
 
         {/* Submit */}
         <div className="pt-4 sticky bottom-0 bg-white dark:bg-[#16181D] flex justify-center pb-6">

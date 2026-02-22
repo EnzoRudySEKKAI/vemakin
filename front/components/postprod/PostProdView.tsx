@@ -5,10 +5,10 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PostProdTask, PostProdFilters } from '@/types'
-import { Card } from '@/components/ui/Card'
+import { TerminalCard } from '@/components/ui/TerminalCard'
+import { TerminalButton } from '@/components/ui/TerminalButton'
 import { POST_PROD_CATEGORIES } from '@/constants'
 import { useClickOutside } from '@/hooks/useClickOutside'
-import { Button } from '@/components/atoms/Button'
 
 interface PostProdViewProps {
   tasks: PostProdTask[]
@@ -84,20 +84,15 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
   if (filteredTasks.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-300px)] w-full overflow-hidden px-6 select-none">
-        <div className="w-14 h-14 bg-gray-100 dark:bg-[#16181D] rounded-xl flex items-center justify-center mb-6 border border-gray-200 dark:border-white/[0.05]">
-          <Scissors size={24} className="text-gray-500 dark:text-white/40" />
+        <div className="w-14 h-14 border border-white/10 bg-[#0a0a0a]/40 flex items-center justify-center mb-6">
+          <Scissors size={24} className="text-muted-foreground" />
         </div>
         <div className="text-center max-w-sm">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Empty Pipeline</h2>
-          <p className="text-gray-500 dark:text-white/30 mb-8 text-sm">No active tasks found. Add your first task.</p>
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={onAddTask}
-            leftIcon={<Plus size={18} strokeWidth={2.5} />}
-          >
+          <h2 className="text-xl font-semibold text-foreground mb-2 font-mono  tracking-wider">Empty Pipeline</h2>
+          <p className="text-muted-foreground mb-8 text-sm font-mono">No active tasks found. Add your first task.</p>
+          <TerminalButton variant="primary" onClick={onAddTask}>
             Add Task
-          </Button>
+          </TerminalButton>
         </div>
       </div>
     )
@@ -115,17 +110,17 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
               <div
                 key={task.id}
                 onClick={() => onSelectTask?.(task.id)}
-                className="group p-4 rounded-xl bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] hover:border-gray-300 dark:hover:border-white/[0.1] transition-all cursor-pointer"
+                className="group p-4 border border-gray-300 dark:border-white/10 bg-[#fafafa] dark:bg-[#0a0a0a]/40 hover:border-primary/30 dark:hover:border-primary/30 transition-all cursor-pointer"
               >
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-[#0F1116] flex items-center justify-center border border-gray-200 dark:border-white/[0.05]">
-                      <CategoryIcon size={16} className="text-gray-500 dark:text-white/50" />
+                    <div className="w-9 h-9 bg-[#f5f5f5] dark:bg-[#16181D] flex items-center justify-center border border-gray-300 dark:border-white/10">
+                      <CategoryIcon size={16} className="text-muted-foreground" />
                     </div>
                     <div>
-                      <div className="text-xs text-gray-500 dark:text-white/30 uppercase tracking-wider">{task.category}</div>
+                      <div className="text-xs font-mono  tracking-wider text-muted-foreground">{task.category}</div>
                       {task.dueDate && (
-                        <div className="flex items-center gap-1 text-[10px] text-gray-400 dark:text-white/20 mt-0.5">
+                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5">
                           <Calendar size={10} />
                           {new Date(task.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                         </div>
@@ -133,14 +128,14 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
                     </div>
                   </div>
 
-                  <span className={`w-14 text-center px-2 py-0.5 rounded text-[10px] font-medium shrink-0 ${getPriorityColor(task.priority)}`}>
+                  <span className={`px-2 py-0.5 text-[10px] font-mono  tracking-wider shrink-0 ${getPriorityColor(task.priority)}`}>
                     {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
                   </span>
                 </div>
 
                 <div className="mb-4">
-                  <h3 className="text-sm text-gray-900 dark:text-white font-medium mb-1">{task.title}</h3>
-                  <p className="text-xs text-gray-500 dark:text-white/30 line-clamp-2">
+                  <h3 className="text-sm text-foreground font-medium mb-1">{task.title}</h3>
+                  <p className="text-xs text-muted-foreground line-clamp-2">
                     {task.description || "No specific details provided."}
                   </p>
                 </div>
@@ -151,12 +146,12 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
                       e.stopPropagation()
                       setActiveStatusMenuId(isActiveMenu ? null : task.id)
                     }}
-                    className="w-full py-2.5 px-3 rounded-lg flex items-center justify-between text-xs font-medium bg-gray-100 dark:bg-[#0F1116] text-gray-600 dark:text-white/50 border border-gray-200 dark:border-white/[0.05] hover:border-gray-300 dark:hover:border-white/10 transition-all"
+                    className="w-full py-2.5 px-3 flex items-center justify-between text-xs font-mono  tracking-wider bg-[#f5f5f5] dark:bg-[#16181D] text-muted-foreground border border-gray-300 dark:border-white/10 hover:border-primary/30 dark:hover:border-primary/30 transition-all"
                   >
                     <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${task.status === 'done' ? 'bg-emerald-500' :
+                      <div className={`w-2 h-2 ${task.status === 'done' ? 'bg-emerald-500' :
                           task.status === 'progress' ? 'bg-primary' :
-                            'bg-gray-400 dark:bg-white/30'
+                            'bg-muted-foreground'
                         }`} />
                       <span className="capitalize">{task.status}</span>
                     </div>
@@ -169,7 +164,7 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
-                        className="absolute left-0 right-0 bottom-full mb-2 bg-white dark:bg-[#16181D] rounded-xl border border-gray-200 dark:border-white/[0.08] p-1.5 z-50 shadow-xl"
+                        className="absolute left-0 right-0 bottom-full mb-2 bg-[#fafafa] dark:bg-[#16181D] border border-gray-300 dark:border-white/10 p-1.5 z-50"
                       >
                         {(['todo', 'progress', 'review', 'done'] as const).map((s) => (
                           <button
@@ -179,9 +174,9 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
                               onUpdateTask?.({ ...task, status: s })
                               setActiveStatusMenuId(null)
                             }}
-                            className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium mb-0.5 flex items-center justify-between transition-colors ${task.status === s
-                                ? 'bg-primary text-white'
-                                : 'text-gray-600 dark:text-white/50 hover:bg-gray-100 dark:hover:bg-white/5'
+                            className={`w-full text-left px-3 py-2 text-xs font-mono  tracking-wider mb-0.5 flex items-center justify-between transition-colors ${task.status === s
+                                ? 'bg-primary text-primary-foreground'
+                                : 'text-muted-foreground hover:bg-secondary'
                               }`}
                           >
                             <span className="capitalize">{s}</span>
@@ -197,8 +192,8 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
           })}
         </div>
       ) : (
-        <Card title="Tasks">
-          <div className="p-4 space-y-2">
+        <TerminalCard header="Tasks">
+          <div className="space-y-2">
             {filteredTasks.map((task) => {
               const CategoryIcon = getCategoryIcon(task.category)
               const isActiveMenu = activeStatusMenuId === task.id
@@ -207,26 +202,26 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
                 <div
                   key={task.id}
                   onClick={() => onSelectTask?.(task.id)}
-                  className="flex items-center gap-4 p-3 rounded-xl bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] hover:border-gray-300 dark:hover:border-white/[0.1] transition-all cursor-pointer"
-                >
-                  <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-[#0F1116] flex items-center justify-center border border-gray-200 dark:border-white/[0.05] shrink-0">
-                    <CategoryIcon size={16} className="text-gray-500 dark:text-white/50" />
+                className="flex items-center gap-4 p-3 border border-gray-300 dark:border-white/10 bg-[#fafafa] dark:bg-[#0a0a0a]/40 hover:border-primary/30 dark:hover:border-primary/30 transition-all cursor-pointer"
+              >
+                <div className="w-9 h-9 bg-[#f5f5f5] dark:bg-[#16181D] flex items-center justify-center border border-gray-300 dark:border-white/10 shrink-0">
+                    <CategoryIcon size={16} className="text-muted-foreground" />
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm text-gray-900 dark:text-white font-medium truncate">{task.title}</div>
-                    <div className="text-xs text-gray-500 dark:text-white/30">{task.category}</div>
+                    <div className="text-sm text-foreground font-medium truncate">{task.title}</div>
+                    <div className="text-xs font-mono  tracking-wider text-muted-foreground">{task.category}</div>
                   </div>
 
                   <div className="hidden sm:flex items-center gap-3">
                     {task.dueDate && (
-                      <div className="text-xs text-gray-500 dark:text-white/30 flex items-center gap-1">
+                      <div className="text-xs text-muted-foreground flex items-center gap-1">
                         <Calendar size={12} />
                         {new Date(task.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                       </div>
                     )}
 
-                    <span className={`w-14 text-center px-2 py-0.5 rounded text-[10px] font-medium shrink-0 ${getPriorityColor(task.priority)}`}>
+                    <span className={`px-2 py-0.5 text-[10px] font-mono  tracking-wider shrink-0 ${getPriorityColor(task.priority)}`}>
                       {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
                     </span>
                   </div>
@@ -237,11 +232,11 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
                         e.stopPropagation()
                         setActiveStatusMenuId(isActiveMenu ? null : task.id)
                       }}
-                      className="w-24 py-2 px-2 rounded-lg flex items-center justify-center gap-2 text-xs font-medium bg-gray-100 dark:bg-[#0F1116] text-gray-600 dark:text-white/50 border border-gray-200 dark:border-white/[0.05] hover:border-gray-300 dark:hover:border-white/10 transition-all"
+                      className="w-24 py-2 px-2 flex items-center justify-center gap-2 text-xs font-mono  tracking-wider bg-[#f5f5f5] dark:bg-[#16181D] text-muted-foreground border border-gray-300 dark:border-white/10 hover:border-primary/30 dark:hover:border-primary/30 transition-all"
                     >
-                      <div className={`w-1.5 h-1.5 rounded-full ${task.status === 'done' ? 'bg-emerald-500' :
+                      <div className={`w-1.5 h-1.5 ${task.status === 'done' ? 'bg-emerald-500' :
                           task.status === 'progress' ? 'bg-primary' :
-                            'bg-gray-400 dark:bg-white/30'
+                            'bg-muted-foreground'
                         }`} />
                       <span className="capitalize">{task.status}</span>
                     </button>
@@ -252,7 +247,7 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
                           initial={{ opacity: 0, y: 5 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 5 }}
-                          className="absolute top-full right-0 mt-2 w-32 bg-white dark:bg-[#16181D] rounded-xl border border-gray-200 dark:border-white/[0.08] p-1.5 z-50 shadow-xl"
+                          className="absolute top-full right-0 mt-2 w-32 bg-[#fafafa] dark:bg-[#16181D] border border-gray-300 dark:border-white/10 p-1.5 z-50"
                         >
                           {(['todo', 'progress', 'review', 'done'] as const).map((s) => (
                             <button
@@ -262,9 +257,9 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
                                 onUpdateTask?.({ ...task, status: s })
                                 setActiveStatusMenuId(null)
                               }}
-                              className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium mb-0.5 transition-colors ${task.status === s
-                                  ? 'bg-primary text-white'
-                                  : 'text-gray-600 dark:text-white/50 hover:bg-gray-100 dark:hover:bg-white/5'
+                              className={`w-full text-left px-3 py-2 text-xs font-mono  tracking-wider mb-0.5 transition-colors ${task.status === s
+                                  ? 'bg-primary text-primary-foreground'
+                                  : 'text-muted-foreground hover:bg-[#f5f5f5] dark:hover:bg-white/5'
                                 }`}
                             >
                               <span className="capitalize">{s}</span>
@@ -278,7 +273,7 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
               )
             })}
           </div>
-        </Card>
+        </TerminalCard>
       )}
     </div>
   )

@@ -15,15 +15,15 @@ export const TerminalCard = React.forwardRef<HTMLDivElement, TerminalCardProps>(
       <div
         ref={ref}
         className={cn(
-          "border border-border/50 bg-card/40 dark:border-white/10 dark:bg-[#0a0a0a]/40",
+          "border border-gray-300 dark:border-white/10 bg-transparent",
           className
         )}
         {...props}
       >
         {(header || headerRight) && (
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border/50 dark:border-white/10">
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-300 dark:border-white/10">
             {header && (
-              <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+              <span className="font-mono text-xs  tracking-widest text-muted-foreground">
                 {header}
               </span>
             )}
@@ -47,7 +47,7 @@ export const TerminalCardHeader = React.forwardRef<HTMLDivElement, TerminalCardH
     <div
       ref={ref}
       className={cn(
-        "flex items-center justify-between px-4 py-3 border-b border-border/50 dark:border-white/10",
+        "flex items-center justify-between px-4 py-1.5 border-b border-gray-300 dark:border-white/10",
         className
       )}
       {...props}
@@ -68,7 +68,7 @@ export const TerminalCardTitle = React.forwardRef<HTMLSpanElement, TerminalCardT
     <span
       ref={ref}
       className={cn(
-        "font-mono text-xs uppercase tracking-widest text-muted-foreground",
+        "font-mono text-xs  tracking-widest text-muted-foreground",
         className
       )}
       {...props}

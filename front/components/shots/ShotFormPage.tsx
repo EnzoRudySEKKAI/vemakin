@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useRef } from 'react'
 import { Film, Calendar, MapPin, FileText, Package, Check, Search, AlertCircle } from 'lucide-react'
 import { FormLayout, FormType } from '@/components/organisms/FormLayout'
 import { Text, Input, Button, IconContainer, Textarea } from '@/components/atoms'
-import { Card } from '@/components/ui/Card'
+import { TerminalCard } from '@/components/ui/TerminalCard'
 import { TimeSelector } from '@/components/ui/TimeSelector'
 import { LocationAutocomplete, LocationSuggestion } from '@/components/ui/LocationAutocomplete'
 import { ProjectRequiredBanner } from '@/components/molecules/ProjectRequiredBanner'
@@ -136,40 +136,38 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
           message="You need to create a project before you can save shots"
         />
       )}
-      <Card title="Scene identity" className="mb-8">
-        <div className="p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-8">
-            <div className="sm:col-span-3">
-              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Scene title</span>
-              <Input
-                type="text"
-                value={form.title}
-                onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="e.g. THE EXTERIOR CHASE"
-                fullWidth
-                variant="underline"
-                className="text-lg font-bold tracking-tight"
-              />
-            </div>
-            <div>
-              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Number</span>
-              <Input
-                type="text"
-                value={form.sceneNumber}
-                onChange={e => setForm(prev => ({ ...prev, sceneNumber: e.target.value }))}
-                placeholder="4C"
-                leftIcon={<span className="text-[10px] font-bold text-gray-400 dark:text-white/20">SC</span>}
-                fullWidth
-                variant="underline"
-                className="font-mono text-primary/70"
-              />
-            </div>
+      <TerminalCard header="Scene identity" className="mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-8">
+          <div className="sm:col-span-3">
+            <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Scene title</span>
+            <Input
+              type="text"
+              value={form.title}
+              onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))}
+              placeholder="e.g. THE EXTERIOR CHASE"
+              fullWidth
+              variant="underline"
+              className="text-lg font-bold tracking-tight"
+            />
+          </div>
+          <div>
+            <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Number</span>
+            <Input
+              type="text"
+              value={form.sceneNumber}
+              onChange={e => setForm(prev => ({ ...prev, sceneNumber: e.target.value }))}
+              placeholder="4C"
+              leftIcon={<span className="text-[10px] font-bold text-gray-400 dark:text-white/20">SC</span>}
+              fullWidth
+              variant="underline"
+              className="font-mono text-primary/70"
+            />
           </div>
         </div>
-      </Card>
+      </TerminalCard>
 
-      <Card title="Schedule & location" className="mb-8">
-        <div className="p-6 space-y-10">
+      <TerminalCard header="Schedule & location" className="mb-8">
+        <div className="space-y-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-12">
             <div className="relative">
               <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Filming date</span>
@@ -192,8 +190,8 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
           </div>
 
           {shotConflict && (
-            <div className="flex items-center gap-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl animate-in fade-in slide-in-from-top-2">
-              <div className="p-2 bg-red-500/20 rounded-lg text-red-400">
+            <div className="flex items-center gap-4 p-4 bg-red-500/10 border border-red-500/20 animate-in fade-in slide-in-from-top-2">
+              <div className="p-2 bg-red-500/20 text-red-400">
                 <AlertCircle size={20} strokeWidth={2.5} />
               </div>
               <div>
@@ -221,28 +219,26 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
             />
           </div>
         </div>
-      </Card>
+      </TerminalCard>
 
-      <Card title="Action brief" className="mb-8">
-        <div className="p-6">
-          <Textarea
-            value={form.description}
-            onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))}
-            placeholder="Describe the action, atmosphere, and key visual elements..."
-            className="min-h-[120px]"
-          />
-        </div>
-      </Card>
+      <TerminalCard header="Action brief" className="mb-8">
+        <Textarea
+          value={form.description}
+          onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))}
+          placeholder="Describe the action, atmosphere, and key visual elements..."
+          className="min-h-[120px]"
+        />
+      </TerminalCard>
 
-      <Card
-        title="Equipment assignment"
+      <TerminalCard
+        header="Equipment assignment"
         headerRight={
           <span className="text-primary font-medium text-xs">
             {form.equipmentIds.length} items selected
           </span>
         }
       >
-        <div className="p-6 space-y-6">
+        <div className="space-y-6">
           <div className="space-y-4">
             <div className="relative">
               <Input
@@ -256,16 +252,16 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
               />
             </div>
 
-            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar mask-linear-fade">
+            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
               {['All', 'Camera', 'Lens', 'Light', 'Filter', 'Support', 'Grip', 'Monitoring', 'Audio', 'Wireless', 'Drone', 'Props'].map(cat => {
                 const isActive = shotGearCategory === cat
                 return (
                   <button
                     key={cat}
                     onClick={() => setShotGearCategory(cat)}
-                    className={`px-4 py-2 rounded-xl text-[10px] font-medium transition-all border whitespace-nowrap ${isActive
-                      ? 'bg-primary text-white border-primary shadow-[0_0_15px_rgba(78,71,221,0.3)]'
-                      : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/5 text-gray-500 dark:text-white/40 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-700 dark:hover:text-white/70 hover:border-gray-300 dark:hover:border-white/10'
+                    className={`px-3 py-1.5 text-xs font-mono tracking-wider whitespace-nowrap border transition-all ${isActive
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-[#fafafa] dark:bg-[#16181D] border-gray-300 dark:border-white/10 text-gray-600 dark:text-white/50 hover:border-primary/30 dark:hover:border-white/20 hover:text-gray-800 dark:hover:text-white/70'
                       }`}
                   >
                     {cat}
@@ -284,13 +280,13 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
                 <button
                   key={item.id}
                   onClick={() => toggleShotGear(item.id)}
-                  className={`w-full flex items-center justify-between p-3 rounded-xl transition-all group border ${isSelected
+                  className={`w-full flex items-center justify-between p-3 transition-all group border ${isSelected
                     ? 'bg-primary/10 border-primary/20 shadow-[0_0_10px_rgba(78,71,221,0.05)]'
                     : 'bg-transparent border-transparent hover:bg-white/5'
                     }`}
                 >
                   <div className="flex items-center gap-4 min-w-0">
-                    <div className={`p-2.5 rounded-xl transition-all ${isSelected
+                    <div className={`p-2.5 border transition-all ${isSelected
                       ? 'bg-primary/20 text-primary'
                       : 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/20 group-hover:bg-gray-200 dark:group-hover:bg-white/10 group-hover:text-gray-600 dark:group-hover:text-white/40'
                       }`}>
@@ -305,7 +301,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
                           {item.category}
                         </span>
                         {item.status !== 'available' && (
-                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-white/30 font-medium">
+                          <span className="text-[9px] px-1.5 py-0.5 bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-white/30 font-medium">
                             {item.status}
                           </span>
                         )}
@@ -313,7 +309,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
                     </div>
                   </div>
 
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 ${isSelected
+                  <div className={`w-8 h-8 border flex items-center justify-center transition-all duration-300 ${isSelected
                     ? 'bg-primary text-white shadow-[0_0_10px_rgba(78,71,221,0.4)] scale-100'
                     : 'bg-gray-100 dark:bg-white/5 text-gray-200 dark:text-white/5 scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100'
                     }`}>
@@ -323,7 +319,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
               )
             }) : (
               <div className="py-16 flex flex-col items-center justify-center text-center">
-                <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-4 text-gray-400 dark:text-white/20">
+                <div className="w-16 h-16 bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-4 text-gray-400 dark:text-white/20">
                   <Package size={32} strokeWidth={1.5} />
                 </div>
                 <h3 className="text-gray-500 dark:text-white/40 font-medium text-sm">No items found</h3>
@@ -332,7 +328,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
             )}
           </div>
         </div>
-      </Card>
+      </TerminalCard>
     </FormLayout>
   )
 }

@@ -2,10 +2,10 @@ import React, { useMemo } from 'react'
 import { FileText, Calendar, Film, StickyNote, Zap, Paperclip, Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Shot, Note, PostProdTask, NotesFilters } from '@/types'
-import { Card } from '@/components/ui/Card'
+import { TerminalCard } from '@/components/ui/TerminalCard'
+import { TerminalButton } from '@/components/ui/TerminalButton'
 import { formatDateToNumeric } from '@/utils'
 import { POST_PROD_CATEGORIES } from '@/constants'
-import { Button } from '@/components/atoms/Button'
 
 interface NotesViewProps {
   shots: Shot[]
@@ -92,20 +92,15 @@ export const NotesView: React.FC<NotesViewProps> = React.memo(({
   if (aggregatedNotes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-300px)] w-full overflow-hidden px-6 select-none">
-        <div className="w-14 h-14 bg-gray-100 dark:bg-[#16181D] rounded-xl flex items-center justify-center mb-6 border border-gray-200 dark:border-white/[0.05]">
-          <StickyNote size={24} className="text-gray-500 dark:text-white/40" />
+        <div className="w-14 h-14 border border-white/10 bg-[#0a0a0a]/40 flex items-center justify-center mb-6">
+          <StickyNote size={24} className="text-muted-foreground" />
         </div>
         <div className="text-center max-w-sm">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No Notes Found</h2>
-          <p className="text-gray-500 dark:text-white/30 mb-8 text-sm">Adjust filters or create your first note.</p>
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={() => setIsAdding(true)}
-            leftIcon={<Plus size={18} strokeWidth={2.5} />}
-          >
+          <h2 className="text-xl font-semibold text-foreground mb-2 font-mono  tracking-wider">No Notes Found</h2>
+          <p className="text-muted-foreground mb-8 text-sm font-mono">Adjust filters or create your first note.</p>
+          <TerminalButton variant="primary" onClick={() => setIsAdding(true)}>
             Add Note
-          </Button>
+          </TerminalButton>
         </div>
       </div>
     )
@@ -131,30 +126,30 @@ export const NotesView: React.FC<NotesViewProps> = React.memo(({
               <div
                 key={note.id}
                 onClick={() => onSelectNote(note.id)}
-                className="group p-4 rounded-xl bg-gray-100 dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] hover:border-gray-300 dark:hover:border-white/[0.1] transition-all cursor-pointer"
+                className="group p-4 border border-gray-300 dark:border-white/10 bg-[#fafafa] dark:bg-[#0a0a0a]/40 hover:border-primary/30 dark:hover:border-primary/30 transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 rounded-lg bg-white dark:bg-[#0F1116] flex items-center justify-center border border-gray-200 dark:border-white/[0.05]">
-                    <ContextIcon size={14} className="text-gray-500 dark:text-white/40" />
+                  <div className="w-8 h-8 bg-[#f5f5f5] dark:bg-[#16181D] flex items-center justify-center border border-gray-300 dark:border-white/10">
+                    <ContextIcon size={14} className="text-muted-foreground" />
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-white/30 uppercase tracking-wider">{contextLabel}</div>
+                  <div className="text-xs font-mono  tracking-wider text-muted-foreground">{contextLabel}</div>
                 </div>
 
                 <div className="mb-3">
-                  <h3 className="text-sm text-gray-900 dark:text-white font-medium mb-1 line-clamp-1">{note.title}</h3>
-                  <p className="text-xs text-gray-500 dark:text-white/30 line-clamp-2">{note.content}</p>
+                  <h3 className="text-sm text-foreground font-medium mb-1 line-clamp-1">{note.title}</h3>
+                  <p className="text-xs text-muted-foreground line-clamp-2">{note.content}</p>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-[10px] text-gray-400 dark:text-white/20">
+                  <div className="flex items-center gap-1.5 text-[10px] font-mono  tracking-wider text-muted-foreground">
                     <Calendar size={10} />
                     {formatDateToNumeric(note.updatedAt)}
                   </div>
 
                   {note.attachments && note.attachments.length > 0 && (
-                    <div className="flex items-center gap-1 text-gray-400 dark:text-white/20">
+                    <div className="flex items-center gap-1 text-muted-foreground">
                       <Paperclip size={10} />
-                      <span className="text-[10px]">{note.attachments.length}</span>
+                      <span className="text-[10px] font-mono">{note.attachments.length}</span>
                     </div>
                   )}
                 </div>
@@ -163,8 +158,8 @@ export const NotesView: React.FC<NotesViewProps> = React.memo(({
           })}
         </div>
       ) : (
-        <Card title="Notes">
-          <div className="p-4 space-y-2">
+        <TerminalCard header="Notes">
+          <div className="space-y-2">
             {aggregatedNotes.map(note => {
               const ContextIcon = getContextIcon(note, shots, tasks)
               const linkedShot = note.shotId ? shots.find(s => s.id === note.shotId) : null
@@ -181,23 +176,23 @@ export const NotesView: React.FC<NotesViewProps> = React.memo(({
               <div
                 key={note.id}
                 onClick={() => onSelectNote(note.id)}
-                className="flex items-center gap-4 p-3 rounded-xl bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] hover:border-gray-300 dark:hover:border-white/[0.1] transition-all cursor-pointer"
+                className="flex items-center gap-4 p-3 border border-gray-300 dark:border-white/10 bg-[#fafafa] dark:bg-[#0a0a0a]/40 hover:border-primary/30 dark:hover:border-primary/30 transition-all cursor-pointer"
               >
-                <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-[#0F1116] flex items-center justify-center border border-gray-200 dark:border-white/[0.05] shrink-0">
-                  <ContextIcon size={16} className="text-gray-500 dark:text-white/40" />
+                <div className="w-9 h-9 bg-[#f5f5f5] dark:bg-[#16181D] flex items-center justify-center border border-gray-300 dark:border-white/10 shrink-0">
+                  <ContextIcon size={16} className="text-muted-foreground" />
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm text-gray-900 dark:text-white font-medium truncate">{note.title}</div>
-                  <div className="text-xs text-gray-500 dark:text-white/30">{contextLabel}</div>
+                  <div className="text-sm text-foreground font-medium truncate">{note.title}</div>
+                  <div className="text-xs font-mono  tracking-wider text-muted-foreground">{contextLabel}</div>
                 </div>
 
                 <div className="hidden sm:flex items-center gap-3 shrink-0">
-                  <div className="text-xs text-gray-500 dark:text-white/30">
+                  <div className="text-xs font-mono  tracking-wider text-muted-foreground">
                     {new Date(note.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                   </div>
                   {note.attachments && note.attachments.length > 0 && (
-                    <div className="flex items-center gap-1 text-gray-400 dark:text-white/20">
+                    <div className="flex items-center gap-1 text-muted-foreground">
                       <Paperclip size={12} />
                     </div>
                   )}
@@ -206,7 +201,7 @@ export const NotesView: React.FC<NotesViewProps> = React.memo(({
               )
             })}
           </div>
-        </Card>
+        </TerminalCard>
       )}
     </div>
   )

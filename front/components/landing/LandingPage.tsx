@@ -47,7 +47,7 @@ const TerminalButton = ({
   <button
     onClick={onClick}
     className={`
-      group relative px-6 py-3 font-mono text-sm tracking-wider uppercase
+      group relative px-6 py-3 font-mono text-sm tracking-wider 
       border transition-all duration-300
       ${variant === 'primary' 
         ? 'border-primary text-primary hover:bg-primary hover:text-primary-foreground' 
@@ -66,7 +66,7 @@ const TerminalButton = ({
 const StatusBadge = ({ text }: { text: string }) => (
   <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-primary/30 bg-primary/5">
     <span className="w-1.5 h-1.5 bg-primary animate-pulse rounded-full" />
-    <span className="font-mono text-[10px] text-primary tracking-widest uppercase">{text}</span>
+    <span className="font-mono text-[10px] text-primary tracking-widest ">{text}</span>
   </div>
 )
 
@@ -76,7 +76,7 @@ const MockShotCard = ({ title, scene, time, location, status = 'pending', active
   <div className={`p-4 border transition-all ${active ? 'border-primary bg-primary/5' : 'border-white/10 bg-[#0a0a0a]/40'} backdrop-blur-sm`}>
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
-        <span className="px-2 py-0.5 border border-white/20 text-white/80 text-[10px] font-mono uppercase tracking-wider">
+        <span className="px-2 py-0.5 border border-white/20 text-white/80 text-[10px] font-mono  tracking-wider">
           Scene_{scene}
         </span>
         <span className="px-2 py-0.5 border border-white/10 text-white/50 text-[10px] font-mono flex items-center gap-1.5">
@@ -94,7 +94,7 @@ const MockShotCard = ({ title, scene, time, location, status = 'pending', active
 
       <div className="flex items-center justify-between mt-2">
         <div className="flex items-center gap-2">
-          <div className="px-2 py-1 border border-white/10 text-white/50 text-[9px] font-mono uppercase">
+          <div className="px-2 py-1 border border-white/10 text-white/50 text-[9px] font-mono ">
             Checklist
           </div>
           <div className="flex items-center gap-1.5 text-primary text-[10px] font-mono">
@@ -113,7 +113,7 @@ const MockTimelineHeader = () => (
   <div className="px-4 py-3 flex items-center justify-between bg-[#0a0a0a]/60 border-b border-white/10">
     <div className="flex items-center gap-2">
       <Terminal size={12} className="text-primary" />
-      <span className="text-xs font-mono text-white/60 uppercase tracking-wider">Monday_Oct_24</span>
+      <span className="text-xs font-mono text-white/60  tracking-wider">Monday_Oct_24</span>
     </div>
     <div className="flex items-center gap-3">
       <div className="flex items-center gap-1.5 text-[10px] font-mono text-orange-400">
@@ -156,7 +156,7 @@ const Navbar = ({ scrolled, onNavigate }: { scrolled: boolean, onNavigate: (path
             <button 
               key={item}
               onClick={() => scrollToSection(item.toLowerCase().replace(/\s+/g, '-'))}
-              className="text-xs font-mono text-white/40 hover:text-white transition-colors tracking-widest uppercase"
+              className="text-xs font-mono text-white/40 hover:text-white transition-colors tracking-widest "
             >
               {item}
             </button>
@@ -166,7 +166,7 @@ const Navbar = ({ scrolled, onNavigate }: { scrolled: boolean, onNavigate: (path
         <div className="hidden md:flex items-center gap-4">
           <button 
             onClick={() => navigate('/auth')} 
-            className="text-xs font-mono text-white/50 hover:text-white transition-colors uppercase tracking-widest"
+            className="text-xs font-mono text-white/50 hover:text-white transition-colors  tracking-widest"
           >
             Sign In
           </button>
@@ -196,7 +196,7 @@ const Navbar = ({ scrolled, onNavigate }: { scrolled: boolean, onNavigate: (path
                 <button 
                   key={item} 
                   onClick={() => scrollToSection(item.toLowerCase().replace(/\s+/g, '-'))} 
-                  className="text-sm font-mono text-white/60 text-left uppercase tracking-widest hover:text-white"
+                  className="text-sm font-mono text-white/60 text-left  tracking-widest hover:text-white"
                 >
                   {item}
                 </button>
@@ -237,7 +237,7 @@ const HeroSection = ({ onNavigate }: { onNavigate: (path: string) => void }) => 
             </div>
             
             {/* Pre-headline */}
-            <div className="font-mono text-[10px] text-white/30 uppercase tracking-[0.3em] mb-4">
+            <div className="font-mono text-[10px] text-white/30  tracking-[0.3em] mb-4">
               // VEMAKIN_FEED_ACTIVE — PRODUCTION_OS: READY
             </div>
             
@@ -270,7 +270,7 @@ const HeroSection = ({ onNavigate }: { onNavigate: (path: string) => void }) => 
             </div>
 
             {/* Trust badges */}
-            <div className="mt-8 flex flex-wrap items-center gap-4 sm:gap-6 text-white/30 text-[10px] font-mono uppercase tracking-wider">
+            <div className="mt-8 flex flex-wrap items-center gap-4 sm:gap-6 text-white/30 text-[10px] font-mono  tracking-wider">
               <span className="flex items-center gap-2">
                 <span className="w-1 h-1 bg-emerald-500 rounded-full" /> 
                 Free for Early Adopters
@@ -311,7 +311,7 @@ const HeroSection = ({ onNavigate }: { onNavigate: (path: string) => void }) => 
                   
                   <div className="flex items-center justify-center gap-4 py-1">
                     <div className="h-px flex-1 bg-white/5" />
-                    <span className="text-[9px] font-mono text-white/30 uppercase tracking-widest">15m_travel_time</span>
+                    <span className="text-[9px] font-mono text-white/30  tracking-widest">15m_travel_time</span>
                     <div className="h-px flex-1 bg-white/5" />
                   </div>
 
@@ -369,7 +369,7 @@ const Benefits = () => {
           <Cpu size={20} className="text-primary" />
           <h2 className="text-2xl font-bold text-white">Core Modules</h2>
           <div className="flex-1 h-px bg-white/10" />
-          <span className="font-mono text-xs text-white/30 uppercase tracking-widest">V.2.0</span>
+          <span className="font-mono text-xs text-white/30  tracking-widest">V.2.0</span>
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
@@ -533,7 +533,7 @@ const CTASection = ({ onNavigate }: { onNavigate: (path: string) => void }) => {
         >
           <div className="absolute -inset-20 bg-primary/10 blur-3xl -z-10 opacity-30" />
           
-          <div className="font-mono text-xs text-white/20 uppercase tracking-[0.3em] mb-6">
+          <div className="font-mono text-xs text-white/20  tracking-[0.3em] mb-6">
             // READY_TO_INITIALIZE
           </div>
           
@@ -551,7 +551,7 @@ const CTASection = ({ onNavigate }: { onNavigate: (path: string) => void }) => {
             Initialize Access
           </TerminalButton>
           
-          <div className="mt-8 flex items-center justify-center gap-8 text-white/30 text-[10px] font-mono uppercase tracking-wider">
+          <div className="mt-8 flex items-center justify-center gap-8 text-white/30 text-[10px] font-mono  tracking-wider">
             <span className="flex items-center gap-2">
               <span className="w-1 h-1 bg-emerald-500 rounded-full" /> 
               Free for Early Adopters
@@ -595,7 +595,7 @@ const Footer = () => {
           </div>
           
           <div className="lg:col-start-7 lg:col-span-2">
-            <h4 className="text-white font-semibold mb-6 text-xs uppercase tracking-widest">Product</h4>
+            <h4 className="text-white font-semibold mb-6 text-xs  tracking-widest">Product</h4>
             <ul className="space-y-3 text-sm text-white/40 font-mono">
               <li><button onClick={() => navigate('/auth')} className="hover:text-white transition-colors">Timeline</button></li>
               <li><button onClick={() => navigate('/auth')} className="hover:text-white transition-colors">Inventory</button></li>
@@ -604,7 +604,7 @@ const Footer = () => {
           </div>
           
           <div className="lg:col-span-2">
-            <h4 className="text-white font-semibold mb-6 text-xs uppercase tracking-widest">Resources</h4>
+            <h4 className="text-white font-semibold mb-6 text-xs  tracking-widest">Resources</h4>
             <ul className="space-y-3 text-sm text-white/40 font-mono">
               <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Support</a></li>
@@ -612,7 +612,7 @@ const Footer = () => {
           </div>
           
           <div className="lg:col-span-2">
-            <h4 className="text-white font-semibold mb-6 text-xs uppercase tracking-widest">Legal</h4>
+            <h4 className="text-white font-semibold mb-6 text-xs  tracking-widest">Legal</h4>
             <ul className="space-y-3 text-sm text-white/40 font-mono">
               <li><a href="#" className="hover:text-white transition-colors">Privacy</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Terms</a></li>

@@ -42,7 +42,7 @@ export const GearTransition: React.FC<GearTransitionProps> = ({ prevShot, nextSh
       >
         <div className="h-px flex-1 bg-gray-200 dark:bg-white/10 group-hover:bg-gray-300 dark:group-hover:bg-white/20 transition-colors" />
         
-        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-white/40 group-hover:text-gray-600 dark:group-hover:text-white/60 transition-colors">
+        <div className="flex items-center gap-2 text-[10px] font-bold  tracking-widest text-gray-400 dark:text-white/40 group-hover:text-gray-600 dark:group-hover:text-white/60 transition-colors">
           <Boxes size={12} />
           Shift Gear
           <span className="opacity-60 ml-1">

@@ -64,8 +64,7 @@ export const DetailViewLayout: React.FC<DetailViewLayoutProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
       className={`
-        flex flex-col 
-        bg-[#F2F2F7] dark:bg-[#0F1116] 
+        flex flex-col
         ${className}
       `}
     >
@@ -156,7 +155,7 @@ export const DetailViewMetadataItem: React.FC<DetailViewMetadataItemProps> = ({
 }) => {
   return (
     <div className={`flex flex-col gap-1 min-w-0 ${className}`}>
-      <span className="detail-subtitle dark:text-white">{label}</span>
+      <span className="detail-subtitle">{label}</span>
       {children}
     </div>
   )

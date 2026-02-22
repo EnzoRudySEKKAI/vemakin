@@ -8,7 +8,8 @@ import { DetailItem } from '../../components/molecules'
 import { Text } from '../../components/atoms/Text'
 import { Input } from '../../components/atoms/Input'
 import { Textarea } from '../../components/atoms/Textarea'
-import { Card, SimpleCard, ListItem } from '../ui/Card'
+import { TerminalCard, TerminalCardContent } from '../ui/TerminalCard'
+import { TerminalButton } from '../ui/TerminalButton'
 
 import { ConfirmModal } from '../ui/ConfirmModal'
 
@@ -138,56 +139,56 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
       size="wide"
       sidebar={
         <div className="space-y-4">
-          <Card title="Linked context">
+          <TerminalCard header="Linked context">
             <div className="p-2 space-y-1">
               {linkedShot && (
                 <button
                   onClick={() => onNavigateToShot(linkedShot.id)}
-                  className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all group"
+                  className="w-full flex items-center justify-between p-3 hover:bg-secondary/50 transition-all group"
                 >
                   <div className="flex items-center gap-4 min-w-0">
-                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                    <div className="p-2 bg-primary/10 text-primary">
                       <Film size={16} />
                     </div>
                     <div className="text-left min-w-0">
-                      <p className="text-[10px] text-white/40 font-medium">Sequence</p>
-                      <p className="text-sm text-white/50 font-medium truncate group-hover:text-white transition-colors">
+                      <p className="text-[10px] font-mono  tracking-wider text-muted-foreground">Sequence</p>
+                      <p className="text-sm text-foreground font-medium truncate group-hover:text-primary transition-colors">
                         {linkedShot.title}
                       </p>
                     </div>
                   </div>
-                  <ArrowUpRight size={12} className="text-white/10 group-hover:text-primary transition-colors" />
+                  <ArrowUpRight size={12} className="text-border group-hover:text-primary transition-colors" />
                 </button>
               )}
               {linkedTask && (
                 <button
                   onClick={() => onNavigateToTask(linkedTask.id)}
-                  className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all group"
+                  className="w-full flex items-center justify-between p-3 hover:bg-secondary/50 transition-all group"
                 >
                   <div className="flex items-center gap-4 min-w-0">
-                    <div className="p-2 rounded-lg bg-orange-500/10 text-orange-400">
+                    <div className="p-2 bg-orange-500/10 text-orange-400">
                       <Briefcase size={16} />
                     </div>
                     <div className="text-left min-w-0">
-                      <p className="text-[10px] text-white/40 font-medium">Task</p>
-                      <p className="text-sm text-white/50 font-medium truncate group-hover:text-white transition-colors">
+                      <p className="text-[10px] font-mono  tracking-wider text-muted-foreground">Task</p>
+                      <p className="text-sm text-foreground font-medium truncate group-hover:text-primary transition-colors">
                         {linkedTask.title}
                       </p>
                     </div>
                   </div>
-                  <ArrowUpRight size={12} className="text-white/10 group-hover:text-orange-400 transition-colors" />
+                  <ArrowUpRight size={12} className="text-border group-hover:text-primary transition-colors" />
                 </button>
               )}
               {!linkedShot && !linkedTask && (
                 <div className="py-12 flex flex-col items-center justify-center text-center opacity-10">
                   <ExternalLink size={24} className="mb-2" />
-                  <span className="text-[10px] font-medium">Unlinked</span>
+                  <span className="text-[10px] font-mono  tracking-wider">Unlinked</span>
                 </div>
               )}
             </div>
-          </Card>
+          </TerminalCard>
 
-          <Card title="Note details">
+          <TerminalCard header="Note details">
             <div className="p-4 space-y-6">
               <DetailItem
                 label="Last modified"
@@ -198,22 +199,21 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
                 value={new Date(note.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
               />
             </div>
-          </Card>
+          </TerminalCard>
         </div>
       }
     >
-      <Card title="Core content" className="mb-8">
+      <TerminalCard header="Core content" className="mb-8">
         <div className="p-6 space-y-10">
           <div className="flex flex-col gap-1 min-w-0">
             {isEditing ? (
               <>
-                <span className="text-[10px] text-white/40 font-medium mb-2">Note title</span>
+                <span className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-2">Note title</span>
                 <Input
                   type="text"
                   value={editedItem.title}
                   onChange={(e) => setEditedItem(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Name your note..."
-                  variant="underline"
                   fullWidth
                   className="text-2xl"
                 />
@@ -228,7 +228,7 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
 
           {isEditing ? (
             <div className="flex flex-col gap-1 min-w-0">
-              <span className="text-[10px] text-white/40 font-medium mb-2">Remarks & observations</span>
+              <span className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-2">Remarks & observations</span>
               <Textarea
                 value={editedItem.content}
                 onChange={(e) => setEditedItem(prev => ({ ...prev, content: e.target.value }))}
@@ -244,18 +244,14 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
             />
           )}
         </div>
-      </Card>
+      </TerminalCard>
 
-      <Card title="Production assets"
-        subtitle={
-          <span className="text-white/40">
-            {editedItem.attachments?.length || 0} Files Attached
-          </span>
-        }
+      <TerminalCard
+        header="Production assets"
         headerRight={
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 text-[10px] font-medium text-primary hover:text-primary/70 transition-colors"
+            className="flex items-center gap-2 text-[10px] font-mono  tracking-wider text-primary hover:text-primary/70 transition-colors"
           >
             <Plus size={12} strokeWidth={3} />
             Append File
@@ -270,18 +266,18 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
               editedItem.attachments.map(att => (
                 <div
                   key={att.id}
-                  className="group relative bg-white/5 p-4 rounded-xl border border-white/5 hover:border-primary/30 transition-all flex items-center gap-4"
+                  className="group relative bg-secondary/30 p-4 border border-border hover:border-primary/30 transition-all flex items-center gap-4"
                 >
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-white/5 text-white/20 group-hover:text-primary group-hover:bg-primary/10 transition-all">
+                  <div className="w-10 h-10 flex items-center justify-center bg-secondary text-muted-foreground group-hover:text-primary group-hover:bg-primary/10 transition-all">
                     {att.type === 'image' ? <ImageIcon size={18} /> : <File size={18} />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-white/80 group-hover:text-white transition-colors truncate">{att.name}</p>
-                    <p className="text-[10px] text-white/40 font-medium">{att.size || 'N/A'}</p>
+                    <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors truncate">{att.name}</p>
+                    <p className="text-[10px] text-muted-foreground font-mono">{att.size || 'N/A'}</p>
                   </div>
                   <button
                     onClick={() => removeAttachment(att.id)}
-                    className="p-2 text-white/5 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                    className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -289,15 +285,15 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
               ))
             ) : (
               <div className="col-span-full py-16 flex flex-col items-center justify-center text-center opacity-10">
-                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-secondary flex items-center justify-center mb-4">
                   <File size={24} />
                 </div>
-                <span className="text-[10px] font-medium">No documentation attached</span>
+                <span className="text-[10px] font-mono  tracking-wider">No documentation attached</span>
               </div>
             )}
           </div>
         </div>
-      </Card>
+      </TerminalCard>
 
       <ConfirmModal
         isOpen={showDeleteConfirm}

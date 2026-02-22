@@ -33,7 +33,7 @@ export const StatusBadge = React.forwardRef<HTMLDivElement, StatusBadgeProps>(
             statusColors[status]
           )}
         />
-        <span className="font-mono text-[10px] text-primary tracking-widest uppercase">
+        <span className="font-mono text-[10px] text-primary tracking-widest ">
           {text}
         </span>
       </div>

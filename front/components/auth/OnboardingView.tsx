@@ -138,14 +138,14 @@ const MockInventory = () => (
                 <Text variant="caption" color="muted" className="mt-1.5 truncate">RED V-RAPTOR</Text>
               </div>
             </div>
-            <span className="px-2.5 py-1 rounded-md text-[10px] font-bold border border-primary/20 bg-primary/10 text-primary uppercase">Owned</span>
+            <span className="px-2.5 py-1 rounded-md text-[10px] font-bold border border-primary/20 bg-primary/10 text-primary ">Owned</span>
           </div>
           <div className="mb-4 min-w-0 flex-1">
-            <span className="inline-block px-2.5 py-1 rounded-md bg-white/5 text-xs font-bold text-white/40 uppercase">Camera</span>
+            <span className="inline-block px-2.5 py-1 rounded-md bg-white/5 text-xs font-bold text-white/40 ">Camera</span>
           </div>
           <div className="mt-auto grid grid-cols-2 gap-3 bg-white/[0.02] p-4 rounded-2xl border border-white/5">
-            <div className="flex flex-col"><span className="text-white/20 text-[9px] font-bold uppercase leading-none mb-1.5">Sensor</span><span className="text-white text-sm font-semibold">8K VV</span></div>
-            <div className="flex flex-col"><span className="text-white/20 text-[9px] font-bold uppercase leading-none mb-1.5">Mount</span><span className="text-white text-sm font-semibold">PL</span></div>
+            <div className="flex flex-col"><span className="text-white/20 text-[9px] font-bold  leading-none mb-1.5">Sensor</span><span className="text-white text-sm font-semibold">8K VV</span></div>
+            <div className="flex flex-col"><span className="text-white/20 text-[9px] font-bold  leading-none mb-1.5">Mount</span><span className="text-white text-sm font-semibold">PL</span></div>
           </div>
         </Card>
 
@@ -159,14 +159,14 @@ const MockInventory = () => (
                 <Text variant="caption" color="muted" className="mt-1.5 truncate">ARRI</Text>
               </div>
             </div>
-            <span className="px-2.5 py-1 rounded-md text-[10px] font-bold border border-orange-500/20 bg-orange-500/10 text-orange-400 uppercase">Rented</span>
+            <span className="px-2.5 py-1 rounded-md text-[10px] font-bold border border-orange-500/20 bg-orange-500/10 text-orange-400 ">Rented</span>
           </div>
           <div className="mb-4 min-w-0 flex-1">
-            <span className="inline-block px-2.5 py-1 rounded-md bg-white/5 text-xs font-bold text-white/40 uppercase">Light</span>
+            <span className="inline-block px-2.5 py-1 rounded-md bg-white/5 text-xs font-bold text-white/40 ">Light</span>
           </div>
           <div className="mt-auto grid grid-cols-2 gap-3 bg-white/[0.02] p-4 rounded-2xl border border-white/5">
-            <div className="flex flex-col"><span className="text-white/20 text-[9px] font-bold uppercase leading-none mb-1.5">Output</span><span className="text-white text-sm font-semibold">1800W</span></div>
-            <div className="flex flex-col"><span className="text-white/20 text-[9px] font-bold uppercase leading-none mb-1.5">Temp</span><span className="text-white text-sm font-semibold">5600K</span></div>
+            <div className="flex flex-col"><span className="text-white/20 text-[9px] font-bold  leading-none mb-1.5">Output</span><span className="text-white text-sm font-semibold">1800W</span></div>
+            <div className="flex flex-col"><span className="text-white/20 text-[9px] font-bold  leading-none mb-1.5">Temp</span><span className="text-white text-sm font-semibold">5600K</span></div>
           </div>
         </Card>
 
@@ -180,14 +180,14 @@ const MockInventory = () => (
                 <Text variant="caption" color="muted" className="mt-1.5 truncate">SmallHD</Text>
               </div>
             </div>
-            <span className="px-2.5 py-1 rounded-md text-[10px] font-bold border border-primary/20 bg-primary/10 text-primary uppercase">Owned</span>
+            <span className="px-2.5 py-1 rounded-md text-[10px] font-bold border border-primary/20 bg-primary/10 text-primary ">Owned</span>
           </div>
           <div className="mb-4 min-w-0 flex-1">
-            <span className="inline-block px-2.5 py-1 rounded-md bg-white/5 text-xs font-bold text-white/40 uppercase">Monitoring</span>
+            <span className="inline-block px-2.5 py-1 rounded-md bg-white/5 text-xs font-bold text-white/40 ">Monitoring</span>
           </div>
           <div className="mt-auto grid grid-cols-2 gap-3 bg-white/[0.02] p-4 rounded-2xl border border-white/5">
-            <div className="flex flex-col"><span className="text-white/20 text-[9px] font-bold uppercase leading-none mb-1.5">Screen</span><span className="text-white text-sm font-semibold">13"4K</span></div>
-            <div className="flex flex-col"><span className="text-white/20 text-[9px] font-bold uppercase leading-none mb-1.5">Nits</span><span className="text-white text-sm font-semibold">1500</span></div>
+            <div className="flex flex-col"><span className="text-white/20 text-[9px] font-bold  leading-none mb-1.5">Screen</span><span className="text-white text-sm font-semibold">13"4K</span></div>
+            <div className="flex flex-col"><span className="text-white/20 text-[9px] font-bold  leading-none mb-1.5">Nits</span><span className="text-white text-sm font-semibold">1500</span></div>
           </div>
         </Card>
       </div>
@@ -201,7 +201,7 @@ const MockPipeline = () => (
       {/* Header Stats */}
       <div className="flex items-center justify-between px-2">
         <Text variant="label" color="muted">Production Activity</Text>
-        <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/5 shadow-sm text-[10px] font-bold text-white/40 uppercase tracking-wider">
+        <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/5 shadow-sm text-[10px] font-bold text-white/40  tracking-wider">
           5 left <span className="text-white/10">/</span> 12 total
         </span>
       </div>
@@ -215,9 +215,9 @@ const MockPipeline = () => (
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-primary/20 bg-primary/10">
                   <Scissors size={12} strokeWidth={2.5} className="text-primary"/>
-                  <Text variant="label" color="accent" className="text-[10px] font-bold uppercase tracking-tight">Editing Task</Text>
+                  <Text variant="label" color="accent" className="text-[10px] font-bold  tracking-tight">Editing Task</Text>
                 </div>
-                <div className="px-2.5 py-1.5 rounded-xl border text-[10px] font-bold uppercase bg-orange-500/10 border-orange-500/20 text-orange-400">
+                <div className="px-2.5 py-1.5 rounded-xl border text-[10px] font-bold  bg-orange-500/10 border-orange-500/20 text-orange-400">
                   High
                 </div>
               </div>
@@ -251,9 +251,9 @@ const MockPipeline = () => (
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-primary/20 bg-primary/10">
                   <Palette size={12} strokeWidth={2.5} className="text-primary"/>
-                  <Text variant="label" color="accent" className="text-[10px] font-bold uppercase tracking-tight">Color Task</Text>
+                  <Text variant="label" color="accent" className="text-[10px] font-bold  tracking-tight">Color Task</Text>
                 </div>
-                <div className="px-2.5 py-1.5 rounded-xl border text-[10px] font-bold uppercase bg-white/5 border-white/5 text-white/40">
+                <div className="px-2.5 py-1.5 rounded-xl border text-[10px] font-bold  bg-white/5 border-white/5 text-white/40">
                   Medium
                 </div>
               </div>
@@ -305,9 +305,9 @@ const MockNotes = () => (
           <div className="px-6 py-4 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
             <div className="flex items-center gap-3">
               <IconContainer icon={Film} size="sm" variant="accent" />
-              <Text variant="label" color="accent" className="text-[10px] font-bold uppercase tracking-tight">Sequence 12A</Text>
+              <Text variant="label" color="accent" className="text-[10px] font-bold  tracking-tight">Sequence 12A</Text>
             </div>
-            <span className="text-[10px] font-bold text-white/20 flex items-center gap-2 uppercase">
+            <span className="text-[10px] font-bold text-white/20 flex items-center gap-2 ">
               <Calendar size={12} strokeWidth={2.5} /> Oct 24
             </span>
           </div>
@@ -317,7 +317,7 @@ const MockNotes = () => (
               Director wants more contrast on the close-up shot. We need to swap the diffusion for the next take.
             </Text>
             <div className="mt-auto pt-5 border-t border-white/5">
-              <div className="w-full py-3.5 rounded-xl bg-white/5 text-white/40 flex items-center justify-between px-5 text-xs font-bold uppercase tracking-wider">
+              <div className="w-full py-3.5 rounded-xl bg-white/5 text-white/40 flex items-center justify-between px-5 text-xs font-bold  tracking-wider">
                 <div className="flex items-center gap-2.5">
                   <Film size={14} strokeWidth={2.5} className="text-white/20"/>
                   <span>View Scene 12A</span>
@@ -333,9 +333,9 @@ const MockNotes = () => (
           <div className="px-6 py-4 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
             <div className="flex items-center gap-3">
               <IconContainer icon={StickyNote} size="sm" variant="accent" />
-              <Text variant="label" color="accent" className="text-[10px] font-bold uppercase tracking-tight">General Note</Text>
+              <Text variant="label" color="accent" className="text-[10px] font-bold  tracking-tight">General Note</Text>
             </div>
-            <span className="text-[10px] font-bold text-white/20 flex items-center gap-2 uppercase">
+            <span className="text-[10px] font-bold text-white/20 flex items-center gap-2 ">
               <Calendar size={12} strokeWidth={2.5} /> Oct 22
             </span>
           </div>
@@ -346,7 +346,7 @@ const MockNotes = () => (
             </Text>
             <div className="mt-auto pt-5 border-t border-white/5">
               <div className="flex justify-end">
-                <span className="text-[10px] font-bold text-white/20 flex items-center gap-1 uppercase tracking-widest">View Details <ArrowUpRight size={12} /></span>
+                <span className="text-[10px] font-bold text-white/20 flex items-center gap-1  tracking-widest">View Details <ArrowUpRight size={12} /></span>
               </div>
             </div>
           </div>

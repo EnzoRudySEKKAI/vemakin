@@ -7,7 +7,8 @@ import { useDetailView } from '@/hooks/useDetailView'
 import { DetailViewLayout } from '@/components/organisms/DetailViewLayout'
 import { ActionButton, ActionButtonGroup } from '@/components/molecules/ActionButton'
 import { DetailItem } from '@/components/molecules'
-import { Card } from '@/components/ui/Card'
+import { TerminalCard } from '@/components/ui/TerminalCard'
+import { TerminalButton } from '@/components/ui/TerminalButton'
 import { StatusToggle } from '@/components/molecules/StatusToggle'
 import { Text, Input, Button, Textarea } from '@/components/atoms'
 import { ConfirmModal } from '@/components/ui/ConfirmModal'
@@ -168,26 +169,26 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
       actions={headerActions}
       sidebar={
         <div className="space-y-4">
-          <Card
-            title="Gear checklist"
-            subtitle={!isEditing && (
-              <span className="text-primary">
+          <TerminalCard
+            header="Gear checklist"
+            headerRight={!isEditing && (
+              <span className="text-primary font-mono text-xs">
                 {(selectedShot.preparedEquipmentIds || []).length}/{(selectedShot.equipmentIds || []).length} ready
               </span>
             )}
           >
             <div className="p-2 space-y-4">
               {isEditing && (
-                <div className="flex p-1 bg-gray-100 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/5 mx-2">
+                <div className="flex border border-border">
                   <button
                     onClick={() => setActiveGearTab('list')}
-                    className={`flex-1 py-1.5 text-[10px] font-medium rounded-lg transition-all ${activeGearTab === 'list' ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-white/30 hover:text-gray-700 dark:hover:text-white/50'}`}
+                    className={`flex-1 py-1.5 text-[10px] font-mono  tracking-wider transition-all ${activeGearTab === 'list' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                   >
                     Assigned
                   </button>
                   <button
                     onClick={() => setActiveGearTab('pool')}
-                    className={`flex-1 py-1.5 text-[10px] font-medium rounded-lg transition-all ${activeGearTab === 'pool' ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-white/30 hover:text-gray-700 dark:hover:text-white/50'}`}
+                    className={`flex-1 py-1.5 text-[10px] font-mono  tracking-wider transition-all ${activeGearTab === 'pool' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                   >
                     Browse Pool
                   </button>
@@ -206,24 +207,25 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                         return (
                           <div
                             key={eId}
-                            className={`flex items-center justify-between p-3 rounded-xl transition-all group border ${isReady
-                              ? 'bg-primary/5 border-primary/10'
-                              : 'bg-transparent border-transparent hover:bg-white/5'
+                            className={`flex items-center justify-between p-3 transition-all group border ${isReady
+                              ? 'bg-primary/5 border-primary/30'
+                              : 'bg-transparent border-transparent hover:bg-secondary/50'
                               }`}
                           >
                             <div className="flex items-center gap-4 min-w-0">
-                              <div className={`p-2.5 rounded-xl transition-all ${isReady
+                              <div className={`p-2.5 transition-all ${isReady
                                 ? 'bg-primary/20 text-primary'
-                                : 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/20'
-                                }`}>
+                                : 'bg-secondary/50 text-muted-foreground'
+                                }`}
+                              >
                                 <Icon size={18} strokeWidth={2} />
                               </div>
                               <div className="min-w-0">
-                                <p className={`text-sm font-medium truncate transition-colors ${isReady ? 'text-primary/70' : 'text-gray-600 dark:text-white/60'}`}>
+                                <p className={`text-sm font-medium truncate transition-colors ${isReady ? 'text-primary' : 'text-foreground'}`}>
                                   {item ? (item.customName || item.name) : 'Unknown'}
                                 </p>
                                 <div className="flex items-center gap-2 mt-0.5">
-                                  <span className="text-[10px] font-medium text-gray-500 dark:text-white/30">
+                                  <span className="text-[10px] font-mono  tracking-wider text-muted-foreground">
                                     {item?.category}
                                   </span>
                                 </div>
@@ -232,16 +234,16 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                             {isEditing ? (
                               <button
                                 onClick={() => handleRemoveEquipment(eId)}
-                                className="w-8 h-8 flex items-center justify-center text-gray-400 dark:text-white/20 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                                className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
                               >
                                 <Plus size={16} className="rotate-45" />
                               </button>
                             ) : (
                               <button
                                 onClick={() => onToggleEquipment(selectedShot.id, eId)}
-                                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 ${isReady
-                                  ? 'bg-primary text-white shadow-[0_0_10px_rgba(78,71,221,0.3)] scale-100'
-                                  : 'bg-gray-100 dark:bg-white/5 text-gray-200 dark:text-white/10 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-primary scale-95 hover:scale-100'
+                                className={`w-8 h-8 flex items-center justify-center transition-all duration-300 ${isReady
+                                  ? 'bg-primary text-primary-foreground'
+                                  : 'bg-secondary/50 text-muted-foreground hover:bg-secondary hover:text-foreground'
                                   }`}
                               >
                                 <Check size={14} strokeWidth={3} />
@@ -254,7 +256,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                   ) : (
                     <div className="py-12 flex flex-col items-center justify-center text-center opacity-10">
                       <Package size={24} className="mb-2" />
-                      <span className="text-[10px] font-medium">No gear assigned</span>
+                      <span className="text-[10px] font-mono  tracking-wider">No gear assigned</span>
                     </div>
                   )
                 )}
@@ -266,9 +268,8 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                       value={gearSearchQuery}
                       onChange={(e) => setGearSearchQuery(e.target.value)}
                       placeholder="Search items..."
-                      variant="underline"
                       fullWidth
-                      leftIcon={<Search size={14} className="text-gray-400 dark:text-white/20" />}
+                      leftIcon={<Search size={14} className="text-muted-foreground" />}
                     />
                     <div className="space-y-1 max-h-[400px] overflow-y-auto custom-scrollbar pr-1">
                       {availableGear.length > 0 ? availableGear.map(gear => {
@@ -277,29 +278,29 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                           <button
                             key={gear.id}
                             onClick={() => handleAddEquipment(gear.id)}
-                            className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all text-left group border border-transparent hover:border-white/5"
+                            className="w-full flex items-center justify-between p-3 transition-all text-left group border border-transparent hover:border-border hover:bg-secondary/30"
                           >
                             <div className="flex items-center gap-4 min-w-0">
-                              <div className="p-2.5 bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/20 rounded-xl group-hover:text-primary group-hover:bg-primary/10 transition-all">
+                              <div className="p-2.5 bg-secondary/50 text-muted-foreground group-hover:text-primary group-hover:bg-primary/10 transition-all">
                                 <Icon size={18} strokeWidth={2} />
                               </div>
                               <div className="min-w-0">
-                                <p className="text-sm font-medium text-gray-600 dark:text-white/50 group-hover:text-gray-900 dark:group-hover:text-white transition-colors truncate">
+                                <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
                                   {gear.customName || gear.name}
                                 </p>
                                 <div className="flex items-center gap-2 mt-0.5">
-                                  <span className="text-[10px] font-medium text-gray-500 dark:text-white/30 group-hover:text-gray-700 dark:group-hover:text-white/50">
+                                  <span className="text-[10px] font-mono  tracking-wider text-muted-foreground">
                                     {gear.category}
                                   </span>
                                   {gear.status !== 'available' && (
-                                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-white/30 font-medium">
+                                    <span className="text-[9px] px-1.5 py-0.5 bg-secondary border border-border font-mono  tracking-wider">
                                       {gear.status}
                                     </span>
                                   )}
                                 </div>
                               </div>
                             </div>
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-200 dark:text-white/10 group-hover:text-primary group-hover:bg-primary/10 transition-all">
+                            <div className="w-8 h-8 flex items-center justify-center text-muted-foreground group-hover:text-primary group-hover:bg-primary/10 transition-all">
                               <Plus size={16} />
                             </div>
                           </button>
@@ -307,7 +308,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                       }) : (
                         <div className="py-12 flex flex-col items-center justify-center text-center opacity-10">
                           <Search size={24} className="mb-2" />
-                          <span className="text-[10px] font-medium">Empty results</span>
+                          <span className="text-[10px] font-mono  tracking-wider">Empty results</span>
                         </div>
                       )}
                     </div>
@@ -315,56 +316,50 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                 )}
               </div>
             </div>
-          </Card>
+          </TerminalCard>
         </div>
       }
     >
       {isRetaking && (
-        <div className="mb-8 p-4 bg-orange-500/10 rounded-2xl border border-orange-500/20 flex flex-wrap items-center gap-4">
+        <div className="mb-8 p-4 bg-orange-500/10 border border-orange-500/30 flex flex-wrap items-center gap-4">
           <Text variant="body" color="warning">Schedule Retake:</Text>
           <Input
             type="date"
             value={retakeDate}
             onChange={e => setRetakeDate(e.target.value)}
-            variant="default"
             className="w-auto"
           />
           <Input
             type="time"
             value={retakeTime}
             onChange={e => setRetakeTime(e.target.value)}
-            variant="default"
             className="w-auto"
           />
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setShowRetakeConfirm(true)}
-          >
+          <TerminalButton variant="primary" onClick={() => setShowRetakeConfirm(true)}>
             Confirm
-          </Button>
+          </TerminalButton>
         </div>
       )}
 
       <div className="flex flex-col gap-8 mb-8">
         {!isEditing && (
-          <Card title="Filming status">
+          <TerminalCard header="Filming status">
             <div className="p-6">
               <StatusToggle
                 status={selectedShot.status as any}
                 onToggle={() => onToggleStatus(selectedShot.id)}
               />
             </div>
-          </Card>
+          </TerminalCard>
         )}
 
-        <Card title="Shot details">
+        <TerminalCard header="Shot details">
           <div className="p-6 space-y-10">
             {isEditing ? (
               <>
                 {/* Scene Identity */}
                 <div className="w-full">
-                  <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Scene identity</span>
+                  <span className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-2 block">Scene identity</span>
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <div className="sm:col-span-3">
                       <Input
@@ -373,7 +368,6 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                         onChange={e => setEditedItem({ ...editedItem, title: e.target.value })}
                         placeholder="Scene title..."
                         fullWidth
-                        variant="underline"
                       />
                     </div>
                     <div>
@@ -382,9 +376,8 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                         value={editedItem.sceneNumber}
                         onChange={e => setEditedItem({ ...editedItem, sceneNumber: e.target.value })}
                         placeholder="Scene #"
-                        leftIcon={<span className="text-[10px] font-bold text-gray-400 dark:text-white/20">SC</span>}
+                        leftIcon={<span className="text-[10px] font-mono  tracking-wider text-muted-foreground">SC</span>}
                         fullWidth
-                        variant="underline"
                       />
                     </div>
                   </div>
@@ -392,7 +385,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
 
                 {/* Schedule */}
                 <div className="w-full">
-                  <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Schedule</span>
+                  <span className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-2 block">Schedule</span>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
                     <div className="relative">
                       <Input
@@ -400,7 +393,6 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                         value={editedItem.date}
                         onChange={e => setEditedItem({ ...editedItem, date: e.target.value })}
                         fullWidth
-                        variant="underline"
                       />
                     </div>
                     <TimeSelector label="" value={editedItem.startTime} onChange={v => setEditedItem({ ...editedItem, startTime: v })} />
@@ -425,7 +417,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
 
                 {/* Description */}
                 <div className="w-full">
-                  <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Description</span>
+                  <span className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-2 block">Description</span>
                   <Textarea
                     value={editedItem.description}
                     onChange={e => setEditedItem({ ...editedItem, description: e.target.value })}
@@ -460,15 +452,15 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
               </div>
             )}
           </div>
-        </Card>
+        </TerminalCard>
       </div>
 
-      <Card
-        title={`Related notes (${associatedNotes.length})`}
+      <TerminalCard
+        header={`Related notes (${associatedNotes.length})`}
         headerRight={
           <button
             onClick={() => onAddNote({ title: '', content: '', shotId: selectedShot.id, attachments: [] })}
-            className="flex items-center gap-2 text-[10px] font-medium text-primary hover:text-primary/70 transition-colors"
+            className="flex items-center gap-2 text-[10px] font-mono  tracking-wider text-primary hover:text-primary/70 transition-colors"
           >
             <Plus size={12} strokeWidth={3} />
             Add Note
@@ -482,12 +474,12 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                 <button
                   key={note.id}
                   onClick={() => onOpenNote?.(note.id)}
-                  className="flex flex-col items-start text-left p-5 bg-white/5 border border-white/5 rounded-2xl hover:border-primary/30 transition-all group"
+                  className="flex flex-col items-start text-left p-5 bg-secondary/30 border border-border hover:border-primary/30 transition-all group"
                 >
-                  <div className="text-sm font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary transition-colors">
+                  <div className="text-sm font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
                     {note.title || "Untitled Note"}
                   </div>
-                  <div className="text-[11px] text-gray-500 dark:text-white/30 truncate w-full font-medium">
+                  <div className="text-[11px] text-muted-foreground truncate w-full font-mono">
                     {note.content || "Empty content"}
                   </div>
                 </button>
@@ -496,11 +488,11 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
           ) : (
             <div className="py-12 flex flex-col items-center justify-center text-center opacity-10">
               <Plus size={24} className="mb-2" />
-              <span className="text-[10px] font-medium">No associated notes</span>
+              <span className="text-[10px] font-mono  tracking-wider">No associated notes</span>
             </div>
           )}
         </div>
-      </Card>
+      </TerminalCard>
 
       <ConfirmModal
         isOpen={showDeleteConfirm}

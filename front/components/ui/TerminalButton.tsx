@@ -42,7 +42,7 @@ export const TerminalButton = React.forwardRef<HTMLButtonElement, TerminalButton
       <button
         ref={ref}
         className={cn(
-          "group relative font-mono uppercase tracking-wider border transition-all duration-200",
+          "group relative font-mono  tracking-wider border transition-all duration-200",
           sizeClasses[size],
           variantClasses[variant],
           "disabled:opacity-50 disabled:cursor-not-allowed",

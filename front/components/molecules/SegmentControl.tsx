@@ -23,7 +23,7 @@ export const SegmentControl: React.FC<SegmentControlProps> = ({
   className = ''
 }) => {
   return (
-    <div className={`flex items-center gap-1 p-1 bg-gray-100 dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] rounded-xl ${variant === 'fluid' ? 'flex-1' : ''} ${className}`}>
+    <div className={`flex items-center gap-1 h-[38px] bg-[#f5f5f5] dark:bg-[#16181D] border border-gray-300 dark:border-white/[0.05] ${variant === 'fluid' ? 'flex-1' : ''} ${className}`}>
       {options.map((option) => {
         const Icon = option.icon
         const isActive = value === option.value
@@ -33,9 +33,9 @@ export const SegmentControl: React.FC<SegmentControlProps> = ({
             key={option.value}
             onClick={() => onChange(option.value)}
             className={`
-              flex items-center justify-center gap-2 px-2.5 md:px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap
+              flex items-center justify-center gap-2 px-2.5 md:px-4 py-2 text-xs tracking-wider transition-all whitespace-nowrap
               ${isActive
-                ? 'bg-primary text-white'
+                ? 'bg-primary text-primary-foreground'
                 : 'text-gray-600 dark:text-white/50 hover:text-gray-800 dark:hover:text-white/70 hover:bg-white dark:hover:bg-white/5'
               }
               ${variant === 'icon-only' || (!option.label && Icon) ? 'w-10 px-0' : 'flex-1'}
@@ -56,24 +56,24 @@ export const LayoutToggle: React.FC<{
   onChange: (value: 'grid' | 'list') => void
   className?: string
 }> = ({ value, onChange, className }) => (
-  <div className={`flex items-center gap-1 p-1 bg-gray-100 dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] rounded-xl ${className}`}>
+  <div className={`flex items-center bg-[#f5f5f5] dark:bg-[#16181D] border border-gray-300 dark:border-white/[0.05] ${className}`}>
     <button
       onClick={() => onChange('grid')}
-      className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all ${value === 'grid'
-          ? 'bg-primary text-white'
+      className={`w-9 h-[36px] flex items-center justify-center transition-all ${value === 'grid'
+          ? 'bg-primary text-primary-foreground'
           : 'text-gray-600 dark:text-white/50 hover:text-gray-800 dark:hover:text-white/70 hover:bg-white dark:hover:bg-white/5'
         }`}
     >
-      <LayoutGrid size={18} strokeWidth={2} />
+      <LayoutGrid size={24} strokeWidth={2} />
     </button>
     <button
       onClick={() => onChange('list')}
-      className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all ${value === 'list'
-          ? 'bg-primary text-white'
+      className={`w-9 h-[36px] flex items-center justify-center transition-all ${value === 'list'
+          ? 'bg-primary text-primary-foreground'
           : 'text-gray-600 dark:text-white/50 hover:text-gray-800 dark:hover:text-white/70 hover:bg-white dark:hover:bg-white/5'
         }`}
     >
-      <ListIcon size={18} strokeWidth={2} />
+      <ListIcon size={24} strokeWidth={2} />
     </button>
   </div>
 )

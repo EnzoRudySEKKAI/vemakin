@@ -2,16 +2,10 @@ import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import {
   Zap, StickyNote, Package, Film,
-  Clock, PenLine, Scissors, Music, Layers, Palette,
-  Terminal, Cpu, Command, FileText
+  Clock, PenLine, Scissors, Music, Layers, Palette
 } from 'lucide-react'
 import { Shot, Equipment, PostProdTask, Note } from '@/types'
-import {
-  TerminalCard,
-  TerminalCardHeader,
-  TerminalCardTitle,
-  TerminalCardContent,
-} from '@/components/ui/TerminalCard'
+import { TerminalCard } from '@/components/ui/TerminalCard'
 import { TerminalButton } from '@/components/ui/TerminalButton'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 
@@ -127,89 +121,77 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Timeline */}
         <motion.div variants={itemVariants}>
-          <TerminalCard className="h-full">
-            <TerminalCardHeader>
-              <div className="flex items-center gap-2">
-                <Terminal size={16} className="text-primary" />
-                <TerminalCardTitle>Timeline</TerminalCardTitle>
-                <span className="font-mono text-[10px] text-primary/60">
-                  {shots.filter(s => s.status === 'pending').length}_SHOTS
-                </span>
-              </div>
+          <TerminalCard 
+            className="h-full"
+            header={`Timeline // ${shots.filter(s => s.status === 'pending').length} shots left`}
+            headerRight={
               <TerminalButton 
                 variant="ghost" 
                 size="sm"
                 onClick={onNavigateToShotsView}
                 showArrow={false}
               >
-                View
+                View all
               </TerminalButton>
-            </TerminalCardHeader>
-            
-            <TerminalCardContent className="pt-0">
-              <div className="space-y-2">
-                {upcomingShots.length > 0 ? (
-                  upcomingShots.map((shot) => (
-                    <div
-                      key={shot.id}
-                      onClick={() => onNavigateToShot(shot)}
-                      className="flex items-center gap-3 p-3 border border-border/50 hover:border-primary/50 transition-all cursor-pointer bg-muted/30 dark:bg-white/5 dark:border-white/10 dark:hover:border-primary/50"
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="w-1 h-8 bg-primary" />
-                        {shot.startTime && (
-                          <span className="text-[10px] font-mono text-muted-foreground">{shot.startTime}</span>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium truncate">{shot.title}</div>
-                        <div className="text-[10px] font-mono text-muted-foreground">
-                          {new Date(shot.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}_{shot.duration || '5min'}
-                        </div>
+            }
+          >
+            <div className>
+              {upcomingShots.length > 0 ? (
+                upcomingShots.map((shot) => (
+                  <div
+                    key={shot.id}
+                    onClick={() => onNavigateToShot(shot)}
+                    className="flex items-center gap-3 p-3 border border-gray-300 hover:border-primary/50 transition-all cursor-pointer bg-[#fafafa] dark:bg-white/5 dark:border-white/10 dark:hover:border-primary/50"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-1 h-8 bg-primary" />
+                      {shot.startTime && (
+                        <span className="text-[10px] font-mono text-muted-foreground">{shot.startTime}</span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate">{shot.title}</div>
+                      <div className="text-[10px] font-mono text-muted-foreground">
+                        {new Date(shot.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}_{shot.duration || '5min'}
                       </div>
                     </div>
-                  ))
-                ) : (
-                  <div className="p-6 text-center text-muted-foreground">
-                    <Film size={20} className="mx-auto mb-2 opacity-50" />
-                    <p className="text-sm font-mono">NO_UPCOMING_SHOTS</p>
                   </div>
-                )}
-              </div>
-            </TerminalCardContent>
+                ))
+              ) : (
+                <div className="p-6 text-center text-muted-foreground">
+                  <Film size={20} className="mx-auto mb-2 opacity-50" />
+                  <p className="text-sm font-mono">No upcoming shots</p>
+                </div>
+              )}
+            </div>
           </TerminalCard>
         </motion.div>
 
         {/* Equipment */}
         <motion.div variants={itemVariants}>
-          <TerminalCard className="h-full">
-            <TerminalCardHeader>
-              <div className="flex items-center gap-2">
-                <Cpu size={16} className="text-primary" />
-                <TerminalCardTitle>Equipment</TerminalCardTitle>
-                <span className="font-mono text-[10px] text-primary/60">
-                  {inventory.length}_ITEMS
-                </span>
-              </div>
+          <TerminalCard 
+            className
+            header={`Equipment // ${inventory.length} items`}
+            headerRight={
               <TerminalButton 
                 variant="ghost" 
                 size="sm"
                 onClick={onNavigateToInventory}
                 showArrow={false}
               >
-                View
+                View all
               </TerminalButton>
-            </TerminalCardHeader>
-            
-            <TerminalCardContent className="pt-0">
+            }
+          >
+            <div className>
               {inventory.length > 0 ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 border border-border/50 flex items-center justify-between bg-muted/30 dark:bg-white/5 dark:border-white/10">
+                    <div className="p-3 border border-gray-300 flex items-center justify-between bg-[#fafafa] dark:bg-white/5 dark:border-white/10">
                       <span className="text-[10px] font-mono text-muted-foreground">TOTAL</span>
                       <span className="text-xl font-semibold">{inventoryStats.total}</span>
                     </div>
-                    <div className="p-3 border border-border/50 flex items-center justify-between bg-muted/30 dark:bg-white/5 dark:border-white/10">
+                    <div className="p-3 border border-gray-300 flex items-center justify-between bg-[#fafafa] dark:bg-white/5 dark:border-white/10">
                       <span className="text-[10px] font-mono text-muted-foreground">CATS</span>
                       <span className="text-xl font-semibold">{inventoryStats.topCategories.length}</span>
                     </div>
@@ -252,94 +234,81 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
                   <p className="text-sm font-mono">NO_EQUIPMENT_FOUND</p>
                 </div>
               )}
-            </TerminalCardContent>
+            </div>
           </TerminalCard>
         </motion.div>
 
         {/* Tasks */}
         <motion.div variants={itemVariants}>
-          <TerminalCard className="h-full">
-            <TerminalCardHeader>
-              <div className="flex items-center gap-2">
-                <Command size={16} className="text-primary" />
-                <TerminalCardTitle>Tasks</TerminalCardTitle>
-                <span className="font-mono text-[10px] text-primary/60">
-                  {tasks.filter(t => t.status !== 'done').length}_PENDING
-                </span>
-              </div>
+          <TerminalCard 
+            className="h-full"
+            header={`Tasks // ${tasks.filter(t => t.status !== 'done').length} pending`}
+            headerRight={
               <TerminalButton 
                 variant="ghost" 
                 size="sm"
                 onClick={onNavigateToPostProd}
                 showArrow={false}
               >
-                View
+                View all
               </TerminalButton>
-            </TerminalCardHeader>
-            
-            <TerminalCardContent className="pt-0">
-              <div className="space-y-2">
-                {pendingTasks.length > 0 ? (
-                  pendingTasks.map((task) => (
-                    <div
-                      key={task.id}
-                      onClick={() => onSelectTask?.(task.id)}
-                      className="flex items-center gap-3 p-3 border border-border/50 hover:border-primary/50 transition-all cursor-pointer bg-muted/30 dark:bg-white/5 dark:border-white/10 dark:hover:border-primary/50"
-                    >
-                      <div className="text-muted-foreground shrink-0">
-                        {getTaskIcon(task.category)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className={`text-sm leading-tight truncate ${task.status === 'done' ? 'text-muted-foreground line-through' : ''}`}>
-                          {task.title}
-                        </div>
-                        <div className="text-[10px] font-mono text-muted-foreground">{task.category.toUpperCase()}</div>
-                      </div>
-                      <div className={`text-[10px] px-2 py-0.5 border font-mono shrink-0 ${getPriorityColor(task.priority)}`}>
-                        {task.priority.toUpperCase()}
-                      </div>
+            }
+          >
+            <div className>
+              {pendingTasks.length > 0 ? (
+                pendingTasks.map((task) => (
+                  <div
+                    key={task.id}
+                    onClick={() => onSelectTask?.(task.id)}
+                    className="flex items-center gap-3 p-3 border border-gray-300 hover:border-primary/50 transition-all cursor-pointer bg-[#fafafa] dark:bg-white/5 dark:border-white/10 dark:hover:border-primary/50"
+                  >
+                    <div className="text-muted-foreground shrink-0">
+                      {getTaskIcon(task.category)}
                     </div>
-                  ))
-                ) : (
-                  <div className="p-6 text-center text-muted-foreground">
-                    <Zap size={20} className="mx-auto mb-2 opacity-50" />
-                    <p className="text-sm font-mono">ALL_TASKS_COMPLETE</p>
+                    <div className="flex-1 min-w-0">
+                      <div className={`text-sm leading-tight truncate ${task.status === 'done' ? 'text-muted-foreground line-through' : ''}`}>
+                        {task.title}
+                      </div>
+                      <div className="text-[10px] font-mono text-muted-foreground">{task.category.toUpperCase()}</div>
+                    </div>
+                    <div className={`text-[10px] px-2 py-0.5 border font-mono shrink-0 ${getPriorityColor(task.priority)}`}>
+                      {task.priority.toUpperCase()}
+                    </div>
                   </div>
-                )}
-              </div>
-            </TerminalCardContent>
+                ))
+              ) : (
+                <div className="p-6 text-center text-muted-foreground">
+                  <Zap size={20} className="mx-auto mb-2 opacity-50" />
+                  <p className="text-sm font-mono">All tasks complete</p>
+                </div>
+              )}
+            </div>
           </TerminalCard>
         </motion.div>
 
         {/* Notes */}
         <motion.div variants={itemVariants}>
-          <TerminalCard className="h-full">
-            <TerminalCardHeader>
-              <div className="flex items-center gap-2">
-                <FileText size={16} className="text-primary" />
-                <TerminalCardTitle>Notes</TerminalCardTitle>
-                <span className="font-mono text-[10px] text-primary/60">
-                  {notes.length}_ENTRIES
-                </span>
-              </div>
+          <TerminalCard 
+            className="h-full"
+            header={`Notes // ${notes.length} entries`}
+            headerRight={
               <TerminalButton 
                 variant="ghost" 
                 size="sm"
                 onClick={onNavigateToNotes}
                 showArrow={false}
               >
-                View
+                View all
               </TerminalButton>
-            </TerminalCardHeader>
-            
-            <TerminalCardContent className="pt-0">
-              <div className="space-y-2">
+            }
+          >
+            <div className>
                 {recentNotes.length > 0 ? (
                   recentNotes.map((note) => (
                     <div
                       key={note.id}
                       onClick={() => onSelectNote?.(note.id)}
-                      className="p-3 border border-border/50 hover:border-primary/50 transition-all cursor-pointer bg-muted/30 dark:bg-white/5 dark:border-white/10 dark:hover:border-primary/50"
+                      className="p-3 border border-gray-300 hover:border-primary/50 transition-all cursor-pointer bg-[#fafafa] dark:bg-white/5 dark:border-white/10 dark:hover:border-primary/50"
                     >
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <div className="text-sm font-medium leading-tight">{note.title}</div>
@@ -349,15 +318,14 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
                       </div>
                       <div className="text-xs text-muted-foreground line-clamp-2">{note.content}</div>
                     </div>
-                  ))
-                ) : (
-                  <div className="p-6 text-center text-muted-foreground">
-                    <StickyNote size={20} className="mx-auto mb-2 opacity-50" />
-                    <p className="text-sm font-mono">NO_NOTES</p>
-                  </div>
-                )}
-              </div>
-            </TerminalCardContent>
+                ))
+              ) : (
+                <div className="p-6 text-center text-muted-foreground">
+                  <StickyNote size={20} className="mx-auto mb-2 opacity-50" />
+                  <p className="text-sm font-mono">No notes</p>
+                </div>
+              )}
+            </div>
           </TerminalCard>
         </motion.div>
       </div>

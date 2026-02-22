@@ -4,7 +4,7 @@ import {
   Image as ImageIcon, File, Trash2, Link as LinkIcon
 } from 'lucide-react'
 import { Shot, PostProdTask, Attachment } from '@/types'
-import { Button, Text, Input, Textarea, Card, IconContainer } from '@/components/atoms'
+import { Button, Text, Input, Textarea, IconContainer } from '@/components/atoms'
 import { radius, typography } from '@/design-system'
 
 export interface NoteFormData {
@@ -150,7 +150,7 @@ export const NoteForm: React.FC<NoteFormProps> = ({
         {form.attachments.length > 0 && (
           <div className="grid grid-cols-1 gap-2">
             {form.attachments.map(att => (
-              <Card key={att.id} variant="flat" size="sm" className="flex items-center gap-3">
+              <div key={att.id} className="flex items-center gap-3 p-3 border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5">
                 <IconContainer
                   icon={att.type === 'image' ? ImageIcon : File}
                   size="sm"
@@ -168,7 +168,7 @@ export const NoteForm: React.FC<NoteFormProps> = ({
                 >
                   <Trash2 size={12} strokeWidth={2.5} />
                 </Button>
-              </Card>
+              </div>
             ))}
           </div>
         )}

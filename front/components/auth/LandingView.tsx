@@ -57,7 +57,7 @@ export function LandingView() {
 
           <div className="py-4 flex items-center gap-4">
             <div className="h-px bg-gray-200 dark:bg-white/10 flex-1" />
-            <Text variant="label" color="muted" className="text-[10px] uppercase tracking-widest">Or Continue With</Text>
+            <Text variant="label" color="muted" className="text-[10px]  tracking-widest">Or Continue With</Text>
             <div className="h-px bg-gray-200 dark:bg-white/10 flex-1" />
           </div>
 

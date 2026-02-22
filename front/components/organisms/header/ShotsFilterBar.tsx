@@ -52,7 +52,7 @@ export const ShotsFilterBar: React.FC<ShotsFilterBarProps> = ({
 
       <div className="flex items-start gap-3">
         <div className="flex-1">
-          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-1">
+          <div className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-1 px-1">
             Status
           </div>
           <FilterDropdown
@@ -64,7 +64,7 @@ export const ShotsFilterBar: React.FC<ShotsFilterBarProps> = ({
         </div>
 
         <div className="flex-1">
-          <div className="text-xs tracking-wider text-gray-500 dark:text-white/40 mb-1 px-1">
+          <div className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-1 px-1">
             View
           </div>
           <SegmentControl

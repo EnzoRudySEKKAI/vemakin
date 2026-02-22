@@ -54,7 +54,7 @@ export const Textarea: React.FC<TextareaProps> = ({
       {label && (
         <label
           htmlFor={textareaId}
-          className={`block mb-2 ${typography.size.xs} ${typography.weight.semibold} text-gray-500 dark:text-gray-400`}
+          className={`block mb-2 ${typography.size.xs} font-mono uppercase tracking-wider text-muted-foreground`}
         >
           {formatLabel(label, sentenceLabel)}
         </label>
@@ -65,29 +65,20 @@ export const Textarea: React.FC<TextareaProps> = ({
         className={`
           w-full
           ${sizeClasses.padding}
-          bg-transparent
-          border-0 border-b-2 border-gray-200 dark:border-white/10
-          text-lg font-semibold
-          text-gray-900 dark:text-white
-          placeholder:text-gray-400 dark:placeholder:text-gray-500
+          bg-[#f5f5f5] dark:bg-[#16181D]
+          border border-gray-300 dark:border-white/10
+          text-base font-mono
+          text-foreground
+          placeholder:text-muted-foreground
           focus:outline-none
-          focus:border-primary dark:focus:border-primary
-          focus:bg-transparent
-          focus-visible:bg-transparent
-          focus-visible:outline-none
-          focus-visible:ring-0
-          active:bg-transparent
-          -webkit-tap-highlight-color: transparent
-          tap-highlight-color: transparent
-          autofill:bg-transparent
-          autofill:text-inherit
+          focus:border-primary
+          focus:ring-1 focus:ring-primary/20
+          disabled:pointer-events-none disabled:opacity-50
           transition-all duration-200
           resize-none
         `}
         style={{
           minHeight: sizeClasses.minHeight,
-          WebkitTapHighlightColor: 'transparent',
-          caretColor: 'currentColor'
         }}
         {...props}
       />

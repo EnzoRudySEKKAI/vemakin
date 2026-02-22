@@ -71,7 +71,7 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
               <AlertCircle size={20} strokeWidth={2.5} />
             </div>
             <div className="space-y-1">
-              <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/80">Project Management</h2>
+              <h2 className="text-[10px] font-bold  tracking-[0.2em] text-primary/80">Project Management</h2>
               <p className="text-xs leading-relaxed text-gray-600 dark:text-white/30 font-medium">
                 Deleting a project will permanently remove all associated shots, inventory assignments, and pipeline tasks. This action cannot be undone.
               </p>
@@ -81,13 +81,13 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
 
         <motion.div variants={itemVariants} className="space-y-3">
           <div className="flex items-center justify-between px-1">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-white/30">Active Workspaces</h2>
+          <h2 className="text-[10px] font-bold  tracking-[0.2em] text-gray-500 dark:text-white/30">Active Workspaces</h2>
           <div className="flex items-center gap-3">
             <span className="text-[10px] font-mono text-gray-400 dark:text-white/20">{projects.length} Projects</span>
             {onCreateProject && (
               <button
                 onClick={onCreateProject}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-white text-[10px] font-bold uppercase tracking-wider hover:bg-primary/90 transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-white text-[10px] font-bold  tracking-wider hover:bg-primary/90 transition-all"
               >
                 <Plus size={14} strokeWidth={2.5} />
                 New
@@ -147,7 +147,7 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
                                 {project}
                               </h3>
                               {isCurrent && (
-                                <div className="px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[8px] font-bold text-primary uppercase tracking-wider">
+                                <div className="px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[8px] font-bold text-primary  tracking-wider">
                                   Active
                                 </div>
                               )}
@@ -210,15 +210,15 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
         <motion.div variants={itemVariants} className="pt-8 flex flex-col items-center gap-8">
           <button 
             onClick={onBack}
-            className="flex items-center gap-2 px-6 py-3 rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-[10px] font-bold text-gray-500 dark:text-white/40 uppercase tracking-widest transition-all border border-gray-200 dark:border-white/5"
+            className="flex items-center gap-2 px-6 py-3 rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-[10px] font-bold text-gray-500 dark:text-white/40  tracking-widest transition-all border border-gray-200 dark:border-white/5"
           >
             <FolderOpen size={14} strokeWidth={2.5} />
             <span>Return To Settings</span>
           </button>
 
           <div className="text-center space-y-1">
-            <p className="text-[10px] font-bold text-gray-400 dark:text-white/20 uppercase tracking-[0.3em]">Project Management Console</p>
-            <p className="text-[10px] font-medium text-gray-300 dark:text-white/10 uppercase">Secure Environment</p>
+            <p className="text-[10px] font-bold text-gray-400 dark:text-white/20  tracking-[0.3em]">Project Management Console</p>
+            <p className="text-[10px] font-medium text-gray-300 dark:text-white/10 ">Secure Environment</p>
           </div>
         </motion.div>
       </div>

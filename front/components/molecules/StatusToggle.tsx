@@ -20,7 +20,7 @@ const statusConfig: Record<StatusType, { label: string; color: string; dotColor:
     variant: 'default'
   },
   'in-progress': {
-    label: 'In Progress',
+    label: 'Progress',
     color: 'bg-primary/5 border-primary/20 text-primary dark:text-primary',
     dotColor: 'bg-primary animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.4)]',
     variant: 'accent'
