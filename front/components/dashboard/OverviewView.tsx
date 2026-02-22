@@ -2,18 +2,18 @@ import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import {
   Zap, StickyNote, Package, Film,
-  Clock, PenLine, Scissors, Music, Layers, Palette
+  Clock, PenLine, Scissors, Music, Layers, Palette,
+  Terminal, Cpu, Command, FileText
 } from 'lucide-react'
 import { Shot, Equipment, PostProdTask, Note } from '@/types'
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
-import { Button } from '@/components/ui/button'
+  TerminalCard,
+  TerminalCardHeader,
+  TerminalCardTitle,
+  TerminalCardContent,
+} from '@/components/ui/TerminalCard'
+import { TerminalButton } from '@/components/ui/TerminalButton'
+import { StatusBadge } from '@/components/ui/StatusBadge'
 
 interface OverviewViewProps {
   shots: Shot[]
@@ -29,16 +29,24 @@ interface OverviewViewProps {
   onSelectNote?: (noteId: string) => void
 }
 
-// Timeline item status colors
-const getTimelineStatus = (shot: Shot, shots: Shot[]): 'done' | 'current' | 'pending' => {
-  const pendingShots = shots.filter(s => s.status === 'pending')
-  const sortedPending = pendingShots.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-  const isNext = sortedPending[0]?.id === shot.id
-  const isDone = shot.status === 'done'
+const getTaskIcon = (category: string) => {
+  switch (category) {
+    case 'Script': return <PenLine size={14} />
+    case 'Editing': return <Scissors size={14} />
+    case 'Sound': return <Music size={14} />
+    case 'VFX': return <Layers size={14} />
+    case 'Color': return <Palette size={14} />
+    default: return <Zap size={14} />
+  }
+}
 
-  if (isDone) return 'done'
-  if (isNext) return 'current'
-  return 'pending'
+const getPriorityColor = (priority: string) => {
+  switch (priority) {
+    case 'critical':
+    case 'high': return 'text-red-400 border-red-400/30 bg-red-400/10'
+    case 'medium': return 'text-yellow-400 border-yellow-400/30 bg-yellow-400/10'
+    default: return 'text-primary border-primary/30 bg-primary/10'
+  }
 }
 
 export const OverviewView: React.FC<OverviewViewProps> = ({
@@ -83,7 +91,6 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
     const owned = inventory.filter(i => i.isOwned).length
     const rented = total - owned
 
-    // Get top categories
     const categoryCounts: Record<string, number> = {}
     inventory.forEach(item => {
       categoryCounts[item.category] = (categoryCounts[item.category] || 0) + 1
@@ -101,35 +108,13 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.08
-      }
+      transition: { staggerChildren: 0.08 }
     }
   }
 
   const itemVariants = {
     hidden: { opacity: 0, y: 15 },
     show: { opacity: 1, y: 0 }
-  }
-
-  const getTaskIcon = (category: string) => {
-    switch (category) {
-      case 'Script': return <PenLine size={14} />
-      case 'Editing': return <Scissors size={14} />
-      case 'Sound': return <Music size={14} />
-      case 'VFX': return <Layers size={14} />
-      case 'Color': return <Palette size={14} />
-      default: return <Zap size={14} />
-    }
-  }
-
-  const getPriorityVariant = (priority: string) => {
-    switch (priority) {
-      case 'critical':
-      case 'high': return 'destructive'
-      case 'medium': return 'secondary'
-      default: return 'default'
-    }
   }
 
   return (
@@ -142,160 +127,164 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Timeline */}
         <motion.div variants={itemVariants}>
-          <Card className="h-full">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <TerminalCard className="h-full">
+            <TerminalCardHeader>
               <div className="flex items-center gap-2">
-                <CardTitle className="text-sm font-semibold">Timeline</CardTitle>
-                <Badge variant="secondary" className="text-[10px] font-mono">
-                  {shots.filter(s => s.status === 'pending').length} Shots left
-                </Badge>
+                <Terminal size={16} className="text-primary" />
+                <TerminalCardTitle>Timeline</TerminalCardTitle>
+                <span className="font-mono text-[10px] text-primary/60">
+                  {shots.filter(s => s.status === 'pending').length}_SHOTS
+                </span>
               </div>
-              <Button 
+              <TerminalButton 
                 variant="ghost" 
-                size="sm" 
+                size="sm"
                 onClick={onNavigateToShotsView}
-                className="text-[10px] h-6 px-2"
+                showArrow={false}
               >
-                View all
-              </Button>
-            </CardHeader>
-            <CardContent className="pt-0">
+                View
+              </TerminalButton>
+            </TerminalCardHeader>
+            
+            <TerminalCardContent className="pt-0">
               <div className="space-y-2">
                 {upcomingShots.length > 0 ? (
-                  upcomingShots.map((shot) => {
-                    const status = getTimelineStatus(shot, shots)
-                    const barColor = status === 'done' ? 'bg-primary' : status === 'current' ? 'bg-primary' : 'bg-muted'
-
-                    return (
-                      <div
-                        key={shot.id}
-                        onClick={() => onNavigateToShot(shot)}
-                        className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border border-border hover:border-primary/30 transition-all cursor-pointer"
-                      >
-                        <div className="flex items-center gap-1.5">
-                          <div className={`w-1 h-8 rounded-full ${barColor}`} />
-                          {shot.startTime && <span className="text-[10px] text-muted-foreground font-mono pr-1">{shot.startTime}</span>}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium truncate">{shot.title}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {new Date(shot.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • {shot.duration || '5min'}
-                          </div>
+                  upcomingShots.map((shot) => (
+                    <div
+                      key={shot.id}
+                      onClick={() => onNavigateToShot(shot)}
+                      className="flex items-center gap-3 p-3 border border-border/50 hover:border-primary/50 transition-all cursor-pointer bg-muted/30 dark:bg-white/5 dark:border-white/10 dark:hover:border-primary/50"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="w-1 h-8 bg-primary" />
+                        {shot.startTime && (
+                          <span className="text-[10px] font-mono text-muted-foreground">{shot.startTime}</span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium truncate">{shot.title}</div>
+                        <div className="text-[10px] font-mono text-muted-foreground">
+                          {new Date(shot.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}_{shot.duration || '5min'}
                         </div>
                       </div>
-                    )
-                  })
+                    </div>
+                  ))
                 ) : (
                   <div className="p-6 text-center text-muted-foreground">
                     <Film size={20} className="mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">No upcoming shots</p>
+                    <p className="text-sm font-mono">NO_UPCOMING_SHOTS</p>
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </TerminalCardContent>
+          </TerminalCard>
         </motion.div>
 
-        {/* Equipment Stats */}
+        {/* Equipment */}
         <motion.div variants={itemVariants}>
-          <Card className="h-full">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <TerminalCard className="h-full">
+            <TerminalCardHeader>
               <div className="flex items-center gap-2">
-                <CardTitle className="text-sm font-semibold">Equipment</CardTitle>
-                <Badge variant="secondary" className="text-[10px] font-mono">
-                  {inventory.length} Items
-                </Badge>
+                <Cpu size={16} className="text-primary" />
+                <TerminalCardTitle>Equipment</TerminalCardTitle>
+                <span className="font-mono text-[10px] text-primary/60">
+                  {inventory.length}_ITEMS
+                </span>
               </div>
-              <Button 
+              <TerminalButton 
                 variant="ghost" 
-                size="sm" 
+                size="sm"
                 onClick={onNavigateToInventory}
-                className="text-[10px] h-6 px-2"
+                showArrow={false}
               >
-                View all
-              </Button>
-            </CardHeader>
-            <CardContent className="pt-0">
+                View
+              </TerminalButton>
+            </TerminalCardHeader>
+            
+            <TerminalCardContent className="pt-0">
               {inventory.length > 0 ? (
                 <div className="space-y-4">
-                  {/* Summary Rows */}
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 rounded-lg bg-muted/50 border border-border hover:border-primary/30 transition-colors cursor-pointer flex items-center justify-between">
-                      <div className="text-[10px] text-muted-foreground font-medium">Total gear</div>
-                      <div className="text-xl font-semibold leading-none">{inventoryStats.total}</div>
+                    <div className="p-3 border border-border/50 flex items-center justify-between bg-muted/30 dark:bg-white/5 dark:border-white/10">
+                      <span className="text-[10px] font-mono text-muted-foreground">TOTAL</span>
+                      <span className="text-xl font-semibold">{inventoryStats.total}</span>
                     </div>
-                    <div className="p-3 rounded-lg bg-muted/50 border border-border hover:border-primary/30 transition-colors cursor-pointer flex items-center justify-between">
-                      <div className="text-[10px] text-muted-foreground font-medium">Categories</div>
-                      <div className="text-xl font-semibold leading-none">{inventoryStats.topCategories.length}</div>
+                    <div className="p-3 border border-border/50 flex items-center justify-between bg-muted/30 dark:bg-white/5 dark:border-white/10">
+                      <span className="text-[10px] font-mono text-muted-foreground">CATS</span>
+                      <span className="text-xl font-semibold">{inventoryStats.topCategories.length}</span>
                     </div>
                   </div>
 
-                  {/* Ownership Breakdown */}
                   <div className="flex gap-4 px-1">
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-primary" />
-                      <span className="text-xs text-muted-foreground">{inventoryStats.owned} <span className="text-muted-foreground/50">Owned</span></span>
+                      <div className="w-2 h-2 bg-primary" />
+                      <span className="text-xs font-mono text-muted-foreground">OWNED:{inventoryStats.owned}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">{inventoryStats.rented} <span className="text-muted-foreground/50">Rented</span></span>
+                      <div className="w-2 h-2 bg-muted-foreground" />
+                      <span className="text-xs font-mono text-muted-foreground">RENTED:{inventoryStats.rented}</span>
                     </div>
                   </div>
 
-                  {/* Top Categories */}
                   <div className="space-y-3 pt-2">
-                    <div className="text-[10px] text-muted-foreground font-medium">Top distributions</div>
-                    {inventoryStats.topCategories.map((cat, idx) => (
+                    <div className="text-[10px] font-mono text-muted-foreground">TOP_CATEGORIES</div>
+                    {inventoryStats.topCategories.map((cat) => (
                       <div key={cat.name} className="flex flex-col gap-1.5">
-                        <div className="flex justify-between items-center text-[10px] text-muted-foreground">
-                          <span>{cat.name}</span>
-                          <span className="font-mono">{cat.count}</span>
+                        <div className="flex justify-between items-center text-[10px] font-mono text-muted-foreground"
+                        >
+                          <span>{cat.name.toUpperCase()}</span>
+                          <span>{cat.count}</span>
                         </div>
-                        <Progress 
-                          value={(cat.count / inventoryStats.total) * 100} 
-                          className="h-1"
-                        />
+                        <div className="h-1 w-full bg-muted/30 dark:bg-white/10">
+                          <div 
+                            className="h-full bg-primary transition-all duration-500"
+                            style={{ width: `${(cat.count / inventoryStats.total) * 100}%` }}
+                          />
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                <div className="flex flex-col items-center justify-center py-8 text-muted-foreground"
+                >
                   <Package size={24} className="mb-2 opacity-20" />
-                  <p className="text-sm">No equipment found</p>
+                  <p className="text-sm font-mono">NO_EQUIPMENT_FOUND</p>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </TerminalCardContent>
+          </TerminalCard>
         </motion.div>
 
         {/* Tasks */}
         <motion.div variants={itemVariants}>
-          <Card className="h-full">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <TerminalCard className="h-full">
+            <TerminalCardHeader>
               <div className="flex items-center gap-2">
-                <CardTitle className="text-sm font-semibold">Tasks</CardTitle>
-                <Badge variant="secondary" className="text-[10px] font-mono">
-                  {tasks.filter(t => t.status !== 'done').length} Tasks left
-                </Badge>
+                <Command size={16} className="text-primary" />
+                <TerminalCardTitle>Tasks</TerminalCardTitle>
+                <span className="font-mono text-[10px] text-primary/60">
+                  {tasks.filter(t => t.status !== 'done').length}_PENDING
+                </span>
               </div>
-              <Button 
+              <TerminalButton 
                 variant="ghost" 
-                size="sm" 
+                size="sm"
                 onClick={onNavigateToPostProd}
-                className="text-[10px] h-6 px-2"
+                showArrow={false}
               >
-                View all
-              </Button>
-            </CardHeader>
-            <CardContent className="pt-0">
+                View
+              </TerminalButton>
+            </TerminalCardHeader>
+            
+            <TerminalCardContent className="pt-0">
               <div className="space-y-2">
                 {pendingTasks.length > 0 ? (
                   pendingTasks.map((task) => (
                     <div
                       key={task.id}
                       onClick={() => onSelectTask?.(task.id)}
-                      className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border hover:border-primary/30 transition-all cursor-pointer"
+                      className="flex items-center gap-3 p-3 border border-border/50 hover:border-primary/50 transition-all cursor-pointer bg-muted/30 dark:bg-white/5 dark:border-white/10 dark:hover:border-primary/50"
                     >
                       <div className="text-muted-foreground shrink-0">
                         {getTaskIcon(task.category)}
@@ -304,59 +293,58 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
                         <div className={`text-sm leading-tight truncate ${task.status === 'done' ? 'text-muted-foreground line-through' : ''}`}>
                           {task.title}
                         </div>
-                        <div className="text-xs text-muted-foreground">{task.category}</div>
+                        <div className="text-[10px] font-mono text-muted-foreground">{task.category.toUpperCase()}</div>
                       </div>
-                      <Badge 
-                        variant={getPriorityVariant(task.priority)} 
-                        className="text-[10px] shrink-0"
-                      >
-                        {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                      </Badge>
+                      <div className={`text-[10px] px-2 py-0.5 border font-mono shrink-0 ${getPriorityColor(task.priority)}`}>
+                        {task.priority.toUpperCase()}
+                      </div>
                     </div>
                   ))
                 ) : (
                   <div className="p-6 text-center text-muted-foreground">
                     <Zap size={20} className="mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">All caught up</p>
+                    <p className="text-sm font-mono">ALL_TASKS_COMPLETE</p>
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </TerminalCardContent>
+          </TerminalCard>
         </motion.div>
 
         {/* Notes */}
         <motion.div variants={itemVariants}>
-          <Card className="h-full">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <TerminalCard className="h-full">
+            <TerminalCardHeader>
               <div className="flex items-center gap-2">
-                <CardTitle className="text-sm font-semibold">Notes</CardTitle>
-                <Badge variant="secondary" className="text-[10px] font-mono">
-                  {notes.length} Notes
-                </Badge>
+                <FileText size={16} className="text-primary" />
+                <TerminalCardTitle>Notes</TerminalCardTitle>
+                <span className="font-mono text-[10px] text-primary/60">
+                  {notes.length}_ENTRIES
+                </span>
               </div>
-              <Button 
+              <TerminalButton 
                 variant="ghost" 
-                size="sm" 
+                size="sm"
                 onClick={onNavigateToNotes}
-                className="text-[10px] h-6 px-2"
+                showArrow={false}
               >
-                View all
-              </Button>
-            </CardHeader>
-            <CardContent className="pt-0">
+                View
+              </TerminalButton>
+            </TerminalCardHeader>
+            
+            <TerminalCardContent className="pt-0">
               <div className="space-y-2">
                 {recentNotes.length > 0 ? (
                   recentNotes.map((note) => (
                     <div
                       key={note.id}
                       onClick={() => onSelectNote?.(note.id)}
-                      className="p-3 rounded-lg bg-muted/50 border border-border hover:border-primary/30 transition-all cursor-pointer"
+                      className="p-3 border border-border/50 hover:border-primary/50 transition-all cursor-pointer bg-muted/30 dark:bg-white/5 dark:border-white/10 dark:hover:border-primary/50"
                     >
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <div className="text-sm font-medium leading-tight">{note.title}</div>
-                        <div className="text-[10px] text-muted-foreground whitespace-nowrap">
-                          {new Date(note.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        <div className="text-[10px] font-mono text-muted-foreground whitespace-nowrap">
+                          {new Date(note.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()}
                         </div>
                       </div>
                       <div className="text-xs text-muted-foreground line-clamp-2">{note.content}</div>
@@ -365,12 +353,12 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
                 ) : (
                   <div className="p-6 text-center text-muted-foreground">
                     <StickyNote size={20} className="mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">No notes</p>
+                    <p className="text-sm font-mono">NO_NOTES</p>
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </TerminalCardContent>
+          </TerminalCard>
         </motion.div>
       </div>
     </motion.div>
