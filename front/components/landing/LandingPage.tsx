@@ -73,7 +73,7 @@ const StatusBadge = ({ text }: { text: string }) => (
 // --- MOCK UI COMPONENTS ---
 
 const MockShotCard = ({ title, scene, time, location, status = 'pending', active = false }: any) => (
-  <div className={`p-4 border transition-all ${active ? 'border-primary bg-primary/5' : 'border-white/10 bg-black/40'} backdrop-blur-sm`}>
+  <div className={`p-4 border transition-all ${active ? 'border-primary bg-primary/5' : 'border-white/10 bg-[#0a0a0a]/40'} backdrop-blur-sm`}>
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
         <span className="px-2 py-0.5 border border-white/20 text-white/80 text-[10px] font-mono uppercase tracking-wider">
@@ -110,7 +110,7 @@ const MockShotCard = ({ title, scene, time, location, status = 'pending', active
 )
 
 const MockTimelineHeader = () => (
-  <div className="px-4 py-3 flex items-center justify-between bg-black/60 border-b border-white/10">
+  <div className="px-4 py-3 flex items-center justify-between bg-[#0a0a0a]/60 border-b border-white/10">
     <div className="flex items-center gap-2">
       <Terminal size={12} className="text-primary" />
       <span className="text-xs font-mono text-white/60 uppercase tracking-wider">Monday_Oct_24</span>
@@ -143,7 +143,7 @@ const Navbar = ({ scrolled, onNavigate }: { scrolled: boolean, onNavigate: (path
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 border-b ${
-        scrolled ? 'bg-black/90 border-white/10 py-3 backdrop-blur-xl' : 'bg-transparent border-transparent py-6'
+        scrolled ? 'bg-[#0a0a0a]/90 border-white/10 py-3 backdrop-blur-xl' : 'bg-transparent border-transparent py-6'
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
@@ -189,7 +189,7 @@ const Navbar = ({ scrolled, onNavigate }: { scrolled: boolean, onNavigate: (path
             initial={{ opacity: 0, y: -20 }} 
             animate={{ opacity: 1, y: 0 }} 
             exit={{ opacity: 0, y: -20 }} 
-            className="md:hidden absolute top-full left-0 right-0 bg-black border-b border-white/10 p-6"
+            className="md:hidden absolute top-full left-0 right-0 bg-[#0a0a0a] border-b border-white/10 p-6"
           >
             <div className="flex flex-col gap-4">
               {['Features', 'How it Works', 'FAQ'].map((item) => (
@@ -292,7 +292,7 @@ const HeroSection = ({ onNavigate }: { onNavigate: (path: string) => void }) => 
             transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="relative"
           >
-            <div className="relative border border-white/10 bg-black/60 backdrop-blur-sm">
+            <div className="relative border border-white/10 bg-[#0a0a0a]/60 backdrop-blur-sm">
               {/* Terminal Header */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-white/5">
                 <div className="flex items-center gap-2">
@@ -433,7 +433,7 @@ const HowItWorks = () => {
   ]
 
   return (
-    <section id="how-it-works" className="py-24 md:py-32 px-6 relative bg-black/50">
+    <section id="how-it-works" className="py-24 md:py-32 px-6 relative bg-[#0a0a0a]/50">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center gap-4 mb-12">
           <Command size={20} className="text-primary" />
@@ -520,7 +520,7 @@ const FAQ = () => {
 
 const CTASection = ({ onNavigate }: { onNavigate: (path: string) => void }) => {
   return (
-    <section className="py-24 md:py-32 px-6 relative bg-black/50 border-y border-white/5">
+    <section className="py-24 md:py-32 px-6 relative bg-[#0a0a0a]/50 border-y border-white/5">
       <div className="max-w-4xl mx-auto text-center">
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }} 
@@ -569,7 +569,7 @@ const Footer = () => {
   const navigate = useNavigate()
 
   return (
-    <footer className="bg-black pt-20 pb-12 px-6 border-t border-white/5">
+    <footer className="bg-[#0a0a0a] pt-20 pb-12 px-6 border-t border-white/5">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-12 gap-12 mb-16">
           <div className="col-span-2 md:col-span-4 lg:col-span-4">
@@ -640,7 +640,7 @@ export const LandingPage = () => {
   }, [])
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-primary/30 font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-primary/30 font-sans overflow-x-hidden">
       <Navbar scrolled={scrolled} onNavigate={navigate} />
       <HeroSection onNavigate={navigate} />
       <Benefits />
