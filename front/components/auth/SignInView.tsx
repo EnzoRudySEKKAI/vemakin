@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label'
 import {
   Card,
   CardContent,
-} from '@/components/ui/card'
+} from '@/components/ui/Card'
 import { AuthLayout } from './AuthLayout'
 
 interface SignInViewProps {

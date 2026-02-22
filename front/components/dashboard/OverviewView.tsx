@@ -135,7 +135,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
               </TerminalButton>
             }
           >
-            <div className>
+            <div className="space-y-3">
               {upcomingShots.length > 0 ? (
                 upcomingShots.map((shot) => (
                   <div
@@ -241,7 +241,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
         {/* Tasks */}
         <motion.div variants={itemVariants}>
           <TerminalCard 
-            className="h-full"
+            className="h-full "
             header={`Tasks // ${tasks.filter(t => t.status !== 'done').length} pending`}
             headerRight={
               <TerminalButton 
@@ -254,7 +254,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
               </TerminalButton>
             }
           >
-            <div className>
+            <div className = "space-y-3">
               {pendingTasks.length > 0 ? (
                 pendingTasks.map((task) => (
                   <div
@@ -302,7 +302,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
               </TerminalButton>
             }
           >
-            <div className>
+            <div className = "space-y-3">
                 {recentNotes.length > 0 ? (
                   recentNotes.map((note) => (
                     <div
