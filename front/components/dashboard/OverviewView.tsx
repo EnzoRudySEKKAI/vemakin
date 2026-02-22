@@ -4,8 +4,16 @@ import {
   Zap, StickyNote, Package, Film,
   Clock, PenLine, Scissors, Music, Layers, Palette
 } from 'lucide-react'
-import { Card, SimpleCard } from '@/components/ui/Card'
 import { Shot, Equipment, PostProdTask, Note } from '@/types'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { Button } from '@/components/ui/button'
 
 interface OverviewViewProps {
   shots: Shot[]
@@ -46,18 +54,6 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
   onSelectTask,
   onSelectNote,
 }) => {
-  const ViewAllButton = ({ onClick }: { onClick: () => void }) => (
-    <button
-      onClick={(e) => {
-        e.stopPropagation()
-        onClick()
-      }}
-      className="text-[10px] text-gray-500 dark:text-white/20 hover:text-gray-700 dark:hover:text-white/50 transition-colors bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 px-2 py-0.5 rounded-md font-medium"
-    >
-      View all
-    </button>
-  )
-
   const upcomingShots = useMemo(() => {
     return shots
       .filter(s => s.status === 'pending')
@@ -116,6 +112,26 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
     show: { opacity: 1, y: 0 }
   }
 
+  const getTaskIcon = (category: string) => {
+    switch (category) {
+      case 'Script': return <PenLine size={14} />
+      case 'Editing': return <Scissors size={14} />
+      case 'Sound': return <Music size={14} />
+      case 'VFX': return <Layers size={14} />
+      case 'Color': return <Palette size={14} />
+      default: return <Zap size={14} />
+    }
+  }
+
+  const getPriorityVariant = (priority: string) => {
+    switch (priority) {
+      case 'critical':
+      case 'high': return 'destructive'
+      case 'medium': return 'secondary'
+      default: return 'default'
+    }
+  }
+
   return (
     <motion.div
       variants={containerVariants}
@@ -126,231 +142,234 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Timeline */}
         <motion.div variants={itemVariants}>
-          <Card
-            title={
+          <Card className="h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div className="flex items-center gap-2">
-                <span className="font-semibold">Timeline</span>
-                <span className="bg-gray-100 dark:bg-white/5 px-1.5 py-0.5 rounded text-[10px] text-gray-500 dark:text-white/40 font-mono">
+                <CardTitle className="text-sm font-semibold">Timeline</CardTitle>
+                <Badge variant="secondary" className="text-[10px] font-mono">
                   {shots.filter(s => s.status === 'pending').length} Shots left
-                </span>
+                </Badge>
               </div>
-            }
-            className="h-full"
-            headerRight={<ViewAllButton onClick={() => onNavigateToShotsView?.() || (window.location.hash = '#/shots')} />}
-          >
-            <div className="p-4 space-y-2">
-              {upcomingShots.length > 0 ? (
-                upcomingShots.map((shot) => {
-                  const status = getTimelineStatus(shot, shots)
-                  const barColor = status === 'done' ? 'bg-primary' : status === 'current' ? 'bg-primary' : 'bg-white/20'
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onNavigateToShotsView}
+                className="text-[10px] h-6 px-2"
+              >
+                View all
+              </Button>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-2">
+                {upcomingShots.length > 0 ? (
+                  upcomingShots.map((shot) => {
+                    const status = getTimelineStatus(shot, shots)
+                    const barColor = status === 'done' ? 'bg-primary' : status === 'current' ? 'bg-primary' : 'bg-muted'
 
-                  return (
-                    <div
-                      key={shot.id}
-                      onClick={() => onNavigateToShot(shot)}
-                      className="flex items-center gap-2 p-3 rounded-xl bg-gray-100 dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] hover:border-gray-300 dark:hover:border-white/[0.1] transition-all cursor-pointer"
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <div className={`w-1 h-8 rounded-full ${barColor}`} />
-                        {shot.startTime && <span className="text-[10px] text-gray-500 dark:text-white/30 font-mono pr-1">{shot.startTime}</span>}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm text-gray-900 dark:text-white font-medium truncate">{shot.title}</div>
-                        <div className="text-xs text-gray-500 dark:text-white/30">
-                          {new Date(shot.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • {shot.duration || '5min'}
+                    return (
+                      <div
+                        key={shot.id}
+                        onClick={() => onNavigateToShot(shot)}
+                        className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border border-border hover:border-primary/30 transition-all cursor-pointer"
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <div className={`w-1 h-8 rounded-full ${barColor}`} />
+                          {shot.startTime && <span className="text-[10px] text-muted-foreground font-mono pr-1">{shot.startTime}</span>}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium truncate">{shot.title}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(shot.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • {shot.duration || '5min'}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )
-                })
-              ) : (
-                <div className="p-6 text-center text-gray-500 dark:text-white/30">
-                  <Film size={20} className="mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No upcoming shots</p>
-                </div>
-              )}
-            </div>
+                    )
+                  })
+                ) : (
+                  <div className="p-6 text-center text-muted-foreground">
+                    <Film size={20} className="mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No upcoming shots</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
           </Card>
         </motion.div>
 
         {/* Equipment Stats */}
         <motion.div variants={itemVariants}>
-          <Card
-            title={
+          <Card className="h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div className="flex items-center gap-2">
-                <span className="font-semibold">Equipment</span>
-                <span className="bg-gray-100 dark:bg-white/5 px-1.5 py-0.5 rounded text-[10px] text-gray-500 dark:text-white/40 font-mono">
+                <CardTitle className="text-sm font-semibold">Equipment</CardTitle>
+                <Badge variant="secondary" className="text-[10px] font-mono">
                   {inventory.length} Items
-                </span>
+                </Badge>
               </div>
-            }
-            className="h-full"
-            headerRight={<ViewAllButton onClick={onNavigateToInventory} />}
-          >
-            <div className="p-4 h-full flex flex-col">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onNavigateToInventory}
+                className="text-[10px] h-6 px-2"
+              >
+                View all
+              </Button>
+            </CardHeader>
+            <CardContent className="pt-0">
               {inventory.length > 0 ? (
-                <div className="space-y-4 flex-1 flex flex-col">
+                <div className="space-y-4">
                   {/* Summary Rows */}
-                  <div className="grid grid-cols-2 gap-3 shrink-0">
-                    <div className="p-3 rounded-xl bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] group hover:border-gray-300 dark:hover:border-white/10 transition-colors cursor-pointer flex items-center justify-between">
-                      <div className="text-[10px] text-gray-500 dark:text-white/40 font-medium">Total gear</div>
-                      <div className="text-xl text-gray-900 dark:text-white font-semibold leading-none">{inventoryStats.total}</div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 rounded-lg bg-muted/50 border border-border hover:border-primary/30 transition-colors cursor-pointer flex items-center justify-between">
+                      <div className="text-[10px] text-muted-foreground font-medium">Total gear</div>
+                      <div className="text-xl font-semibold leading-none">{inventoryStats.total}</div>
                     </div>
-                    <div className="p-3 rounded-xl bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] group hover:border-gray-300 dark:hover:border-white/10 transition-colors cursor-pointer flex items-center justify-between">
-                      <div className="text-[10px] text-gray-500 dark:text-white/40 font-medium">Categories</div>
-                      <div className="text-xl text-gray-900 dark:text-white font-semibold leading-none">{inventoryStats.topCategories.length}</div>
+                    <div className="p-3 rounded-lg bg-muted/50 border border-border hover:border-primary/30 transition-colors cursor-pointer flex items-center justify-between">
+                      <div className="text-[10px] text-muted-foreground font-medium">Categories</div>
+                      <div className="text-xl font-semibold leading-none">{inventoryStats.topCategories.length}</div>
                     </div>
                   </div>
 
                   {/* Ownership Breakdown */}
-                  <div className="flex gap-4 px-1 shrink-0">
+                  <div className="flex gap-4 px-1">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-primary" />
-                      <span className="text-xs text-gray-600 dark:text-white/50">{inventoryStats.owned} <span className="text-gray-400 dark:text-white/20">Owned</span></span>
+                      <span className="text-xs text-muted-foreground">{inventoryStats.owned} <span className="text-muted-foreground/50">Owned</span></span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-gray-400 dark:bg-white/20" />
-                      <span className="text-xs text-gray-600 dark:text-white/50">{inventoryStats.rented} <span className="text-gray-400 dark:text-white/20">Rented</span></span>
+                      <div className="w-2 h-2 rounded-full bg-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">{inventoryStats.rented} <span className="text-muted-foreground/50">Rented</span></span>
                     </div>
                   </div>
 
-                  {/* Top Categories - Distributed vertically */}
-                  <div className="flex-1 flex flex-col justify-center space-y-3 pt-2">
-                    <div className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-1">Top distributions</div>
+                  {/* Top Categories */}
+                  <div className="space-y-3 pt-2">
+                    <div className="text-[10px] text-muted-foreground font-medium">Top distributions</div>
                     {inventoryStats.topCategories.map((cat, idx) => (
                       <div key={cat.name} className="flex flex-col gap-1.5">
-                        <div className="flex justify-between items-center text-[10px] text-gray-500 dark:text-white/40">
+                        <div className="flex justify-between items-center text-[10px] text-muted-foreground">
                           <span>{cat.name}</span>
                           <span className="font-mono">{cat.count}</span>
                         </div>
-                        <div className="h-1 w-full bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${(cat.count / inventoryStats.total) * 100}%` }}
-                            transition={{ duration: 0.8, delay: 0.2 + idx * 0.1 }}
-                            className="h-full bg-gray-400 dark:bg-white/20 rounded-full"
-                          />
-                        </div>
+                        <Progress 
+                          value={(cat.count / inventoryStats.total) * 100} 
+                          className="h-1"
+                        />
                       </div>
                     ))}
                   </div>
                 </div>
               ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-gray-500 dark:text-white/30">
+                <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
                   <Package size={24} className="mb-2 opacity-20" />
                   <p className="text-sm">No equipment found</p>
                 </div>
               )}
-            </div>
+            </CardContent>
           </Card>
         </motion.div>
 
         {/* Tasks */}
         <motion.div variants={itemVariants}>
-          <Card
-            title={
+          <Card className="h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div className="flex items-center gap-2">
-                <span className="font-semibold">Tasks</span>
-                <span className="bg-gray-100 dark:bg-white/5 px-1.5 py-0.5 rounded text-[10px] text-gray-500 dark:text-white/40 font-mono">
+                <CardTitle className="text-sm font-semibold">Tasks</CardTitle>
+                <Badge variant="secondary" className="text-[10px] font-mono">
                   {tasks.filter(t => t.status !== 'done').length} Tasks left
-                </span>
+                </Badge>
               </div>
-            }
-            className="h-full"
-            headerRight={<ViewAllButton onClick={onNavigateToPostProd} />}
-          >
-            <div className="p-4 space-y-2">
-              {pendingTasks.length > 0 ? (
-                pendingTasks.map((task) => {
-                  const getTaskIcon = () => {
-                    switch (task.category) {
-                      case 'Script': return <PenLine size={14} />
-                      case 'Editing': return <Scissors size={14} />
-                      case 'Sound': return <Music size={14} />
-                      case 'VFX': return <Layers size={14} />
-                      case 'Color': return <Palette size={14} />
-                      default: return <Zap size={14} />
-                    }
-                  }
-
-                  const getPriorityColor = () => {
-                    switch (task.priority) {
-                      case 'critical':
-                      case 'high': return 'bg-red-500/20 text-red-400'
-                      case 'medium': return 'bg-yellow-500/20 text-yellow-400'
-                      default: return 'bg-primary/20 text-primary'
-                    }
-                  }
-
-                  return (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onNavigateToPostProd}
+                className="text-[10px] h-6 px-2"
+              >
+                View all
+              </Button>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-2">
+                {pendingTasks.length > 0 ? (
+                  pendingTasks.map((task) => (
                     <div
                       key={task.id}
                       onClick={() => onSelectTask?.(task.id)}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] hover:border-gray-300 dark:hover:border-white/[0.1] transition-all cursor-pointer"
+                      className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border hover:border-primary/30 transition-all cursor-pointer"
                     >
-                      <div className="text-gray-500 dark:text-white/40 shrink-0">
-                        {getTaskIcon()}
+                      <div className="text-muted-foreground shrink-0">
+                        {getTaskIcon(task.category)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className={`text-sm leading-tight truncate ${task.status === 'done' ? 'text-gray-400 dark:text-white/30 line-through' : 'text-gray-700 dark:text-white/80'}`}>
+                        <div className={`text-sm leading-tight truncate ${task.status === 'done' ? 'text-muted-foreground line-through' : ''}`}>
                           {task.title}
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-white/30">{task.category}</div>
+                        <div className="text-xs text-muted-foreground">{task.category}</div>
                       </div>
-                      <div className={`text-[10px] w-14 text-center px-2 py-0.5 rounded shrink-0 ${getPriorityColor()}`}>
+                      <Badge 
+                        variant={getPriorityVariant(task.priority)} 
+                        className="text-[10px] shrink-0"
+                      >
                         {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                      </div>
+                      </Badge>
                     </div>
-                  )
-                })
-              ) : (
-                <div className="p-6 text-center text-gray-500 dark:text-white/30">
-                  <Zap size={20} className="mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">All caught up</p>
-                </div>
-              )}
-            </div>
+                  ))
+                ) : (
+                  <div className="p-6 text-center text-muted-foreground">
+                    <Zap size={20} className="mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">All caught up</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
           </Card>
         </motion.div>
 
         {/* Notes */}
         <motion.div variants={itemVariants}>
-          <Card
-            title={
+          <Card className="h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div className="flex items-center gap-2">
-                <span className="font-semibold">Notes</span>
-                <span className="bg-gray-100 dark:bg-white/5 px-1.5 py-0.5 rounded text-[10px] text-gray-500 dark:text-white/40 font-mono">
+                <CardTitle className="text-sm font-semibold">Notes</CardTitle>
+                <Badge variant="secondary" className="text-[10px] font-mono">
                   {notes.length} Notes
-                </span>
+                </Badge>
               </div>
-            }
-            className="h-full"
-            headerRight={<ViewAllButton onClick={onNavigateToNotes} />}
-          >
-            <div className="p-4 space-y-2">
-              {recentNotes.length > 0 ? (
-                recentNotes.map((note) => (
-                  <div
-                    key={note.id}
-                    onClick={() => onSelectNote?.(note.id)}
-                    className="p-3 rounded-xl bg-gray-100 dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] hover:border-gray-300 dark:hover:border-white/[0.1] transition-all cursor-pointer"
-                  >
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <div className="text-sm text-gray-800 dark:text-white/80 font-medium leading-tight">{note.title}</div>
-                      <div className="text-[10px] text-gray-400 dark:text-white/20 whitespace-nowrap">
-                        {new Date(note.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onNavigateToNotes}
+                className="text-[10px] h-6 px-2"
+              >
+                View all
+              </Button>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-2">
+                {recentNotes.length > 0 ? (
+                  recentNotes.map((note) => (
+                    <div
+                      key={note.id}
+                      onClick={() => onSelectNote?.(note.id)}
+                      className="p-3 rounded-lg bg-muted/50 border border-border hover:border-primary/30 transition-all cursor-pointer"
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <div className="text-sm font-medium leading-tight">{note.title}</div>
+                        <div className="text-[10px] text-muted-foreground whitespace-nowrap">
+                          {new Date(note.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </div>
                       </div>
+                      <div className="text-xs text-muted-foreground line-clamp-2">{note.content}</div>
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-white/30 line-clamp-2">{note.content}</div>
+                  ))
+                ) : (
+                  <div className="p-6 text-center text-muted-foreground">
+                    <StickyNote size={20} className="mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No notes</p>
                   </div>
-                ))
-              ) : (
-                <div className="p-6 text-center text-gray-500 dark:text-white/30">
-                  <StickyNote size={20} className="mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No notes</p>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            </CardContent>
           </Card>
         </motion.div>
       </div>

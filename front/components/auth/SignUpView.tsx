@@ -1,7 +1,12 @@
 import React, { useState } from 'react'
-import { ArrowLeft, Mail, Lock, User, ArrowRight, Loader2 } from 'lucide-react'
-import { Button, Text, Input, IconContainer } from '@/components/atoms'
-import { SimpleCard } from '@/components/ui/Card'
+import { ArrowLeft, Mail, Lock, User, ArrowRight } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Card,
+  CardContent,
+} from '@/components/ui/card'
 import { AuthLayout } from './AuthLayout'
 
 interface SignUpViewProps {
@@ -44,68 +49,91 @@ export const SignUpView: React.FC<SignUpViewProps> = ({ onBack, onSignUp }) => {
         <Button
           onClick={onBack}
           variant="ghost"
-          size="md"
-          className="group absolute top-[-80px] left-0 p-3 bg-[#16181D] border border-white/5 shadow-sm text-gray-400 hover:text-white"
+          size="icon"
+          className="group absolute top-[-80px] left-0 bg-card border border-border shadow-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft size={20} strokeWidth={2.5} className="group-hover:-translate-x-0.5 transition-transform" />
         </Button>
 
         <div className="mb-10 text-center">
-          <Text variant="h1" className="mb-3 text-white">Create Account</Text>
-          <Text variant="body" color="muted">Join Vemakin to manage your productions.</Text>
+          <h1 className="text-3xl font-bold mb-3 text-foreground">Create Account</h1>
+          <p className="text-muted-foreground">Join Vemakin to manage your productions.</p>
         </div>
 
-        <SimpleCard className="p-8 shadow-2xl shadow-black/50 border-white/5 bg-[#16181D]">
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="space-y-6">
-              <Input
-                label="Full Name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                fullWidth
-                placeholder="Director Name"
-                leftIcon={<User size={18} strokeWidth={2.5} className="text-gray-500" />}
-                className="border-white/10"
-              />
+        <Card className="p-8 shadow-2xl shadow-black/50 border-border bg-card">
+          <CardContent className="p-0">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    Full Name
+                  </Label>
+                  <div className="relative">
+                    <User size={18} strokeWidth={2.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="name"
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Director Name"
+                      className="pl-10 border-border"
+                    />
+                  </div>
+                </div>
 
-              <Input
-                label="Email Address"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                fullWidth
-                placeholder="name@studio.com"
-                leftIcon={<Mail size={18} strokeWidth={2.5} className="text-gray-500" />}
-                className="border-white/10"
-              />
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    Email Address
+                  </Label>
+                  <div className="relative">
+                    <Mail size={18} strokeWidth={2.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="name@studio.com"
+                      className="pl-10 border-border"
+                    />
+                  </div>
+                </div>
 
-              <Input
-                label="Password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                fullWidth
-                placeholder="Create a strong password"
-                leftIcon={<Lock size={18} strokeWidth={2.5} className="text-gray-500" />}
-                className="border-white/10"
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    Password
+                  </Label>
+                  <div className="relative">
+                    <Lock size={18} strokeWidth={2.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Create a strong password"
+                      className="pl-10 border-border"
+                    />
+                  </div>
+                </div>
+              </div>
 
-            <Button
-              type="submit"
-              isLoading={isLoading}
-              disabled={isLoading || !name || !email || !password}
-              variant="primary"
-              size="lg"
-              fullWidth
-              rightIcon={!isLoading && <ArrowRight size={18} strokeWidth={2.5} />}
-              className="mt-6"
-            >
-              Create Account
-            </Button>
-          </form>
-        </SimpleCard>
+              <Button
+                type="submit"
+                disabled={isLoading || !name || !email || !password}
+                size="lg"
+                className="w-full mt-6"
+              >
+                {isLoading ? (
+                  'Creating account...'
+                ) : (
+                  <>
+                    Create Account
+                    <ArrowRight size={18} strokeWidth={2.5} className="ml-2" />
+                  </>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </AuthLayout>
   )

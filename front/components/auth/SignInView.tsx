@@ -1,8 +1,13 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Mail, Lock, ArrowRight } from 'lucide-react'
-import { Button, Text, Input } from '@/components/atoms'
-import { SimpleCard } from '@/components/ui/Card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Card,
+  CardContent,
+} from '@/components/ui/card'
 import { AuthLayout } from './AuthLayout'
 
 interface SignInViewProps {
@@ -38,67 +43,82 @@ export const SignInView: React.FC<SignInViewProps> = ({ onBack, onSignIn }) => {
         <Button
           onClick={onBack}
           variant="ghost"
-          size="md"
-          className="group absolute top-[-80px] left-0 p-3 bg-[#16181D] border border-white/5 shadow-sm text-gray-400 hover:text-white"
+          size="icon"
+          className="group absolute top-[-80px] left-0 bg-card border border-border shadow-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft size={20} strokeWidth={2.5} className="group-hover:-translate-x-0.5 transition-transform" />
         </Button>
 
         <div className="mb-10 text-center">
-          <Text variant="h1" className="mb-3 text-white">Welcome Back</Text>
-          <Text variant="body" color="muted">Enter your credentials to access your productions.</Text>
+          <h1 className="text-3xl font-bold mb-3 text-foreground">Welcome Back</h1>
+          <p className="text-muted-foreground">Enter your credentials to access your productions.</p>
         </div>
 
-        <SimpleCard className="p-8 shadow-2xl shadow-black/50 border-white/5 bg-[#16181D]">
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="space-y-6">
-              <Input
-                label="Email Address"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                fullWidth
-                placeholder="name@studio.com"
-                leftIcon={<Mail size={18} strokeWidth={2.5} className="text-gray-500" />}
-                className="border-white/10"
-              />
-
-              <div className="space-y-2">
-                <div className="flex justify-between items-center pr-1">
-                  <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Password</span>
-                  <Link 
-                    to="/auth/forgot-password" 
-                    className="ml-auto text-primary hover:underline text-xs font-medium"
-                  >
-                    Forgot Password?
-                  </Link>
+        <Card className="p-8 shadow-2xl shadow-black/50 border-border bg-card">
+          <CardContent className="p-0">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    Email Address
+                  </Label>
+                  <div className="relative">
+                    <Mail size={18} strokeWidth={2.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="name@studio.com"
+                      className="pl-10 border-border"
+                    />
+                  </div>
                 </div>
-                <Input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  fullWidth
-                  placeholder="••••••••"
-                  leftIcon={<Lock size={18} strokeWidth={2.5} className="text-gray-500" />}
-                  className="border-white/10"
-                />
-              </div>
-            </div>
 
-            <Button
-              type="submit"
-              isLoading={isLoading}
-              disabled={isLoading || !email || !password}
-              variant="primary"
-              size="lg"
-              fullWidth
-              rightIcon={!isLoading && <ArrowRight size={18} strokeWidth={2.5} />}
-              className="mt-6"
-            >
-              Sign In
-            </Button>
-          </form>
-        </SimpleCard>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="password" className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                      Password
+                    </Label>
+                    <Link 
+                      to="/auth/forgot-password" 
+                      className="text-primary hover:underline text-xs font-medium"
+                    >
+                      Forgot Password?
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <Lock size={18} strokeWidth={2.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="pl-10 border-border"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isLoading || !email || !password}
+                size="lg"
+                className="w-full mt-6"
+              >
+                {isLoading ? (
+                  'Signing in...'
+                ) : (
+                  <>
+                    Sign In
+                    <ArrowRight size={18} strokeWidth={2.5} className="ml-2" />
+                  </>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </AuthLayout>
   )

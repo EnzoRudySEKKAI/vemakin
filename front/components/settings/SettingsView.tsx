@@ -5,8 +5,12 @@ import {
   LogOut, User as UserIcon, BookOpen,
   FileText, ShieldCheck, Globe, Download, Upload
 } from 'lucide-react'
-import { Card, ListItem } from '@/components/ui/Card'
-import { Button } from '@/components/atoms/Button'
+import {
+  Card,
+  CardContent,
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { User } from '@/types'
 
 interface SettingsViewProps {
@@ -45,6 +49,36 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     show: { opacity: 1, y: 0 }
   }
 
+  const SettingItem = ({ 
+    icon: Icon, 
+    label, 
+    onClick, 
+    rightElement,
+    disabled = false 
+  }: { 
+    icon: any, 
+    label: string, 
+    onClick?: () => void, 
+    rightElement?: React.ReactNode,
+    disabled?: boolean
+  }) => (
+    <div 
+      onClick={disabled ? undefined : onClick}
+      className={`
+        p-4 flex items-center gap-3 
+        bg-card border border-border rounded-xl
+        ${disabled ? 'opacity-50' : 'hover:border-primary/30 cursor-pointer'}
+        transition-all
+      `}
+    >
+      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+        <Icon size={18} strokeWidth={2} />
+      </div>
+      <span className="text-sm font-medium flex-1">{label}</span>
+      {rightElement || <ChevronRight size={16} className="text-muted-foreground shrink-0" />}
+    </div>
+  )
+
   return (
     <motion.div 
       variants={containerVariants}
@@ -56,156 +90,122 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         
         {/* Account Section */}
         <motion.section variants={itemVariants} className="space-y-3">
-          <h2 className="text-[11px] font-semibold text-gray-400 dark:text-white/40 px-1">
+          <h2 className="text-[11px] font-semibold text-muted-foreground px-1">
             Account
           </h2>
 
           {user ? (
             <Card>
-              <div className="p-4 flex items-center gap-4">
+              <CardContent className="p-4 flex items-center gap-4">
                 <div className="relative shrink-0">
                   <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-base">
                     {getInitials(user.name)}
                   </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white dark:border-[#16181D] flex items-center justify-center">
+                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-background flex items-center justify-center">
                     <ShieldCheck size={7} className="text-white" strokeWidth={3} />
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                  <h3 className="text-sm font-semibold truncate">
                     {user.name}
                   </h3>
-                  <p className="text-xs text-gray-500 dark:text-white/40 truncate">
+                  <p className="text-xs text-muted-foreground truncate">
                     {user.email}
                   </p>
                 </div>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon"
                   onClick={onLogout}
-                  leftIcon={<LogOut size={16} />}
-                  className="text-gray-400 hover:text-red-500 shrink-0"
-                />
-              </div>
+                  className="text-muted-foreground hover:text-destructive shrink-0"
+                >
+                  <LogOut size={16} />
+                </Button>
+              </CardContent>
             </Card>
           ) : (
             <Card>
-              <div className="p-5 flex flex-col items-center text-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-400 dark:text-white/20">
+              <CardContent className="p-5 flex flex-col items-center text-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
                   <UserIcon size={24} strokeWidth={1.5} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Sign in to Vemakin</h3>
-                  <p className="text-xs text-gray-500 dark:text-white/40 mt-0.5">
+                  <h3 className="text-sm font-semibold">Sign in to Vemakin</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     Sync across all your devices
                   </p>
                 </div>
-                <Button variant="primary" size="sm" fullWidth onClick={onLogin}>
+                <Button className="w-full" onClick={onLogin}>
                   Sign In
                 </Button>
-              </div>
+              </CardContent>
             </Card>
           )}
         </motion.section>
 
         {/* Preferences Section */}
         <motion.section variants={itemVariants} className="space-y-3">
-          <h2 className="text-[11px] font-semibold text-gray-400 dark:text-white/40 px-1">
+          <h2 className="text-[11px] font-semibold text-muted-foreground px-1">
             Preferences
           </h2>
           
           <div className="space-y-2">
-            <ListItem onClick={onNavigateToProjects} className="p-4 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                <Briefcase size={18} strokeWidth={2} />
-              </div>
-              <span className="text-sm font-medium text-gray-900 dark:text-white flex-1">
-                Project Management
-              </span>
-              <ChevronRight size={16} className="text-gray-300 dark:text-white/20 shrink-0" />
-            </ListItem>
+            <SettingItem 
+              icon={Briefcase} 
+              label="Project Management" 
+              onClick={onNavigateToProjects} 
+            />
 
-            <ListItem onClick={onToggleDarkMode} className="p-4 flex items-center gap-3">
+            <div 
+              className="p-4 flex items-center gap-3 bg-card border border-border rounded-xl hover:border-primary/30 transition-all"
+            >
               <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${darkMode ? 'bg-primary/10 text-primary' : 'bg-orange-500/10 text-orange-400'}`}>
                 {darkMode ? <Moon size={18} strokeWidth={2} /> : <Sun size={18} strokeWidth={2} />}
               </div>
-              <span className="text-sm font-medium text-gray-900 dark:text-white flex-1">
-                Dark Mode
-              </span>
-              <div className={`w-9 h-5 rounded-full p-0.5 transition-colors ${darkMode ? 'bg-primary' : 'bg-gray-200 dark:bg-white/20'}`}>
-                <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${darkMode ? 'translate-x-4' : 'translate-x-0'}`} />
-              </div>
-            </ListItem>
+              <span className="text-sm font-medium flex-1">Dark Mode</span>
+              <Switch checked={darkMode} onCheckedChange={onToggleDarkMode} />
+            </div>
           </div>
         </motion.section>
 
         {/* Data & Cloud Section - Coming Soon */}
         <motion.section variants={itemVariants} className="space-y-3 opacity-40">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-[11px] font-semibold text-gray-400 dark:text-white/40">
+            <h2 className="text-[11px] font-semibold text-muted-foreground">
               Data & Cloud
             </h2>
-            <span className="text-[10px] text-gray-400 dark:text-white/30">
+            <span className="text-[10px] text-muted-foreground">
               Coming Soon
             </span>
           </div>
           
           <div className="space-y-2">
-            <div className="p-4 flex items-center gap-3 bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] rounded-xl">
-              <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-400 dark:text-white/30 shrink-0">
-                <Download size={18} strokeWidth={2} />
-              </div>
-              <span className="text-sm font-medium text-gray-500 dark:text-white/50 flex-1">
-                Import Data
-              </span>
-            </div>
-            <div className="p-4 flex items-center gap-3 bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] rounded-xl">
-              <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-400 dark:text-white/30 shrink-0">
-                <Upload size={18} strokeWidth={2} />
-              </div>
-              <span className="text-sm font-medium text-gray-500 dark:text-white/50 flex-1">
-                Export Data
-              </span>
-            </div>
+            <SettingItem icon={Download} label="Import Data" disabled />
+            <SettingItem icon={Upload} label="Export Data" disabled />
           </div>
         </motion.section>
 
         {/* Language Section - Coming Soon */}
         <motion.section variants={itemVariants} className="space-y-3 opacity-40">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-[11px] font-semibold text-gray-400 dark:text-white/40">
+            <h2 className="text-[11px] font-semibold text-muted-foreground">
               Language
             </h2>
-            <span className="text-[10px] text-gray-400 dark:text-white/30">
+            <span className="text-[10px] text-muted-foreground">
               Coming Soon
             </span>
           </div>
           
-          <div className="p-4 flex items-center gap-3 bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.05] rounded-xl">
-            <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-400 dark:text-white/30 shrink-0">
-              <Globe size={18} strokeWidth={2} />
-            </div>
-            <span className="text-sm font-medium text-gray-500 dark:text-white/50 flex-1">
-              Language
-            </span>
-          </div>
+          <SettingItem icon={Globe} label="Language" disabled />
         </motion.section>
 
         {/* Support Section */}
         <motion.section variants={itemVariants} className="space-y-3">
-          <h2 className="text-[11px] font-semibold text-gray-400 dark:text-white/40 px-1">
+          <h2 className="text-[11px] font-semibold text-muted-foreground px-1">
             Support
           </h2>
           
-          <ListItem onClick={onOpenTutorial} className="p-4 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <BookOpen size={18} strokeWidth={2} />
-            </div>
-            <span className="text-sm font-medium text-gray-900 dark:text-white flex-1">
-              Tutorial
-            </span>
-            <ChevronRight size={16} className="text-gray-300 dark:text-white/20 shrink-0" />
-          </ListItem>
+          <SettingItem icon={BookOpen} label="Tutorial" onClick={onOpenTutorial} />
         </motion.section>
 
         {/* About Section */}
@@ -214,15 +214,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              leftIcon={<FileText size={14} />}
-              className="text-gray-400 dark:text-white/30"
+              className="text-muted-foreground"
             >
+              <FileText size={14} className="mr-2" />
               Terms & Privacy
             </Button>
           </div>
           
           <div className="text-center">
-            <p className="text-[10px] text-gray-300 dark:text-white/20">
+            <p className="text-[10px] text-muted-foreground">
               Vemakin OS v1.2.0
             </p>
           </div>

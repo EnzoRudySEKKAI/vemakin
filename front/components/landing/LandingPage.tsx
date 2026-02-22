@@ -1,6 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { 
+  ArrowRight, Check, Film, Package, Zap, StickyNote, 
+  Menu, X, Play, Clock, MapPin,
+  ChevronDown, Sun, Moon, Sparkles, Camera, Clapperboard,
+  FilmIcon
+} from 'lucide-react'
+
+import { Logo } from '@/components/atoms'
+import { WindowCard } from '@/components/ui/WindowCard'
+import { GlassCard } from '@/components/ui/GlassCard'
+import { Button } from '@/components/ui/button'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 
 // Throttle utility for Safari scroll performance
 const throttle = <T extends (...args: any[]) => any>(func: T, limit: number) => {
@@ -13,18 +30,6 @@ const throttle = <T extends (...args: any[]) => any>(func: T, limit: number) => 
     }
   }
 }
-import { 
-  ArrowRight, Check, Film, Package, Zap, StickyNote, 
-  Menu, X, Play, Lock, Clock, MapPin,
-  ChevronDown, Sun, Moon, Scissors, Palette, Music,
-  Sparkles, Star, ChevronRight, Quote, Camera, Clapperboard,
-  MonitorPlay, Headphones, Briefcase, MessageSquare,
-  FilmIcon, Wrench, Users
-} from 'lucide-react'
-
-import { Button, Logo } from '@/components/atoms'
-import { WindowCard } from '@/components/ui/WindowCard'
-import { GlassCard } from '@/components/ui/GlassCard'
 
 // --- MOCK UI COMPONENTS ---
 
@@ -153,7 +158,9 @@ const Navbar = ({ scrolled, onNavigate }: { scrolled: boolean, onNavigate: (path
 
         <div className="hidden md:flex items-center gap-6">
           <button onClick={() => navigate('/auth')} className="text-sm font-semibold text-white/70 hover:text-white transition-colors">Sign In</button>
-          <Button size="md" variant="primary" onClick={() => navigate('/auth')} className="shadow-2xl shadow-primary/20 px-6">Get Started</Button>
+          <Button size="default" onClick={() => navigate('/auth')} className="shadow-2xl shadow-primary/20 px-6">
+            Get Started
+          </Button>
         </div>
 
         <button className="md:hidden p-2 text-white/60 hover:text-white" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
@@ -163,14 +170,20 @@ const Navbar = ({ scrolled, onNavigate }: { scrolled: boolean, onNavigate: (path
 
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} style={{ willChange: 'transform, opacity' }} className="md:hidden absolute top-full left-0 right-0 bg-[#16181D] border-b border-white/10 shadow-2xl overflow-hidden px-6 py-10 flex flex-col gap-8">
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -20 }} 
+            style={{ willChange: 'transform, opacity' }} 
+            className="md:hidden absolute top-full left-0 right-0 bg-[#16181D] border-b border-white/10 shadow-2xl overflow-hidden px-6 py-10 flex flex-col gap-8"
+          >
             {['Features', 'How it Works', 'FAQ'].map((item) => (
               <button key={item} onClick={() => scrollToSection(item.toLowerCase().replace(/\s+/g, '-'))} className="text-xl font-bold text-white/80 text-left">{item}</button>
             ))}
             <div className="h-px bg-white/5 w-full" />
             <div className="flex flex-col gap-4">
-              <Button size="lg" variant="secondary" onClick={() => navigate('/auth')}>Sign In</Button>
-              <Button size="lg" variant="primary" onClick={() => navigate('/auth')}>Get Started Free</Button>
+              <Button variant="outline" onClick={() => navigate('/auth')}>Sign In</Button>
+              <Button onClick={() => navigate('/auth')}>Get Started Free</Button>
             </div>
           </motion.div>
         )}
@@ -220,10 +233,21 @@ const HeroSection = ({ onNavigate }: { onNavigate: (path: string) => void }) => 
           
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button size="lg" variant="primary" rightIcon={<ArrowRight size={20} />} onClick={() => onNavigate('/auth')} className="h-14 px-10 text-lg shadow-[0_20px_40px_rgba(78,71,221,0.3)] w-full sm:w-auto">
+            <Button 
+              size="lg" 
+              onClick={() => onNavigate('/auth')} 
+              className="h-14 px-10 text-lg shadow-[0_20px_40px_rgba(78,71,221,0.3)] w-full sm:w-auto"
+            >
               Join the Waitlist
+              <ArrowRight size={20} className="ml-2" />
             </Button>
-            <Button size="lg" variant="secondary" leftIcon={<Play size={20} fill="currentColor" />} onClick={() => scrollToSection('how-it-works')} className="h-14 px-10 text-lg bg-white/5 border-white/10 w-full sm:w-auto">
+            <Button 
+              size="lg" 
+              variant="outline"
+              onClick={() => scrollToSection('how-it-works')} 
+              className="h-14 px-10 text-lg bg-white/5 border-white/10 w-full sm:w-auto hover:bg-white/10"
+            >
+              <Play size={20} fill="currentColor" className="mr-2" />
               See How It Works
             </Button>
           </div>
@@ -387,8 +411,6 @@ const HowItWorks = () => {
 }
 
 const FAQ = () => {
-  const [openIndex, setOpenIndex] = useState<number | null>(0)
-
   const faqs = [
     {
       question: "When will Vemakin be available?",
@@ -420,43 +442,20 @@ const FAQ = () => {
           <p className="text-lg text-white/40">Got questions? We've got answers.</p>
         </div>
 
-        <div className="space-y-4">
+        <Accordion type="single" collapsible className="space-y-4">
           {faqs.map((faq, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.05 }}
-            >
-              <GlassCard 
-                className={`p-6 cursor-pointer transition-all ${openIndex === i ? 'border-white/20' : ''}`}
-                onClick={() => setOpenIndex(openIndex === i ? null : i)}
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <h3 className="text-lg font-semibold text-white">{faq.question}</h3>
-                  <ChevronDown 
-                    size={20} 
-                    className={`text-white/40 transition-transform flex-shrink-0 ${openIndex === i ? 'rotate-180' : ''}`} 
-                  />
-                </div>
-                <AnimatePresence>
-                  {openIndex === i && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
-                      <p className="text-white/50 mt-4 leading-relaxed">{faq.answer}</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </GlassCard>
-            </motion.div>
+            <GlassCard key={i} className="border-0">
+              <AccordionItem value={`item-${i}`} className="border-0">
+                <AccordionTrigger className="text-lg font-semibold text-white hover:no-underline px-6 py-6">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-white/50 leading-relaxed px-6 pb-6">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            </GlassCard>
           ))}
-        </div>
+        </Accordion>
       </div>
     </section>
   )
@@ -485,12 +484,11 @@ const CTASection = ({ onNavigate }: { onNavigate: (path: string) => void }) => {
           
           <Button 
             size="lg" 
-            variant="primary" 
             className="h-16 px-12 text-lg shadow-2xl shadow-primary/30 w-full sm:w-auto font-bold"
             onClick={() => onNavigate('/auth')}
-            rightIcon={<ArrowRight size={20} />}
           >
             Join the Waitlist
+            <ArrowRight size={20} className="ml-2" />
           </Button>
           
           <div className="mt-8 flex items-center justify-center gap-8 text-white/30 text-xs font-bold uppercase tracking-[0.2em]">
