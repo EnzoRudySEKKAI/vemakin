@@ -146,7 +146,7 @@ const Navbar = ({ scrolled, onNavigate }: { scrolled: boolean, onNavigate: (path
         scrolled ? 'bg-[#0a0a0a]/90 border-white/10 py-3 backdrop-blur-xl' : 'bg-transparent border-transparent py-6'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Logo variant="default" size="md" />
         </div>
@@ -221,12 +221,9 @@ const HeroSection = ({ onNavigate }: { onNavigate: (path: string) => void }) => 
 
   return (
     <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
-      {/* Grid Background */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_80%)]" />
-      
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0a0a0a]/80" />
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10 w-full">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left - Content */}
           <motion.div 
@@ -245,7 +242,7 @@ const HeroSection = ({ onNavigate }: { onNavigate: (path: string) => void }) => 
             </div>
             
             {/* Headline */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-4 leading-[1.1]">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-4 leading-[1.1] break-words">
               Production
               <br />
               <span className="font-mono text-primary">[Operating_System]</span>
@@ -273,7 +270,7 @@ const HeroSection = ({ onNavigate }: { onNavigate: (path: string) => void }) => 
             </div>
 
             {/* Trust badges */}
-            <div className="mt-8 flex items-center gap-6 text-white/30 text-[10px] font-mono uppercase tracking-wider">
+            <div className="mt-8 flex flex-wrap items-center gap-4 sm:gap-6 text-white/30 text-[10px] font-mono uppercase tracking-wider">
               <span className="flex items-center gap-2">
                 <span className="w-1 h-1 bg-emerald-500 rounded-full" /> 
                 Free for Early Adopters
@@ -290,7 +287,7 @@ const HeroSection = ({ onNavigate }: { onNavigate: (path: string) => void }) => 
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="relative"
+            className="relative w-full"
           >
             <div className="relative border border-white/10 bg-[#0a0a0a]/60 backdrop-blur-sm">
               {/* Terminal Header */}
@@ -366,9 +363,7 @@ const Benefits = () => {
   ]
 
   return (
-    <section id="features" className="py-24 md:py-32 px-6 relative">
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:32px_32px]" />
-      
+    <section id="features" className="py-24 md:py-32 px-4 sm:px-6 relative">
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="flex items-center gap-4 mb-12">
           <Cpu size={20} className="text-primary" />
@@ -433,7 +428,7 @@ const HowItWorks = () => {
   ]
 
   return (
-    <section id="how-it-works" className="py-24 md:py-32 px-6 relative bg-[#0a0a0a]/50">
+    <section id="how-it-works" className="py-24 md:py-32 px-4 sm:px-6 relative bg-[#0a0a0a]/50">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center gap-4 mb-12">
           <Command size={20} className="text-primary" />
@@ -449,7 +444,7 @@ const HowItWorks = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="relative"
+              className="relative w-full"
             >
               <div className="font-mono text-5xl font-bold text-white/5 mb-4">{step.number}</div>
               <h3 className="text-base font-semibold text-white mb-2">{step.title}</h3>
@@ -490,7 +485,7 @@ const FAQ = () => {
   ]
 
   return (
-    <section id="faq" className="py-24 md:py-32 px-6 relative">
+    <section id="faq" className="py-24 md:py-32 px-4 sm:px-6 relative">
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center gap-4 mb-12">
           <Terminal size={20} className="text-primary" />
@@ -520,14 +515,14 @@ const FAQ = () => {
 
 const CTASection = ({ onNavigate }: { onNavigate: (path: string) => void }) => {
   return (
-    <section className="py-24 md:py-32 px-6 relative bg-[#0a0a0a]/50 border-y border-white/5">
+    <section className="py-24 md:py-32 px-4 sm:px-6 relative bg-[#0a0a0a]/50 border-y border-white/5">
       <div className="max-w-4xl mx-auto text-center">
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }} 
           whileInView={{ opacity: 1, scale: 1 }} 
           viewport={{ once: true }} 
           transition={{ duration: 0.8 }}
-          className="relative"
+          className="relative w-full"
         >
           <div className="absolute -inset-20 bg-primary/10 blur-3xl -z-10 opacity-30" />
           
@@ -569,9 +564,9 @@ const Footer = () => {
   const navigate = useNavigate()
 
   return (
-    <footer className="bg-[#0a0a0a] pt-20 pb-12 px-6 border-t border-white/5">
+    <footer className="bg-[#0a0a0a] pt-20 pb-12 px-4 sm:px-6 border-t border-white/5">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-12 gap-12 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:grid-cols-12 gap-8 sm:gap-12 mb-16">
           <div className="col-span-2 md:col-span-4 lg:col-span-4">
             <Logo size="lg" className="mb-6" />
             <p className="text-white/30 text-sm leading-relaxed max-w-xs mb-6 font-mono">
@@ -640,14 +635,19 @@ export const LandingPage = () => {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-primary/30 font-sans overflow-x-hidden">
-      <Navbar scrolled={scrolled} onNavigate={navigate} />
-      <HeroSection onNavigate={navigate} />
-      <Benefits />
-      <HowItWorks />
-      <FAQ />
-      <CTASection onNavigate={navigate} />
-      <Footer />
+    <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-primary/30 font-sans overflow-x-hidden relative">
+      {/* Global Grid Background */}
+      <div className="fixed inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px] pointer-events-none z-0" />
+      
+      <div className="relative z-10">
+        <Navbar scrolled={scrolled} onNavigate={navigate} />
+        <HeroSection onNavigate={navigate} />
+        <Benefits />
+        <HowItWorks />
+        <FAQ />
+        <CTASection onNavigate={navigate} />
+        <Footer />
+      </div>
     </div>
   )
 }
