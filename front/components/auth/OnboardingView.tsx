@@ -333,7 +333,7 @@ const MockNotes = () => (
           <div className="px-6 py-4 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
             <div className="flex items-center gap-3">
               <IconContainer icon={StickyNote} size="sm" variant="accent" />
-              <Text variant="label" color="accent" className="text-[10px] font-bold  tracking-tight">General Note</Text>
+              <Text variant="label" color="accent" className="text-[10px] font-bold  tracking-tight">General note</Text>
             </div>
             <span className="text-[10px] font-bold text-white/20 flex items-center gap-2 ">
               <Calendar size={12} strokeWidth={2.5} /> Oct 22

@@ -173,7 +173,7 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
                     return (
                       <div key={shot.id}>
                         {shotLayout === 'timeline' && idx > 0 && !searchQuery && statusFilter === 'all' && (
-                          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-center gap-3 lg:gap-4 my-4 px-2">
+                          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-center lg:gap-4 my-4 px-2">
                             <TravelIndicator
                               from={dayShots[idx - 1].location}
                               to={shot.location}
