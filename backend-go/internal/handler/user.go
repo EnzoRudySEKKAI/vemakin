@@ -10,11 +10,14 @@ import (
 
 func userToResponse(u models.User) dto.UserResponse {
 	return dto.UserResponse{
-		ID:            u.ID,
-		Email:         u.Email,
-		Name:          u.Name,
-		DarkMode:      u.DarkMode,
-		LastProjectID: u.LastProjectID,
+		ID:                   u.ID,
+		Email:                u.Email,
+		Name:                 u.Name,
+		DarkMode:             u.DarkMode,
+		LastProjectID:        u.LastProjectID,
+		PostProdGridColumns:  u.PostProdGridColumns,
+		NotesGridColumns:     u.NotesGridColumns,
+		InventoryGridColumns: u.InventoryGridColumns,
 	}
 }
 
@@ -45,6 +48,15 @@ func (h *Handler) UpdateUser(c echo.Context) error {
 	}
 	if req.LastProjectID != nil {
 		updates["last_project_id"] = *req.LastProjectID
+	}
+	if req.PostProdGridColumns != nil {
+		updates["post_prod_grid_columns"] = *req.PostProdGridColumns
+	}
+	if req.NotesGridColumns != nil {
+		updates["notes_grid_columns"] = *req.NotesGridColumns
+	}
+	if req.InventoryGridColumns != nil {
+		updates["inventory_grid_columns"] = *req.InventoryGridColumns
 	}
 
 	if len(updates) == 0 {

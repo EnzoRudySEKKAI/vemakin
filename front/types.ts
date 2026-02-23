@@ -11,6 +11,9 @@ export interface User {
     avatar?: string;
     darkMode?: boolean | null;
     lastProjectId?: string | null;
+    postProdGridColumns?: number | null;
+    notesGridColumns?: number | null;
+    inventoryGridColumns?: number | null;
 }
 
 export interface Currency {

@@ -19,7 +19,7 @@ func NewUserRepository(db *sqlx.DB) *UserRepository {
 
 func (r *UserRepository) GetByID(ctx context.Context, id string) (*models.User, error) {
 	var u models.User
-	err := r.db.GetContext(ctx, &u, `SELECT id, email, name, dark_mode, last_project_id FROM users WHERE id = $1`, id)
+	err := r.db.GetContext(ctx, &u, `SELECT id, email, name, dark_mode, last_project_id, post_prod_grid_columns, notes_grid_columns, inventory_grid_columns FROM users WHERE id = $1`, id)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -32,7 +32,7 @@ func (r *UserRepository) Create(ctx context.Context, id, email, name string) (*m
 		INSERT INTO users (id, email, name)
 		VALUES ($1, $2, $3)
 		ON CONFLICT (id) DO NOTHING
-		RETURNING id, email, name, dark_mode, last_project_id
+		RETURNING id, email, name, dark_mode, last_project_id, post_prod_grid_columns, notes_grid_columns, inventory_grid_columns
 	`, id, email, name)
 	if err == sql.ErrNoRows {
 		return r.GetByID(ctx, id)
@@ -46,7 +46,7 @@ func (r *UserRepository) Upsert(ctx context.Context, id, email, name string) (*m
 		INSERT INTO users (id, email, name)
 		VALUES ($1, $2, $3)
 		ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email, name = EXCLUDED.name
-		RETURNING id, email, name, dark_mode, last_project_id
+		RETURNING id, email, name, dark_mode, last_project_id, post_prod_grid_columns, notes_grid_columns, inventory_grid_columns
 	`, id, email, name)
 	return &u, err
 }

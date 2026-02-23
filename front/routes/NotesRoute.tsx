@@ -20,6 +20,7 @@ export const NotesRoute = () => {
             onSelectTask={(id) => ctx.navigate(`/dashboard/pipeline/${id}`)}
             filters={ctx.notesFilters}
             layout={ctx.notesLayout}
+            gridColumns={ctx.notesGridColumns}
         />
     )
 }

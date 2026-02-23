@@ -14,6 +14,7 @@ export const InventoryRoute = () => {
             currency={ctx.currency}
             layout={ctx.inventoryLayout}
             onAddEquipment={() => ctx.navigate('/dashboard/inventory/new')}
+            gridColumns={ctx.inventoryGridColumns}
         />
     )
 }

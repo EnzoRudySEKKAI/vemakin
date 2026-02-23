@@ -17,6 +17,7 @@ interface PostProdViewProps {
   onSelectTask?: (taskId: string) => void
   filters: PostProdFilters
   layout?: 'grid' | 'list'
+  gridColumns?: 2 | 3
 }
 
 const getCategoryIcon = (category: string) => {
@@ -45,7 +46,8 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
   onUpdateTask,
   onSelectTask,
   filters,
-  layout = 'grid'
+  layout = 'grid',
+  gridColumns = 2
 }) => {
   const [activeStatusMenuId, setActiveStatusMenuId] = useState<string | null>(null)
   const statusMenuRef = useRef<HTMLDivElement>(null)
@@ -101,7 +103,7 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
   return (
     <div className="space-y-4">
       {layout === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className={`grid grid-cols-1 gap-4 ${gridColumns === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
           {filteredTasks.map((task) => {
             const CategoryIcon = getCategoryIcon(task.category)
             const isActiveMenu = activeStatusMenuId === task.id

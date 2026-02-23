@@ -3,7 +3,8 @@ import { motion } from 'framer-motion'
 import {
   Moon, Sun, Briefcase, ChevronRight,
   LogOut, User as UserIcon, BookOpen,
-  FileText, ShieldCheck, Globe, Download, Upload
+  FileText, ShieldCheck, Globe, Download, Upload,
+  LayoutGrid
 } from 'lucide-react'
 import { TerminalCard, TerminalCardContent } from '@/components/ui/TerminalCard'
 import { TerminalButton } from '@/components/ui/TerminalButton'
@@ -18,6 +19,12 @@ interface SettingsViewProps {
   onOpenTutorial: () => void
   darkMode: boolean
   onToggleDarkMode: () => void
+  postProdGridColumns: 2 | 3
+  notesGridColumns: 2 | 3
+  inventoryGridColumns: 2 | 3
+  onPostProdGridColumnsChange: (columns: 2 | 3) => void
+  onNotesGridColumnsChange: (columns: 2 | 3) => void
+  onInventoryGridColumnsChange: (columns: 2 | 3) => void
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
@@ -27,7 +34,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   onLogout,
   onOpenTutorial,
   darkMode,
-  onToggleDarkMode
+  onToggleDarkMode,
+  postProdGridColumns,
+  notesGridColumns,
+  inventoryGridColumns,
+  onPostProdGridColumnsChange,
+  onNotesGridColumnsChange,
+  onInventoryGridColumnsChange
 }) => {
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
@@ -159,6 +172,70 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               </div>
               <span className="text-sm font-medium flex-1">Dark mode</span>
               <Switch checked={darkMode} onCheckedChange={onToggleDarkMode} />
+            </div>
+          </div>
+        </motion.section>
+
+        {/* Layout Section */}
+        <motion.section variants={itemVariants} className="space-y-2">
+          <h2 className="text-[11px] font-mono  tracking-wider text-muted-foreground px-1">
+            Layout
+          </h2>
+
+          <h3 className="text-[10px] font-mono  tracking-wider text-muted-foreground px-1">
+            Desktop only
+          </h3>
+          
+          <div className="space-y-2">
+            <div 
+              className="p-2 flex items-center gap-3 bg-card border border-border hover:border-primary/30 transition-all"
+            >
+              <div className="w-9 h-9 flex items-center justify-center shrink-0 bg-primary/10 text-primary">
+                <LayoutGrid size={18} strokeWidth={2} />
+              </div>
+              <span className="text-sm font-medium flex-1">Inventory columns</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">2</span>
+                <Switch 
+                  checked={inventoryGridColumns === 3} 
+                  onCheckedChange={(checked) => onInventoryGridColumnsChange(checked ? 3 : 2)} 
+                />
+                <span className="text-xs text-muted-foreground">3</span>
+              </div>
+            </div>
+
+            <div 
+              className="p-2 flex items-center gap-3 bg-card border border-border hover:border-primary/30 transition-all"
+            >
+              <div className="w-9 h-9 flex items-center justify-center shrink-0 bg-primary/10 text-primary">
+                <LayoutGrid size={18} strokeWidth={2} />
+              </div>
+              <span className="text-sm font-medium flex-1">Pipeline columns</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">2</span>
+                <Switch 
+                  checked={postProdGridColumns === 3} 
+                  onCheckedChange={(checked) => onPostProdGridColumnsChange(checked ? 3 : 2)} 
+                />
+                <span className="text-xs text-muted-foreground">3</span>
+              </div>
+            </div>
+
+            <div 
+              className="p-2 flex items-center gap-3 bg-card border border-border hover:border-primary/30 transition-all"
+            >
+              <div className="w-9 h-9 flex items-center justify-center shrink-0 bg-primary/10 text-primary">
+                <LayoutGrid size={18} strokeWidth={2} />
+              </div>
+              <span className="text-sm font-medium flex-1">Notes columns</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">2</span>
+                <Switch 
+                  checked={notesGridColumns === 3} 
+                  onCheckedChange={(checked) => onNotesGridColumnsChange(checked ? 3 : 2)} 
+                />
+                <span className="text-xs text-muted-foreground">3</span>
+              </div>
             </div>
           </div>
         </motion.section>

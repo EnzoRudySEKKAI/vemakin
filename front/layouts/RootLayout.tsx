@@ -93,7 +93,10 @@ const RootLayoutInner = () => {
     darkMode,
     toggleDarkMode,
     showCreateProjectPrompt,
-    setShowCreateProjectPrompt
+    setShowCreateProjectPrompt,
+    postProdGridColumns,
+    notesGridColumns,
+    inventoryGridColumns
   } = useUIStore()
 
   // Project Store
@@ -603,6 +606,9 @@ const RootLayoutInner = () => {
                     postProdLayout,
                     notesFilters,
                     notesLayout,
+                    postProdGridColumns,
+                    notesGridColumns,
+                    inventoryGridColumns,
                     activePostProdTasks,
                     projects,
                     hasProjects,

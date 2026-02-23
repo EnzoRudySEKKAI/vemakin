@@ -18,6 +18,9 @@ interface UIState {
   notesFilters: NotesFilters
   darkMode: boolean
   showCreateProjectPrompt: boolean
+  postProdGridColumns: 2 | 3
+  notesGridColumns: 2 | 3
+  inventoryGridColumns: 2 | 3
 
   setMainView: (view: MainView) => void
   setShotLayout: (layout: ShotLayout) => void
@@ -28,6 +31,9 @@ interface UIState {
   toggleDarkMode: () => void
   setDarkMode: (value: boolean) => void
   setShowCreateProjectPrompt: (show: boolean) => void
+  setPostProdGridColumns: (columns: 2 | 3) => void
+  setNotesGridColumns: (columns: 2 | 3) => void
+  setInventoryGridColumns: (columns: 2 | 3) => void
 }
 
 const defaultPostProdFilters: PostProdFilters = {
@@ -58,6 +64,9 @@ export const useUIStore = create<UIState>()(
       notesFilters: defaultNotesFilters,
       darkMode: false,
       showCreateProjectPrompt: false,
+      postProdGridColumns: 2,
+      notesGridColumns: 2,
+      inventoryGridColumns: 2,
 
       setMainView: (view) => set({ mainView: view }),
       setShotLayout: (layout) => set({ shotLayout: layout }),
@@ -81,7 +90,37 @@ export const useUIStore = create<UIState>()(
         }
       },
       setDarkMode: (value) => set({ darkMode: value }),
-      setShowCreateProjectPrompt: (show) => set({ showCreateProjectPrompt: show })
+      setShowCreateProjectPrompt: (show) => set({ showCreateProjectPrompt: show }),
+      setPostProdGridColumns: (columns) => {
+        set({ postProdGridColumns: columns })
+        
+        const { currentUser } = useAuthStore.getState()
+        if (currentUser) {
+          userService.updateProfile({ postProdGridColumns: columns }).catch((error) => {
+            console.error('Failed to sync post-prod grid columns:', error)
+          })
+        }
+      },
+      setNotesGridColumns: (columns) => {
+        set({ notesGridColumns: columns })
+        
+        const { currentUser } = useAuthStore.getState()
+        if (currentUser) {
+          userService.updateProfile({ notesGridColumns: columns }).catch((error) => {
+            console.error('Failed to sync notes grid columns:', error)
+          })
+        }
+      },
+      setInventoryGridColumns: (columns) => {
+        set({ inventoryGridColumns: columns })
+        
+        const { currentUser } = useAuthStore.getState()
+        if (currentUser) {
+          userService.updateProfile({ inventoryGridColumns: columns }).catch((error) => {
+            console.error('Failed to sync inventory grid columns:', error)
+          })
+        }
+      },
     }),
     {
       name: 'vemakin-ui',
@@ -90,6 +129,7 @@ export const useUIStore = create<UIState>()(
         shotLayout: state.shotLayout,
         notesLayout: state.notesLayout,
         shotStatusFilter: state.shotStatusFilter,
+        // Grid columns are synced from database, not localStorage
       })
     }
   )

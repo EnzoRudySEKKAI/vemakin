@@ -222,16 +222,22 @@ type UserInfoResponse struct {
 }
 
 type UserResponse struct {
-	ID            string  `json:"id"`
-	Email         string  `json:"email"`
-	Name          string  `json:"name"`
-	DarkMode      *bool   `json:"darkMode"`
-	LastProjectID *string `json:"lastProjectId"`
+	ID                   string  `json:"id"`
+	Email                string  `json:"email"`
+	Name                 string  `json:"name"`
+	DarkMode             *bool   `json:"darkMode"`
+	LastProjectID        *string `json:"lastProjectId"`
+	PostProdGridColumns  *int    `json:"postProdGridColumns"`
+	NotesGridColumns     *int    `json:"notesGridColumns"`
+	InventoryGridColumns *int    `json:"inventoryGridColumns"`
 }
 
 type UpdateUserRequest struct {
-	DarkMode      *bool   `json:"dark_mode"`
-	LastProjectID *string `json:"last_project_id"`
+	DarkMode             *bool   `json:"dark_mode"`
+	LastProjectID        *string `json:"last_project_id"`
+	PostProdGridColumns  *int    `json:"post_prod_grid_columns"`
+	NotesGridColumns     *int    `json:"notes_grid_columns"`
+	InventoryGridColumns *int    `json:"inventory_grid_columns"`
 }
 
 type ErrorResponse struct {

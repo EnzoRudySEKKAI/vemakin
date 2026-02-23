@@ -6,11 +6,14 @@ import (
 )
 
 type User struct {
-	ID            string  `db:"id" json:"id"`
-	Email         string  `db:"email" json:"email"`
-	Name          string  `db:"name" json:"name"`
-	DarkMode      *bool   `db:"dark_mode" json:"darkMode"`
-	LastProjectID *string `db:"last_project_id" json:"lastProjectId"`
+	ID                   string  `db:"id" json:"id"`
+	Email                string  `db:"email" json:"email"`
+	Name                 string  `db:"name" json:"name"`
+	DarkMode             *bool   `db:"dark_mode" json:"darkMode"`
+	LastProjectID        *string `db:"last_project_id" json:"lastProjectId"`
+	PostProdGridColumns  *int    `db:"post_prod_grid_columns" json:"postProdGridColumns"`
+	NotesGridColumns     *int    `db:"notes_grid_columns" json:"notesGridColumns"`
+	InventoryGridColumns *int    `db:"inventory_grid_columns" json:"inventoryGridColumns"`
 }
 
 type Project struct {
