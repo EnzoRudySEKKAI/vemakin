@@ -29,7 +29,7 @@ export const ProjectForm = ({ onSubmit }: ProjectFormProps) => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-6">
         <div>
-          <Text variant="caption" color="secondary" className="mb-2 block">Production Title</Text>
+          <Text variant="caption" color="secondary" className="mb-2 block">Production title</Text>
           <div className="relative">
             <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500" size={16} strokeWidth={2.5} />
             <Input

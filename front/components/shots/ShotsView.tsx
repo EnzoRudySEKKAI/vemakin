@@ -113,7 +113,7 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
 
         <div className="text-center max-w-sm">
           <h2 className="text-xl font-semibold text-foreground mb-2 font-mono  tracking-wider">
-            {searchQuery || statusFilter !== 'all' ? "No Matches Found" : "Empty Timeline"}
+            {searchQuery || statusFilter !== 'all' ? "No matches found" : "Empty timeline"}
           </h2>
           <p className="text-muted-foreground mb-8 text-sm font-mono">
             {searchQuery || statusFilter !== 'all' ? "Try adjusting your filters." : "Begin your production by scheduling the first scene."}

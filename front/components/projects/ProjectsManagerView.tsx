@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Briefcase, Trash2, Edit3, Check, X, FolderOpen, AlertCircle, Plus } from 'lucide-react'
+import { TerminalCard } from '@/components/ui/TerminalCard'
+import { TerminalButton } from '@/components/ui/TerminalButton'
 
 interface ProjectsManagerViewProps {
   projects: string[]
@@ -66,17 +68,18 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
       <div className="flex-1 space-y-6 pb-32" style={{ paddingTop: '100px' }}>
         
         <motion.div variants={itemVariants}>
-          <div className="p-5 rounded-[24px] bg-primary/5 border border-primary/10 flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <AlertCircle size={20} strokeWidth={2.5} />
+          <TerminalCard header="Project management">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 border border-primary/30 bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                <AlertCircle size={20} strokeWidth={2.5} />
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs leading-relaxed text-gray-600 dark:text-white/30 font-medium">
+                  Deleting a project will permanently remove all associated shots, inventory assignments, and pipeline tasks. This action cannot be undone.
+                </p>
+              </div>
             </div>
-            <div className="space-y-1">
-              <h2 className="text-[10px] font-bold  tracking-[0.2em] text-primary/80">Project Management</h2>
-              <p className="text-xs leading-relaxed text-gray-600 dark:text-white/30 font-medium">
-                Deleting a project will permanently remove all associated shots, inventory assignments, and pipeline tasks. This action cannot be undone.
-              </p>
-            </div>
-          </div>
+          </TerminalCard>
         </motion.div>
 
         <motion.div variants={itemVariants} className="space-y-3">
@@ -85,13 +88,14 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
           <div className="flex items-center gap-3">
             <span className="text-[10px] font-mono text-gray-400 dark:text-white/20">{projects.length} Projects</span>
             {onCreateProject && (
-              <button
+              <TerminalButton
                 onClick={onCreateProject}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-white text-[10px] font-bold  tracking-wider hover:bg-primary/90 transition-all"
+                variant="primary"
+                size="sm"
               >
                 <Plus size={14} strokeWidth={2.5} />
                 New
-              </button>
+              </TerminalButton>
             )}
           </div>
           </div>
@@ -112,16 +116,16 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
                     className="relative group"
                   >
                     <div className={`
-                      p-4 rounded-[24px] flex items-center justify-between transition-all duration-300
+                      p-4 flex items-center justify-between transition-all duration-300 border
                       ${isCurrent 
-                        ? 'bg-white dark:bg-[#16181D] border-primary/30 shadow-lg shadow-primary/5 ring-1 ring-primary/20' 
-                        : 'bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.08] hover:border-gray-300 dark:hover:border-white/[0.15]'}
-                      ${isEditing ? 'ring-2 ring-primary' : ''}
+                        ? 'bg-[#fafafa] dark:bg-[#0a0a0a]/40 border-primary/50' 
+                        : 'bg-[#fafafa] dark:bg-[#0a0a0a]/40 border-gray-300 dark:border-white/10 hover:border-primary/30 dark:hover:border-white/20'}
+                      ${isEditing ? 'border-primary' : ''}
                     `}>
                       <div className="flex items-center gap-4 flex-1 min-w-0">
                         <div className={`
-                          w-12 h-12 rounded-2xl flex items-center justify-center transition-colors
-                          ${isCurrent ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-white/20'}
+                          w-12 h-12 border flex items-center justify-center transition-colors
+                          ${isCurrent ? 'bg-primary text-primary-foreground border-primary' : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-500 dark:text-white/20'}
                         `}>
                           <Briefcase size={22} strokeWidth={2.5} />
                         </div>
@@ -137,7 +141,7 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
                                 if (e.key === 'Enter') saveEditing()
                                 if (e.key === 'Escape') cancelEditing()
                               }}
-                              className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                              className="w-full bg-[#fafafa] dark:bg-[#0a0a0a]/40 border border-gray-300 dark:border-white/10 px-4 py-2 text-sm font-bold text-gray-900 dark:text-white focus:outline-none focus:border-primary transition-all"
                             />
                           </div>
                         ) : (
@@ -147,7 +151,7 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
                                 {project}
                               </h3>
                               {isCurrent && (
-                                <div className="px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[8px] font-bold text-primary  tracking-wider">
+                                <div className="px-2 py-0.5 bg-primary/10 border border-primary/30 text-[8px] font-bold text-primary tracking-wider">
                                   Active
                                 </div>
                               )}
@@ -162,13 +166,13 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
                           <>
                             <button
                               onClick={saveEditing}
-                              className="w-9 h-9 rounded-xl flex items-center justify-center text-emerald-500 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+                              className="w-9 h-9 flex items-center justify-center text-emerald-500 dark:text-emerald-400 hover:bg-emerald-500/10 border border-transparent hover:border-emerald-500/30 transition-colors"
                             >
                               <Check size={18} strokeWidth={3} />
                             </button>
                             <button
                               onClick={cancelEditing}
-                              className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 dark:text-white/20 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+                              className="w-9 h-9 flex items-center justify-center text-gray-400 dark:text-white/20 hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent hover:border-gray-300 dark:hover:border-white/10 transition-colors"
                             >
                               <X size={18} strokeWidth={3} />
                             </button>
@@ -177,7 +181,7 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
                           <>
                             <button
                               onClick={() => startEditing(project)}
-                              className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 dark:text-white/20 hover:text-gray-600 dark:hover:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 transition-all opacity-0 group-hover:opacity-100"
+                              className="w-9 h-9 flex items-center justify-center text-gray-400 dark:text-white/20 hover:text-gray-600 dark:hover:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent hover:border-gray-300 dark:hover:border-white/10 transition-all opacity-0 group-hover:opacity-100"
                               title="Rename"
                             >
                               <Edit3 size={16} strokeWidth={2.5} />
@@ -190,7 +194,7 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
                                     onDeleteProject(project)
                                   }
                                 }}
-                                className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 dark:text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
+                                className="w-9 h-9 flex items-center justify-center text-gray-400 dark:text-white/20 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/30 transition-all opacity-0 group-hover:opacity-100"
                                 title="Delete"
                               >
                                 <Trash2 size={16} strokeWidth={2.5} />
@@ -208,17 +212,17 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
         </motion.div>
 
         <motion.div variants={itemVariants} className="pt-8 flex flex-col items-center gap-8">
-          <button 
+          <TerminalButton 
             onClick={onBack}
-            className="flex items-center gap-2 px-6 py-3 rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-[10px] font-bold text-gray-500 dark:text-white/40  tracking-widest transition-all border border-gray-200 dark:border-white/5"
+            variant="secondary"
           >
             <FolderOpen size={14} strokeWidth={2.5} />
             <span>Return To Settings</span>
-          </button>
+          </TerminalButton>
 
           <div className="text-center space-y-1">
-            <p className="text-[10px] font-bold text-gray-400 dark:text-white/20  tracking-[0.3em]">Project Management Console</p>
-            <p className="text-[10px] font-medium text-gray-300 dark:text-white/10 ">Secure Environment</p>
+            <p className="text-[10px] font-mono text-gray-400 dark:text-white/20 tracking-[0.3em]">Project management console</p>
+            <p className="text-[10px] font-mono text-gray-300 dark:text-white/10">Secure environment</p>
           </div>
         </motion.div>
       </div>
