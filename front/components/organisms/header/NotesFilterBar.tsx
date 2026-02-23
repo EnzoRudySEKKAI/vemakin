@@ -46,7 +46,7 @@ export const NotesFilterBar: React.FC<NotesFilterBarProps> = ({
       <div className="flex items-start gap-3">
         <div className="flex-1">
           <div className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-1 px-1">
-            Sort By
+            Sort by
           </div>
           <FilterDropdown
             label="Sort"

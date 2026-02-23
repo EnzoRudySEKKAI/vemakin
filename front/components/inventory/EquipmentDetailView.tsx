@@ -98,14 +98,14 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
       sidebar={
         <div className="space-y-4">
           <TerminalCard header="Project usage">
-            <div className="p-2 space-y-1">
+            <div className="space-y-1">
               {involvedProjects.length > 0 ? (
                 involvedProjects.map((pName) => {
                   const relatedShots = getShotsForEquipmentInProject(pName)
                   const isExpanded = expandedProject === pName
 
                   return (
-                    <div key={pName} className="space-y-1">
+                    <div key={pName} className="space-y-1 ">
                       <button
                         onClick={() => toggleProject(pName)}
                         className={`w-full flex justify-between items-center p-3 transition-all group ${isExpanded ? 'bg-primary/5 border border-primary/30' : 'hover:bg-secondary/50 border border-transparent'}`}
@@ -180,7 +180,7 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
       }
     >
       <TerminalCard header="Core information" className="mb-8">
-        <div className="p-6 space-y-12">
+        <div className="p-2 space-y-12">
 
 
           <div className="grid grid-cols-2 lg:grid-cols-4 items-start gap-12">
@@ -239,7 +239,7 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
       </TerminalCard>
 
       <TerminalCard header="Ownership detail" className="mb-8">
-        <div className="p-6 space-y-6">
+        <div className="p-2 space-y-6">
           <div className="grid grid-cols-2 gap-12">
             <DetailItem
               label="Deployment registry"
@@ -258,8 +258,8 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
       </TerminalCard>
 
       <TerminalCard header="Technical specifications">
-        <div className="p-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-12">
+        <div className="p-2">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-12">
             {Object.entries(item.specs).map(([key, val]) => (
               <DetailItem
                 key={key}

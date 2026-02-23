@@ -30,7 +30,7 @@ export const TerminalCard = React.forwardRef<HTMLDivElement, TerminalCardProps>(
             {headerRight && <div className="flex items-center">{headerRight}</div>}
           </div>
         )}
-        <div className={cn("p-4", contentClassName)}>{children}</div>
+        <div className={cn("p-2", contentClassName)}>{children}</div>
       </div>
     )
   }

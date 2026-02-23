@@ -111,11 +111,11 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
 
   const getSubtitle = () => {
     switch (mainView) {
-      case 'overview': return 'Production Hub'
-      case 'shots': return 'Production Schedule'
+      case 'overview': return 'Production hub'
+      case 'shots': return 'Production schedule'
       case 'inventory': return 'Equipment management'
       case 'postprod': return 'Post-production tasks'
-      case 'notes': return 'Production knowledge base'
+      case 'notes': return 'Production notes'
       default: return ''
     }
   }

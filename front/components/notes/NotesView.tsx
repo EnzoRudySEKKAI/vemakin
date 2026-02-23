@@ -96,7 +96,7 @@ export const NotesView: React.FC<NotesViewProps> = React.memo(({
           <StickyNote size={24} className="text-muted-foreground" />
         </div>
         <div className="text-center max-w-sm">
-          <h2 className="text-xl font-semibold text-foreground mb-2 font-mono  tracking-wider">No Notes Found</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-2 font-mono  tracking-wider">No notes found</h2>
           <p className="text-muted-foreground mb-8 text-sm font-mono">Adjust filters or create your first note.</p>
           <TerminalButton variant="primary" onClick={() => setIsAdding(true)}>
             Add Note

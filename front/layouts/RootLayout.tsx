@@ -276,20 +276,20 @@ const RootLayoutInner = () => {
   const viewTitles = useMemo(() => ({
     overview: "Good morning",
     shots: "Timeline",
-    'shot-detail': "Shot Detail",
+    'shot-detail': "Shot detail",
     inventory: "Inventory",
-    'equipment-detail': "Equipment Detail",
+    'equipment-detail': "Equipment detail",
     notes: "Notes",
-    'note-detail': "Note Detail",
+    'note-detail': "Note detail",
     postprod: "Pipeline",
-    'task-detail': "Task Detail",
+    'task-detail': "Task detail",
     settings: "Settings",
-    'manage-projects': "Manage Projects",
-    'new-shot': "New Scene",
-    'new-gear': "New Equipment",
-    'new-task': "New Task",
-    'new-note': "New Note",
-    'new-project': "New Project"
+    'manage-projects': "Manage projects",
+    'new-shot': "New scene",
+    'new-gear': "New equipment",
+    'new-task': "New task",
+    'new-note': "New note",
+    'new-project': "New project"
   }), [])
 
   // Action handlers

@@ -148,7 +148,7 @@ export const ActionSuite = ({
             </div>
 
             <div>
-              <span className="text-[10px] font-mono uppercase tracking-wider text-primary">Create New</span>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-primary">Create new</span>
               <h1 className="text-2xl font-semibold mt-1">{VIEW_TITLES[view]}</h1>
             </div>
           </div>

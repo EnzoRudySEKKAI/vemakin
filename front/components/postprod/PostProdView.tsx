@@ -88,7 +88,7 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
           <Scissors size={24} className="text-muted-foreground" />
         </div>
         <div className="text-center max-w-sm">
-          <h2 className="text-xl font-semibold text-foreground mb-2 font-mono  tracking-wider">Empty Pipeline</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-2 font-mono  tracking-wider">Empty pipeline</h2>
           <p className="text-muted-foreground mb-8 text-sm font-mono">No active tasks found. Add your first task.</p>
           <TerminalButton variant="primary" onClick={onAddTask}>
             Add Task

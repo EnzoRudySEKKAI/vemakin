@@ -118,7 +118,7 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
           <Package size={24} className="text-muted-foreground" />
         </div>
         <div className="text-center max-w-sm">
-          <h2 className="text-xl font-semibold text-foreground mb-2 font-mono  tracking-wider">Empty Repository</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-2 font-mono  tracking-wider">Empty repository</h2>
           <p className="text-muted-foreground text-sm font-mono">No items match your criteria</p>
         </div>
       </div>
