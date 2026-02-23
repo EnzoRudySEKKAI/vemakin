@@ -21,6 +21,7 @@ interface NotesViewProps {
   onSelectTask: (id: string) => void
   filters: NotesFilters
   layout?: 'grid' | 'list'
+  gridColumns?: 2 | 3
 }
 
 const getContextIcon = (note: Note & { isAuto?: boolean }, shots: Shot[], tasks: PostProdTask[]) => {
@@ -40,7 +41,8 @@ export const NotesView: React.FC<NotesViewProps> = React.memo(({
   setIsAdding,
   onSelectNote,
   filters,
-  layout = 'grid'
+  layout = 'grid',
+  gridColumns = 2
 }) => {
   const aggregatedNotes = useMemo(() => {
     const manualNotes = notes.map(n => ({ ...n, isAuto: false }))
@@ -109,7 +111,7 @@ export const NotesView: React.FC<NotesViewProps> = React.memo(({
   return (
     <div className="space-y-4">
       {layout === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className={`grid grid-cols-1 gap-4 ${gridColumns === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
           {aggregatedNotes.map(note => {
             const ContextIcon = getContextIcon(note, shots, tasks)
             const linkedShot = note.shotId ? shots.find(s => s.id === note.shotId) : null

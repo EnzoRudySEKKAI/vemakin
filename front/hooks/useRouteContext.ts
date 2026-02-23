@@ -31,6 +31,9 @@ export interface RouteContext {
     inventoryLayout: InventoryLayout
     postProdLayout: 'grid' | 'list'
     notesLayout: 'grid' | 'list'
+    postProdGridColumns: 2 | 3
+    notesGridColumns: 2 | 3
+    inventoryGridColumns: 2 | 3
     shotSearchQuery: string
     shotStatusFilter: string
     inventoryFilters: InventoryFilters

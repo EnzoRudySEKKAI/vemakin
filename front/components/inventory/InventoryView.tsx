@@ -12,6 +12,7 @@ interface InventoryViewProps {
   currency: Currency
   layout?: InventoryLayout
   onAddEquipment: () => void
+  gridColumns?: 2 | 3
 }
 
 const getCategoryIcon = (category: string) => {
@@ -59,6 +60,7 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
   filters,
   currency,
   layout = 'grid',
+  gridColumns = 2
 }) => {
   const { data: catalogCategories = [] } = useCatalogCategories()
 
@@ -141,7 +143,7 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
               </div>
             }
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${gridColumns === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-2'}`}>
               {items.map((item) => {
                 const { title, subtitle } = getEquipmentDisplayInfo(item)
                 return (

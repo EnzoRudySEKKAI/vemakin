@@ -51,14 +51,14 @@ export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, set
         onMouseDown={handleMouseDown}
         onMouseEnter={handleMouseEnter}
         onFocus={handleMouseEnter}
-        className={`flex items-center lg:justify-center xl:justify-start gap-4 px-4 lg:px-2 xl:px-6 py-3.5 text-sm font-mono  tracking-wider transition-all duration-200 group w-full xl:w-auto
+        className={`flex items-center lg:justify-center 2xl:justify-start gap-4 px-4 lg:px-2 2xl:px-6 py-3.5 text-sm font-mono  tracking-wider transition-all duration-200 group w-full 2xl:w-auto
           ${isActive
             ? 'text-primary bg-primary/10'
             : 'text-muted-foreground hover:text-foreground hover:bg-[#e8e8e8] dark:hover:bg-white/10'
           }`}
       >
         <Icon size={24} strokeWidth={isActive ? 2.5 : 2.2} className="transition-transform group-hover:scale-105" />
-        <span className="hidden xl:inline">{label}</span>
+        <span className="hidden 2xl:inline">{label}</span>
       </button>
     )
   }
@@ -121,11 +121,11 @@ export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, set
       </nav>
 
       {/* DESKTOP SIDEBAR NAVIGATION (>= 1024px) */}
-      <nav className="hidden lg:flex fixed left-0 top-0 h-screen w-[88px] xl:w-[280px] flex-col z-[1000] px-4 py-8 bg-[#F2F2F7] dark:bg-[#0F1116]">
+      <nav className="hidden lg:flex fixed left-0 top-0 h-screen w-[88px] 2xl:w-[280px] flex-col z-[1000] px-4 py-8 bg-[#F2F2F7] dark:bg-[#0F1116]">
         {/* Logo Area */}
-        <div className="px-4 mb-10 flex items-center lg:justify-center xl:justify-start">
-          <Logo size="lg" showText={false} className="xl:hidden" />
-          <Logo size="lg" className="hidden xl:flex" />
+        <div className="px-4 mb-10 flex items-center lg:justify-center 2xl:justify-start">
+          <Logo size="lg" showText={false} className="2xl:hidden" />
+          <Logo size="lg" className="hidden 2xl:flex" />
         </div>
 
         {/* Nav Items */}
@@ -141,10 +141,10 @@ export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, set
         {/* Add Button */}
         <button
           onClick={onPlusClick}
-          className="mt-auto mx-auto xl:mx-0 w-12 h-12 xl:w-full xl:h-14 flex items-center justify-center gap-3 bg-transparent hover:bg-[#e8e8e8] dark:hover:bg-white/10 active:scale-[0.96] text-foreground transition-all font-mono  tracking-wider group"
+          className="mt-auto mx-auto 2xl:mx-0 w-12 h-12 2xl:w-full 2xl:h-14 flex items-center justify-center gap-3 bg-transparent hover:bg-[#e8e8e8] dark:hover:bg-white/10 active:scale-[0.96] text-foreground transition-all font-mono  tracking-wider group"
         >
           <Plus size={24} strokeWidth={2.8} className="text-primary group-hover:rotate-90 transition-transform duration-300" />
-          <span className="hidden xl:inline text-sm">New</span>
+          <span className="hidden 2xl:inline text-sm">New</span>
         </button>
       </nav>
     </>

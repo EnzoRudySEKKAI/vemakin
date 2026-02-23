@@ -5,6 +5,7 @@ import { onAuthStateChanged, signOut, User as FirebaseUser } from 'firebase/auth
 import { User } from '@/types'
 import { userService } from '@/api/services'
 import { useProjectStore } from './useProjectStore'
+import { useUIStore } from './useUIStore'
 import { queryClient } from '@/providers/QueryProvider'
 
 interface AuthState {
@@ -61,11 +62,32 @@ export const useAuthStore = create<AuthState>()(
                 id: user.uid,
                 name: userProfile?.name || user.displayName || user.email?.split('@')[0] || 'User',
                 email: user.email || '',
-                darkMode: userProfile?.darkMode ?? false
+                darkMode: userProfile?.darkMode ?? false,
+                postProdGridColumns: userProfile?.postProdGridColumns,
+                notesGridColumns: userProfile?.notesGridColumns,
+                inventoryGridColumns: userProfile?.inventoryGridColumns,
+                hubCardOrder: userProfile?.hubCardOrder
               },
               previousUserId: user.uid,
               isLoadingAuth: false
             })
+
+            // Sync grid columns from user profile to UI store (skip server sync since we just got the data from server)
+            if (userProfile) {
+              const uiStore = useUIStore.getState()
+              if (userProfile.postProdGridColumns !== undefined && userProfile.postProdGridColumns !== null) {
+                uiStore.setPostProdGridColumns(userProfile.postProdGridColumns as 2 | 3, true)
+              }
+              if (userProfile.notesGridColumns !== undefined && userProfile.notesGridColumns !== null) {
+                uiStore.setNotesGridColumns(userProfile.notesGridColumns as 2 | 3, true)
+              }
+              if (userProfile.inventoryGridColumns !== undefined && userProfile.inventoryGridColumns !== null) {
+                uiStore.setInventoryGridColumns(userProfile.inventoryGridColumns as 2 | 3, true)
+              }
+              if (userProfile.hubCardOrder !== undefined && userProfile.hubCardOrder !== null && userProfile.hubCardOrder.length > 0) {
+                uiStore.setHubCardOrder(userProfile.hubCardOrder, true)
+              }
+            }
           } else {
             set({
               currentUser: null,

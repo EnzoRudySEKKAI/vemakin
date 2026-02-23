@@ -150,14 +150,14 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
       sidebar={
         <div className="space-y-4">
           <TerminalCard header="Status">
-            <div className="p-3 space-y-1">
+            <div className="">
               {statusOptions.map((status) => {
                 const isActive = task.status === status.key
                 return (
                   <button
                     key={status.key}
                     onClick={() => onUpdateTask({ ...task, status: status.key as any })}
-                    className={`w-full flex items-center justify-between p-4 transition-all border ${isActive
+                    className={`w-full flex items-center justify-between p-2 transition-all border ${isActive
                       ? 'bg-primary/10 border-primary/30 text-primary'
                       : 'bg-transparent border-transparent text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
                       }`}
@@ -175,22 +175,15 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
               })}
             </div>
           </TerminalCard>
-
-          <TerminalCard header="Recent feedback">
-            <div className="p-6 flex flex-col items-center justify-center text-center opacity-30">
-              <MessageSquare size={24} className="mb-2" />
-              <span className="text-[10px] font-mono  tracking-wider">No reviews yet</span>
-            </div>
-          </TerminalCard>
         </div>
       }
     >
       <TerminalCard header="Goal & details" className="mb-8">
-        <div className="p-6 space-y-12">
+        <div className="p-2">
           {isEditing ? (
             <div className="space-y-10">
               <div className="flex flex-col gap-1 min-w-0">
-                <span className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-2">Production title</span>
+                <span className="text-[10px] font-mono tracking-wider text-muted-foreground mb-2">Production title</span>
                 <Input
                   type="text"
                   value={editedItem.title}
@@ -201,14 +194,14 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2">
                 <div className="flex flex-col gap-1 min-w-0">
-                  <span className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-3 block">Priority tier</span>
+                  <span className="text-[10px] font-mono tracking-wider text-muted-foreground mb-3 block">Priority tier</span>
                   <div className="relative group">
                   <select
                     value={editedItem.priority}
                     onChange={(e) => setEditedItem(prev => ({ ...prev, priority: e.target.value as any }))}
-                    className="w-full bg-transparent border border-border px-3 py-3 text-foreground focus:outline-none focus:border-primary appearance-none cursor-pointer pr-10 text-sm font-bold tracking-tight transition-all"
+                    className="w-full bg-transparent border border-border text-foreground focus:outline-none focus:border-primary appearance-none cursor-pointer pr-10 text-sm font-bold tracking-tight transition-all"
                   >
                     <option value="low" className="bg-card">Low Tier</option>
                     <option value="medium" className="bg-card">Medium Tier</option>
@@ -220,7 +213,7 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                 </div>
 
                 <div className="flex flex-col gap-1 min-w-0">
-                  <span className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-2">Completion deadline</span>
+                  <span className="text-[10px] font-mono tracking-wider text-muted-foreground mb-2">Completion deadline</span>
                   <Input
                     type="date"
                     value={editedItem.dueDate || ''}
@@ -277,14 +270,30 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
               )}
             </div>
           ) : (
-            <div className="space-y-12">
-              <div className="flex flex-col sm:flex-row justify-between items-start gap-8">
-                <DetailItem
-                  label="Production objective"
-                  value={task.title}
-                />
+            <div className="space-y-6">
+              <div className="grid grid-cols-3 md:grid-cols-3">
+                <div>
+                  <DetailItem
+                    label="Task name"
+                    value={task.title}
+                  />
+                </div>
 
-                <div className={`flex items-center gap-4 px-5 py-3 border transition-all duration-500 ${task.priority === 'critical' || task.priority === 'high'
+                <div >
+                  <DetailItem
+                    label="Due date"
+                    value={task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'No deadline'}
+                  />
+                </div>
+                <div>
+                  <DetailItem
+                    label="Department"
+                    value={task.category}
+                  />
+                </div>
+              </div>
+
+              <div className={`flex items-center gap-4 px-5 py-3 border transition-all duration-500 ${task.priority === 'critical' || task.priority === 'high'
                   ? 'bg-red-500/10 border-red-500/30 text-red-400'
                   : task.priority === 'medium'
                     ? 'bg-orange-500/10 border-orange-500/30 text-orange-400'
@@ -301,19 +310,6 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                     {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} Priority
                   </span>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
-                <DetailItem
-                  label="Due date"
-                  value={task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'No deadline'}
-                />
-
-                <DetailItem
-                  label="Department"
-                  value={task.category}
-                />
-              </div>
 
               <div className="max-w-3xl">
                 <DetailItem
@@ -353,7 +349,7 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
           <Plus size={12} strokeWidth={3} /> New entry
         </button>
       }>
-        <div className="p-6">
+        <div className="">
           {linkedNotes.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {linkedNotes.map(note => (

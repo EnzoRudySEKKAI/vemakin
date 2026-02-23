@@ -93,7 +93,10 @@ const RootLayoutInner = () => {
     darkMode,
     toggleDarkMode,
     showCreateProjectPrompt,
-    setShowCreateProjectPrompt
+    setShowCreateProjectPrompt,
+    postProdGridColumns,
+    notesGridColumns,
+    inventoryGridColumns
   } = useUIStore()
 
   // Project Store
@@ -560,7 +563,7 @@ const RootLayoutInner = () => {
         )}
 
         <div
-          className={`content-wrapper px-4 md:px-6 pb-0 ${shouldHideNavigation ? '' : 'lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(240px+1.5rem)]'} view-${mainView}`}
+          className={`content-wrapper px-4 md:px-6 pb-0 ${shouldHideNavigation ? '' : 'lg:pl-[calc(88px+1.5rem)] 2xl:pl-[calc(280px+1.5rem)]'} view-${mainView}`}
           style={mainView === 'settings' || mainView === 'manage-projects' ? { paddingTop: 0 } : layoutStyle}
         >
           <main className={`mx-auto w-full transition-all duration-500 ease-in-out ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`} style={{ paddingBottom: shouldHideNavigation ? '24px' : '120px' }}>
@@ -603,6 +606,9 @@ const RootLayoutInner = () => {
                     postProdLayout,
                     notesFilters,
                     notesLayout,
+                    postProdGridColumns,
+                    notesGridColumns,
+                    inventoryGridColumns,
                     activePostProdTasks,
                     projects,
                     hasProjects,

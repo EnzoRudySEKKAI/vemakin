@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -9,12 +10,22 @@ import (
 )
 
 func userToResponse(u models.User) dto.UserResponse {
+	// Convert []byte (JSONB from DB) to []string
+	var hubCardOrder []string
+	if u.HubCardOrder != nil && len(u.HubCardOrder) > 0 {
+		json.Unmarshal(u.HubCardOrder, &hubCardOrder)
+	}
+
 	return dto.UserResponse{
-		ID:            u.ID,
-		Email:         u.Email,
-		Name:          u.Name,
-		DarkMode:      u.DarkMode,
-		LastProjectID: u.LastProjectID,
+		ID:                   u.ID,
+		Email:                u.Email,
+		Name:                 u.Name,
+		DarkMode:             u.DarkMode,
+		LastProjectID:        u.LastProjectID,
+		PostProdGridColumns:  u.PostProdGridColumns,
+		NotesGridColumns:     u.NotesGridColumns,
+		InventoryGridColumns: u.InventoryGridColumns,
+		HubCardOrder:         hubCardOrder,
 	}
 }
 
@@ -45,6 +56,19 @@ func (h *Handler) UpdateUser(c echo.Context) error {
 	}
 	if req.LastProjectID != nil {
 		updates["last_project_id"] = *req.LastProjectID
+	}
+	if req.PostProdGridColumns != nil {
+		updates["post_prod_grid_columns"] = *req.PostProdGridColumns
+	}
+	if req.NotesGridColumns != nil {
+		updates["notes_grid_columns"] = *req.NotesGridColumns
+	}
+	if req.InventoryGridColumns != nil {
+		updates["inventory_grid_columns"] = *req.InventoryGridColumns
+	}
+	if req.HubCardOrder != nil {
+		hubCardOrderJSON, _ := json.Marshal(req.HubCardOrder)
+		updates["hub_card_order"] = hubCardOrderJSON
 	}
 
 	if len(updates) == 0 {

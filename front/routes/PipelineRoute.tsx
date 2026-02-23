@@ -13,6 +13,7 @@ export const PipelineRoute = () => {
             onSelectTask={(id) => ctx.navigate(`/dashboard/pipeline/${id}`)}
             filters={ctx.postProdFilters}
             layout={ctx.postProdLayout}
+            gridColumns={ctx.postProdGridColumns}
         />
     )
 }
