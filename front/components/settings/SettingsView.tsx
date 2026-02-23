@@ -62,7 +62,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     <div 
       onClick={disabled ? undefined : onClick}
       className={`
-        p-4 flex items-center gap-3 
+        p-2 flex items-center gap-3 
         bg-[#fafafa] dark:bg-[#0a0a0a]/40 border border-gray-300 dark:border-white/10
         ${disabled ? 'opacity-50' : 'hover:border-primary/30 dark:hover:border-primary/30 cursor-pointer'}
         transition-all
@@ -93,7 +93,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
           {user ? (
             <TerminalCard>
-              <TerminalCardContent className="p-4 flex items-center gap-4">
+              <TerminalCardContent className="flex items-center gap-4">
                 <div className="relative shrink-0">
                   <div className="w-12 h-12 bg-primary/20 flex items-center justify-center text-primary font-bold text-base font-mono">
                     {getInitials(user.name)}
@@ -152,7 +152,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             />
 
             <div 
-              className="p-4 flex items-center gap-3 bg-card border border-border hover:border-primary/30 transition-all"
+              className="p-2 flex items-center gap-3 bg-card border border-border hover:border-primary/30 transition-all"
             >
               <div className={`w-9 h-9 flex items-center justify-center shrink-0 ${darkMode ? 'bg-primary/10 text-primary' : 'bg-orange-500/10 text-orange-400'}`}>
                 {darkMode ? <Moon size={18} strokeWidth={2} /> : <Sun size={18} strokeWidth={2} />}

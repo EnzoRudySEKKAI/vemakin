@@ -177,7 +177,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
               </span>
             )}
           >
-            <div className="p-2 space-y-4">
+            <div className="space-y-4">
               {isEditing && (
                 <div className="flex border border-border">
                   <button
@@ -344,7 +344,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
       <div className="flex flex-col gap-8 mb-8">
         {!isEditing && (
           <TerminalCard header="Filming status">
-            <div className="p-6">
+            <div className="">
               <StatusToggle
                 status={selectedShot.status as any}
                 onToggle={() => onToggleStatus(selectedShot.id)}
@@ -354,7 +354,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
         )}
 
         <TerminalCard header="Shot details">
-          <div className="p-6 space-y-10">
+          <div className="p-2 space-y-10">
             {isEditing ? (
               <>
                 {/* Scene Identity */}
@@ -467,7 +467,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
           </button>
         }
       >
-        <div className="p-6">
+        <div className="">
           {associatedNotes.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {associatedNotes.map(note => (

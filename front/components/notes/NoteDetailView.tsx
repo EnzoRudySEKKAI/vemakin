@@ -140,14 +140,14 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
       sidebar={
         <div className="space-y-4">
           <TerminalCard header="Linked context">
-            <div className="p-2 space-y-1">
+            <div className="p-1 space-y-1">
               {linkedShot && (
                 <button
                   onClick={() => onNavigateToShot(linkedShot.id)}
-                  className="w-full flex items-center justify-between p-3 hover:bg-secondary/50 transition-all group"
+                  className="w-full flex items-center justify-between hover:bg-secondary/50 transition-all group"
                 >
                   <div className="flex items-center gap-4 min-w-0">
-                    <div className="p-2 bg-primary/10 text-primary">
+                    <div className="bg-primary/10 text-primary">
                       <Film size={16} />
                     </div>
                     <div className="text-left min-w-0">
@@ -163,7 +163,7 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
               {linkedTask && (
                 <button
                   onClick={() => onNavigateToTask(linkedTask.id)}
-                  className="w-full flex items-center justify-between p-3 hover:bg-secondary/50 transition-all group"
+                  className="w-full flex items-center justify-between hover:bg-secondary/50 transition-all group"
                 >
                   <div className="flex items-center gap-4 min-w-0">
                     <div className="p-2 bg-orange-500/10 text-orange-400">
@@ -189,7 +189,7 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
           </TerminalCard>
 
           <TerminalCard header="Note details">
-            <div className="p-4 space-y-6">
+            <div className="p-2 space-y-6 grid grid-cols-2 gap-6">
               <DetailItem
                 label="Last modified"
                 value={new Date(note.updatedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
@@ -204,7 +204,7 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
       }
     >
       <TerminalCard header="Core content" className="mb-8">
-        <div className="p-6 space-y-10">
+        <div className="p-2 space-y-10">
           <div className="flex flex-col gap-1 min-w-0">
             {isEditing ? (
               <>

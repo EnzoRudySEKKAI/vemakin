@@ -135,7 +135,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
           paddingTop: 'calc(env(safe-area-inset-top) + 12px)',
         }}
       >
-        <div className={`px-4 md:px-6 ${isSettingsView ? '' : 'lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(240px+1.5rem)]'}`}>
+        <div className={`px-4 md:px-6 ${isSettingsView ? '' : 'lg:pl-[calc(88px+1.5rem)] 2xl:pl-[calc(280px+1.5rem)]'}`}>
           <div className={`mx-auto w-full ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`}>
             <div className="flex items-center justify-between h-14">
               {/* Left: Title & Subtitle */}
@@ -193,7 +193,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
           transform: `translateY(${filterTranslateY}px)`
         }}
       >
-        <div className={`px-4 md:px-6 ${isSettingsView ? '' : 'lg:pl-[calc(88px+1.5rem)] xl:pl-[calc(240px+1.5rem)]'}`}>
+        <div className={`px-4 md:px-6 ${isSettingsView ? '' : 'lg:pl-[calc(88px+1.5rem)] 2xl:pl-[calc(280px+1.5rem)]'}`}>
           <div className={`mx-auto w-full ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`}>
             <div className="flex flex-col gap-2 pb-3">
               {isDetailView || backAction ? (

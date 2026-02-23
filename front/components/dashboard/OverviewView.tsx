@@ -187,29 +187,29 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
               {inventory.length > 0 ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 border border-gray-300 flex items-center justify-between bg-[#fafafa] dark:bg-white/5 dark:border-white/10">
-                      <span className="text-[10px] font-mono text-muted-foreground">TOTAL</span>
-                      <span className="text-xl font-semibold">{inventoryStats.total}</span>
+                    <div className="p-2 border border-gray-300 flex items-center justify-between bg-[#fafafa] dark:bg-white/5 dark:border-white/10">
+                      <span className="text-sm font-mono text-muted-foreground">Total</span>
+                      <span className="font-semibold">{inventoryStats.total}</span>
                     </div>
-                    <div className="p-3 border border-gray-300 flex items-center justify-between bg-[#fafafa] dark:bg-white/5 dark:border-white/10">
-                      <span className="text-[10px] font-mono text-muted-foreground">CATS</span>
-                      <span className="text-xl font-semibold">{inventoryStats.topCategories.length}</span>
+                    <div className="p-2 border border-gray-300 flex items-center justify-between bg-[#fafafa] dark:bg-white/5 dark:border-white/10">
+                      <span className="text-sm font-mono text-muted-foreground">Categories</span>
+                      <span className="font-semibold">{inventoryStats.topCategories.length}</span>
                     </div>
                   </div>
 
                   <div className="flex gap-4 px-1">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-primary" />
-                      <span className="text-xs font-mono text-muted-foreground">OWNED:{inventoryStats.owned}</span>
+                      <span className="text-xs font-mono text-muted-foreground">Owned:{inventoryStats.owned}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-muted-foreground" />
-                      <span className="text-xs font-mono text-muted-foreground">RENTED:{inventoryStats.rented}</span>
+                      <span className="text-xs font-mono text-muted-foreground">Rented:{inventoryStats.rented}</span>
                     </div>
                   </div>
 
-                  <div className="space-y-3 pt-2">
-                    <div className="text-[10px] font-mono text-muted-foreground">TOP_CATEGORIES</div>
+                  <div className="space-y-3 pb-0.5">
+                    <div className="text-[12px] font-mono text-muted-foreground">Top categories</div>
                     {inventoryStats.topCategories.map((cat) => (
                       <div key={cat.name} className="flex flex-col gap-1.5">
                         <div className="flex justify-between items-center text-[10px] font-mono text-muted-foreground"
@@ -231,7 +231,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
                 <div className="flex flex-col items-center justify-center py-8 text-muted-foreground"
                 >
                   <Package size={24} className="mb-2 opacity-20" />
-                  <p className="text-sm font-mono">NO_EQUIPMENT_FOUND</p>
+                  <p className="text-sm font-mono">No equipment found</p>
                 </div>
               )}
             </div>
