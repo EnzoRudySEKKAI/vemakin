@@ -98,7 +98,7 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
       sidebar={
         <div className="space-y-4">
           <TerminalCard header="Project usage">
-            <div className="p-2 space-y-1">
+            <div className="space-y-1">
               {involvedProjects.length > 0 ? (
                 involvedProjects.map((pName) => {
                   const relatedShots = getShotsForEquipmentInProject(pName)
