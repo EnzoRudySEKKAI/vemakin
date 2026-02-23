@@ -24,22 +24,10 @@ const ensureAuth = async () => {
 
 /**
  * Loader for the root route.
- * Prefetches initial data (projects, inventory) if not already in cache.
+ * Ensures auth is initialized before proceeding.
  */
 export const rootLoader = async () => {
   await ensureAuth()
-  
-  // Prefetch initial data in background
-  const { currentUser } = useAuthStore.getState()
-  
-  if (currentUser) {
-    // Check if we already have the data cached
-    const cachedData = queryClient.getQueryData(queryKeys.initialData)
-    if (!cachedData) {
-      prefetchInitialData(queryClient)
-    }
-  }
-  
   return null
 }
 

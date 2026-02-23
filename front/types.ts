@@ -3,6 +3,7 @@ export type MainView = 'overview' | 'shots' | 'shot-detail' | 'inventory' | 'equ
 export type ShotLayout = 'timeline' | 'list';
 export type InventoryLayout = 'grid' | 'list';
 export type TransportMode = 'driving' | 'walking' | 'cycling' | 'train' | 'plane' | 'bus';
+export type HubCardType = 'timeline' | 'equipment' | 'tasks' | 'notes';
 
 export interface User {
     id: string;
@@ -14,6 +15,7 @@ export interface User {
     postProdGridColumns?: number | null;
     notesGridColumns?: number | null;
     inventoryGridColumns?: number | null;
+    hubCardOrder?: HubCardType[] | null;
 }
 
 export interface Currency {

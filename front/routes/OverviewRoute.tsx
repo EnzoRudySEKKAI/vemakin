@@ -1,9 +1,11 @@
 import React from 'react'
 import { useRouteContext } from '@/hooks/useRouteContext'
 import { OverviewView } from '@/components/dashboard/OverviewView'
+import { useUIStore } from '@/stores/useUIStore'
 
 export const OverviewRoute = () => {
     const ctx = useRouteContext()
+    const { hubCardOrder } = useUIStore()
 
     return (
         <OverviewView
@@ -35,6 +37,7 @@ export const OverviewRoute = () => {
             onNavigateToSettings={() => ctx.navigate('/dashboard/settings')}
             onSelectTask={(id) => ctx.navigate(`/dashboard/pipeline/${id}`)}
             onSelectNote={(id) => ctx.navigate(`/dashboard/notes/${id}`)}
+            hubCardOrder={hubCardOrder}
         />
     )
 }

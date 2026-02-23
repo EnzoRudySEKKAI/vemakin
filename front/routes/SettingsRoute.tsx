@@ -9,9 +9,11 @@ export const SettingsRoute = () => {
         postProdGridColumns,
         notesGridColumns,
         inventoryGridColumns,
+        hubCardOrder,
         setPostProdGridColumns,
         setNotesGridColumns,
-        setInventoryGridColumns
+        setInventoryGridColumns,
+        setHubCardOrder
     } = useUIStore()
 
     return (
@@ -26,9 +28,11 @@ export const SettingsRoute = () => {
             postProdGridColumns={postProdGridColumns}
             notesGridColumns={notesGridColumns}
             inventoryGridColumns={inventoryGridColumns}
+            hubCardOrder={hubCardOrder}
             onPostProdGridColumnsChange={setPostProdGridColumns}
             onNotesGridColumnsChange={setNotesGridColumns}
             onInventoryGridColumnsChange={setInventoryGridColumns}
+            onHubCardOrderChange={setHubCardOrder}
         />
     )
 }

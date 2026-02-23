@@ -65,23 +65,27 @@ export const useAuthStore = create<AuthState>()(
                 darkMode: userProfile?.darkMode ?? false,
                 postProdGridColumns: userProfile?.postProdGridColumns,
                 notesGridColumns: userProfile?.notesGridColumns,
-                inventoryGridColumns: userProfile?.inventoryGridColumns
+                inventoryGridColumns: userProfile?.inventoryGridColumns,
+                hubCardOrder: userProfile?.hubCardOrder
               },
               previousUserId: user.uid,
               isLoadingAuth: false
             })
 
-            // Sync grid columns from user profile to UI store
+            // Sync grid columns from user profile to UI store (skip server sync since we just got the data from server)
             if (userProfile) {
               const uiStore = useUIStore.getState()
               if (userProfile.postProdGridColumns !== undefined && userProfile.postProdGridColumns !== null) {
-                uiStore.setPostProdGridColumns(userProfile.postProdGridColumns as 2 | 3)
+                uiStore.setPostProdGridColumns(userProfile.postProdGridColumns as 2 | 3, true)
               }
               if (userProfile.notesGridColumns !== undefined && userProfile.notesGridColumns !== null) {
-                uiStore.setNotesGridColumns(userProfile.notesGridColumns as 2 | 3)
+                uiStore.setNotesGridColumns(userProfile.notesGridColumns as 2 | 3, true)
               }
               if (userProfile.inventoryGridColumns !== undefined && userProfile.inventoryGridColumns !== null) {
-                uiStore.setInventoryGridColumns(userProfile.inventoryGridColumns as 2 | 3)
+                uiStore.setInventoryGridColumns(userProfile.inventoryGridColumns as 2 | 3, true)
+              }
+              if (userProfile.hubCardOrder !== undefined && userProfile.hubCardOrder !== null && userProfile.hubCardOrder.length > 0) {
+                uiStore.setHubCardOrder(userProfile.hubCardOrder, true)
               }
             }
           } else {

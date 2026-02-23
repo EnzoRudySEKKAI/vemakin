@@ -14,6 +14,7 @@ type User struct {
 	PostProdGridColumns  *int    `db:"post_prod_grid_columns" json:"postProdGridColumns"`
 	NotesGridColumns     *int    `db:"notes_grid_columns" json:"notesGridColumns"`
 	InventoryGridColumns *int    `db:"inventory_grid_columns" json:"inventoryGridColumns"`
+	HubCardOrder         []byte  `db:"hub_card_order" json:"-"`
 }
 
 type Project struct {

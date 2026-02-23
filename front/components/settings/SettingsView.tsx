@@ -1,15 +1,15 @@
-import React from 'react'
-import { motion } from 'framer-motion'
+import React, { useState } from 'react'
+import { motion, Reorder } from 'framer-motion'
 import {
   Moon, Sun, Briefcase, ChevronRight,
   LogOut, User as UserIcon, BookOpen,
   FileText, ShieldCheck, Globe, Download, Upload,
-  LayoutGrid
+  LayoutGrid, GripVertical, Film, Package, CheckSquare, StickyNote
 } from 'lucide-react'
 import { TerminalCard, TerminalCardContent } from '@/components/ui/TerminalCard'
 import { TerminalButton } from '@/components/ui/TerminalButton'
 import { Switch } from '@/components/ui/switch'
-import { User } from '@/types'
+import { User, HubCardType } from '@/types'
 
 interface SettingsViewProps {
   onNavigateToProjects: () => void
@@ -22,9 +22,11 @@ interface SettingsViewProps {
   postProdGridColumns: 2 | 3
   notesGridColumns: 2 | 3
   inventoryGridColumns: 2 | 3
+  hubCardOrder: HubCardType[]
   onPostProdGridColumnsChange: (columns: 2 | 3) => void
   onNotesGridColumnsChange: (columns: 2 | 3) => void
   onInventoryGridColumnsChange: (columns: 2 | 3) => void
+  onHubCardOrderChange: (order: HubCardType[]) => void
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
@@ -38,10 +40,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   postProdGridColumns,
   notesGridColumns,
   inventoryGridColumns,
+  hubCardOrder,
   onPostProdGridColumnsChange,
   onNotesGridColumnsChange,
-  onInventoryGridColumnsChange
+  onInventoryGridColumnsChange,
+  onHubCardOrderChange
 }) => {
+  const [cards, setCards] = useState<HubCardType[]>(hubCardOrder)
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
   }
@@ -57,6 +62,29 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const itemVariants = {
     hidden: { opacity: 0, y: 15 },
     show: { opacity: 1, y: 0 }
+  }
+
+  const getCardConfig = (card: HubCardType) => {
+    switch (card) {
+      case 'timeline':
+        return { icon: Film, label: 'Timeline', color: 'text-blue-400' }
+      case 'equipment':
+        return { icon: Package, label: 'Equipment', color: 'text-emerald-400' }
+      case 'tasks':
+        return { icon: CheckSquare, label: 'Tasks', color: 'text-amber-400' }
+      case 'notes':
+        return { icon: StickyNote, label: 'Notes', color: 'text-purple-400' }
+      default:
+        return { icon: LayoutGrid, label: card, color: 'text-primary' }
+    }
+  }
+
+  const handleReorder = (newOrder: HubCardType[]) => {
+    setCards(newOrder)
+  }
+
+  const handleDragEnd = () => {
+    onHubCardOrderChange(cards)
   }
 
   const SettingItem = ({ 
@@ -238,6 +266,42 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               </div>
             </div>
           </div>
+
+          <h3 className="text-[10px] font-mono tracking-wider text-muted-foreground px-1 pt-2">
+            Home cards order
+          </h3>
+          
+          <Reorder.Group 
+            axis="y" 
+            values={cards} 
+            onReorder={handleReorder}
+            className="space-y-2"
+          >
+            {cards.map((card) => {
+              const config = getCardConfig(card)
+              const Icon = config.icon
+              return (
+                <Reorder.Item 
+                  key={card} 
+                  value={card}
+                  className="cursor-grab active:cursor-grabbing"
+                  onDragEnd={handleDragEnd}
+                >
+                  <div 
+                    className="p-2 flex items-center gap-3 bg-card border border-border hover:border-primary/30 transition-all select-none"
+                  >
+                    <div className="text-muted-foreground shrink-0">
+                      <GripVertical size={16} />
+                    </div>
+                    <div className={`w-9 h-9 flex items-center justify-center shrink-0 bg-primary/10 ${config.color}`}>
+                      <Icon size={18} strokeWidth={2} />
+                    </div>
+                    <span className="text-sm font-medium flex-1">{config.label}</span>
+                  </div>
+                </Reorder.Item>
+              )
+            })}
+          </Reorder.Group>
         </motion.section>
 
         {/* Data & Cloud Section - Coming Soon */}

@@ -4,7 +4,8 @@ import {
   MainView, 
   ShotLayout, 
   PostProdFilters, 
-  NotesFilters 
+  NotesFilters,
+  HubCardType 
 } from '@/types'
 import { userService } from '@/api/services'
 import { useAuthStore } from './useAuthStore'
@@ -21,6 +22,7 @@ interface UIState {
   postProdGridColumns: 2 | 3
   notesGridColumns: 2 | 3
   inventoryGridColumns: 2 | 3
+  hubCardOrder: HubCardType[]
 
   setMainView: (view: MainView) => void
   setShotLayout: (layout: ShotLayout) => void
@@ -31,9 +33,10 @@ interface UIState {
   toggleDarkMode: () => void
   setDarkMode: (value: boolean) => void
   setShowCreateProjectPrompt: (show: boolean) => void
-  setPostProdGridColumns: (columns: 2 | 3) => void
-  setNotesGridColumns: (columns: 2 | 3) => void
-  setInventoryGridColumns: (columns: 2 | 3) => void
+  setPostProdGridColumns: (columns: 2 | 3, skipSync?: boolean) => void
+  setNotesGridColumns: (columns: 2 | 3, skipSync?: boolean) => void
+  setInventoryGridColumns: (columns: 2 | 3, skipSync?: boolean) => void
+  setHubCardOrder: (order: HubCardType[], skipSync?: boolean) => void
 }
 
 const defaultPostProdFilters: PostProdFilters = {
@@ -67,6 +70,7 @@ export const useUIStore = create<UIState>()(
       postProdGridColumns: 2,
       notesGridColumns: 2,
       inventoryGridColumns: 2,
+      hubCardOrder: ['timeline', 'equipment', 'tasks', 'notes'],
 
       setMainView: (view) => set({ mainView: view }),
       setShotLayout: (layout) => set({ shotLayout: layout }),
@@ -91,8 +95,10 @@ export const useUIStore = create<UIState>()(
       },
       setDarkMode: (value) => set({ darkMode: value }),
       setShowCreateProjectPrompt: (show) => set({ showCreateProjectPrompt: show }),
-      setPostProdGridColumns: (columns) => {
+      setPostProdGridColumns: (columns, skipSync) => {
         set({ postProdGridColumns: columns })
+        
+        if (skipSync) return
         
         const { currentUser } = useAuthStore.getState()
         if (currentUser) {
@@ -101,8 +107,10 @@ export const useUIStore = create<UIState>()(
           })
         }
       },
-      setNotesGridColumns: (columns) => {
+      setNotesGridColumns: (columns, skipSync) => {
         set({ notesGridColumns: columns })
+        
+        if (skipSync) return
         
         const { currentUser } = useAuthStore.getState()
         if (currentUser) {
@@ -111,13 +119,27 @@ export const useUIStore = create<UIState>()(
           })
         }
       },
-      setInventoryGridColumns: (columns) => {
+      setInventoryGridColumns: (columns, skipSync) => {
         set({ inventoryGridColumns: columns })
+        
+        if (skipSync) return
         
         const { currentUser } = useAuthStore.getState()
         if (currentUser) {
           userService.updateProfile({ inventoryGridColumns: columns }).catch((error) => {
             console.error('Failed to sync inventory grid columns:', error)
+          })
+        }
+      },
+      setHubCardOrder: (order, skipSync) => {
+        set({ hubCardOrder: order })
+        
+        if (skipSync) return
+        
+        const { currentUser } = useAuthStore.getState()
+        if (currentUser) {
+          userService.updateProfile({ hubCardOrder: order }).catch((error) => {
+            console.error('Failed to sync hub card order:', error)
           })
         }
       },
