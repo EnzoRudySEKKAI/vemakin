@@ -1,8 +1,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { Check, RotateCcw } from 'lucide-react'
-import { Text, Button, IconContainer } from '@/components/atoms'
-import { radius, typography } from '@/design-system'
+import { cn } from '@/lib/utils'
 
 export type StatusType = 'pending' | 'completed' | 'in-progress' | 'done'
 
@@ -12,30 +11,30 @@ interface StatusToggleProps {
   className?: string
 }
 
-const statusConfig: Record<StatusType, { label: string; color: string; dotColor: string; variant: 'default' | 'accent' | 'success' | 'warning' | 'danger' }> = {
+const statusConfig: Record<StatusType, { label: string; dotColor: string; borderColor: string; textColor: string }> = {
   pending: {
-    label: 'Pending',
-    color: 'bg-primary/5 dark:bg-primary/10 border-primary/20 dark:border-primary/30 text-primary',
-    dotColor: 'bg-primary animate-pulse shadow-[0_0_8px_rgba(55,98,227,0.4)]',
-    variant: 'default'
+    label: 'PENDING',
+    dotColor: 'bg-primary animate-pulse',
+    borderColor: 'border-primary/30 hover:border-primary/50',
+    textColor: 'text-primary'
   },
   'in-progress': {
-    label: 'Progress',
-    color: 'bg-primary/5 border-primary/20 text-primary dark:text-primary',
-    dotColor: 'bg-primary animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.4)]',
-    variant: 'accent'
+    label: 'IN_PROGRESS',
+    dotColor: 'bg-primary animate-pulse',
+    borderColor: 'border-primary/30 hover:border-primary/50',
+    textColor: 'text-primary'
   },
   completed: {
-    label: 'Completed',
-    color: 'bg-green-500/5 border-green-500/20 text-green-600 dark:text-green-400',
-    dotColor: 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]',
-    variant: 'success'
+    label: 'COMPLETED',
+    dotColor: 'bg-emerald-500',
+    borderColor: 'border-emerald-500/30 hover:border-emerald-500/50',
+    textColor: 'text-emerald-600 dark:text-emerald-400'
   },
   done: {
-    label: 'Completed',
-    color: 'bg-green-500/5 border-green-500/20 text-green-600 dark:text-green-400',
-    dotColor: 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]',
-    variant: 'success'
+    label: 'COMPLETED',
+    dotColor: 'bg-emerald-500',
+    borderColor: 'border-emerald-500/30 hover:border-emerald-500/50',
+    textColor: 'text-emerald-600 dark:text-emerald-400'
   }
 }
 
@@ -46,33 +45,37 @@ export const StatusToggle: React.FC<StatusToggleProps> = ({
 }) => {
   const config = statusConfig[status]
   const isCompleted = status === 'completed' || status === 'done'
-  
+
   return (
     <motion.button
       whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.98 }}
+      whileTap={{ scale: 0.99 }}
       onClick={onToggle}
-      className={`
-        group flex items-center justify-center gap-3 
-        px-5 py-3 rounded-2xl border 
-        transition-all duration-300 w-full
-        ${config.color}
-        ${className}
-      `}
+      className={cn(
+        "group flex items-center justify-center gap-3",
+        "w-full px-4 py-3",
+        "border bg-primary/5",
+        "transition-all duration-200",
+        config.borderColor,
+        className
+      )}
       title={isCompleted ? 'Mark as Pending' : 'Mark as Completed'}
     >
       <div className="flex items-center gap-2.5">
-        <div className={`w-2 h-2 rounded-full ${config.dotColor}`} />
-        <Text variant="h3" color={isCompleted ? 'success' : 'primary'}>
+        <span className={cn("w-1.5 h-1.5", config.dotColor)} />
+        <span className={cn(
+          "font-mono text-xs tracking-widest",
+          config.textColor
+        )}>
           {config.label}
-        </Text>
+        </span>
       </div>
-      
+
       <div className="opacity-40 group-hover:opacity-100 transition-opacity">
         {isCompleted ? (
-          <RotateCcw size={16} strokeWidth={2.5} />
+          <RotateCcw size={14} strokeWidth={2} className={config.textColor} />
         ) : (
-          <Check size={16} strokeWidth={3} />
+          <Check size={14} strokeWidth={2.5} className={config.textColor} />
         )}
       </div>
     </motion.button>
@@ -89,17 +92,22 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   className = ''
 }) => {
   const config = statusConfig[status]
-  
+
   return (
-    <span className={`
-      inline-flex items-center gap-2 
-      px-3 py-1.5 rounded-xl text-xs font-bold
-      border
-      ${config.color}
-      ${className}
-    `}>
-      <div className={`w-1.5 h-1.5 rounded-full ${config.dotColor}`} />
-      {config.label}
+    <span className={cn(
+      "inline-flex items-center gap-2",
+      "px-3 py-1.5",
+      "border bg-primary/5",
+      config.borderColor,
+      className
+    )}>
+      <span className={cn("w-1.5 h-1.5", config.dotColor)} />
+      <span className={cn(
+        "font-mono text-[10px] tracking-widest",
+        config.textColor
+      )}>
+        {config.label}
+      </span>
     </span>
   )
 }

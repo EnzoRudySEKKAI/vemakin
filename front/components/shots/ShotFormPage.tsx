@@ -9,7 +9,7 @@ import { DatePickerInput } from '@/components/ui/DatePickerInput'
 import { ProjectRequiredBanner } from '@/components/molecules/ProjectRequiredBanner'
 import { CATEGORY_ICONS } from '@/constants'
 import { Shot, Equipment } from '@/types'
-import { timeToMinutes, calculateEndTime } from '@/utils'
+import { timeToMinutes, calculateEndTime, addHoursToTime, subtractHoursFromTime } from '@/utils'
 
 interface ShotFormPageProps {
   onClose: () => void
@@ -169,7 +169,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
 
       <TerminalCard header="Schedule & location" className="mb-8">
         <div className="space-y-8">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className="relative">
               <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Filming date</span>
               <DatePickerInput
@@ -178,14 +178,32 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
                 fullWidth
               />
             </div>
-            <div>
-              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Start time</span>
-              <TimeSelector label="" value={form.startTime} onChange={(v) => setForm(prev => ({ ...prev, startTime: v }))} />
-            </div>
-            <div>
-              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Estimated end</span>
-              <TimeSelector label="" value={form.endTime} onChange={(v) => setForm(prev => ({ ...prev, endTime: v }))} />
-            </div>
+            <TimeSelector 
+              label="START TIME" 
+              value={form.startTime} 
+              onChange={(v) => {
+                const startMins = timeToMinutes(v)
+                const endMins = timeToMinutes(form.endTime)
+                setForm(prev => ({ ...prev, startTime: v }))
+                // If start >= end, set end to start + 2 hours (capped at 23:55)
+                if (startMins >= endMins) {
+                  setForm(prev => ({ ...prev, endTime: addHoursToTime(v, 2) }))
+                }
+              }} 
+            />
+            <TimeSelector 
+              label="END TIME" 
+              value={form.endTime} 
+              onChange={(v) => {
+                const startMins = timeToMinutes(form.startTime)
+                const endMins = timeToMinutes(v)
+                setForm(prev => ({ ...prev, endTime: v }))
+                // If end <= start, set start to end - 2 hours (min 00:00)
+                if (endMins <= startMins) {
+                  setForm(prev => ({ ...prev, startTime: subtractHoursFromTime(v, 2) }))
+                }
+              }} 
+            />
           </div>
 
           {shotConflict && (
@@ -224,7 +242,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
         <Textarea
           value={form.description}
           onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))}
-          placeholder="Describe the action, atmosphere, and key visual elements..."
+          placeholder=" Describe the action, atmosphere, and key visual elements..."
           className="min-h-[120px]"
         />
       </TerminalCard>

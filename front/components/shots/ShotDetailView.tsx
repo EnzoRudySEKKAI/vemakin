@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { Plus, Search, Package, Check, ExternalLink } from 'lucide-react'
 import { Shot, Note, Equipment } from '@/types'
-import { calculateEndTime, formatDateToNumeric, timeToMinutes } from '@/utils'
+import { calculateEndTime, formatDateToNumeric, timeToMinutes, addHoursToTime, subtractHoursFromTime } from '@/utils'
 import { CATEGORY_ICONS } from '@/constants'
 import { useDetailView } from '@/hooks/useDetailView'
 import { DetailViewLayout } from '@/components/organisms/DetailViewLayout'
@@ -87,14 +87,22 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
     const startMins = timeToMinutes(editedItem.startTime)
     let endMins = timeToMinutes(newEndTime)
 
-    if (endMins < startMins) endMins += 1440
-    if (endMins - startMins < 5) endMins = startMins + 5
-
-    const diffMins = endMins - startMins
-    const hours = diffMins / 60
-    const duration = `${parseFloat(hours.toFixed(2))}h`
-
-    setEditedItem(prev => ({ ...prev, duration }))
+    // If end <= start, move start back by 2 hours
+    if (endMins <= startMins) {
+      const newStartTime = subtractHoursFromTime(newEndTime, 2)
+      const newStartMins = timeToMinutes(newStartTime)
+      if (endMins < newStartMins) endMins += 1440
+      const diffMins = endMins - newStartMins
+      const hours = diffMins / 60
+      const duration = `${parseFloat(hours.toFixed(2))}h`
+      setEditedItem(prev => ({ ...prev, startTime: newStartTime, duration }))
+    } else {
+      if (endMins - startMins < 5) endMins = startMins + 5
+      const diffMins = endMins - startMins
+      const hours = diffMins / 60
+      const duration = `${parseFloat(hours.toFixed(2))}h`
+      setEditedItem(prev => ({ ...prev, duration }))
+    }
   }, [editedItem.startTime, setEditedItem])
 
   const handleAddEquipment = (equipmentId: string) => {
@@ -394,8 +402,22 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                         fullWidth
                       />
                     </div>
-                    <TimeSelector label="" value={editedItem.startTime} onChange={v => setEditedItem({ ...editedItem, startTime: v })} />
-                    <TimeSelector label="" value={currentEndTime} onChange={handleEndTimeChange} />
+                    <TimeSelector 
+                      label="START TIME" 
+                      value={editedItem.startTime} 
+                      onChange={v => {
+                        const startMins = timeToMinutes(v)
+                        const endMins = timeToMinutes(currentEndTime)
+                        // If start >= end, adjust duration so end is start + 2 hours
+                        if (startMins >= endMins) {
+                          const newDuration = '2h'
+                          setEditedItem({ ...editedItem, startTime: v, duration: newDuration })
+                        } else {
+                          setEditedItem({ ...editedItem, startTime: v })
+                        }
+                      }} 
+                    />
+                    <TimeSelector label="END TIME" value={currentEndTime} onChange={handleEndTimeChange} />
                   </div>
                 </div>
 
@@ -420,7 +442,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                   <Textarea
                     value={editedItem.description}
                     onChange={e => setEditedItem({ ...editedItem, description: e.target.value })}
-                    placeholder="Describe the action, atmosphere, and key visual elements..."
+                    placeholder=" Describe the action, atmosphere, and key visual elements..."
                     className="min-h-[120px]"
                   />
                 </div>

@@ -12,8 +12,8 @@ export const GlassCard: React.FC<HTMLMotionProps<"div">> = ({
 }) => (
  <motion.div
   onClick={onClick}
-   className={`bg-white/80 dark:bg-[#16181D]/95 backdrop-blur-xl border border-white/20 dark:border-white/[0.08] rounded-[32px] shadow-sm ${className}`}
   {...props}
+   className={`bg-white/80 dark:bg-[#16181D]/95 backdrop-blur-xl border border-white/20 dark:border-white/[0.08] rounded-[32px] shadow-sm ${className}`}
  >
   {children}
  </motion.div>

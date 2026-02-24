@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Clock, MapPin, CheckCircle2, Film, Check, ListChecks, Package, ChevronUp, ChevronDown } from 'lucide-react';
+import { Clock, MapPin, CheckCircle2, Film, Check, ListChecks, Package, ChevronUp, ChevronDown, Square } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Shot, ShotLayout, Equipment } from '../../types.ts';
 import { calculateEndTime } from '../../utils.ts';
@@ -82,29 +82,31 @@ export const ShotCard: React.FC<ShotCardProps> = ({
 							)}
 
 							{/* Checklist Button */}
-							<button
-								onClick={(e) => {
-									e.stopPropagation();
-									onToggleChecklist(shot.id);
-								}}
-								className={`h-10 px-4 flex items-center gap-2 text-xs font-mono  tracking-wider border transition-all ${isChecklistOpen
-									? 'bg-primary text-primary-foreground border-primary'
-									: 'bg-secondary/50 text-muted-foreground border-border hover:border-primary/30 hover:text-foreground'
+							{shot.equipmentIds.length > 0 && (
+								<button
+									onClick={(e) => {
+										e.stopPropagation();
+										onToggleChecklist(shot.id);
+									}}
+							className={`h-10 px-3 flex items-center gap-2 text-xs font-mono tracking-wider transition-all ${isChecklistOpen
+									? 'text-primary'
+									: 'text-muted-foreground hover:text-foreground'
 									}`}
-							>
-								<span>Checklist</span>
-								{isChecklistOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-							</button>
+								>
+									<span>Checklist</span>
+									{isChecklistOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+								</button>
+							)}
 
 							{/* Status Checkbox */}
 							<button
 								onClick={(e) => { e.stopPropagation(); onToggleStatus(shot.id); }}
 								className={`w-10 h-10 flex items-center justify-center border transition-all ${shot.status === 'done'
 									? 'bg-primary text-primary-foreground border-primary'
-									: 'bg-transparent text-muted-foreground border-border hover:border-primary/30'
+									: 'bg-transparent text-muted-foreground/50 border-border hover:text-primary hover:border-primary/50'
 									}`}
 							>
-								<Check size={18} strokeWidth={3} />
+								{shot.status === 'done' ? <Check size={18} strokeWidth={3} /> : <Square size={18} strokeWidth={2} />}
 							</button>
 						</div>
 					</div>
@@ -201,19 +203,21 @@ export const ShotCard: React.FC<ShotCardProps> = ({
 						<div className="flex items-center justify-between gap-4">
 							{/* Left: Gear Badge + Checklist */}
 							<div className="flex items-center gap-2">
-								<button
-									onClick={(e) => {
-										e.stopPropagation();
-										onToggleChecklist(shot.id);
-									}}
-									className={`h-9 px-3 flex items-center gap-1.5 text-[10px] font-mono  tracking-wider border transition-colors ${isChecklistOpen
-										? 'bg-primary text-primary-foreground border-primary'
-										: 'bg-secondary/50 text-muted-foreground border-border hover:border-primary/30 hover:text-foreground'
-										}`}
-								>
-									<span>Checklist</span>
-									{isChecklistOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+								{shot.equipmentIds.length > 0 && (
+									<button
+										onClick={(e) => {
+											e.stopPropagation();
+											onToggleChecklist(shot.id);
+										}}
+							className={`h-9 px-2 flex items-center gap-1.5 text-[10px] font-mono tracking-wider transition-colors ${isChecklistOpen
+											? 'text-primary'
+											: 'text-muted-foreground hover:text-foreground'
+											}`}
+									>
+										<span>Checklist</span>
+										{isChecklistOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
 								</button>
+								)}
 
 								{/* Gear Badge (Moved from top-right) */}
 								{shot.equipmentIds.length > 0 && (
@@ -230,10 +234,10 @@ export const ShotCard: React.FC<ShotCardProps> = ({
 								onClick={(e) => { e.stopPropagation(); onToggleStatus(shot.id); }}
 								className={`w-9 h-9 flex items-center justify-center border transition-all shrink-0 ${shot.status === 'done'
 									? 'bg-primary text-primary-foreground border-primary'
-									: 'bg-transparent text-muted-foreground border-border hover:border-primary/30'
+									: 'bg-transparent text-muted-foreground/50 border-border hover:text-primary hover:border-primary/50'
 									}`}
 							>
-								<Check size={14} strokeWidth={3} />
+								{shot.status === 'done' ? <Check size={14} strokeWidth={3} /> : <Square size={14} strokeWidth={2} />}
 							</button>
 						</div>
 

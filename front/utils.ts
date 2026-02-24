@@ -17,6 +17,24 @@ export const timeToMinutes = (timeStr: string | null | undefined) => {
     return h * 60 + m;
 };
 
+export const addHoursToTime = (timeStr: string, hours: number): string => {
+    const totalMinutes = timeToMinutes(timeStr) + (hours * 60);
+    // Cap at 23:55 (1435 minutes)
+    const cappedMinutes = Math.min(totalMinutes, 1435);
+    const h = Math.floor(cappedMinutes / 60);
+    const m = cappedMinutes % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+};
+
+export const subtractHoursFromTime = (timeStr: string, hours: number): string => {
+    const totalMinutes = timeToMinutes(timeStr) - (hours * 60);
+    // Don't go below 00:00
+    const cappedMinutes = Math.max(totalMinutes, 0);
+    const h = Math.floor(cappedMinutes / 60);
+    const m = cappedMinutes % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+};
+
 export const getSunTimes = (dateStr: string) => {
     // Simple stable hash to generate consistent mock times for a given date
     let hash = 0;

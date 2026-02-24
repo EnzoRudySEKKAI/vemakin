@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react'
 import { Package, ArrowDownRight, ArrowUpRight, ChevronDown, Boxes, Check } from 'lucide-react'
 import { Shot, Equipment } from '@/types'
 import { CATEGORY_ICONS } from '@/constants'
-import { Text, IconContainer, Card } from '@/components/atoms'
+import { Text, IconContainer } from '@/components/atoms'
+import { TerminalCard } from '@/components/ui/TerminalCard'
 
 interface GearTransitionProps {
   prevShot: Shot
@@ -34,24 +35,32 @@ export const GearTransition: React.FC<GearTransitionProps> = ({ prevShot, nextSh
 
   const totalItems = gearDelta.toDrop.length + gearDelta.toAdd.length
 
+  // Hide component entirely if no gear changes
+  if (totalItems === 0) {
+    return null
+  }
+
+  const hasDrop = gearDelta.toDrop.length > 0
+  const hasAdd = gearDelta.toAdd.length > 0
+
   return (
     <div className="relative animate-in fade-in slide-in-from-top-1 duration-500 flex-1 lg:flex-1 overflow-hidden transition-all duration-300">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-center gap-4 py-2 group cursor-pointer"
       >
-        <div className="h-px flex-1 bg-gray-200 dark:bg-white/10 group-hover:bg-gray-300 dark:group-hover:bg-white/20 transition-colors" />
+        <div className="h-px flex-1 bg-gray-300 dark:bg-white/10 group-hover:bg-gray-400 dark:group-hover:bg-white/20 transition-colors" />
         
-        <div className="flex items-center gap-2 text-[10px] font-bold  tracking-widest text-gray-400 dark:text-white/40 group-hover:text-gray-600 dark:group-hover:text-white/60 transition-colors">
+        <div className="flex items-center gap-2 text-[10px] font-mono tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">
           <Boxes size={12} />
-          Shift Gear
+          SHIFT GEAR
           <span className="opacity-60 ml-1">
-            ({totalItems > 0 ? `${totalItems} Items` : 'Full Kit'})
+            {totalItems} ITEMS
           </span>
           <ChevronDown size={10} className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
         </div>
 
-        <div className="h-px flex-1 bg-gray-200 dark:bg-white/10 group-hover:bg-gray-300 dark:group-hover:bg-white/20 transition-colors" />
+        <div className="h-px flex-1 bg-gray-300 dark:bg-white/10 group-hover:bg-gray-400 dark:group-hover:bg-white/20 transition-colors" />
       </button>
 
       {/* Expanded Content */}
@@ -60,71 +69,65 @@ export const GearTransition: React.FC<GearTransitionProps> = ({ prevShot, nextSh
         ${isOpen ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0'}
       `}>
         <div className="overflow-hidden">
-          <div className="bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/10 rounded-[16px] shadow-sm p-5 relative">
-            <div className="absolute top-0 right-0 p-4 opacity-5 text-gray-900 dark:text-white pointer-events-none">
-              <Package size={80} strokeWidth={2.5} />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10">
+          <TerminalCard contentClassName="p-2">
+            <div className={`grid gap-6 ${hasDrop && hasAdd ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
               {/* Stuff to Drop */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2.5 px-1">
-                  <IconContainer icon={ArrowDownRight} size="sm" variant="danger" />
-                  <Text variant="caption" color="danger">Drop</Text>
-                </div>
+              {hasDrop && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2.5 px-1">
+                    <IconContainer icon={ArrowDownRight} size="sm" variant="danger" />
+                    <span className="font-mono text-xs tracking-widest text-destructive">Drop</span>
+                  </div>
 
-                <div className="space-y-1.5">
-                  {gearDelta.toDrop.length > 0 ? gearDelta.toDrop.map(item => {
-                    const Icon = (CATEGORY_ICONS as any)[item.category] || Package
-                    return (
-                      <Card key={item.id} variant="flat" size="sm" className="flex items-center justify-between group/item">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <IconContainer icon={Icon} size="sm" variant="default" />
-                          <div className="min-w-0">
-                            <Text variant="caption" className="truncate leading-none mb-1">{item.customName || item.name}</Text>
-                            <Text variant="label" color="muted">{item.category}</Text>
+                  <div className="space-y-1.5">
+                    {gearDelta.toDrop.map(item => {
+                      const Icon = (CATEGORY_ICONS as any)[item.category] || Package
+                      return (
+                        <div key={item.id} className="flex items-center justify-between p-3 border border-border bg-transparent group/item">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <IconContainer icon={Icon} size="sm" variant="default" />
+                            <div className="min-w-0">
+                              <Text variant="caption" className="truncate leading-none mb-1">{item.customName || item.name}</Text>
+                              <Text variant="label" color="muted"> {item.category}</Text>
+                            </div>
                           </div>
+                          <div className="w-2 h-2 bg-red-300 dark:bg-red-500/50" />
                         </div>
-                        <div className="w-2 h-2 rounded-full bg-red-300 dark:bg-red-500/50" />
-                      </Card>
-                    )
-                  }) : (
-                    <Text variant="caption" color="muted" className="text-center py-4 border border-dashed border-gray-200 dark:border-white/10 rounded-xl">Everything Stays</Text>
-                  )}
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Stuff to Add */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2.5 px-1">
-                  <IconContainer icon={ArrowUpRight} size="sm" variant="success" />
-                  <Text variant="caption" color="success">Add</Text>
-                </div>
+              {hasAdd && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2.5 px-1">
+                    <IconContainer icon={ArrowUpRight} size="sm" variant="success" />
+                    <span className="font-mono text-xs tracking-widest text-emerald-500">Add</span>
+                  </div>
 
-                <div className="space-y-1.5">
-                  {gearDelta.toAdd.length > 0 ? gearDelta.toAdd.map(item => {
-                    const Icon = (CATEGORY_ICONS as any)[item.category] || Package
-                    return (
-                      <Card key={item.id} variant="flat" size="sm" className="flex items-center justify-between group/item border-emerald-100 dark:border-emerald-500/20">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <IconContainer icon={Icon} size="sm" variant="success" />
-                          <div className="min-w-0">
-                            <Text variant="caption" className="truncate leading-none mb-1">{item.customName || item.name}</Text>
-                            <Text variant="label" color="success">{item.category}</Text>
+                  <div className="space-y-1.5">
+                    {gearDelta.toAdd.map(item => {
+                      const Icon = (CATEGORY_ICONS as any)[item.category] || Package
+                      return (
+                        <div key={item.id} className="flex items-center justify-between p-3 border border-emerald-100 dark:border-emerald-500/20 bg-transparent group/item">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <IconContainer icon={Icon} size="sm" variant="success" />
+                            <div className="min-w-0">
+                              <Text variant="caption" className="truncate leading-none mb-1">{item.customName || item.name}</Text>
+                              <Text variant="label" color="success"> {item.category}</Text>
+                            </div>
                           </div>
+                          <div className="w-2 h-2 bg-emerald-500 dark:bg-emerald-400" />
                         </div>
-                        <div className="p-1 bg-emerald-500 dark:bg-emerald-400 text-white dark:text-emerald-900 rounded-lg group-hover/item:scale-110 transition-transform">
-                          <Check size={10} strokeWidth={3} />
-                        </div>
-                      </Card>
-                    )
-                  }) : (
-                    <Text variant="caption" color="muted" className="text-center py-4 border border-dashed border-gray-200 dark:border-white/10 rounded-xl">No New Gear Needed</Text>
-                  )}
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
-          </div>
+          </TerminalCard>
         </div>
       </div>
     </div>
