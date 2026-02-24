@@ -90,7 +90,7 @@ const TimelineCard = memo<TimelineCardProps>(({
   <motion.div variants={itemVariants} layout="position">
     <TerminalCard 
       className="h-full"
-      header={`Timeline // ${shots.filter(s => s.status === 'pending').length} shots left`}
+      header={`Timeline`}
       headerRight={
         <TerminalButton 
           variant="ghost" 
@@ -125,8 +125,8 @@ const TimelineCard = memo<TimelineCardProps>(({
             </div>
           ))
         ) : (
-          <div className="p-6 text-center text-muted-foreground">
-            <Film size={20} className="mx-auto mb-2 opacity-50" />
+          <div className="p-6 flex flex-col items-center justify-center min-h-[200px] text-muted-foreground">
+            <Film size={20} className="mb-2 opacity-50" />
             <p className="text-sm font-mono">No upcoming shots</p>
           </div>
         )}
@@ -201,7 +201,7 @@ const EquipmentCard = memo<EquipmentCardProps>(({
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+          <div className="p-6 flex flex-col items-center justify-center min-h-[200px] text-muted-foreground">
             <Package size={24} className="mb-2 opacity-20" />
             <p className="text-sm font-mono">No equipment found</p>
           </div>
@@ -257,8 +257,8 @@ const TasksCard = memo<TasksCardProps>(({
             </div>
           ))
         ) : (
-          <div className="p-6 text-center text-muted-foreground">
-            <Zap size={20} className="mx-auto mb-2 opacity-50" />
+          <div className="p-6 flex flex-col items-center justify-center min-h-[200px] text-muted-foreground">
+            <Zap size={20} className="mb-2 opacity-50" />
             <p className="text-sm font-mono">All tasks complete</p>
           </div>
         )}
@@ -308,8 +308,8 @@ const NotesCard = memo<NotesCardProps>(({
             </div>
         ))
         ) : (
-          <div className="p-6 text-center text-muted-foreground">
-            <StickyNote size={20} className="mx-auto mb-2 opacity-50" />
+          <div className="p-6 flex flex-col items-center justify-center min-h-[200px] text-muted-foreground">
+            <StickyNote size={20} className="mb-2 opacity-50" />
             <p className="text-sm font-mono">No notes</p>
           </div>
         )}
