@@ -25,6 +25,7 @@ interface HeaderProps {
   setMainView: (view: MainView) => void
   projectProgress: number
   activeDate: string
+  dateFilter: string | null
   shotLayout?: ShotLayout
   setShotLayout?: (layout: ShotLayout) => void
   isDateSelectorOpen: boolean
@@ -103,6 +104,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
   setIsDateSelectorOpen,
   activeDate,
   handleDateSelect,
+  dateFilter,
   inventory = [],
   tasks = []
 }, ref) => {
@@ -220,6 +222,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
                           layout={shotLayout}
                           onLayoutChange={setShotLayout}
                           activeDate={activeDate}
+                          dateFilter={dateFilter}
                           isDatePickerOpen={isDateSelectorOpen}
                           onDatePickerToggle={() => setIsDateSelectorOpen(!isDateSelectorOpen)}
                           onDateSelect={handleDateSelect}

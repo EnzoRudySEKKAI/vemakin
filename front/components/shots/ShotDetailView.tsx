@@ -14,6 +14,7 @@ import { Text, Input, Button, Textarea } from '@/components/atoms'
 import { ConfirmModal } from '@/components/ui/ConfirmModal'
 import { TimeSelector } from '@/components/ui/TimeSelector'
 import { LocationAutocomplete } from '@/components/ui/LocationAutocomplete'
+import { DatePickerInput } from '@/components/ui/DatePickerInput'
 
 const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -320,15 +321,14 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
         </div>
       }
     >
-      {isRetaking && (
-        <div className="mb-8 p-4 bg-orange-500/10 border border-orange-500/30 flex flex-wrap items-center gap-4">
-          <Text variant="body" color="warning">Schedule Retake:</Text>
-          <Input
-            type="date"
-            value={retakeDate}
-            onChange={e => setRetakeDate(e.target.value)}
-            className="w-auto"
-          />
+        {isRetaking && (
+          <div className="mb-8 p-4 bg-orange-500/10 border border-orange-500/30 flex flex-wrap items-center gap-4">
+            <Text variant="body" color="warning">Schedule Retake:</Text>
+            <DatePickerInput
+              value={retakeDate}
+              onChange={date => setRetakeDate(date || '')}
+              className="w-auto"
+            />
           <Input
             type="time"
             value={retakeTime}
@@ -388,10 +388,9 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                   <span className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-2 block">Schedule</span>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
                     <div className="relative">
-                      <Input
-                        type="date"
+                      <DatePickerInput
                         value={editedItem.date}
-                        onChange={e => setEditedItem({ ...editedItem, date: e.target.value })}
+                        onChange={date => setEditedItem({ ...editedItem, date: date || '' })}
                         fullWidth
                       />
                     </div>

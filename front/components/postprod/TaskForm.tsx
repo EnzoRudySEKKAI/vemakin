@@ -6,6 +6,7 @@ import {
 import { PostProdTask } from '@/types'
 import { Button, Text, Input, IconContainer, Textarea, Select } from '@/components/atoms'
 import { TerminalCard } from '@/components/ui/TerminalCard'
+import { DatePickerInput } from '@/components/ui/DatePickerInput'
 import { radius, typography } from '@/design-system'
 
 export interface TaskFormData {
@@ -89,16 +90,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({ form, setForm, onSubmit }) =
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Text variant="label" color="muted" className="mb-2 block">Due Date</Text>
-              <div className="relative group min-w-0">
-                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500" size={16} strokeWidth={2.5} />
-                <Input
-                  type="date"
-                  value={form.dueDate}
-                  onChange={(e) => setForm(prev => ({ ...prev, dueDate: e.target.value }))}
-                  fullWidth
-                  className="pl-12"
-                />
-              </div>
+              <DatePickerInput
+                value={form.dueDate}
+                onChange={(date) => setForm(prev => ({ ...prev, dueDate: date || '' }))}
+                fullWidth
+              />
             </div>
 
             <div>

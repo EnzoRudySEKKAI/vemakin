@@ -5,6 +5,7 @@ import { Text, Input, Button, IconContainer, Textarea } from '@/components/atoms
 import { TerminalCard } from '@/components/ui/TerminalCard'
 import { TimeSelector } from '@/components/ui/TimeSelector'
 import { LocationAutocomplete, LocationSuggestion } from '@/components/ui/LocationAutocomplete'
+import { DatePickerInput } from '@/components/ui/DatePickerInput'
 import { ProjectRequiredBanner } from '@/components/molecules/ProjectRequiredBanner'
 import { CATEGORY_ICONS } from '@/constants'
 import { Shot, Equipment } from '@/types'
@@ -38,7 +39,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
     location: '',
     locationLat: undefined as number | undefined,
     locationLng: undefined as number | undefined,
-    date: toISODate(new Date().toLocaleDateString()),
+    date: new Date().toISOString().split('T')[0],
     startTime: '08:00',
     endTime: '10:00',
     description: '',
@@ -171,12 +172,10 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-12">
             <div className="relative">
               <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Filming date</span>
-              <Input
-                type="date"
+              <DatePickerInput
                 value={form.date}
-                onChange={e => setForm(prev => ({ ...prev, date: e.target.value }))}
+                onChange={date => setForm(prev => ({ ...prev, date: date || '' }))}
                 fullWidth
-                variant="underline"
               />
             </div>
             <div>

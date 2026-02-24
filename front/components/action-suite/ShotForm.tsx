@@ -9,6 +9,7 @@ import { Text } from '@/components/atoms/Text'
 import { Input } from '@/components/atoms/Input'
 import { Textarea } from '@/components/atoms/Textarea'
 import { TerminalCard } from '@/components/ui/TerminalCard'
+import { DatePickerInput } from '@/components/ui/DatePickerInput'
 
 interface ShotFormProps {
   inventory: Equipment[]
@@ -25,7 +26,7 @@ export const ShotForm = ({ inventory, existingShots, onSubmit }: ShotFormProps) 
   const [title, setTitle] = useState('')
   const [sceneNumber, setSceneNumber] = useState('')
   const [location, setLocation] = useState('')
-  const [date, setDate] = useState(toISODate(new Date().toLocaleDateString()))
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [startTime, setStartTime] = useState('08:00')
   const [endTime, setEndTime] = useState('10:00')
   const [description, setDescription] = useState('')
@@ -120,10 +121,9 @@ export const ShotForm = ({ inventory, existingShots, onSubmit }: ShotFormProps) 
       <TerminalCard title="Schedule">
         <div className="p-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <Input
-              type="date"
+            <DatePickerInput
               value={date}
-              onChange={e => setDate(e.target.value)}
+              onChange={newDate => setDate(newDate || '')}
               fullWidth
             />
             <TimeSelector label="" value={startTime} onChange={setStartTime} />

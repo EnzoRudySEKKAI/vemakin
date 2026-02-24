@@ -7,6 +7,7 @@ import { Textarea } from '../atoms/Textarea';
 import { ProjectRequiredBanner } from '../molecules/ProjectRequiredBanner';
 import { PostProdTask } from '../../types';
 import { TerminalCard } from '../ui/TerminalCard';
+import { DatePickerInput } from '../ui/DatePickerInput';
 
 interface TaskFormPageProps {
   onClose: () => void;
@@ -140,11 +141,9 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-12">
             <div className="flex flex-col gap-1 min-w-0">
               <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Timeline deadline</span>
-              <Input
-                type="date"
+              <DatePickerInput
                 value={form.dueDate}
-                onChange={(e) => setForm(prev => ({ ...prev, dueDate: e.target.value }))}
-                variant="underline"
+                onChange={(date) => setForm(prev => ({ ...prev, dueDate: date || '' }))}
                 fullWidth
               />
             </div>

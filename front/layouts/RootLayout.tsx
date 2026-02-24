@@ -516,6 +516,7 @@ const RootLayoutInner = () => {
           setMainView={handleNavigateToView}
           projectProgress={projectProgress}
           activeDate={activeDate}
+          dateFilter={dateFilter}
           shotLayout={shotLayout}
           setShotLayout={setShotLayout}
           isDateSelectorOpen={isDateSelectorOpen}

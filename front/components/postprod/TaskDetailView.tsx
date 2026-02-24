@@ -10,6 +10,7 @@ import { Text, Input, Textarea, Select } from '../../components/atoms'
 
 import { ConfirmModal } from '../ui/ConfirmModal'
 import { TerminalCard } from '../ui/TerminalCard'
+import { DatePickerInput } from '../ui/DatePickerInput'
 import { FileText, MessageSquare } from 'lucide-react'
 
 interface TaskDetailViewProps {
@@ -214,10 +215,9 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
 
                 <div className="flex flex-col gap-1 min-w-0">
                   <span className="text-[10px] font-mono tracking-wider text-muted-foreground mb-2">Completion deadline</span>
-                  <Input
-                    type="date"
-                    value={editedItem.dueDate || ''}
-                    onChange={(e) => setEditedItem(prev => ({ ...prev, dueDate: e.target.value }))}
+                  <DatePickerInput
+                    value={editedItem.dueDate}
+                    onChange={(date) => setEditedItem(prev => ({ ...prev, dueDate: date || '' }))}
                     fullWidth
                   />
                 </div>
