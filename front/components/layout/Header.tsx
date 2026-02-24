@@ -253,6 +253,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(({
                           onLayoutChange={setPostProdLayout}
                           tasks={tasks}
                           activeDate={activeDate}
+                          dateFilter={dateFilter}
                           isDatePickerOpen={isDateSelectorOpen}
                           onDatePickerToggle={() => setIsDateSelectorOpen(!isDateSelectorOpen)}
                           onDateSelect={handleDateSelect}
