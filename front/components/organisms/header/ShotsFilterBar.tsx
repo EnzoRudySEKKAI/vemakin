@@ -11,6 +11,7 @@ interface ShotsFilterBarProps {
   layout: 'timeline' | 'list'
   onLayoutChange: (layout: 'timeline' | 'list') => void
   activeDate: string
+  dateFilter: string | null
   isDatePickerOpen: boolean
   onDatePickerToggle: () => void
   onDateSelect: (date: string | null) => void
@@ -31,6 +32,7 @@ export const ShotsFilterBar: React.FC<ShotsFilterBarProps> = ({
   layout,
   onLayoutChange,
   activeDate,
+  dateFilter,
   isDatePickerOpen,
   onDatePickerToggle,
   onDateSelect,
@@ -46,7 +48,7 @@ export const ShotsFilterBar: React.FC<ShotsFilterBarProps> = ({
         showDatePicker
         isDatePickerOpen={isDatePickerOpen}
         onDatePickerToggle={onDatePickerToggle}
-        activeDate={activeDate}
+        activeDate={dateFilter}
         onDateSelect={onDateSelect}
       />
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useRouteContext } from '@/hooks/useRouteContext'
+import { useNavigateBack } from '@/hooks/useNavigateBack'
 import { EquipmentDetailView } from '@/components/inventory/EquipmentDetailView'
 import { DetailViewSkeleton } from '@/components/ui/DetailViewSkeleton'
 import { Equipment } from '@/types'
@@ -9,6 +10,7 @@ import { equipmentService } from '@/api/services/equipment'
 export const EquipmentDetailRoute = () => {
     const { id } = useParams<{ id: string }>()
     const ctx = useRouteContext()
+    const navigateBack = useNavigateBack()
     const [isLoading, setIsLoading] = useState(true)
     const [itemWithSpecs, setItemWithSpecs] = useState<Equipment | null>(null)
 
@@ -78,7 +80,7 @@ export const EquipmentDetailRoute = () => {
     return (
         <EquipmentDetailView
             item={displayItem}
-            onClose={() => ctx.navigate('/dashboard/inventory')}
+            onClose={navigateBack}
             projectData={projectData}
             involvedProjects={involvedProjects}
             onNavigateToShot={(projectName, shotId) => {

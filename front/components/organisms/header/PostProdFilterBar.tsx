@@ -33,6 +33,7 @@ interface PostProdFilterBarProps {
   onLayoutChange: (layout: 'grid' | 'list') => void
   tasks: PostProdTask[]
   activeDate: string
+  dateFilter: string | null
   isDatePickerOpen: boolean
   onDatePickerToggle: () => void
   onDateSelect: (date: string | null) => void
@@ -48,6 +49,7 @@ export const PostProdFilterBar: React.FC<PostProdFilterBarProps> = ({
   onLayoutChange,
   tasks,
   activeDate,
+  dateFilter,
   isDatePickerOpen,
   onDatePickerToggle,
   onDateSelect,
@@ -63,7 +65,7 @@ export const PostProdFilterBar: React.FC<PostProdFilterBarProps> = ({
         showDatePicker
         isDatePickerOpen={isDatePickerOpen}
         onDatePickerToggle={onDatePickerToggle}
-        activeDate={activeDate}
+        activeDate={dateFilter}
         onDateSelect={onDateSelect}
       />
 

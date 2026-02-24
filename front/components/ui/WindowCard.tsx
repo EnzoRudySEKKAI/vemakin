@@ -30,8 +30,8 @@ export const WindowCard: React.FC<WindowCardProps> = ({
 }) => {
   return (
     <motion.div
-      className={`bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.08] rounded-2xl overflow-hidden ${className}`}
       {...props}
+      className={`bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.08] rounded-2xl overflow-hidden ${className}`}
     >
       {/* Header with Traffic Lights */}
       {(showTrafficLights || title || headerRight) && (

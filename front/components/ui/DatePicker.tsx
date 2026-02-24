@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react'
-import { ChevronLeft, ChevronRight, Check } from 'lucide-react'
+import React, { useState } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button, Text } from '@/components/atoms'
-import { radius, typography } from '@/design-system'
+import { Text } from '@/components/atoms'
 
 interface DatePickerProps {
   isOpen: boolean
@@ -23,27 +22,32 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   const safeDate = isNaN(initialDate.getTime()) ? new Date() : initialDate
 
   const [viewDate, setViewDate] = useState(safeDate)
-  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right')
 
-  const daysOfWeek = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+  const daysOfWeek = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA']
 
   // Helpers
   const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate()
   const getFirstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay()
 
   const formatDate = (year: number, month: number, day: number) => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    return `${months[month]} ${day}, ${year}`
+    // Return ISO format: YYYY-MM-DD
+    return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
   }
 
   const handlePrevMonth = () => {
-    setSlideDirection('left')
     setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))
   }
 
   const handleNextMonth = () => {
-    setSlideDirection('right')
     setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1))
+  }
+
+  const handlePrevYear = () => {
+    setViewDate(new Date(viewDate.getFullYear() - 1, viewDate.getMonth(), 1))
+  }
+
+  const handleNextYear = () => {
+    setViewDate(new Date(viewDate.getFullYear() + 1, viewDate.getMonth(), 1))
   }
 
   const isToday = (year: number, month: number, day: number) => {
@@ -57,7 +61,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
   const isSelected = (year: number, month: number, day: number) => {
     if (!selectedDate) return false
-    return formatDate(year, month, day) === selectedDate
+    const clickedDate = formatDate(year, month, day)
+    return clickedDate === selectedDate
   }
 
   // Generate Calendar Grid
@@ -87,17 +92,20 @@ export const DatePicker: React.FC<DatePickerProps> = ({
             onClose()
           }}
           className={`
-            w-8 h-8 rounded-full flex items-center justify-center ${typography.size.base} ${typography.weight.semibold} relative transition-all
+            w-8 h-8 flex items-center justify-center
+            font-mono text-sm tracking-wider
+            transition-colors duration-150
             ${selected
-              ? 'bg-primary text-white shadow-md shadow-primary/30 scale-100'
-              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10'
+              ? 'border border-primary text-primary bg-primary/5 dark:bg-primary/10'
+              : 'border border-transparent text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-white/20 hover:bg-gray-50 dark:hover:bg-white/5'
             }
-            ${today && !selected ? 'text-primary font-semibold' : ''}
+            ${today && !selected ? 'text-primary font-bold' : ''}
           `}
         >
-          {d}
-          {today && !selected && (
-            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-current" />
+          {today && !selected ? (
+            <span className="text-primary">[{d.toString().padStart(2, '0')}]</span>
+          ) : (
+            d.toString().padStart(2, '0')
           )}
         </button>
       )
@@ -109,86 +117,102 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     <AnimatePresence>
       {isOpen && (
         <>
-          <div className="fixed inset-0 z-[60]" onClick={onClose} />
+
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.15 }}
             className={`
-              absolute top-full right-0 mt-2 z-[70]
-              w-[280px] p-4
+              absolute top-full right-0 mt-2 z-[9999]
+              w-[320px]
               bg-white dark:bg-[#16181D]
-              ${radius.xl}
-              border border-gray-200 dark:border-white/10
-              shadow-2xl
+              border border-gray-300 dark:border-white/10
+              shadow-lg
               overflow-hidden
             `}
           >
             {/* Header */}
-            <div className="flex items-center justify-between mb-4 px-1">
-              <Text variant="body" className="text-gray-900 dark:text-white">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-300 dark:border-white/10">
+              <Text 
+                variant="body" 
+                className="font-mono text-xs tracking-widest text-gray-900 dark:text-white uppercase"
+              >
                 {viewDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
               </Text>
-              <div className="flex gap-1">
-                <Button
+              <div className="flex gap-0">
+                <button
+                  onClick={handlePrevYear}
+                  className="w-7 h-7 flex items-center justify-center border border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/30 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-mono text-xs"
+                  title="Previous year"
+                >
+                  {'<<'}
+                </button>
+                <button
                   onClick={handlePrevMonth}
-                  variant="ghost"
-                  size="sm"
-                  className="p-1"
+                  className="w-7 h-7 flex items-center justify-center border-l-0 border border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/30 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  title="Previous month"
                 >
-                  <ChevronLeft size={18} strokeWidth={2.5} />
-                </Button>
-                <Button
+                  <ChevronLeft size={14} strokeWidth={2} />
+                </button>
+                <button
                   onClick={handleNextMonth}
-                  variant="ghost"
-                  size="sm"
-                  className="p-1"
+                  className="w-7 h-7 flex items-center justify-center border-l-0 border border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/30 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  title="Next month"
                 >
-                  <ChevronRight size={18} strokeWidth={2.5} />
-                </Button>
+                  <ChevronRight size={14} strokeWidth={2} />
+                </button>
+                <button
+                  onClick={handleNextYear}
+                  className="w-7 h-7 flex items-center justify-center border-l-0 border border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/30 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-mono text-xs"
+                  title="Next year"
+                >
+                  {'>>'}
+                </button>
               </div>
             </div>
 
             {/* Weekday Headers */}
-            <div className="grid grid-cols-7 mb-2 text-center">
+            <div className="grid grid-cols-7 px-2 pt-3 pb-2">
               {daysOfWeek.map(day => (
-                <Text key={day} variant="label" color="muted">{day}</Text>
+                <div 
+                  key={day} 
+                  className="w-8 h-6 flex items-center justify-center font-mono text-[10px] tracking-widest text-gray-500 dark:text-gray-500"
+                >
+                  {day}
+                </div>
               ))}
             </div>
 
             {/* Calendar Grid */}
-            <motion.div
-              key={viewDate.getMonth()}
-              initial={{ x: slideDirection === 'right' ? 20 : -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.2 }}
-              className="grid grid-cols-7 gap-y-1 justify-items-center"
-            >
+            <div className="grid grid-cols-7 gap-0 px-2 pb-3 justify-items-center">
               {renderCalendarDays()}
-            </motion.div>
+            </div>
 
             {/* Selected Date Footer */}
-            <div className="mt-4 pt-3 border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
-              {selectedDate ? (
-                <Text variant="caption" color="muted">
-                  Selected: <span className="text-gray-900 dark:text-white font-semibold">{selectedDate}</span>
-                </Text>
-              ) : (
-                <Text variant="caption" color="muted">No Date Selected</Text>
-              )}
+            <div className="px-4 py-3 border-t border-gray-300 dark:border-white/10 flex items-center justify-between bg-gray-50 dark:bg-[#0F1116]">
+              <Text 
+                variant="caption" 
+                className="font-mono text-xs tracking-wider text-gray-500 dark:text-gray-500"
+              >
+                {selectedDate ? (
+                  <>
+                    SELECTED: <span className="text-gray-900 dark:text-white">{selectedDate}</span>
+                  </>
+                ) : (
+                  'NO DATE SELECTED'
+                )}
+              </Text>
 
-              <Button
+              <button
                 onClick={() => {
                   onSelectDate(null)
                   onClose()
                 }}
-                variant="ghost"
-                size="sm"
-                className="text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10"
+                className="font-mono text-xs tracking-wider text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors"
               >
-                Clear
-              </Button>
+                [CLEAR]
+              </button>
             </div>
           </motion.div>
         </>

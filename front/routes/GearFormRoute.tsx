@@ -1,9 +1,11 @@
 import React from 'react'
 import { useRouteContext } from '@/hooks/useRouteContext'
+import { useNavigateBack } from '@/hooks/useNavigateBack'
 import { GearFormPage } from '@/components/inventory/GearFormPage'
 
 export const GearFormRoute = () => {
     const ctx = useRouteContext()
+    const navigateBack = useNavigateBack()
 
     const handleSwitchForm = (formType: 'gear' | 'shot' | 'task' | 'note') => {
         const paths = {
@@ -17,7 +19,7 @@ export const GearFormRoute = () => {
 
     return (
         <GearFormPage
-            onClose={() => ctx.navigate('/dashboard/inventory')}
+            onClose={navigateBack}
             onSwitchForm={handleSwitchForm}
             onSubmit={ctx.addGear}
         />

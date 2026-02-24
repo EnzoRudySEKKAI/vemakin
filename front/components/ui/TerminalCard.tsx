@@ -86,7 +86,7 @@ interface TerminalCardContentProps extends React.HTMLAttributes<HTMLDivElement> 
 
 export const TerminalCardContent = React.forwardRef<HTMLDivElement, TerminalCardContentProps>(
   ({ children, className, ...props }, ref) => (
-    <div ref={ref} className={cn("", className)} {...props}>
+    <div ref={ref} {...props} className={cn("", className)}>
       {children}
     </div>
   )

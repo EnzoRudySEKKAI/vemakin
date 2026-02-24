@@ -2,13 +2,14 @@ import { useState, useMemo } from 'react'
 import { Package, AlertCircle, Check, Save, Search } from 'lucide-react'
 import { Shot, Equipment } from '@/types'
 import { CATEGORY_ICONS } from '@/constants'
-import { timeToMinutes, calculateEndTime } from '@/utils'
+import { timeToMinutes, calculateEndTime, addHoursToTime, subtractHoursFromTime } from '@/utils'
 import { TimeSelector } from '@/components/ui/TimeSelector'
 import { Button } from '@/components/atoms/Button'
 import { Text } from '@/components/atoms/Text'
 import { Input } from '@/components/atoms/Input'
 import { Textarea } from '@/components/atoms/Textarea'
 import { TerminalCard } from '@/components/ui/TerminalCard'
+import { DatePickerInput } from '@/components/ui/DatePickerInput'
 
 interface ShotFormProps {
   inventory: Equipment[]
@@ -25,7 +26,7 @@ export const ShotForm = ({ inventory, existingShots, onSubmit }: ShotFormProps) 
   const [title, setTitle] = useState('')
   const [sceneNumber, setSceneNumber] = useState('')
   const [location, setLocation] = useState('')
-  const [date, setDate] = useState(toISODate(new Date().toLocaleDateString()))
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [startTime, setStartTime] = useState('08:00')
   const [endTime, setEndTime] = useState('10:00')
   const [description, setDescription] = useState('')
@@ -119,15 +120,38 @@ export const ShotForm = ({ inventory, existingShots, onSubmit }: ShotFormProps) 
 
       <TerminalCard title="Schedule">
         <div className="p-6 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <Input
-              type="date"
-              value={date}
-              onChange={e => setDate(e.target.value)}
-              fullWidth
+          <DatePickerInput
+            value={date}
+            onChange={newDate => setDate(newDate || '')}
+            fullWidth
+          />
+          <div className="grid grid-cols-2 gap-4">
+            <TimeSelector 
+              label="START TIME" 
+              value={startTime} 
+              onChange={(newStartTime) => {
+                const startMins = timeToMinutes(newStartTime)
+                const endMins = timeToMinutes(endTime)
+                setStartTime(newStartTime)
+                // If start >= end, set end to start + 2 hours (capped at 23:55)
+                if (startMins >= endMins) {
+                  setEndTime(addHoursToTime(newStartTime, 2))
+                }
+              }} 
             />
-            <TimeSelector label="" value={startTime} onChange={setStartTime} />
-            <TimeSelector label="" value={endTime} onChange={setEndTime} />
+            <TimeSelector 
+              label="END TIME" 
+              value={endTime} 
+              onChange={(newEndTime) => {
+                const startMins = timeToMinutes(startTime)
+                const endMins = timeToMinutes(newEndTime)
+                setEndTime(newEndTime)
+                // If end <= start, set start to end - 2 hours (min 00:00)
+                if (endMins <= startMins) {
+                  setStartTime(subtractHoursFromTime(newEndTime, 2))
+                }
+              }} 
+            />
           </div>
 
           {shotConflict && (
@@ -158,7 +182,7 @@ export const ShotForm = ({ inventory, existingShots, onSubmit }: ShotFormProps) 
           <Textarea
             value={description}
             onChange={e => setDescription(e.target.value)}
-            placeholder="Describe the action, atmosphere, and key visual elements..."
+            placeholder=" Describe the action, atmosphere, and key visual elements..."
             size="md"
           />
         </div>

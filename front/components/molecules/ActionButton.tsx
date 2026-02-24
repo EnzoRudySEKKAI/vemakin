@@ -1,8 +1,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Edit3, Trash2, Check, X, RotateCcw, CalendarPlus, LucideIcon } from 'lucide-react'
-import { Button, IconContainer } from '@/components/atoms'
-import { radius, typography } from '@/design-system'
+import { Edit3, Trash2, Check, X, RotateCcw, CalendarPlus, type LucideIcon } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 export type ActionType = 'edit' | 'delete' | 'save' | 'cancel' | 'retake' | 'calendar' | 'custom'
 
@@ -23,42 +22,47 @@ const iconMap: Record<ActionType, LucideIcon> = {
   cancel: X,
   retake: RotateCcw,
   calendar: CalendarPlus,
-  custom: Edit3
+  custom: Edit3,
 }
 
-const typeStyles: Record<ActionType, { variant: 'primary' | 'secondary' | 'ghost' | 'danger'; active?: string }> = {
-  edit: {
-    variant: 'ghost'
-  },
-  delete: {
-    variant: 'danger'
-  },
-  save: {
-    variant: 'primary'
-  },
-  cancel: {
-    variant: 'ghost'
-  },
-  retake: {
-    variant: 'ghost',
-    active: 'bg-orange-500 text-white border-orange-600'
-  },
-  calendar: {
-    variant: 'ghost'
-  },
-  custom: {
-    variant: 'ghost'
-  }
+const buttonSizes = {
+  sm: 'w-8 h-8',
+  md: 'w-10 h-10',
 }
 
 const iconSizes = {
-  sm: 16,
-  md: 20
+  sm: 14,
+  md: 16,
 }
 
-const strokeWidths = {
-  save: 3,
-  default: 2.5
+const strokeWidths: Record<string, number> = {
+  save: 2.5,
+  default: 2,
+}
+
+const variantStyles = {
+  ghost: {
+    base: 'border border-transparent text-muted-foreground hover:border-border hover:text-foreground dark:hover:border-white/10 dark:hover:text-white',
+    active: 'bg-primary/10 border-primary/50 text-primary',
+  },
+  danger: {
+    base: 'border border-transparent text-red-500 hover:border-red-500/50 hover:bg-red-500/10',
+    active: 'border-red-500/50 bg-red-500/10 text-red-500',
+  },
+  primary: {
+    base: 'border border-primary text-primary hover:bg-primary hover:text-primary-foreground',
+    active: 'bg-primary text-primary-foreground border-primary',
+  },
+}
+
+const typeToVariant: Record<ActionType, keyof typeof variantStyles> = {
+  edit: 'ghost',
+  delete: 'danger',
+  save: 'primary',
+  cancel: 'ghost',
+  retake: 'ghost',
+  calendar: 'ghost',
+  custom: 'ghost',
 }
 
 export const ActionButton: React.FC<ActionButtonProps> = ({
@@ -68,22 +72,32 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   title,
   className = '',
   customIcon,
-  size = 'md'
+  size = 'md',
 }) => {
   const Icon = customIcon || iconMap[type]
-  const styles = typeStyles[type]
-  const strokeWidth = strokeWidths[type as keyof typeof strokeWidths] || strokeWidths.default
-  
+  const variant = typeToVariant[type]
+  const styles = variantStyles[variant]
+
   return (
-    <Button
+    <motion.button
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      variant={styles.variant}
-      size={size}
-      className={`${className} ${isActive && styles.active ? styles.active : ''}`}
+      className={cn(
+        'group relative flex items-center justify-center',
+        'transition-all duration-200',
+        buttonSizes[size],
+        isActive ? styles.active : styles.base,
+        className
+      )}
       title={title}
     >
-      <Icon size={iconSizes[size]} strokeWidth={strokeWidth} />
-    </Button>
+      <Icon
+        size={iconSizes[size]}
+        strokeWidth={strokeWidths[type] || strokeWidths.default}
+        className="transition-colors"
+      />
+    </motion.button>
   )
 }
 
@@ -104,10 +118,10 @@ export const ActionButtonGroup: React.FC<ActionButtonGroupProps> = ({
   onSave,
   onCancel,
   extraActions,
-  className = ''
+  className = '',
 }) => {
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
+    <div className={cn('flex items-center gap-2', className)}>
       {!isEditing ? (
         <>
           <ActionButton type="edit" onClick={onEdit} title="Edit" />
@@ -115,10 +129,10 @@ export const ActionButtonGroup: React.FC<ActionButtonGroupProps> = ({
           <ActionButton type="delete" onClick={onDelete} title="Delete" />
         </>
       ) : (
-        <div className="flex gap-3">
+        <>
           <ActionButton type="cancel" onClick={onCancel} title="Cancel changes" />
           <ActionButton type="save" onClick={onSave} title="Save changes" />
-        </div>
+        </>
       )}
     </div>
   )

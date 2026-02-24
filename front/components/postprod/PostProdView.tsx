@@ -101,9 +101,9 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-visible pb-32">
       {layout === 'grid' ? (
-        <div className={`grid grid-cols-1 gap-4 ${gridColumns === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+        <div className={`grid grid-cols-1 gap-4 overflow-visible ${gridColumns === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
           {filteredTasks.map((task) => {
             const CategoryIcon = getCategoryIcon(task.category)
             const isActiveMenu = activeStatusMenuId === task.id
@@ -112,7 +112,7 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
               <div
                 key={task.id}
                 onClick={() => onSelectTask?.(task.id)}
-                className="group p-4 border border-gray-300 dark:border-white/10 bg-[#fafafa] dark:bg-[#0a0a0a]/40 hover:border-primary/30 dark:hover:border-primary/30 transition-all cursor-pointer"
+                className="group p-4 border border-gray-300 dark:border-white/10 bg-[#fafafa] dark:bg-[#0a0a0a]/40 hover:border-primary/30 dark:hover:border-primary/30 transition-all cursor-pointer overflow-visible"
               >
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex items-center gap-3">
@@ -163,10 +163,10 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
                   <AnimatePresence>
                     {isActiveMenu && (
                       <motion.div
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute left-0 right-0 bottom-full mb-2 bg-[#fafafa] dark:bg-[#16181D] border border-gray-300 dark:border-white/10 p-1.5 z-50"
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute left-0 right-0 top-full mt-2 bg-[#fafafa] dark:bg-[#16181D] border border-gray-300 dark:border-white/10 p-1.5 z-[100]"
                       >
                         {(['todo', 'progress', 'review', 'done'] as const).map((s) => (
                           <button
@@ -249,7 +249,7 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
                           initial={{ opacity: 0, y: 5 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 5 }}
-                          className="absolute top-full right-0 mt-2 w-32 bg-[#fafafa] dark:bg-[#16181D] border border-gray-300 dark:border-white/10 p-1.5 z-50"
+                          className="absolute top-full right-0 mt-2 w-32 bg-[#fafafa] dark:bg-[#16181D] border border-gray-300 dark:border-white/10 p-1.5 z-[100]"
                         >
                           {(['todo', 'progress', 'review', 'done'] as const).map((s) => (
                             <button

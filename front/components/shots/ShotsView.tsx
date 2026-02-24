@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Aperture, Plus, Sun, Moon, MapPin, Check, Package, ChevronUp, ChevronDown } from 'lucide-react'
+import { Aperture, Plus, Sun, Moon, MapPin, Check, Package, ChevronUp, ChevronDown, Square } from 'lucide-react'
 
 import { Shot, ShotLayout, Equipment } from '@/types'
 import { calculateEndTime, timeToMinutes, getSunTimes, formatDateWithDay } from '@/utils'
@@ -223,34 +223,41 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
                               {shotLayout !== 'list' && (
                                 <div className="flex items-center justify-between gap-3">
                                   <div className="flex items-center gap-4">
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        handleToggleChecklist(shot.id)
-                                      }}
-                                      className={`h-9 pl-3 pr-2.5 flex items-center gap-2 text-xs font-mono  tracking-wider border transition-all ${isChecklistOpen
-                                        ? 'bg-primary/10 text-primary border-primary/30'
-                                        : 'bg-[#f5f5f5] dark:bg-[#16181D] text-muted-foreground border-gray-300 dark:border-white/10 hover:border-primary/30 dark:hover:border-primary/30 hover:text-foreground'
-                                        }`}
-                                    >
-                                      <span>Checklist</span>
-                                      {isChecklistOpen ? <ChevronUp size={14} className="opacity-50" /> : <ChevronDown size={14} className="opacity-50" />}
-                                    </button>
+                                    {(shot.equipmentIds || []).length > 0 && (
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          handleToggleChecklist(shot.id)
+                                        }}
+                                        className={`h-9 px-2 flex items-center gap-2 text-xs font-mono tracking-wider transition-all ${isChecklistOpen
+                                          ? 'text-primary'
+                                          : 'text-muted-foreground hover:text-foreground'
+                                          }`}
+                                      >
+                                        <span>Checklist</span>
+                                        {isChecklistOpen ? <ChevronUp size={14} className="opacity-50" /> : <ChevronDown size={14} className="opacity-50" />}
+                                      </button>
+                                    )}
 
-                                    <div className="flex items-center gap-2 text-xs font-mono  tracking-wider text-primary">
-                                      <Package size={18} strokeWidth={2.5} />
-                                      <span>Gear {(shot.preparedEquipmentIds || []).length}/{(shot.equipmentIds || []).length}</span>
-                                    </div>
+                                    {(shot.equipmentIds || []).length > 0 && (
+                                      <div className="flex items-center gap-2 text-xs font-mono  tracking-wider text-primary">
+                                        <Package size={18} strokeWidth={2.5} />
+                                        <span>Gear {(shot.preparedEquipmentIds || []).length}/{(shot.equipmentIds || []).length}</span>
+                                      </div>
+                                    )}
+                                    {(shot.equipmentIds || []).length === 0 && (
+                                      <span className="text-xs font-mono text-muted-foreground tracking-wider">No gear for this shot</span>
+                                    )}
                                   </div>
 
                                     <button
                                     onClick={(e) => { e.stopPropagation(); onToggleStatus(shot.id) }}
                                     className={`${shotLayout === 'list' ? 'w-7 h-7' : 'w-8 h-8'} flex items-center justify-center border transition-all ${shot.status === 'done'
                                       ? 'bg-primary text-primary-foreground border-primary'
-                                      : 'bg-transparent text-muted-foreground border-gray-300 dark:border-white/10 hover:border-primary/30 dark:hover:border-primary/30'
+                                      : 'bg-transparent text-muted-foreground/50 border-gray-300 dark:border-white/10 hover:text-primary hover:border-primary/50 dark:hover:border-primary/50'
                                       }`}
                                   >
-                                    <Check size={14} strokeWidth={3} />
+                                    {shot.status === 'done' ? <Check size={14} strokeWidth={3} /> : <Square size={14} strokeWidth={2} />}
                                   </button>
                                 </div>
                               )}

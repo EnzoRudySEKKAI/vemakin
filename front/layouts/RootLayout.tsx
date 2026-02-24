@@ -395,7 +395,7 @@ const RootLayoutInner = () => {
   const handleToggleShotStatus = useCallback((id: string) => {
     const shot = activeData.shots.find(s => s.id === id)
     if (shot) {
-      const newStatus = shot.status === 'completed' ? 'pending' : 'completed'
+      const newStatus = shot.status === 'done' ? 'pending' : 'done'
       updateShotMutation.mutateAsync({ id, data: { status: newStatus } })
     }
   }, [activeData.shots, updateShotMutation])
@@ -516,6 +516,7 @@ const RootLayoutInner = () => {
           setMainView={handleNavigateToView}
           projectProgress={projectProgress}
           activeDate={activeDate}
+          dateFilter={dateFilter}
           shotLayout={shotLayout}
           setShotLayout={setShotLayout}
           isDateSelectorOpen={isDateSelectorOpen}

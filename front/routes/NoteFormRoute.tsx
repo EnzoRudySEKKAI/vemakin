@@ -1,9 +1,11 @@
 import React from 'react'
 import { useRouteContext } from '@/hooks/useRouteContext'
+import { useNavigateBack } from '@/hooks/useNavigateBack'
 import { NoteFormPage } from '@/components/notes/NoteFormPage'
 
 export const NoteFormRoute = () => {
     const ctx = useRouteContext()
+    const navigateBack = useNavigateBack()
 
     // Redirect to project creation if no projects exist
     if (!ctx.hasProjects) {
@@ -23,7 +25,7 @@ export const NoteFormRoute = () => {
 
     return (
         <NoteFormPage
-            onClose={() => ctx.navigate('/dashboard/notes')}
+            onClose={navigateBack}
             onSwitchForm={handleSwitchForm}
             onSubmit={(title, content, linkedId, linkType, attachments) => ctx.addNote({
                 id: crypto.randomUUID(),

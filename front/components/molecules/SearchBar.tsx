@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { Search, Calendar, X } from 'lucide-react'
 import { DatePicker } from '@/components/ui/DatePicker'
 
@@ -35,6 +36,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   onDateSelect,
   className = ''
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+
   const handleDateSelect = (date: string | null) => {
     onDateSelect?.(date)
     if (date) {
@@ -47,8 +50,35 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     }
   }
 
+  // Portal-based overlay that blocks all clicks underneath
+  const Overlay = isDatePickerOpen ? (
+    createPortal(
+      <div 
+        className="fixed inset-0 z-[9998]"
+        style={{ 
+          backgroundColor: 'transparent',
+          cursor: 'default'
+        }}
+        onClick={(e) => {
+          e.stopPropagation()
+          e.preventDefault()
+          onDatePickerToggle?.()
+        }}
+        onMouseDown={(e) => {
+          e.stopPropagation()
+          e.preventDefault()
+        }}
+        onPointerDown={(e) => {
+          e.stopPropagation()
+          e.preventDefault()
+        }}
+      />,
+      document.body
+    )
+  ) : null
+
   return (
-    <div className={`relative h-12 ${className}`}>
+    <div ref={containerRef} className={`relative h-12 ${className}`}>
       <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/30">
         <Search size={18} strokeWidth={2} />
       </div>
@@ -77,12 +107,15 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             <Calendar size={16} strokeWidth={2} />
           </button>
           {isDatePickerOpen && onDateSelect && (
-            <DatePicker
-              isOpen={isDatePickerOpen}
-              onClose={() => onDatePickerToggle?.()}
-              selectedDate={activeDate}
-              onSelectDate={handleDateSelect}
-            />
+            <>
+              {Overlay}
+              <DatePicker
+                isOpen={isDatePickerOpen}
+                onClose={() => onDatePickerToggle?.()}
+                selectedDate={activeDate}
+                onSelectDate={handleDateSelect}
+              />
+            </>
           )}
         </>
       )}

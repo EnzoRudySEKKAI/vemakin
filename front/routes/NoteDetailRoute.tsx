@@ -1,12 +1,14 @@
 import React from 'react'
 import { useParams } from 'react-router-dom'
 import { useRouteContext } from '@/hooks/useRouteContext'
+import { useNavigateBack } from '@/hooks/useNavigateBack'
 import { NoteDetailView } from '@/components/notes/NoteDetailView'
 import { DetailViewSkeleton } from '@/components/ui/DetailViewSkeleton'
 
 export const NoteDetailRoute = () => {
     const { id } = useParams<{ id: string }>()
     const ctx = useRouteContext()
+    const navigateBack = useNavigateBack()
 
     const note = ctx.activeData.notes.find(n => n.id === id)
 
@@ -28,7 +30,7 @@ export const NoteDetailRoute = () => {
             note={note}
             shots={ctx.activeData.shots}
             tasks={ctx.activeData.tasks}
-            onClose={() => ctx.navigate('/dashboard/notes')}
+            onClose={navigateBack}
             onUpdateNote={ctx.updateNote}
             onDeleteNote={(id) => {
                 ctx.deleteNote(id)

@@ -1,5 +1,6 @@
 import React, { lazy, Suspense, useEffect } from 'react'
 import { createBrowserRouter, createRoutesFromElements, Route, Navigate, Outlet, useLocation, useNavigate, useOutletContext } from 'react-router-dom'
+import { useNavigateBack } from '@/hooks/useNavigateBack'
 import { RootLayout } from '@/layouts/RootLayout'
 import { ProtectedRoute } from '@/routes/ProtectedRoute'
 import { AuthRoute } from '@/routes/AuthRoute'
@@ -107,11 +108,12 @@ export const router = createBrowserRouter(
 
 function SignInPageRoute() {
   const navigate = useNavigate()
+  const navigateBack = useNavigateBack()
   return (
     <Suspense fallback={<PageLoader />}>
-      <SignInView 
-        onBack={() => navigate('/auth')} 
-        onSignIn={() => navigate('/dashboard')} 
+      <SignInView
+        onBack={navigateBack}
+        onSignIn={() => navigate('/dashboard')}
       />
     </Suspense>
   )
@@ -119,11 +121,12 @@ function SignInPageRoute() {
 
 function SignUpPageRoute() {
   const navigate = useNavigate()
+  const navigateBack = useNavigateBack()
   return (
     <Suspense fallback={<PageLoader />}>
-      <SignUpView 
-        onBack={() => navigate('/auth')} 
-        onSignUp={() => navigate('/dashboard')} 
+      <SignUpView
+        onBack={navigateBack}
+        onSignUp={() => navigate('/dashboard')}
       />
     </Suspense>
   )

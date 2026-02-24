@@ -1,9 +1,11 @@
 import React from 'react'
 import { useRouteContext } from '@/hooks/useRouteContext'
+import { useNavigateBack } from '@/hooks/useNavigateBack'
 import { ProjectsManagerView } from '@/components/projects/ProjectsManagerView'
 
 export const ProjectsRoute = () => {
     const ctx = useRouteContext()
+    const navigateBack = useNavigateBack()
 
     return (
         <ProjectsManagerView
@@ -14,7 +16,7 @@ export const ProjectsRoute = () => {
             onRenameProject={(oldName, newName) => {
                 // TODO: Implement rename project
             }}
-            onBack={() => ctx.navigate('/dashboard/settings')}
+            onBack={navigateBack}
             onCreateProject={() => ctx.navigate('/dashboard/projects/new')}
         />
     )

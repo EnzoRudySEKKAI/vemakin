@@ -1,12 +1,14 @@
 import React from 'react'
 import { useParams } from 'react-router-dom'
 import { useRouteContext } from '@/hooks/useRouteContext'
+import { useNavigateBack } from '@/hooks/useNavigateBack'
 import { TaskDetailView } from '@/components/postprod/TaskDetailView'
 import { DetailViewSkeleton } from '@/components/ui/DetailViewSkeleton'
 
 export const TaskDetailRoute = () => {
     const { id } = useParams<{ id: string }>()
     const ctx = useRouteContext()
+    const navigateBack = useNavigateBack()
 
     const task = ctx.activeData.tasks.find(t => t.id === id)
 
@@ -27,7 +29,7 @@ export const TaskDetailRoute = () => {
         <TaskDetailView
             task={task}
             notes={ctx.activeData.notes}
-            onClose={() => ctx.navigate('/dashboard/pipeline')}
+            onClose={navigateBack}
             onUpdateTask={ctx.updateTask}
             onDeleteTask={(id) => {
                 ctx.deleteTask(id)
