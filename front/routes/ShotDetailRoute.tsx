@@ -1,12 +1,14 @@
 import React from 'react'
 import { useParams } from 'react-router-dom'
 import { useRouteContext } from '@/hooks/useRouteContext'
+import { useNavigateBack } from '@/hooks/useNavigateBack'
 import { ShotDetailView } from '@/components/shots/ShotDetailView'
 import { DetailViewSkeleton } from '@/components/ui/DetailViewSkeleton'
 
 export const ShotDetailRoute = () => {
     const { id } = useParams<{ id: string }>()
     const ctx = useRouteContext()
+    const navigateBack = useNavigateBack()
 
     const selectedShot = ctx.activeData.shots.find(s => s.id === id)
 
@@ -28,7 +30,7 @@ export const ShotDetailRoute = () => {
             selectedShot={selectedShot}
             allShots={ctx.activeData.shots}
             notes={ctx.activeData.notes}
-            onClose={() => ctx.navigate('/dashboard/shots')}
+            onClose={navigateBack}
             onToggleStatus={ctx.toggleShotStatus}
             onToggleEquipment={ctx.toggleEquipmentStatus}
             onUpdateShot={ctx.updateShot}

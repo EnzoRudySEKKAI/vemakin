@@ -1,9 +1,11 @@
 import React from 'react'
 import { useRouteContext } from '@/hooks/useRouteContext'
+import { useNavigateBack } from '@/hooks/useNavigateBack'
 import { TaskFormPage } from '@/components/postprod/TaskFormPage'
 
 export const TaskFormRoute = () => {
     const ctx = useRouteContext()
+    const navigateBack = useNavigateBack()
 
     // Redirect to project creation if no projects exist
     if (!ctx.hasProjects) {
@@ -23,7 +25,7 @@ export const TaskFormRoute = () => {
 
     return (
         <TaskFormPage
-            onClose={() => ctx.navigate('/dashboard/pipeline')}
+            onClose={navigateBack}
             onSwitchForm={handleSwitchForm}
             onSubmit={ctx.addTask}
             hasProjects={ctx.hasProjects}

@@ -84,7 +84,7 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
 
         <motion.div variants={itemVariants} className="space-y-3">
           <div className="flex items-center justify-between px-1">
-          <h2 className="text-[10px] font-bold  tracking-[0.2em] text-gray-500 dark:text-white/30">Active Workspaces</h2>
+          <h2 className="text-[10px] font-bold  tracking-[0.2em] text-gray-500 dark:text-white/30">Active workspaces</h2>
           <div className="flex items-center gap-3">
             <span className="text-[10px] font-mono text-gray-400 dark:text-white/20">{projects.length} Projects</span>
             {onCreateProject && (

@@ -1,9 +1,11 @@
 import React from 'react'
 import { useRouteContext } from '@/hooks/useRouteContext'
+import { useNavigateBack } from '@/hooks/useNavigateBack'
 import { ShotFormPage } from '@/components/shots/ShotFormPage'
 
 export const ShotFormRoute = () => {
     const ctx = useRouteContext()
+    const navigateBack = useNavigateBack()
 
     // Redirect to project creation if no projects exist
     if (!ctx.hasProjects) {
@@ -23,7 +25,7 @@ export const ShotFormRoute = () => {
 
     return (
         <ShotFormPage
-            onClose={() => ctx.navigate('/dashboard/shots')}
+            onClose={navigateBack}
             onSwitchForm={handleSwitchForm}
             onSubmit={ctx.addShot}
             inventory={ctx.allInventory}
