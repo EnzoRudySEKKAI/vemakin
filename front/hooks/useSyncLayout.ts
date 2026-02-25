@@ -14,17 +14,17 @@ export interface UseSyncLayoutReturn {
 }
 
 const VIEW_OFFSETS: Record<string, number> = {
-  shots: 8,
+  shots: 12,
   inventory: 12,
-  notes: 16,
+  notes: 12,
   postprod: 12,
   overview: 12,
-  settings: 8,
+  settings: 12,
   'equipment-detail': 12,
   'shot-detail': 12,
   'note-detail': 12,
   'task-detail': 12,
-  'manage-projects': 8,
+  'manage-projects': 12,
 };
 
 const DEFAULT_HEIGHTS: Record<string, number> = {
