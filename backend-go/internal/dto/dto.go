@@ -235,6 +235,7 @@ type UserResponse struct {
 	HubTasksLimit        *int     `json:"hubTasksLimit"`
 	HubNotesLimit        *int     `json:"hubNotesLimit"`
 	HubEquipmentLimit    *int     `json:"hubEquipmentLimit"`
+	FirstConnection      *bool    `json:"firstConnection"`
 }
 
 type UpdateUserRequest struct {
@@ -248,6 +249,7 @@ type UpdateUserRequest struct {
 	HubTasksLimit        *int     `json:"hub_tasks_limit"`
 	HubNotesLimit        *int     `json:"hub_notes_limit"`
 	HubEquipmentLimit    *int     `json:"hub_equipment_limit"`
+	FirstConnection      *bool    `json:"first_connection"`
 }
 
 type ErrorResponse struct {

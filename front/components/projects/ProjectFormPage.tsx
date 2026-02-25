@@ -8,11 +8,13 @@ import { TerminalCard } from '@/components/ui/TerminalCard'
 interface ProjectFormPageProps {
   onClose: () => void
   onSubmit: (name: string) => void
+  isFirstProject?: boolean
 }
 
 export const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
   onClose,
-  onSubmit
+  onSubmit,
+  isFirstProject = false
 }) => {
   const { setActions, setTitle, setSubtitle, setOnBack, setDetailLabel } = useHeaderActions()
   const [form, setForm] = useState({

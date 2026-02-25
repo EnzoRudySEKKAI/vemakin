@@ -19,6 +19,7 @@ interface AuthState {
   login: (name: string, email: string) => void
   logout: () => Promise<void>
   setLoading: (loading: boolean) => void
+  updateFirstConnection: (value: boolean) => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -70,7 +71,8 @@ export const useAuthStore = create<AuthState>()(
                 hubShotsLimit: userProfile?.hubShotsLimit,
                 hubTasksLimit: userProfile?.hubTasksLimit,
                 hubNotesLimit: userProfile?.hubNotesLimit,
-                hubEquipmentLimit: userProfile?.hubEquipmentLimit
+                hubEquipmentLimit: userProfile?.hubEquipmentLimit,
+                firstConnection: userProfile?.firstConnection ?? true
               },
               previousUserId: user.uid,
               isLoadingAuth: false
@@ -147,6 +149,18 @@ export const useAuthStore = create<AuthState>()(
 
       setLoading: (loading: boolean) => {
         set({ isLoadingAuth: loading })
+      },
+
+      updateFirstConnection: (value: boolean) => {
+        const { currentUser } = get()
+        if (currentUser) {
+          set({
+            currentUser: {
+              ...currentUser,
+              firstConnection: value
+            }
+          })
+        }
       }
     }),
     {
