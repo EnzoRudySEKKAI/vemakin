@@ -101,9 +101,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   <div className="w-12 h-12 bg-primary/20 flex items-center justify-center text-primary font-bold text-base font-mono">
                     {getInitials(user.name)}
                   </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-emerald-500 border-2 border-background flex items-center justify-center">
-                    <ShieldCheck size={7} className="text-white" strokeWidth={3} />
-                  </div>
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-semibold truncate">
