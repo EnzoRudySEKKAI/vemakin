@@ -85,11 +85,11 @@ export const PostProdView: React.FC<PostProdViewProps> = React.memo(({
 
   if (filteredTasks.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-300px)] w-full overflow-hidden px-6 select-none">
-        <div className="w-14 h-14 border border-white/10 bg-[#0a0a0a]/40 flex items-center justify-center mb-6">
-          <Scissors size={24} className="text-muted-foreground" />
-        </div>
+      <div className="centered-empty px-6 select-none">
         <div className="text-center max-w-sm">
+          <div className="w-14 h-14 border border-white/10 bg-[#0a0a0a]/40 flex items-center justify-center mb-6 mx-auto">
+            <Scissors size={24} className="text-muted-foreground" />
+          </div>
           <h2 className="text-xl font-semibold text-foreground mb-2 font-mono  tracking-wider">Empty pipeline</h2>
           <p className="text-muted-foreground mb-8 text-sm font-mono">No active tasks found. Add your first task.</p>
           <TerminalButton variant="primary" onClick={onAddTask}>

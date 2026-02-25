@@ -393,15 +393,13 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
 
                 {/* Schedule */}
                 <div className="w-full">
-                  <span className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-2 block">Schedule</span>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-                    <div className="relative">
-                      <DatePickerInput
-                        value={editedItem.date}
-                        onChange={date => setEditedItem({ ...editedItem, date: date || '' })}
-                        fullWidth
-                      />
-                    </div>
+                    <DatePickerInput
+                      label="Schedule"
+                      value={editedItem.date}
+                      onChange={date => setEditedItem({ ...editedItem, date: date || '' })}
+                      fullWidth
+                    />
                     <TimeSelector 
                       label="START TIME" 
                       value={editedItem.startTime} 
@@ -442,7 +440,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                   <Textarea
                     value={editedItem.description}
                     onChange={e => setEditedItem({ ...editedItem, description: e.target.value })}
-                    placeholder=" Describe the action, atmosphere, and key visual elements..."
+                    placeholder="Describe the action, atmosphere, and key visual elements..."
                     className="min-h-[120px]"
                   />
                 </div>

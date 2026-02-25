@@ -8,3 +8,4 @@ export * from './TimeSelector.tsx';
 export * from './EmptyState.tsx';
 export * from './Skeleton';
 export * from './DetailViewSkeleton';
+export * from './TerminalSelect';

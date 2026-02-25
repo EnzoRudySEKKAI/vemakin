@@ -170,6 +170,68 @@ const RootLayoutInner = () => {
   const projectProgress = useProjectProgress(activeData.shots)
   const allInventory = inventoryQuery.data || []
 
+  // Calculate sidebar stats
+  const sidebarStats = useMemo(() => {
+    const shots = shotsQuery.data || []
+    const inventory = inventoryQuery.data || []
+    const tasks = tasksQuery.data || []
+    const notes = notesQuery.data || []
+
+    // Calculate tasks by category
+    const tasksByCategory: Record<string, number> = {}
+    tasks.forEach(task => {
+      tasksByCategory[task.category] = (tasksByCategory[task.category] || 0) + 1
+    })
+
+    // Calculate inventory by category
+    const inventoryByCategory: Record<string, number> = {}
+    inventory.forEach(item => {
+      inventoryByCategory[item.category] = (inventoryByCategory[item.category] || 0) + 1
+    })
+
+    // Calculate notes by category (General, Shots, Script, Editing, Sound, VFX, Color)
+    const notesByCategory: Record<string, number> = {
+      General: 0,
+      Shots: 0,
+      Script: 0,
+      Editing: 0,
+      Sound: 0,
+      VFX: 0,
+      Color: 0,
+    }
+    notes.forEach(note => {
+      if (note.shotId) {
+        notesByCategory.Shots++
+      } else if (note.taskId) {
+        const task = tasks.find(t => t.id === note.taskId)
+        if (task && task.category) {
+          notesByCategory[task.category]++
+        }
+      } else {
+        notesByCategory.General++
+      }
+    })
+
+    return {
+      shotsCount: shots.length,
+      completedShotsCount: shots.filter(s => s.status === 'done').length,
+      inventoryCount: inventory.length,
+      rentedCount: inventory.filter(i => !i.isOwned).length,
+      ownedCount: inventory.filter(i => i.isOwned).length,
+      tasksCount: tasks.length,
+      tasksByStatus: {
+        todo: tasks.filter(t => t.status === 'todo').length,
+        progress: tasks.filter(t => t.status === 'progress').length,
+        review: tasks.filter(t => t.status === 'review').length,
+        done: tasks.filter(t => t.status === 'done').length,
+      },
+      notesCount: notes.length,
+      tasksByCategory,
+      inventoryByCategory,
+      notesByCategory,
+    }
+  }, [shotsQuery.data, inventoryQuery.data, tasksQuery.data, notesQuery.data])
+
   // Helper to set project by name (looks up the ID)
   const setCurrentProjectByName = useCallback((name: string) => {
     const project = projectsQuery.data?.find(p => p.name === name)
@@ -432,7 +494,7 @@ const RootLayoutInner = () => {
   // The Header contains the LCP element (h1 title)
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#0F1116] text-[#16181D] dark:text-white">
+      <div className="min-h-[100dvh] min-h-[100svh] bg-[#F2F2F7] dark:bg-[#0F1116] text-[#16181D] dark:text-white">
         <Header
           ref={headerRef}
           filterTranslateY={0}
@@ -498,7 +560,7 @@ const RootLayoutInner = () => {
 
   return (
     <HeaderActionsProvider>
-      <div className={`min-h-screen bg-[#F2F2F7] dark:bg-[#0F1116] text-[#16181D] selection:bg-blue-100 dark:text-white transition-colors duration-500 ${darkMode ? 'dark' : ''}`}>
+      <div className={`min-h-[100dvh] min-h-[100svh] h-full w-full bg-[#F2F2F7] dark:bg-[#0F1116] text-[#16181D] selection:bg-blue-100 dark:text-white transition-colors duration-500 ${darkMode ? 'dark' : ''}`}>
         <Header
           ref={headerRef}
           filterTranslateY={effectiveHeaderTranslateY}
@@ -560,14 +622,15 @@ const RootLayoutInner = () => {
             scale={1 - navScrollProgress}
             isAnimating={navIsAnimating}
             hasProjects={hasProjects}
+            stats={sidebarStats}
           />
         )}
 
         <div
-          className={`content-wrapper px-4 md:px-6 pb-0 ${shouldHideNavigation ? '' : 'lg:pl-[calc(88px+1.5rem)] 2xl:pl-[calc(280px+1.5rem)]'} view-${mainView}`}
+          className={`content-wrapper px-4 md:px-6 ${shouldHideNavigation ? '' : 'lg:pl-[calc(88px+1.5rem)] 2xl:pl-[calc(280px+1.5rem)]'} view-${mainView}`}
           style={mainView === 'settings' || mainView === 'manage-projects' ? { paddingTop: 0 } : layoutStyle}
         >
-          <main className={`mx-auto w-full transition-all duration-500 ease-in-out ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`} style={{ paddingBottom: shouldHideNavigation ? '24px' : '120px' }}>
+          <main className={`flex-1 flex flex-col mx-auto w-full transition-all duration-500 ease-in-out ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`} style={{ paddingBottom: shouldHideNavigation ? '80px' : '140px' }}>
             {/* Remove AnimatePresence mode="wait" to prevent blocking navigation
                 The key prop ensures React reconciles properly without waiting for exit animations */}
             <PageTransition key={location.pathname}>

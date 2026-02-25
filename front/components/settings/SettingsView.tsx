@@ -1,52 +1,37 @@
-import React, { useState } from 'react'
-import { motion, Reorder } from 'framer-motion'
+import React from 'react'
+import { motion } from 'framer-motion'
 import {
   Moon, Sun, Briefcase, ChevronRight,
   LogOut, User as UserIcon, BookOpen,
   FileText, ShieldCheck, Globe, Download, Upload,
-  LayoutGrid, GripVertical, Film, Package, CheckSquare, StickyNote
+  Palette
 } from 'lucide-react'
 import { TerminalCard, TerminalCardContent } from '@/components/ui/TerminalCard'
 import { TerminalButton } from '@/components/ui/TerminalButton'
 import { Switch } from '@/components/ui/switch'
-import { User, HubCardType } from '@/types'
+import { User } from '@/types'
 
 interface SettingsViewProps {
   onNavigateToProjects: () => void
+  onNavigateToCustomization: () => void
   user: User | null
   onLogin: () => void
   onLogout: () => void
   onOpenTutorial: () => void
   darkMode: boolean
   onToggleDarkMode: () => void
-  postProdGridColumns: 2 | 3
-  notesGridColumns: 2 | 3
-  inventoryGridColumns: 2 | 3
-  hubCardOrder: HubCardType[]
-  onPostProdGridColumnsChange: (columns: 2 | 3) => void
-  onNotesGridColumnsChange: (columns: 2 | 3) => void
-  onInventoryGridColumnsChange: (columns: 2 | 3) => void
-  onHubCardOrderChange: (order: HubCardType[]) => void
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
   onNavigateToProjects,
+  onNavigateToCustomization,
   user,
   onLogin,
   onLogout,
   onOpenTutorial,
   darkMode,
   onToggleDarkMode,
-  postProdGridColumns,
-  notesGridColumns,
-  inventoryGridColumns,
-  hubCardOrder,
-  onPostProdGridColumnsChange,
-  onNotesGridColumnsChange,
-  onInventoryGridColumnsChange,
-  onHubCardOrderChange
 }) => {
-  const [cards, setCards] = useState<HubCardType[]>(hubCardOrder)
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
   }
@@ -62,29 +47,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const itemVariants = {
     hidden: { opacity: 0, y: 15 },
     show: { opacity: 1, y: 0 }
-  }
-
-  const getCardConfig = (card: HubCardType) => {
-    switch (card) {
-      case 'timeline':
-        return { icon: Film, label: 'Timeline', color: 'text-blue-400' }
-      case 'equipment':
-        return { icon: Package, label: 'Equipment', color: 'text-emerald-400' }
-      case 'tasks':
-        return { icon: CheckSquare, label: 'Tasks', color: 'text-amber-400' }
-      case 'notes':
-        return { icon: StickyNote, label: 'Notes', color: 'text-purple-400' }
-      default:
-        return { icon: LayoutGrid, label: card, color: 'text-primary' }
-    }
-  }
-
-  const handleReorder = (newOrder: HubCardType[]) => {
-    setCards(newOrder)
-  }
-
-  const handleDragEnd = () => {
-    onHubCardOrderChange(cards)
   }
 
   const SettingItem = ({ 
@@ -139,9 +101,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   <div className="w-12 h-12 bg-primary/20 flex items-center justify-center text-primary font-bold text-base font-mono">
                     {getInitials(user.name)}
                   </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-emerald-500 border-2 border-background flex items-center justify-center">
-                    <ShieldCheck size={7} className="text-white" strokeWidth={3} />
-                  </div>
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-semibold truncate">
@@ -192,6 +151,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               onClick={onNavigateToProjects} 
             />
 
+            <SettingItem 
+              icon={Palette} 
+              label="Customization" 
+              onClick={onNavigateToCustomization} 
+            />
+
             <div 
               className="p-2 flex items-center gap-3 bg-card border border-border hover:border-primary/30 transition-all"
             >
@@ -202,106 +167,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <Switch checked={darkMode} onCheckedChange={onToggleDarkMode} />
             </div>
           </div>
-        </motion.section>
-
-        {/* Layout Section */}
-        <motion.section variants={itemVariants} className="space-y-2">
-          <h2 className="text-[11px] font-mono  tracking-wider text-muted-foreground px-1">
-            Layout
-          </h2>
-
-          <h3 className="text-[10px] font-mono  tracking-wider text-muted-foreground px-1">
-            Desktop only
-          </h3>
-          
-          <div className="space-y-2">
-            <div 
-              className="p-2 flex items-center gap-3 bg-card border border-border hover:border-primary/30 transition-all"
-            >
-              <div className="w-9 h-9 flex items-center justify-center shrink-0 bg-primary/10 text-primary">
-                <LayoutGrid size={18} strokeWidth={2} />
-              </div>
-              <span className="text-sm font-medium flex-1">Inventory columns</span>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">2</span>
-                <Switch 
-                  checked={inventoryGridColumns === 3} 
-                  onCheckedChange={(checked) => onInventoryGridColumnsChange(checked ? 3 : 2)} 
-                />
-                <span className="text-xs text-muted-foreground">3</span>
-              </div>
-            </div>
-
-            <div 
-              className="p-2 flex items-center gap-3 bg-card border border-border hover:border-primary/30 transition-all"
-            >
-              <div className="w-9 h-9 flex items-center justify-center shrink-0 bg-primary/10 text-primary">
-                <LayoutGrid size={18} strokeWidth={2} />
-              </div>
-              <span className="text-sm font-medium flex-1">Pipeline columns</span>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">2</span>
-                <Switch 
-                  checked={postProdGridColumns === 3} 
-                  onCheckedChange={(checked) => onPostProdGridColumnsChange(checked ? 3 : 2)} 
-                />
-                <span className="text-xs text-muted-foreground">3</span>
-              </div>
-            </div>
-
-            <div 
-              className="p-2 flex items-center gap-3 bg-card border border-border hover:border-primary/30 transition-all"
-            >
-              <div className="w-9 h-9 flex items-center justify-center shrink-0 bg-primary/10 text-primary">
-                <LayoutGrid size={18} strokeWidth={2} />
-              </div>
-              <span className="text-sm font-medium flex-1">Notes columns</span>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">2</span>
-                <Switch 
-                  checked={notesGridColumns === 3} 
-                  onCheckedChange={(checked) => onNotesGridColumnsChange(checked ? 3 : 2)} 
-                />
-                <span className="text-xs text-muted-foreground">3</span>
-              </div>
-            </div>
-          </div>
-
-          <h3 className="text-[10px] font-mono tracking-wider text-muted-foreground px-1 pt-2">
-            Home cards order
-          </h3>
-          
-          <Reorder.Group 
-            axis="y" 
-            values={cards} 
-            onReorder={handleReorder}
-            className="space-y-2"
-          >
-            {cards.map((card) => {
-              const config = getCardConfig(card)
-              const Icon = config.icon
-              return (
-                <Reorder.Item 
-                  key={card} 
-                  value={card}
-                  className="cursor-grab active:cursor-grabbing"
-                  onDragEnd={handleDragEnd}
-                >
-                  <div 
-                    className="p-2 flex items-center gap-3 bg-card border border-border hover:border-primary/30 transition-all select-none"
-                  >
-                    <div className="text-muted-foreground shrink-0">
-                      <GripVertical size={16} />
-                    </div>
-                    <div className={`w-9 h-9 flex items-center justify-center shrink-0 bg-primary/10 ${config.color}`}>
-                      <Icon size={18} strokeWidth={2} />
-                    </div>
-                    <span className="text-sm font-medium flex-1">{config.label}</span>
-                  </div>
-                </Reorder.Item>
-              )
-            })}
-          </Reorder.Group>
         </motion.section>
 
         {/* Data & Cloud Section - Coming Soon */}

@@ -106,12 +106,11 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
 
   if (totalShots === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-220px)] w-full overflow-hidden px-6 select-none">
-        <div className="w-14 h-14 border border-white/10 bg-[#0a0a0a]/40 flex items-center justify-center mb-6">
-          <Aperture size={24} className="text-muted-foreground" />
-        </div>
-
+      <div className="centered-empty px-6 select-none">
         <div className="text-center max-w-sm">
+          <div className="w-14 h-14 border border-white/10 bg-[#0a0a0a]/40 flex items-center justify-center mb-6 mx-auto">
+            <Aperture size={24} className="text-muted-foreground" />
+          </div>
           <h2 className="text-xl font-semibold text-foreground mb-2 font-mono  tracking-wider">
             {searchQuery || statusFilter !== 'all' ? "No matches found" : "Empty timeline"}
           </h2>
@@ -174,15 +173,17 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
                       <div key={shot.id}>
                         {shotLayout === 'timeline' && idx > 0 && !searchQuery && statusFilter === 'all' && (
                           <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-center lg:gap-4 my-4 px-2">
-                            <TravelIndicator
-                              from={dayShots[idx - 1].location}
-                              to={shot.location}
-                              fromLat={dayShots[idx - 1].locationLat}
-                              fromLng={dayShots[idx - 1].locationLng}
-                              toLat={shot.locationLat}
-                              toLng={shot.locationLng}
-                              availableMinutes={availableMinutes}
-                            />
+                            {dayShots[idx - 1].location && dayShots[idx - 1].location !== 'Location TBD' && shot.location && shot.location !== 'Location TBD' && (
+                              <TravelIndicator
+                                from={dayShots[idx - 1].location}
+                                to={shot.location}
+                                fromLat={dayShots[idx - 1].locationLat}
+                                fromLng={dayShots[idx - 1].locationLng}
+                                toLat={shot.locationLat}
+                                toLng={shot.locationLng}
+                                availableMinutes={availableMinutes}
+                              />
+                            )}
                             <GearTransition
                               prevShot={dayShots[idx - 1]}
                               nextShot={shot}

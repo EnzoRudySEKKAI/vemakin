@@ -15,6 +15,10 @@ type User struct {
 	NotesGridColumns     *int    `db:"notes_grid_columns" json:"notesGridColumns"`
 	InventoryGridColumns *int    `db:"inventory_grid_columns" json:"inventoryGridColumns"`
 	HubCardOrder         []byte  `db:"hub_card_order" json:"-"`
+	HubShotsLimit        *int    `db:"hub_shots_limit" json:"hubShotsLimit"`
+	HubTasksLimit        *int    `db:"hub_tasks_limit" json:"hubTasksLimit"`
+	HubNotesLimit        *int    `db:"hub_notes_limit" json:"hubNotesLimit"`
+	HubEquipmentLimit    *int    `db:"hub_equipment_limit" json:"hubEquipmentLimit"`
 }
 
 type Project struct {

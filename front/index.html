@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
     <meta name="theme-color" content="#0F1116">
     <meta name="description" content="Vemakin - Production OS for film and video production management. Plan shots, manage equipment, track post-production, and collaborate with your team.">
     <meta name="keywords" content="film production, video production, production management, shot planning, equipment management, post-production">
@@ -35,10 +35,16 @@
     <link rel="mask-icon" href="/favicon.svg" color="#4E47DD">
     <meta name="msapplication-TileColor" content="#0F1116">
     
-    <style>
+        <style>
         html {
             background-color: #0F1116;
             color-scheme: dark;
+            min-height: 100vh;
+            min-height: 100dvh;
+            min-height: 100svh;
+            min-height: -webkit-fill-available;
+            overscroll-behavior-y: none;
+            -webkit-overscroll-behavior-y: none;
         }
 
         html:not(.dark) {
@@ -48,9 +54,14 @@
         
         body {
             min-height: 100vh;
+            min-height: 100dvh;
+            min-height: 100svh;
+            min-height: -webkit-fill-available;
             font-family: Menlo, monospace;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            overscroll-behavior-y: none;
+            -webkit-overscroll-behavior-y: none;
         }
 
         @keyframes pulse {
@@ -125,8 +136,13 @@
         
         .app-container {
             min-height: 100vh;
+            min-height: 100dvh;
+            min-height: 100svh;
+            min-height: -webkit-fill-available;
             display: flex;
             flex-direction: column;
+            overscroll-behavior-y: none;
+            -webkit-overscroll-behavior-y: none;
         }
         
         @keyframes fadeIn {
@@ -136,6 +152,24 @@
         
         .fade-in {
             animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        .safe-area-bottom {
+            padding-bottom: env(safe-area-inset-bottom, 34px);
+            padding-bottom: constant(safe-area-inset-bottom);
+        }
+        
+        /* Prevent tap highlight on mobile */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Ensure root div fills viewport */
+        #root {
+            min-height: 100vh;
+            min-height: 100dvh;
+            min-height: 100svh;
+            min-height: -webkit-fill-available;
         }
     </style>
     

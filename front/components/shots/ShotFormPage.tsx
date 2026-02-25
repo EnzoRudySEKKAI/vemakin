@@ -170,14 +170,12 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
       <TerminalCard header="Schedule & location" className="mb-8">
         <div className="space-y-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="relative">
-              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Filming date</span>
-              <DatePickerInput
-                value={form.date}
-                onChange={date => setForm(prev => ({ ...prev, date: date || '' }))}
-                fullWidth
-              />
-            </div>
+            <DatePickerInput
+              label="Schedule"
+              value={form.date}
+              onChange={date => setForm(prev => ({ ...prev, date: date || '' }))}
+              fullWidth
+            />
             <TimeSelector 
               label="START TIME" 
               value={form.startTime} 
@@ -242,7 +240,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
         <Textarea
           value={form.description}
           onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))}
-          placeholder=" Describe the action, atmosphere, and key visual elements..."
+          placeholder="Describe the action, atmosphere, and key visual elements..."
           className="min-h-[120px]"
         />
       </TerminalCard>

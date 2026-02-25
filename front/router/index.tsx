@@ -25,6 +25,7 @@ const PipelineRoute = lazy(() => import('@/routes/PipelineRoute').then(m => ({ d
 const TaskDetailRoute = lazy(() => import('@/routes/TaskDetailRoute').then(m => ({ default: m.TaskDetailRoute })))
 const TaskFormRoute = lazy(() => import('@/routes/TaskFormRoute').then(m => ({ default: m.TaskFormRoute })))
 const SettingsRoute = lazy(() => import('@/routes/SettingsRoute').then(m => ({ default: m.SettingsRoute })))
+const CustomizationRoute = lazy(() => import('@/routes/CustomizationRoute').then(m => ({ default: m.CustomizationRoute })))
 const ProjectsRoute = lazy(() => import('@/routes/ProjectsRoute').then(m => ({ default: m.ProjectsRoute })))
 const ProjectFormRoute = lazy(() => import('@/routes/ProjectFormRoute').then(m => ({ default: m.ProjectFormRoute })))
 
@@ -90,6 +91,7 @@ export const router = createBrowserRouter(
                     <Route path="pipeline/new" element={withSuspense(TaskFormRoute)} />
                     <Route path="pipeline/:id" element={withSuspense(TaskDetailRoute)} loader={detailLoader} hydrateFallbackElement={<PageLoader />} />
                     <Route path="settings" element={withSuspense(SettingsRoute)} />
+                    <Route path="settings/customization" element={withSuspense(CustomizationRoute)} />
                     <Route path="projects" element={withSuspense(ProjectsRoute)} />
                     <Route path="projects/new" element={withSuspense(ProjectFormRoute)} />
                     </Route>
@@ -178,6 +180,7 @@ export function getViewFromPath(pathname: string): string {
     if (pathname.match(/^\/dashboard\/pipeline\/[^/]+$/)) return 'task-detail'
     if (pathname === '/dashboard/pipeline') return 'postprod'
     if (pathname === '/dashboard/settings') return 'settings'
+    if (pathname === '/dashboard/settings/customization') return 'settings'
     if (pathname === '/dashboard/projects') return 'manage-projects'
     if (pathname === '/dashboard/projects/new') return 'new-project'
     return 'overview'
