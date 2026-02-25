@@ -182,7 +182,7 @@ export const ShotForm = ({ inventory, existingShots, onSubmit }: ShotFormProps) 
           <Textarea
             value={description}
             onChange={e => setDescription(e.target.value)}
-            placeholder=" Describe the action, atmosphere, and key visual elements..."
+            placeholder="Describe the action, atmosphere, and key visual elements..."
             size="md"
           />
         </div>

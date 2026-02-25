@@ -15,9 +15,22 @@ interface NavigationProps {
   scale?: number
   isAnimating?: boolean
   hasProjects?: boolean
+  stats?: {
+    shotsCount?: number
+    completedShotsCount?: number
+    inventoryCount?: number
+    rentedCount?: number
+    ownedCount?: number
+    tasksCount?: number
+    tasksByStatus?: { todo: number; progress: number; review: number; done: number }
+    notesCount?: number
+    tasksByCategory?: Record<string, number>
+    inventoryByCategory?: Record<string, number>
+    notesByCategory?: Record<string, number>
+  }
 }
 
-export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, setMainView, onPlusClick, scale = 1, isAnimating = false, hasProjects = true }) => {
+export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, setMainView, onPlusClick, scale = 1, isAnimating = false, hasProjects = true, stats }) => {
   // Optimized prefetch handler - triggers on interaction start (mousedown/touchstart)
   // This gives ~100ms head start before click event fires, improving perceived performance
   const handlePrefetch = useCallback((view: MainView | undefined, isActive: boolean) => {
@@ -30,6 +43,116 @@ export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, set
     prefetchedRoutes.add(path)
     prefetchRoute(path)
   }, [])
+
+  const SidebarStats = () => {
+    if (!stats) return null
+
+    const renderStats = () => {
+      switch (mainView) {
+        case 'shots':
+        case 'shot-detail':
+          return (
+            <div className="flex flex-col gap-1">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-muted-foreground">Total shots</span>
+                <span className="text-xs font-mono font-medium">{stats.shotsCount || 0}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-muted-foreground">Completed</span>
+                <span className="text-xs font-mono font-medium">{stats.completedShotsCount || 0}</span>
+              </div>
+            </div>
+          )
+        case 'inventory':
+        case 'equipment-detail':
+          const inventoryCategories = stats.inventoryByCategory 
+            ? Object.entries(stats.inventoryByCategory).filter(([_, count]) => count > 0)
+            : []
+          return (
+            <div className="flex flex-col gap-1">
+              {inventoryCategories.length > 0 && (
+                <div className="mb-2 pb-2 border-b border-gray-200 dark:border-white/5">
+                  {inventoryCategories.map(([category, count]) => (
+                    <div key={category} className="flex justify-between items-center py-0.5">
+                      <span className="text-xs text-muted-foreground">{category}</span>
+                      <span className="text-xs font-mono font-medium">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-muted-foreground">Total items</span>
+                <span className="text-xs font-mono font-medium">{stats.inventoryCount || 0}</span>
+              </div>
+              <div className="flex justify-between items-center gap-2">
+                <span className="text-xs text-muted-foreground">Owned</span>
+                <span className="text-xs font-mono font-medium">{stats.ownedCount || 0}</span>
+                <span className="text-xs text-muted-foreground">/</span>
+                <span className="text-xs text-muted-foreground">Rented</span>
+                <span className="text-xs font-mono font-medium">{stats.rentedCount || 0}</span>
+              </div>
+            </div>
+          )
+        case 'postprod':
+        case 'task-detail':
+          const taskCategories = stats.tasksByCategory
+            ? Object.entries(stats.tasksByCategory).filter(([_, count]) => count > 0)
+            : []
+          return (
+            <div className="flex flex-col gap-1">
+              {taskCategories.length > 0 && (
+                <div className="mb-2 pb-2 border-b border-gray-200 dark:border-white/5">
+                  {taskCategories.map(([category, count]) => (
+                    <div key={category} className="flex justify-between items-center py-0.5">
+                      <span className="text-xs text-muted-foreground">{category}</span>
+                      <span className="text-xs font-mono font-medium">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-muted-foreground">Total tasks</span>
+                <span className="text-xs font-mono font-medium">{stats.tasksCount || 0}</span>
+              </div>
+            </div>
+          )
+        case 'notes':
+        case 'note-detail':
+          const notesCategories = stats.notesByCategory
+            ? Object.entries(stats.notesByCategory).filter(([_, count]) => count > 0)
+            : []
+          return (
+            <div className="flex flex-col gap-1">
+              {notesCategories.length > 0 && (
+                <div className="mb-2 pb-2 border-b border-gray-200 dark:border-white/5">
+                  {notesCategories.map(([category, count]) => (
+                    <div key={category} className="flex justify-between items-center py-0.5">
+                      <span className="text-xs text-muted-foreground">{category}</span>
+                      <span className="text-xs font-mono font-medium">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-muted-foreground">Total notes</span>
+                <span className="text-xs font-mono font-medium">{stats.notesCount || 0}</span>
+              </div>
+            </div>
+          )
+        default:
+          return null
+      }
+    }
+
+    const content = renderStats()
+    if (!content) return null
+
+    return (
+      <div className="hidden 2xl:block mt-auto p-2 border-t border-gray-200 dark:border-white/10 max-h-[40vh] overflow-y-auto">
+        {content}
+      </div>
+    )
+  }
 
   const NavItem = ({ view, icon: Icon, label, onClick }: { view?: MainView, icon: any, label: string, onClick: () => void }) => {
     const isActive = view ? mainView === view : false
@@ -137,6 +260,8 @@ export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, set
           <NavItem view="postprod" icon={Zap} label="Pipeline" onClick={() => setMainView('postprod')} />
           <NavItem view="notes" icon={StickyNote} label="Notes" onClick={() => setMainView('notes')} />
         </div>
+
+        <SidebarStats />
 
         {/* Add Button */}
         <button

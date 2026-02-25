@@ -38,6 +38,7 @@ interface EquipmentCardProps {
     owned: number
     rented: number
     topCategories: { name: string; count: number }[]
+    totalCategories: number
   }
   onNavigateToInventory: () => void
   itemVariants: Variants
@@ -119,7 +120,7 @@ const TimelineCard = memo<TimelineCardProps>(({
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium truncate">{shot.title}</div>
                 <div className="text-[10px] font-mono text-muted-foreground">
-                  {new Date(shot.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}_{shot.duration || '5min'}
+                  {new Date(shot.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} {shot.duration || '5min'}
                 </div>
               </div>
             </div>
@@ -145,7 +146,7 @@ const EquipmentCard = memo<EquipmentCardProps>(({
   <motion.div variants={itemVariants} layout="position">
     <TerminalCard 
       className="h-full"
-      header={`Equipment // ${inventory.length} items`}
+      header={`Equipment`}
       headerRight={
         <TerminalButton 
           variant="ghost" 
@@ -167,7 +168,7 @@ const EquipmentCard = memo<EquipmentCardProps>(({
               </div>
               <div className="p-2 border border-gray-300 flex items-center justify-between bg-[#fafafa] dark:bg-white/5 dark:border-white/10">
                 <span className="text-sm font-mono text-muted-foreground">Categories</span>
-                <span className="font-semibold">{inventoryStats.topCategories.length}</span>
+                <span className="font-semibold">{inventoryStats.totalCategories}</span>
               </div>
             </div>
 
@@ -222,7 +223,7 @@ const TasksCard = memo<TasksCardProps>(({
   <motion.div variants={itemVariants} layout="position">
     <TerminalCard 
       className="h-full"
-      header={`Tasks // ${tasks.filter(t => t.status !== 'done').length} pending`}
+      header={`Tasks`}
       headerRight={
         <TerminalButton 
           variant="ghost" 
@@ -278,7 +279,7 @@ const NotesCard = memo<NotesCardProps>(({
   <motion.div variants={itemVariants} layout="position">
     <TerminalCard 
       className="h-full"
-      header={`Notes // ${notes.length} entries`}
+      header={`Notes`}
       headerRight={
         <TerminalButton 
           variant="ghost" 
@@ -298,10 +299,10 @@ const NotesCard = memo<NotesCardProps>(({
               onClick={() => onSelectNote?.(note.id)}
               className="p-3 border border-gray-300 hover:border-primary/50 transition-all cursor-pointer bg-[#fafafa] dark:bg-white/5 dark:border-white/10 dark:hover:border-primary/50"
             >
-              <div className="flex items-start justify-between gap-2 mb-1">
+              <div className="flex items-start justify-between gap-2">
                 <div className="text-sm font-medium leading-tight">{note.title}</div>
                 <div className="text-[10px] font-mono text-muted-foreground whitespace-nowrap">
-                  {new Date(note.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()}
+                  {new Date(note.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </div>
               </div>
               <div className="text-xs text-muted-foreground line-clamp-2">{note.content}</div>
@@ -344,8 +345,19 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
   const upcomingShots = useMemo(() => {
     return shots
       .filter(s => s.status === 'pending')
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .slice(0, 4)
+      .sort((a, b) => {
+        // First compare by date
+        const dateA = new Date(a.date).getTime()
+        const dateB = new Date(b.date).getTime()
+        if (dateA !== dateB) {
+          return dateA - dateB
+        }
+        // If dates are equal, compare by startTime
+        const timeA = a.startTime || ''
+        const timeB = b.startTime || ''
+        return timeA.localeCompare(timeB)
+      })
+      .slice(0, 3)
   }, [shots])
 
   const pendingTasks = useMemo(() => {
@@ -356,7 +368,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
         if (b.priority === 'critical' && a.priority !== 'critical') return 1
         return 0
       })
-      .slice(0, 4)
+      .slice(0, 3)
   }, [tasks])
 
   const recentNotes = useMemo(() => {
@@ -380,7 +392,9 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
       .slice(0, 3)
       .map(([name, count]) => ({ name, count }))
 
-    return { total, owned, rented, topCategories }
+    const totalCategories = Object.keys(categoryCounts).length
+
+    return { total, owned, rented, topCategories, totalCategories }
   }, [inventory])
 
   const containerVariants = useMemo(() => ({

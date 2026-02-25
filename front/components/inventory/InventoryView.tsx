@@ -115,11 +115,11 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
 
   if (filteredInventory.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-300px)] w-full overflow-hidden px-6 select-none">
-        <div className="w-14 h-14 border border-white/10 bg-[#0a0a0a]/40 flex items-center justify-center mb-6">
-          <Package size={24} className="text-muted-foreground" />
-        </div>
+      <div className="centered-empty px-6 select-none">
         <div className="text-center max-w-sm">
+          <div className="w-14 h-14 border border-white/10 bg-[#0a0a0a]/40 flex items-center justify-center mb-6 mx-auto">
+            <Package size={24} className="text-muted-foreground" />
+          </div>
           <h2 className="text-xl font-semibold text-foreground mb-2 font-mono  tracking-wider">Empty repository</h2>
           <p className="text-muted-foreground text-sm font-mono">No items match your criteria</p>
         </div>

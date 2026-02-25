@@ -356,7 +356,7 @@ export const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
   return (
     <div className="relative w-full">
       {label && (
-        <span className="text-[10px] text-white/40 font-medium mb-2 block">{label}</span>
+        <span className="text-[10px] text-white/40 font-medium block">{label}</span>
       )}
       
       <div className="relative group">
