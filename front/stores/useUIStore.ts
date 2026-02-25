@@ -23,6 +23,10 @@ interface UIState {
   notesGridColumns: 2 | 3
   inventoryGridColumns: 2 | 3
   hubCardOrder: HubCardType[]
+  hubShotsLimit: number
+  hubTasksLimit: number
+  hubNotesLimit: number
+  hubEquipmentLimit: number
 
   setMainView: (view: MainView) => void
   setShotLayout: (layout: ShotLayout) => void
@@ -37,6 +41,10 @@ interface UIState {
   setNotesGridColumns: (columns: 2 | 3, skipSync?: boolean) => void
   setInventoryGridColumns: (columns: 2 | 3, skipSync?: boolean) => void
   setHubCardOrder: (order: HubCardType[], skipSync?: boolean) => void
+  setHubShotsLimit: (limit: number, skipSync?: boolean) => void
+  setHubTasksLimit: (limit: number, skipSync?: boolean) => void
+  setHubNotesLimit: (limit: number, skipSync?: boolean) => void
+  setHubEquipmentLimit: (limit: number, skipSync?: boolean) => void
 }
 
 const defaultPostProdFilters: PostProdFilters = {
@@ -71,6 +79,10 @@ export const useUIStore = create<UIState>()(
       notesGridColumns: 2,
       inventoryGridColumns: 2,
       hubCardOrder: ['timeline', 'equipment', 'tasks', 'notes'],
+      hubShotsLimit: 3,
+      hubTasksLimit: 3,
+      hubNotesLimit: 3,
+      hubEquipmentLimit: 3,
 
       setMainView: (view) => set({ mainView: view }),
       setShotLayout: (layout) => set({ shotLayout: layout }),
@@ -140,6 +152,54 @@ export const useUIStore = create<UIState>()(
         if (currentUser) {
           userService.updateProfile({ hubCardOrder: order }).catch((error) => {
             console.error('Failed to sync hub card order:', error)
+          })
+        }
+      },
+      setHubShotsLimit: (limit, skipSync) => {
+        set({ hubShotsLimit: limit })
+        
+        if (skipSync) return
+        
+        const { currentUser } = useAuthStore.getState()
+        if (currentUser) {
+          userService.updateProfile({ hubShotsLimit: limit }).catch((error) => {
+            console.error('Failed to sync hub shots limit:', error)
+          })
+        }
+      },
+      setHubTasksLimit: (limit, skipSync) => {
+        set({ hubTasksLimit: limit })
+        
+        if (skipSync) return
+        
+        const { currentUser } = useAuthStore.getState()
+        if (currentUser) {
+          userService.updateProfile({ hubTasksLimit: limit }).catch((error) => {
+            console.error('Failed to sync hub tasks limit:', error)
+          })
+        }
+      },
+      setHubNotesLimit: (limit, skipSync) => {
+        set({ hubNotesLimit: limit })
+        
+        if (skipSync) return
+        
+        const { currentUser } = useAuthStore.getState()
+        if (currentUser) {
+          userService.updateProfile({ hubNotesLimit: limit }).catch((error) => {
+            console.error('Failed to sync hub notes limit:', error)
+          })
+        }
+      },
+      setHubEquipmentLimit: (limit, skipSync) => {
+        set({ hubEquipmentLimit: limit })
+        
+        if (skipSync) return
+        
+        const { currentUser } = useAuthStore.getState()
+        if (currentUser) {
+          userService.updateProfile({ hubEquipmentLimit: limit }).catch((error) => {
+            console.error('Failed to sync hub equipment limit:', error)
           })
         }
       },

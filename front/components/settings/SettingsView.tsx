@@ -23,10 +23,18 @@ interface SettingsViewProps {
   notesGridColumns: 2 | 3
   inventoryGridColumns: 2 | 3
   hubCardOrder: HubCardType[]
+  hubShotsLimit: number
+  hubTasksLimit: number
+  hubNotesLimit: number
+  hubEquipmentLimit: number
   onPostProdGridColumnsChange: (columns: 2 | 3) => void
   onNotesGridColumnsChange: (columns: 2 | 3) => void
   onInventoryGridColumnsChange: (columns: 2 | 3) => void
   onHubCardOrderChange: (order: HubCardType[]) => void
+  onHubShotsLimitChange: (limit: number) => void
+  onHubTasksLimitChange: (limit: number) => void
+  onHubNotesLimitChange: (limit: number) => void
+  onHubEquipmentLimitChange: (limit: number) => void
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
@@ -41,10 +49,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   notesGridColumns,
   inventoryGridColumns,
   hubCardOrder,
+  hubShotsLimit,
+  hubTasksLimit,
+  hubNotesLimit,
+  hubEquipmentLimit,
   onPostProdGridColumnsChange,
   onNotesGridColumnsChange,
   onInventoryGridColumnsChange,
-  onHubCardOrderChange
+  onHubCardOrderChange,
+  onHubShotsLimitChange,
+  onHubTasksLimitChange,
+  onHubNotesLimitChange,
+  onHubEquipmentLimitChange
 }) => {
   const [cards, setCards] = useState<HubCardType[]>(hubCardOrder)
   const getInitials = (name: string) => {
@@ -264,6 +280,80 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 />
                 <span className="text-xs text-muted-foreground">3</span>
               </div>
+            </div>
+          </div>
+
+          <h3 className="text-[10px] font-mono tracking-wider text-muted-foreground px-1 pt-4">
+            Items per section
+          </h3>
+          
+          <div className="space-y-2">
+            <div className="p-2 flex items-center gap-3 bg-card border border-border hover:border-primary/30 transition-all">
+              <div className="w-9 h-9 flex items-center justify-center shrink-0 bg-primary/10 text-primary">
+                <Film size={18} strokeWidth={2} />
+              </div>
+              <span className="text-sm font-medium flex-1">Shots</span>
+              <select
+                value={hubShotsLimit}
+                onChange={(e) => onHubShotsLimitChange(Number(e.target.value))}
+                className="text-sm bg-transparent border border-border rounded px-2 py-1 outline-none focus:border-primary"
+              >
+                <option value={2}>2</option>
+                <option value={3}>3</option>
+                <option value={4}>4</option>
+                <option value={5}>5</option>
+              </select>
+            </div>
+
+            <div className="p-2 flex items-center gap-3 bg-card border border-border hover:border-primary/30 transition-all">
+              <div className="w-9 h-9 flex items-center justify-center shrink-0 bg-primary/10 text-primary">
+                <CheckSquare size={18} strokeWidth={2} />
+              </div>
+              <span className="text-sm font-medium flex-1">Tasks</span>
+              <select
+                value={hubTasksLimit}
+                onChange={(e) => onHubTasksLimitChange(Number(e.target.value))}
+                className="text-sm bg-transparent border border-border rounded px-2 py-1 outline-none focus:border-primary"
+              >
+                <option value={2}>2</option>
+                <option value={3}>3</option>
+                <option value={4}>4</option>
+                <option value={5}>5</option>
+              </select>
+            </div>
+
+            <div className="p-2 flex items-center gap-3 bg-card border border-border hover:border-primary/30 transition-all">
+              <div className="w-9 h-9 flex items-center justify-center shrink-0 bg-primary/10 text-primary">
+                <StickyNote size={18} strokeWidth={2} />
+              </div>
+              <span className="text-sm font-medium flex-1">Notes</span>
+              <select
+                value={hubNotesLimit}
+                onChange={(e) => onHubNotesLimitChange(Number(e.target.value))}
+                className="text-sm bg-transparent border border-border rounded px-2 py-1 outline-none focus:border-primary"
+              >
+                <option value={2}>2</option>
+                <option value={3}>3</option>
+                <option value={4}>4</option>
+                <option value={5}>5</option>
+              </select>
+            </div>
+
+            <div className="p-2 flex items-center gap-3 bg-card border border-border hover:border-primary/30 transition-all">
+              <div className="w-9 h-9 flex items-center justify-center shrink-0 bg-primary/10 text-primary">
+                <Package size={18} strokeWidth={2} />
+              </div>
+              <span className="text-sm font-medium flex-1">Equipment categories</span>
+              <select
+                value={hubEquipmentLimit}
+                onChange={(e) => onHubEquipmentLimitChange(Number(e.target.value))}
+                className="text-sm bg-transparent border border-border rounded px-2 py-1 outline-none focus:border-primary"
+              >
+                <option value={2}>2</option>
+                <option value={3}>3</option>
+                <option value={4}>4</option>
+                <option value={5}>5</option>
+              </select>
             </div>
           </div>
 

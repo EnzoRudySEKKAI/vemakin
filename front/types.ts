@@ -16,6 +16,10 @@ export interface User {
     notesGridColumns?: number | null;
     inventoryGridColumns?: number | null;
     hubCardOrder?: HubCardType[] | null;
+    hubShotsLimit?: number | null;
+    hubTasksLimit?: number | null;
+    hubNotesLimit?: number | null;
+    hubEquipmentLimit?: number | null;
 }
 
 export interface Currency {

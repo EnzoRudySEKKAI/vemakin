@@ -66,7 +66,11 @@ export const useAuthStore = create<AuthState>()(
                 postProdGridColumns: userProfile?.postProdGridColumns,
                 notesGridColumns: userProfile?.notesGridColumns,
                 inventoryGridColumns: userProfile?.inventoryGridColumns,
-                hubCardOrder: userProfile?.hubCardOrder
+                hubCardOrder: userProfile?.hubCardOrder,
+                hubShotsLimit: userProfile?.hubShotsLimit,
+                hubTasksLimit: userProfile?.hubTasksLimit,
+                hubNotesLimit: userProfile?.hubNotesLimit,
+                hubEquipmentLimit: userProfile?.hubEquipmentLimit
               },
               previousUserId: user.uid,
               isLoadingAuth: false
@@ -86,6 +90,18 @@ export const useAuthStore = create<AuthState>()(
               }
               if (userProfile.hubCardOrder !== undefined && userProfile.hubCardOrder !== null && userProfile.hubCardOrder.length > 0) {
                 uiStore.setHubCardOrder(userProfile.hubCardOrder, true)
+              }
+              if (userProfile.hubShotsLimit !== undefined && userProfile.hubShotsLimit !== null) {
+                uiStore.setHubShotsLimit(userProfile.hubShotsLimit, true)
+              }
+              if (userProfile.hubTasksLimit !== undefined && userProfile.hubTasksLimit !== null) {
+                uiStore.setHubTasksLimit(userProfile.hubTasksLimit, true)
+              }
+              if (userProfile.hubNotesLimit !== undefined && userProfile.hubNotesLimit !== null) {
+                uiStore.setHubNotesLimit(userProfile.hubNotesLimit, true)
+              }
+              if (userProfile.hubEquipmentLimit !== undefined && userProfile.hubEquipmentLimit !== null) {
+                uiStore.setHubEquipmentLimit(userProfile.hubEquipmentLimit, true)
               }
             }
           } else {

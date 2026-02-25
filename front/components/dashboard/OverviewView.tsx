@@ -21,6 +21,10 @@ interface OverviewViewProps {
   onSelectTask?: (taskId: string) => void
   onSelectNote?: (noteId: string) => void
   hubCardOrder: HubCardType[]
+  hubShotsLimit?: number
+  hubTasksLimit?: number
+  hubNotesLimit?: number
+  hubEquipmentLimit?: number
 }
 
 interface TimelineCardProps {
@@ -341,6 +345,10 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
   onSelectTask,
   onSelectNote,
   hubCardOrder,
+  hubShotsLimit = 3,
+  hubTasksLimit = 3,
+  hubNotesLimit = 3,
+  hubEquipmentLimit = 3,
 }) => {
   const upcomingShots = useMemo(() => {
     return shots
@@ -357,8 +365,8 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
         const timeB = b.startTime || ''
         return timeA.localeCompare(timeB)
       })
-      .slice(0, 3)
-  }, [shots])
+      .slice(0, hubShotsLimit)
+  }, [shots, hubShotsLimit])
 
   const pendingTasks = useMemo(() => {
     return tasks
@@ -368,14 +376,14 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
         if (b.priority === 'critical' && a.priority !== 'critical') return 1
         return 0
       })
-      .slice(0, 3)
-  }, [tasks])
+      .slice(0, hubTasksLimit)
+  }, [tasks, hubTasksLimit])
 
   const recentNotes = useMemo(() => {
     return notes
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-      .slice(0, 3)
-  }, [notes])
+      .slice(0, hubNotesLimit)
+  }, [notes, hubNotesLimit])
 
   const inventoryStats = useMemo(() => {
     const total = inventory.length
@@ -389,13 +397,13 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
 
     const topCategories = Object.entries(categoryCounts)
       .sort(([, a], [, b]) => b - a)
-      .slice(0, 3)
+      .slice(0, hubEquipmentLimit)
       .map(([name, count]) => ({ name, count }))
 
     const totalCategories = Object.keys(categoryCounts).length
 
     return { total, owned, rented, topCategories, totalCategories }
-  }, [inventory])
+  }, [inventory, hubEquipmentLimit])
 
   const containerVariants = useMemo(() => ({
     hidden: { opacity: 0 },

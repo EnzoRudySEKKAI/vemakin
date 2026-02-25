@@ -231,6 +231,10 @@ type UserResponse struct {
 	NotesGridColumns     *int     `json:"notesGridColumns"`
 	InventoryGridColumns *int     `json:"inventoryGridColumns"`
 	HubCardOrder         []string `json:"hubCardOrder"`
+	HubShotsLimit        *int     `json:"hubShotsLimit"`
+	HubTasksLimit        *int     `json:"hubTasksLimit"`
+	HubNotesLimit        *int     `json:"hubNotesLimit"`
+	HubEquipmentLimit    *int     `json:"hubEquipmentLimit"`
 }
 
 type UpdateUserRequest struct {
@@ -240,6 +244,10 @@ type UpdateUserRequest struct {
 	NotesGridColumns     *int     `json:"notes_grid_columns"`
 	InventoryGridColumns *int     `json:"inventory_grid_columns"`
 	HubCardOrder         []string `json:"hub_card_order"`
+	HubShotsLimit        *int     `json:"hub_shots_limit"`
+	HubTasksLimit        *int     `json:"hub_tasks_limit"`
+	HubNotesLimit        *int     `json:"hub_notes_limit"`
+	HubEquipmentLimit    *int     `json:"hub_equipment_limit"`
 }
 
 type ErrorResponse struct {

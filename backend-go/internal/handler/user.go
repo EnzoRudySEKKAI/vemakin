@@ -26,6 +26,10 @@ func userToResponse(u models.User) dto.UserResponse {
 		NotesGridColumns:     u.NotesGridColumns,
 		InventoryGridColumns: u.InventoryGridColumns,
 		HubCardOrder:         hubCardOrder,
+		HubShotsLimit:        u.HubShotsLimit,
+		HubTasksLimit:        u.HubTasksLimit,
+		HubNotesLimit:        u.HubNotesLimit,
+		HubEquipmentLimit:    u.HubEquipmentLimit,
 	}
 }
 
@@ -69,6 +73,18 @@ func (h *Handler) UpdateUser(c echo.Context) error {
 	if req.HubCardOrder != nil {
 		hubCardOrderJSON, _ := json.Marshal(req.HubCardOrder)
 		updates["hub_card_order"] = hubCardOrderJSON
+	}
+	if req.HubShotsLimit != nil {
+		updates["hub_shots_limit"] = *req.HubShotsLimit
+	}
+	if req.HubTasksLimit != nil {
+		updates["hub_tasks_limit"] = *req.HubTasksLimit
+	}
+	if req.HubNotesLimit != nil {
+		updates["hub_notes_limit"] = *req.HubNotesLimit
+	}
+	if req.HubEquipmentLimit != nil {
+		updates["hub_equipment_limit"] = *req.HubEquipmentLimit
 	}
 
 	if len(updates) == 0 {

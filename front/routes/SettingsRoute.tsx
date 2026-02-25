@@ -10,10 +10,18 @@ export const SettingsRoute = () => {
         notesGridColumns,
         inventoryGridColumns,
         hubCardOrder,
+        hubShotsLimit,
+        hubTasksLimit,
+        hubNotesLimit,
+        hubEquipmentLimit,
         setPostProdGridColumns,
         setNotesGridColumns,
         setInventoryGridColumns,
-        setHubCardOrder
+        setHubCardOrder,
+        setHubShotsLimit,
+        setHubTasksLimit,
+        setHubNotesLimit,
+        setHubEquipmentLimit
     } = useUIStore()
 
     return (
@@ -29,10 +37,18 @@ export const SettingsRoute = () => {
             notesGridColumns={notesGridColumns}
             inventoryGridColumns={inventoryGridColumns}
             hubCardOrder={hubCardOrder}
+            hubShotsLimit={hubShotsLimit}
+            hubTasksLimit={hubTasksLimit}
+            hubNotesLimit={hubNotesLimit}
+            hubEquipmentLimit={hubEquipmentLimit}
             onPostProdGridColumnsChange={setPostProdGridColumns}
             onNotesGridColumnsChange={setNotesGridColumns}
             onInventoryGridColumnsChange={setInventoryGridColumns}
             onHubCardOrderChange={setHubCardOrder}
+            onHubShotsLimitChange={setHubShotsLimit}
+            onHubTasksLimitChange={setHubTasksLimit}
+            onHubNotesLimitChange={setHubNotesLimit}
+            onHubEquipmentLimitChange={setHubEquipmentLimit}
         />
     )
 }

@@ -5,7 +5,13 @@ import { useUIStore } from '@/stores/useUIStore'
 
 export const OverviewRoute = () => {
     const ctx = useRouteContext()
-    const { hubCardOrder } = useUIStore()
+    const { 
+        hubCardOrder,
+        hubShotsLimit,
+        hubTasksLimit,
+        hubNotesLimit,
+        hubEquipmentLimit
+    } = useUIStore()
 
     return (
         <OverviewView
@@ -38,6 +44,10 @@ export const OverviewRoute = () => {
             onSelectTask={(id) => ctx.navigate(`/dashboard/pipeline/${id}`)}
             onSelectNote={(id) => ctx.navigate(`/dashboard/notes/${id}`)}
             hubCardOrder={hubCardOrder}
+            hubShotsLimit={hubShotsLimit}
+            hubTasksLimit={hubTasksLimit}
+            hubNotesLimit={hubNotesLimit}
+            hubEquipmentLimit={hubEquipmentLimit}
         />
     )
 }
