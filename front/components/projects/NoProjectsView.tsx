@@ -69,7 +69,7 @@ export const NoProjectsView: React.FC<NoProjectsViewProps> = ({ onCreateProject,
                     )}
 
                     <div className="mt-8 pt-6 border-t border-gray-200 dark:border-white/[0.05] w-full">
-                        <button onClick={onLogout} className="text-sm text-gray-400 dark:text-white/20 hover:text-gray-600 dark:hover:text-white/40 transition-colors">
+                        <button onClick={onLogout} className="cursor-pointer text-sm text-gray-400 dark:text-white/20 hover:text-gray-600 dark:hover:text-white/40 transition-colors">
                             Sign Out
                         </button>
                     </div>

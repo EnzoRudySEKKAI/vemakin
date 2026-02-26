@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { auth } from '@/firebase'
+import { getFirebaseAuth } from '@/firebase'
 import { onAuthStateChanged, signOut, User as FirebaseUser } from 'firebase/auth'
 import { User } from '@/types'
 import { userService } from '@/api/services'
@@ -41,7 +41,7 @@ export const useAuthStore = create<AuthState>()(
 
         set({ authPromise: promise, resolveAuth: () => resolver() })
 
-        const unsubscribe = onAuthStateChanged(auth, async (user: FirebaseUser | null) => {
+        const unsubscribe = onAuthStateChanged(getFirebaseAuth(), async (user: FirebaseUser | null) => {
           const previousUserId = get().previousUserId
           const newUserId = user?.uid || null
 
@@ -126,7 +126,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async () => {
         try {
-          await signOut(auth)
+          await signOut(getFirebaseAuth())
         } catch {
           // Silently fail
         }

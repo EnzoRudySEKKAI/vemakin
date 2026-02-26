@@ -5,6 +5,7 @@ import { Package, Film, Zap, StickyNote } from 'lucide-react'
 import { TerminalButton } from '@/components/ui/TerminalButton'
 
 export type FormType = 'gear' | 'shot' | 'task' | 'note'
+export type FormLayoutSize = 'default' | 'wide' | 'full'
 
 interface FormLayoutProps {
   children: React.ReactNode
@@ -18,6 +19,8 @@ interface FormLayoutProps {
   submitDisabled?: boolean
   submitLabel?: string
   className?: string
+  size?: FormLayoutSize
+  sidebar?: React.ReactNode
 }
 
 const FORM_TYPES: { id: FormType; label: string; icon: any }[] = [
@@ -26,6 +29,12 @@ const FORM_TYPES: { id: FormType; label: string; icon: any }[] = [
   { id: 'task', label: 'Task', icon: Zap },
   { id: 'note', label: 'Note', icon: StickyNote },
 ]
+
+const sizeClasses: Record<FormLayoutSize, string> = {
+  default: 'max-w-7xl',
+  wide: 'max-w-[1920px]',
+  full: 'max-w-none'
+}
 
 export const FormLayout: React.FC<FormLayoutProps> = ({
   children,
@@ -38,7 +47,9 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
   onSubmit,
   submitDisabled = false,
   submitLabel = 'Save',
-  className = ''
+  className = '',
+  size = 'default',
+  sidebar
 }) => {
   const { setActions, setTitle, setSubtitle, setOnBack, setDetailLabel } = useHeaderActions()
 
@@ -109,8 +120,21 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
         ${className}
       `}
     >
-      <div className="max-w-3xl w-full mx-auto py-4 md:py-8 px-0 pt-6 pb-32">
-        {children}
+      <div className={`${sizeClasses[size]} w-full mx-auto`}>
+        {sidebar ? (
+          <div className="grid grid-cols-1 xl:grid-cols-12 xl:gap-12">
+            <div className="xl:col-span-8 space-y-12">
+              {children}
+            </div>
+            <aside className="xl:col-span-4 lg:sticky self-start">
+              {sidebar}
+            </aside>
+          </div>
+        ) : (
+          <div className="py-4 md:py-8 px-0 pt-6 pb-32">
+            {children}
+          </div>
+        )}
       </div>
     </motion.div>
   )

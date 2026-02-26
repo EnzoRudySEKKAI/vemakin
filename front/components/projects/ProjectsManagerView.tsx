@@ -166,13 +166,13 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
                           <>
                             <button
                               onClick={saveEditing}
-                              className="w-9 h-9 flex items-center justify-center text-emerald-500 dark:text-emerald-400 hover:bg-emerald-500/10 border border-transparent hover:border-emerald-500/30 transition-colors"
+                              className="cursor-pointer w-9 h-9 flex items-center justify-center text-emerald-500 dark:text-emerald-400 hover:bg-emerald-500/10 border border-transparent hover:border-emerald-500/30 transition-colors"
                             >
                               <Check size={18} strokeWidth={3} />
                             </button>
                             <button
                               onClick={cancelEditing}
-                              className="w-9 h-9 flex items-center justify-center text-gray-400 dark:text-white/20 hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent hover:border-gray-300 dark:hover:border-white/10 transition-colors"
+                              className="cursor-pointer w-9 h-9 flex items-center justify-center text-gray-400 dark:text-white/20 hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent hover:border-gray-300 dark:hover:border-white/10 transition-colors"
                             >
                               <X size={18} strokeWidth={3} />
                             </button>
@@ -181,7 +181,7 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
                           <>
                             <button
                               onClick={() => startEditing(project)}
-                              className="w-9 h-9 flex items-center justify-center text-gray-400 dark:text-white/20 hover:text-gray-600 dark:hover:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent hover:border-gray-300 dark:hover:border-white/10 transition-all opacity-0 group-hover:opacity-100"
+                              className="cursor-pointer w-9 h-9 flex items-center justify-center text-gray-400 dark:text-white/20 hover:text-gray-600 dark:hover:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent hover:border-gray-300 dark:hover:border-white/10 transition-all opacity-0 group-hover:opacity-100"
                               title="Rename"
                             >
                               <Edit3 size={16} strokeWidth={2.5} />
@@ -194,7 +194,7 @@ export const ProjectsManagerView: React.FC<ProjectsManagerViewProps> = ({
                                     onDeleteProject(project)
                                   }
                                 }}
-                                className="w-9 h-9 flex items-center justify-center text-gray-400 dark:text-white/20 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/30 transition-all opacity-0 group-hover:opacity-100"
+                                className="cursor-pointer w-9 h-9 flex items-center justify-center text-gray-400 dark:text-white/20 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/30 transition-all opacity-0 group-hover:opacity-100"
                                 title="Delete"
                               >
                                 <Trash2 size={16} strokeWidth={2.5} />

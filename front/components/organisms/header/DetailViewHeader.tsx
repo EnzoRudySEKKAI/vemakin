@@ -17,7 +17,7 @@ export const DetailViewHeader: React.FC<DetailViewHeaderProps> = ({
         <button
           onClick={backAction || undefined}
           className={`
-            w-10 h-10 flex items-center justify-center transition-all border
+            cursor-pointer w-10 h-10 flex items-center justify-center transition-all border
             ${backAction 
               ? 'border-gray-300 dark:border-white/10 bg-[#f5f5f5] dark:bg-white/5 text-gray-700 dark:text-white/70 hover:border-primary/30 dark:hover:border-white/20 hover:text-gray-900 dark:hover:text-white' 
               : 'border-gray-200 dark:border-white/5 bg-gray-100 dark:bg-white/5 opacity-50 cursor-default'

@@ -52,7 +52,7 @@ export const TerminalSelect: React.FC<TerminalSelectProps> = ({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`
-          w-full h-9 px-3 py-1
+          cursor-pointer w-full h-9 px-3 py-1
           flex items-center justify-between gap-2
           bg-transparent
           border border-gray-300 dark:border-white/20
@@ -91,7 +91,7 @@ export const TerminalSelect: React.FC<TerminalSelectProps> = ({
               type="button"
               onClick={() => handleSelect(option.value)}
               className={`
-                w-full px-3 py-2
+                cursor-pointer w-full px-3 py-2
                 flex items-center gap-2
                 font-mono text-sm text-left
                 hover:bg-gray-100 dark:hover:bg-white/5

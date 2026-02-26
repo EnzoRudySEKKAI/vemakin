@@ -1,7 +1,6 @@
 import React from 'react'
 import { Package } from 'lucide-react'
 import { Equipment, Currency } from '@/types'
-import { HoverCard } from '@/components/ui/HoverCard'
 import { CATEGORY_ICONS } from '@/constants'
 import { Text, IconContainer } from '@/components/atoms'
 
@@ -30,11 +29,9 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({
   const subTitle = subtitleParts.join(' ')
 
   return (
-    <HoverCard
+    <div
       onClick={onClick}
-      className="p-5 flex flex-col h-full rounded-[28px] bg-white/80 dark:bg-[#16181D]/80 backdrop-blur-xl border border-white/20 dark:border-white/5 shadow-sm hover:shadow-lg"
-      blobColor="from-primary/70 to-primary dark:from-primary/70 dark:to-primary"
-      enableHoverScale={true}
+      className="p-5 flex flex-col h-full rounded-[28px] bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg transition-all cursor-pointer"
     >
       {/* Header */}
       <div className="flex justify-between items-start mb-4 gap-2">
@@ -91,6 +88,6 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({
           </div>
         ))}
       </div>
-    </HoverCard>
+    </div>
   )
 }

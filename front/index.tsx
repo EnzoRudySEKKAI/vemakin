@@ -5,7 +5,6 @@ import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
 import { router } from './router'
 import { QueryProvider } from './providers/QueryProvider'
-import { AuthProvider } from './providers/AuthProvider'
 import { ErrorBoundary } from './providers/ErrorBoundary'
 import { initPerformanceTracking } from './utils/performance'
 
@@ -44,13 +43,28 @@ const AppContent = () => {
     startTransition(() => {
       initPerformanceTracking()
     })
+
+    // Remove HTML loader once React has mounted
+    // This ensures the loader is visible during JS bundle load but removed once React takes over
+    const removeLoader = () => {
+      const loader = document.getElementById('initial-loader')
+      if (loader) {
+        loader.classList.add('loaded')
+        setTimeout(() => loader.remove(), 400)
+      }
+    }
+
+    // Small delay to ensure React has rendered before removing loader
+    const timer = setTimeout(() => {
+      requestAnimationFrame(removeLoader)
+    }, 100)
+
+    return () => clearTimeout(timer)
   }, [])
 
   return (
     <QueryProvider>
-      <AuthProvider>
-        <RouterProvider router={router} hydrateFallbackElement={<HydrateFallback />} />
-      </AuthProvider>
+      <RouterProvider router={router} hydrateFallbackElement={<HydrateFallback />} />
     </QueryProvider>
   )
 }
@@ -67,10 +81,3 @@ if (container) {
   root.render(<App />)
 }
 
-window.addEventListener('app-ready', () => {
-  const loader = document.getElementById('initial-loader')
-  if (loader) {
-    loader.classList.add('loaded')
-    setTimeout(() => loader.remove(), 400)
-  }
-})

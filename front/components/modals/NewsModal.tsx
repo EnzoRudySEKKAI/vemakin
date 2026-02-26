@@ -33,8 +33,8 @@ export const NewsModal: React.FC<NewsModalProps> = ({ onClose }) => {
   ]
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300" onClick={onClose}>
-      <Card variant="glass" className="w-full max-w-md p-0 overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4 animate-in fade-in duration-300" onClick={onClose}>
+      <Card variant="default" className="w-full max-w-md p-0 overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className={`p-6 border-b border-gray-100 flex justify-between items-center bg-white/50 ${radius.lg}`}>
           <div>
             <Text variant="h2">Latest News</Text>

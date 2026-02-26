@@ -98,7 +98,7 @@ export const CustomizationView: React.FC<CustomizationViewProps> = ({
         <motion.div variants={itemVariants} className="flex items-center gap-3">
           <button
             onClick={onNavigateBack}
-            className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+            className="cursor-pointer p-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronLeft size={24} />
           </button>

@@ -7,7 +7,7 @@ export interface LogoProps {
   showText?: boolean
   className?: string
   textClassName?: string
-  variant?: 'default' | 'primary' | 'glass'
+  variant?: 'default' | 'primary'
   withContainer?: boolean
 }
 
@@ -45,10 +45,6 @@ export const Logo: React.FC<LogoProps> = ({
     
     const base = `${containerSizes[size]} ${radius.md} flex items-center justify-center`
     
-    if (variant === 'glass') {
-      return `${base} bg-white/10 backdrop-blur-md border border-white/20 shadow-lg`
-    }
-    
     if (variant === 'primary') {
        return `${base} bg-primary shadow-lg shadow-primary/20`
     }
@@ -59,7 +55,6 @@ export const Logo: React.FC<LogoProps> = ({
 
   const getIconColor = () => {
     if (variant === 'primary') return 'text-white'
-    if (variant === 'glass') return 'text-white'
     return 'text-primary'
   }
   

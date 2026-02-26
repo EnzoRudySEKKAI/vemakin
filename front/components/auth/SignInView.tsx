@@ -27,8 +27,8 @@ export const SignInView: React.FC<SignInViewProps> = ({ onBack, onSignIn }) => {
     setIsLoading(true)
     try {
       const { signInWithEmailAndPassword } = await import('firebase/auth')
-      const { auth } = await import('@/firebase')
-      await signInWithEmailAndPassword(auth, email, password)
+      const { getFirebaseAuth } = await import('@/firebase')
+      await signInWithEmailAndPassword(getFirebaseAuth(), email, password)
     } catch (error: any) {
       console.error("Sign in failed", error)
       alert("Login failed. Please check your credentials.")

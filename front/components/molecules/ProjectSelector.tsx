@@ -32,7 +32,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
     <div className={`relative ${className}`}>
       <button
         onClick={handleClick}
-        className="w-full flex items-center justify-between p-2 bg-[#fafafa] dark:bg-[#16181D] border border-gray-300 dark:border-white/[0.05] hover:border-primary/30 dark:hover:border-white/[0.1] transition-all"
+        className="cursor-pointer w-full flex items-center justify-between p-2 bg-[#fafafa] dark:bg-[#16181D] border border-gray-300 dark:border-white/[0.05] hover:border-primary/30 dark:hover:border-white/[0.1] transition-all"
       >
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-primary/10 flex items-center justify-center border border-primary/30">
@@ -67,7 +67,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
                     key={projectName}
                     onClick={() => { onSelect(projectName); setIsOpen(false); }}
                     className={`
-                      w-full flex items-center justify-between p-3 mb-1 transition-colors text-sm font-mono  tracking-wider
+                      cursor-pointer w-full flex items-center justify-between p-3 mb-1 transition-colors text-sm font-mono  tracking-wider
                       ${currentProject === projectName 
                         ? 'bg-primary/10 text-primary border border-primary/30' 
                         : 'text-gray-700 dark:text-white/60 hover:bg-[#f5f5f5] dark:hover:bg-white/5'
@@ -82,7 +82,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
               <div className="h-px bg-gray-300 dark:bg-white/[0.05] my-2" />
               <button
                 onClick={() => { onNavigateToCreate(); setIsOpen(false); }}
-                className="w-full flex items-center gap-3 p-3 text-sm font-mono  tracking-wider text-gray-700 dark:text-white/60 hover:bg-[#f5f5f5] dark:hover:bg-white/5 transition-colors"
+                className="cursor-pointer w-full flex items-center gap-3 p-3 text-sm font-mono  tracking-wider text-gray-700 dark:text-white/60 hover:bg-[#f5f5f5] dark:hover:bg-white/5 transition-colors"
               >
                 <div className="w-8 h-8 bg-[#f5f5f5] dark:bg-white/5 flex items-center justify-center border border-gray-300 dark:border-white/10">
                   <Plus size={16} />

@@ -24,7 +24,7 @@ export const FilterPill: React.FC<FilterPillProps> = ({
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
       className={`
-        h-12 px-5 rounded-2xl font-bold text-sm whitespace-nowrap
+        cursor-pointer h-12 px-5 rounded-2xl font-bold text-sm whitespace-nowrap
         transition-all duration-200
         border shadow-sm
         ${isActive 

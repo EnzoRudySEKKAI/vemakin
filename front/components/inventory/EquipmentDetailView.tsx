@@ -179,7 +179,7 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
         </div>
       }
     >
-      <TerminalCard header="Core information" className="mb-8">
+      <TerminalCard header="Core information" className="mb-4 md:mb-8">
         <div className="p-2 space-y-12">
 
 
@@ -238,7 +238,7 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
         </div>
       </TerminalCard>
 
-      <TerminalCard header="Ownership detail" className="mb-8">
+      <TerminalCard header="Ownership detail" className="mb-4 md:mb-8">
         <div className="p-2 space-y-6">
           <div className="grid grid-cols-2 gap-12">
             <DetailItem
@@ -257,7 +257,7 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
         </div>
       </TerminalCard>
 
-      <TerminalCard header="Technical specifications">
+      <TerminalCard header="Technical specifications" className="mb-4 md:mb-8">
         <div className="p-2">
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-12">
             {Object.entries(item.specs).map(([key, val]) => (

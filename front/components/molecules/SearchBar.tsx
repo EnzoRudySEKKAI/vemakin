@@ -92,7 +92,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       {value && (
         <button
           onClick={() => onChange('')}
-          className="absolute right-12 top-1/2 -translate-y-1/2 p-1 text-gray-400 dark:text-white/30 hover:text-gray-600 dark:hover:text-white/50 transition-colors"
+          className="cursor-pointer absolute right-12 top-1/2 -translate-y-1/2 p-1 text-gray-400 dark:text-white/30 hover:text-gray-600 dark:hover:text-white/50 transition-colors"
         >
           <X size={16} strokeWidth={2} />
         </button>
@@ -102,7 +102,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           <button
             onClick={onDatePickerToggle}
             title="Filter by date"
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 dark:text-white/30 hover:text-gray-600 dark:hover:text-white/50 transition-colors"
+            className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 dark:text-white/30 hover:text-gray-600 dark:hover:text-white/50 transition-colors"
           >
             <Calendar size={16} strokeWidth={2} />
           </button>

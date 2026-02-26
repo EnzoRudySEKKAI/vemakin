@@ -343,7 +343,7 @@ const RootLayoutInner = () => {
 
   // View titles
   const viewTitles = useMemo(() => ({
-    overview: "Good morning",
+    overview: "Hub",
     shots: "Timeline",
     'shot-detail': "Shot detail",
     inventory: "Inventory",
@@ -493,12 +493,6 @@ const RootLayoutInner = () => {
   , [dateFilter, activeData.tasks])
 
   const isLoading = isLoadingAuth || projectsQuery.isLoading || currentUser?.firstConnection === undefined
-
-  useEffect(() => {
-    if (!isLoading) {
-      window.dispatchEvent(new CustomEvent('app-ready'))
-    }
-  }, [isLoading])
 
   if (isLoading) {
     return <FullPageLoader />

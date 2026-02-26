@@ -176,6 +176,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
       detailLabel="Shot Detail"
       onBack={onClose}
       actions={headerActions}
+      size="wide"
       sidebar={
         <div className="space-y-4">
           <TerminalCard
@@ -191,13 +192,13 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                 <div className="flex border border-border">
                   <button
                     onClick={() => setActiveGearTab('list')}
-                    className={`flex-1 py-1.5 text-[10px] font-mono  tracking-wider transition-all ${activeGearTab === 'list' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                    className={`cursor-pointer flex-1 py-1.5 text-[10px] font-mono  tracking-wider transition-all ${activeGearTab === 'list' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                   >
                     Assigned
                   </button>
                   <button
                     onClick={() => setActiveGearTab('pool')}
-                    className={`flex-1 py-1.5 text-[10px] font-mono  tracking-wider transition-all ${activeGearTab === 'pool' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                    className={`cursor-pointer flex-1 py-1.5 text-[10px] font-mono  tracking-wider transition-all ${activeGearTab === 'pool' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                   >
                     Browse Pool
                   </button>
@@ -243,14 +244,14 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                             {isEditing ? (
                               <button
                                 onClick={() => handleRemoveEquipment(eId)}
-                                className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
+                                className="cursor-pointer w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
                               >
                                 <Plus size={16} className="rotate-45" />
                               </button>
                             ) : (
                               <button
                                 onClick={() => onToggleEquipment(selectedShot.id, eId)}
-                                className={`w-8 h-8 flex items-center justify-center transition-all duration-300 ${isReady
+                                className={`cursor-pointer w-8 h-8 flex items-center justify-center transition-all duration-300 ${isReady
                                   ? 'bg-primary text-primary-foreground'
                                   : 'bg-secondary/50 text-muted-foreground hover:bg-secondary hover:text-foreground'
                                   }`}
@@ -287,7 +288,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                           <button
                             key={gear.id}
                             onClick={() => handleAddEquipment(gear.id)}
-                            className="w-full flex items-center justify-between p-3 transition-all text-left group border border-transparent hover:border-border hover:bg-secondary/30"
+                            className="cursor-pointer w-full flex items-center justify-between p-3 transition-all text-left group border border-transparent hover:border-border hover:bg-secondary/30"
                           >
                             <div className="flex items-center gap-4 min-w-0">
                               <div className="p-2.5 bg-secondary/50 text-muted-foreground group-hover:text-primary group-hover:bg-primary/10 transition-all">
@@ -349,9 +350,9 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
         </div>
       )}
 
-      <div className="flex flex-col gap-8 mb-8">
+      <div className="flex flex-col">
         {!isEditing && (
-          <TerminalCard header="Filming status">
+          <TerminalCard header="Filming status" className="mb-4 md:mb-8">
             <div className="">
               <StatusToggle
                 status={selectedShot.status as any}
@@ -361,7 +362,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
           </TerminalCard>
         )}
 
-        <TerminalCard header="Shot details">
+        <TerminalCard header="Shot details" className="mb-4 md:mb-8">
           <div className="p-2 space-y-10">
             {isEditing ? (
               <>
@@ -476,10 +477,11 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
 
       <TerminalCard
         header={`Related notes (${associatedNotes.length})`}
+        className="mb-4 md:mb-8"
         headerRight={
           <button
             onClick={() => onAddNote({ title: '', content: '', shotId: selectedShot.id, attachments: [] })}
-            className="flex items-center gap-2 text-[10px] font-mono  tracking-wider text-primary hover:text-primary/70 transition-colors"
+            className="cursor-pointer flex items-center gap-2 text-[10px] font-mono  tracking-wider text-primary hover:text-primary/70 transition-colors"
           >
             <Plus size={12} strokeWidth={3} />
             Add Note
@@ -493,7 +495,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                 <button
                   key={note.id}
                   onClick={() => onOpenNote?.(note.id)}
-                  className="flex flex-col items-start text-left p-5 bg-secondary/30 border border-border hover:border-primary/30 transition-all group"
+                  className="cursor-pointer flex flex-col items-start text-left p-5 bg-secondary/30 border border-border hover:border-primary/30 transition-all group"
                 >
                   <div className="text-sm font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
                     {note.title || "Untitled Note"}

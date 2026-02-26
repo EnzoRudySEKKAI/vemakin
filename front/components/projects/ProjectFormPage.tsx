@@ -72,50 +72,52 @@ export const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
       transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
       className="flex flex-col"
     >
-      <div className="max-w-3xl w-full mx-auto py-4 md:py-8 px-0 pt-6 pb-32">
+      <div className="max-w-[1920px] w-full mx-auto py-4 md:py-8 px-0 pt-6 pb-32">
         <TerminalCard header="Project identity" className="mb-8">
-          <div className="space-y-8">
-            <div className="w-full">
-              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Project name</span>
-              <div className="relative">
-                <Briefcase className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500" size={16} strokeWidth={2.5} />
-                <Input
-                  type="text"
-                  value={form.name}
-                  onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g. Summer Commercial 2024"
-                  fullWidth
-                  variant="underline"
-                  className="pl-8 text-lg font-bold tracking-tight"
-                  autoFocus
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div className="space-y-8">
+              <div className="w-full">
+                <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Project name</span>
+                <div className="relative">
+                  <Briefcase className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500" size={16} strokeWidth={2.5} />
+                  <Input
+                    type="text"
+                    value={form.name}
+                    onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="e.g. Summer Commercial 2024"
+                    fullWidth
+                    variant="underline"
+                    className="pl-8 text-lg font-bold tracking-tight"
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div className="w-full">
+                <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Description</span>
+                <Textarea
+                  value={form.description}
+                  onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Brief description of the project..."
+                  className="min-h-[100px]"
                 />
               </div>
             </div>
 
-            <div className="w-full">
-              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Description</span>
-              <Textarea
-                value={form.description}
-                onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Brief description of the project..."
-                className="min-h-[100px]"
-              />
+            <div className="flex items-start gap-4 p-6 bg-primary/5 border border-primary/10 h-fit">
+              <div className="w-10 h-10 bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                <Check size={20} strokeWidth={2.5} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white">What happens next?</h3>
+                <p className="text-xs leading-relaxed text-gray-600 dark:text-white/50">
+                  After creating the project, you'll be able to add shots, manage equipment inventory, 
+                  track post-production tasks, and keep all your production notes in one place.
+                </p>
+              </div>
             </div>
           </div>
         </TerminalCard>
-
-        <div className="flex items-start gap-4 p-4 bg-primary/5 border border-primary/10">
-          <div className="w-10 h-10 bg-primary/10 flex items-center justify-center text-primary shrink-0">
-            <Check size={20} strokeWidth={2.5} />
-          </div>
-          <div className="space-y-1">
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white">What happens next?</h3>
-            <p className="text-xs leading-relaxed text-gray-600 dark:text-white/50">
-              After creating the project, you'll be able to add shots, manage equipment inventory, 
-              track post-production tasks, and keep all your production notes in one place.
-            </p>
-          </div>
-        </div>
       </div>
     </motion.div>
   )

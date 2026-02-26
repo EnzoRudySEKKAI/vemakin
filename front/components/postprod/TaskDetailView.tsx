@@ -176,10 +176,43 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
               })}
             </div>
           </TerminalCard>
+
+          <TerminalCard header="Related notes" headerRight={
+            <button
+              onClick={onAddNote}
+              className="cursor-pointer flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary text-[10px] font-mono  tracking-wider hover:bg-primary hover:text-primary-foreground transition-all"
+            >
+              <Plus size={12} strokeWidth={3} /> New
+            </button>
+          }>
+            <div className="space-y-2">
+              {linkedNotes.length > 0 ? (
+                linkedNotes.map(note => (
+                  <button
+                    key={note.id}
+                    onClick={() => onOpenNote(note.id)}
+                    className="w-full p-3 bg-secondary/30 border border-border cursor-pointer hover:border-primary/30 hover:bg-secondary/50 transition-all group text-left"
+                  >
+                    <h4 className="font-bold text-foreground text-sm mb-1 line-clamp-1 group-hover:text-primary transition-colors">
+                      {note.title || "Untitled entry"}
+                    </h4>
+                    <p className="text-muted-foreground text-xs line-clamp-2 leading-relaxed">{note.content}</p>
+                  </button>
+                ))
+              ) : (
+                <div className="py-8 flex flex-col items-center justify-center text-center opacity-10">
+                  <div className="p-3 bg-secondary mb-3">
+                    <MessageSquare size={20} />
+                  </div>
+                  <span className="text-[10px] font-mono  tracking-wider text-foreground">No notes</span>
+                </div>
+              )}
+            </div>
+          </TerminalCard>
         </div>
       }
     >
-      <TerminalCard header="Goal & details" className="mb-8">
+      <TerminalCard header="Goal & details" className="mb-4 md:mb-8">
         <div className="p-2">
           {isEditing ? (
             <div className="space-y-10">
@@ -319,69 +352,26 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                 />
               </div>
 
-              {task.metadata && Object.keys(task.metadata).length > 0 && (
-                <div className="pt-10 border-t border-border">
-                  <span className="text-[10px] font-mono  tracking-wider text-muted-foreground block mb-8 leading-none">Technical parameters</span>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-y-12 gap-x-12">
-                    {Object.entries(task.metadata).map(([key, val]) => (
-                      val ? (
-                        <DetailItem
-                          key={key}
-                          label={key.replace(/([A-Z])/g, ' $1').trim()}
-                          value={String(val)}
-                        />
-                      ) : null
-                    ))}
-                  </div>
-                </div>
-              )}
-
             </div>
           )}
         </div>
       </TerminalCard>
 
-      <TerminalCard header="Related notes" headerRight={
-        <button
-          onClick={onAddNote}
-          className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary text-[10px] font-mono  tracking-wider hover:bg-primary hover:text-primary-foreground transition-all"
-        >
-          <Plus size={12} strokeWidth={3} /> New entry
-        </button>
-      }>
-        <div className="">
-          {linkedNotes.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {linkedNotes.map(note => (
-                <div
-                  key={note.id}
-                  onClick={() => onOpenNote(note.id)}
-                  className="p-6 bg-secondary/30 border border-border cursor-pointer hover:border-primary/30 hover:bg-secondary/50 transition-all group relative overflow-hidden"
-                >
-                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
-                    <FileText size={40} />
-                  </div>
-                  <h4 className="font-bold text-foreground text-sm mb-2 line-clamp-1 group-hover:text-primary transition-colors">
-                    {note.title || "Untitled entry"}
-                  </h4>
-                  <p className="text-muted-foreground text-xs line-clamp-2 leading-relaxed">{note.content}</p>
-                  <div className="mt-4 flex items-center gap-2 text-[10px] font-mono  tracking-wider text-muted-foreground">
-                    <Clock size={10} />
-                    {new Date(note.createdAt).toLocaleDateString()}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="py-20 flex flex-col items-center justify-center text-center opacity-10">
-              <div className="p-4 bg-secondary mb-4">
-                <MessageSquare size={32} />
-              </div>
-              <span className="text-[10px] font-mono  tracking-wider text-foreground">No documentation recorded</span>
-            </div>
-          )}
-        </div>
-      </TerminalCard>
+      {task.metadata && Object.keys(task.metadata).length > 0 && (
+        <TerminalCard header="Technical parameters">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-y-12 gap-x-12">
+            {Object.entries(task.metadata).map(([key, val]) => (
+              val ? (
+                <DetailItem
+                  key={key}
+                  label={key.replace(/([A-Z])/g, ' $1').trim()}
+                  value={String(val)}
+                />
+              ) : null
+            ))}
+          </div>
+        </TerminalCard>
+      )}
 
       <ConfirmModal
         isOpen={showDeleteConfirm}
