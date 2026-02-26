@@ -24,13 +24,13 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
     if (side === 'left') {
       return {
         wrapper: `
-          ${isFocused ? 'border-primary dark:border-primary bg-white dark:bg-[#16181D]' : 'border-gray-300 dark:border-white/10 bg-white dark:bg-[#16181D]'}
-          ${isOtherFocused ? 'border-gray-200 dark:border-white/5' : ''}
+          ${isFocused ? 'bg-white dark:bg-[#16181D]' : 'bg-white dark:bg-[#16181D]'}
+          ${isOtherFocused ? '' : ''}
           transition-all duration-300
         `,
         iconBox: `
-          ${isFocused ? 'border-primary/50 dark:border-primary/50 bg-primary/5 dark:bg-primary/10' : 'border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5'}
-          ${isOtherFocused ? 'border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]' : ''}
+          ${isFocused ? 'bg-primary/5 dark:bg-primary/10' : 'bg-gray-50 dark:bg-white/5'}
+          ${isOtherFocused ? 'bg-gray-50/50 dark:bg-white/[0.02]' : ''}
           transition-all duration-300
         `,
         icon: `
@@ -67,13 +67,13 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
     } else {
       return {
         wrapper: `
-          ${isFocused ? 'border-primary dark:border-primary bg-white dark:bg-[#16181D]' : 'border-gray-300 dark:border-white/10 bg-white dark:bg-[#16181D]'}
-          ${isOtherFocused ? 'border-gray-200 dark:border-white/5' : ''}
+          ${isFocused ? 'bg-white dark:bg-[#16181D]' : 'bg-white dark:bg-[#16181D]'}
+          ${isOtherFocused ? '' : ''}
           transition-all duration-300
         `,
         iconBox: `
-          ${isFocused ? 'border-primary/50 dark:border-primary/50 bg-primary/5 dark:bg-primary/10' : 'border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5'}
-          ${isOtherFocused ? 'border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]' : ''}
+          ${isFocused ? 'bg-primary/5 dark:bg-primary/10' : 'bg-gray-50 dark:bg-white/5'}
+          ${isOtherFocused ? 'bg-gray-50/50 dark:bg-white/[0.02]' : ''}
           transition-all duration-300
         `,
         icon: `
@@ -124,10 +124,10 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
         onBlur={() => setFocusedSide(null)}
         className={`
           h-[50dvh] lg:h-full lg:flex-1 relative overflow-hidden
-          border-b-0 lg:border-b-0 lg:border-r-2 ${leftStyles.wrapper}
+          ${leftStyles.wrapper}
           ${getSideOpacity('left')}
           text-left cursor-pointer
-          focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset
+          focus:outline-none
         `}
       >
         {/* Top gradient fade */}
@@ -136,7 +136,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
         <div className="h-full flex flex-col p-5 lg:p-12 xl:p-16 pb-[max(1.25rem,env(safe-area-inset-bottom))] lg:pb-12">
           <div className="flex-1 flex flex-col">
             {/* Icon */}
-            <div className={`w-10 h-10 lg:w-12 lg:h-12 border flex items-center justify-center mb-4 lg:mb-8 ${leftStyles.iconBox}`}>
+            <div className={`w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center mb-4 lg:mb-8 ${leftStyles.iconBox}`}>
               <Package className={`w-5 h-5 lg:w-6 lg:h-6 ${leftStyles.icon}`} />
             </div>
 
@@ -187,16 +187,16 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
         onBlur={() => setFocusedSide(null)}
         className={`
           h-[50dvh] lg:h-full lg:flex-1 relative overflow-hidden
-          border-t-0 lg:border-t-0 ${rightStyles.wrapper}
+          ${rightStyles.wrapper}
           ${getSideOpacity('right')}
           text-left cursor-pointer
-          focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset
+          focus:outline-none
         `}
         >
         <div className="h-full flex flex-col p-5 lg:p-12 xl:p-16 pb-[max(1.25rem,env(safe-area-inset-bottom))] lg:pb-12">
           <div className="flex-1 flex flex-col">
             {/* Icon */}
-            <div className={`w-10 h-10 lg:w-12 lg:h-12 border flex items-center justify-center mb-4 lg:mb-8 ${rightStyles.iconBox}`}>
+            <div className={`w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center mb-4 lg:mb-8 ${rightStyles.iconBox}`}>
               <Film className={`w-5 h-5 lg:w-6 lg:h-6 ${rightStyles.icon}`} />
             </div>
 
