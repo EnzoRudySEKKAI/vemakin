@@ -494,12 +494,6 @@ const RootLayoutInner = () => {
 
   const isLoading = isLoadingAuth || projectsQuery.isLoading || currentUser?.firstConnection === undefined
 
-  useEffect(() => {
-    if (!isLoading) {
-      window.dispatchEvent(new CustomEvent('app-ready'))
-    }
-  }, [isLoading])
-
   if (isLoading) {
     return <FullPageLoader />
   }
