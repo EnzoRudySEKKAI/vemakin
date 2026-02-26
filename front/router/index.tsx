@@ -5,6 +5,7 @@ import { RootLayout } from '@/layouts/RootLayout'
 import { ProtectedRoute } from '@/routes/ProtectedRoute'
 import { AuthRoute } from '@/routes/AuthRoute'
 import { prefetchLikelyRoutes } from '@/utils/prefetch'
+import { FullPageLoader } from '@/components/ui/FullPageLoader'
 
 const LandingPage = lazy(() => import('@/components/landing/LandingPage'))
 const LandingView = lazy(() => import('@/components/auth/LandingView').then(m => ({ default: m.LandingView })))
@@ -31,11 +32,7 @@ const ProjectFormRoute = lazy(() => import('@/routes/ProjectFormRoute').then(m =
 
 import { rootLoader, shotsLoader, inventoryLoader, notesLoader, pipelineLoader, detailLoader } from './loaders'
 
-const PageLoader = () => (
-  <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#0F1116] flex items-center justify-center">
-    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-  </div>
-)
+const PageLoader = () => <FullPageLoader />
 
 // Prefetch likely routes after initial load - must forward Outlet context from RootLayout
 const RoutePrefetcher = () => {

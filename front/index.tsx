@@ -31,11 +31,9 @@ const injectApiPreconnect = () => {
   }
 }
 
-const HydrateFallback = () => (
-  <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#0F1116] flex items-center justify-center">
-    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-  </div>
-)
+import { FullPageLoader } from './components/ui/FullPageLoader'
+
+const HydrateFallback = () => <FullPageLoader />
 
 const AppContent = () => {
   useEffect(() => {
@@ -67,15 +65,12 @@ const container = document.getElementById('root')
 if (container) {
   const root = createRoot(container)
   root.render(<App />)
-  
-  // Delay removing initial loader until React has had a chance to paint
-  setTimeout(() => {
-    requestAnimationFrame(() => {
-      const loader = document.getElementById('initial-loader')
-      if (loader) {
-        loader.classList.add('loaded')
-        setTimeout(() => loader.remove(), 400)
-      }
-    })
-  }, 100)
 }
+
+window.addEventListener('app-ready', () => {
+  const loader = document.getElementById('initial-loader')
+  if (loader) {
+    loader.classList.add('loaded')
+    setTimeout(() => loader.remove(), 400)
+  }
+})

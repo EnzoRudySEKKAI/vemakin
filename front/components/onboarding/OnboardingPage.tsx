@@ -203,7 +203,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
 
             {/* Title */}
             <h2 className={`text-xl lg:text-3xl xl:text-4xl font-mono font-semibold tracking-tight mb-2 lg:mb-4 ${rightStyles.title}`}>
-              Create a Project
+              Create a project
             </h2>
 
             {/* Description - shorter on mobile */}
@@ -239,7 +239,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
                 ${rightStyles.cta}
               `}
             >
-              <span className="tracking-wide">Create Your First Project</span>
+              <span className="tracking-wide">Create your first project</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
