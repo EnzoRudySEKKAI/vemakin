@@ -1,15 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import useEmblaCarousel from 'embla-carousel-react'
-import Autoplay from 'embla-carousel-autoplay'
 import { 
   ArrowRight, Check, Film, Package, Zap, StickyNote, 
   Menu, X, Play, Clock, MapPin,
   ChevronDown, Sun, Moon, Sparkles, Camera, Clapperboard,
-  FilmIcon, Terminal, Cpu, Grid3X3, Command,
-  ChevronLeft, ChevronRight, Layers, CheckCircle2, AlertCircle,
-  Battery, Database, HardDrive, Wifi, Smartphone
+  FilmIcon, Terminal, Cpu, Grid3X3, Command
 } from 'lucide-react'
 
 import { Logo } from '@/components/atoms'
@@ -23,6 +19,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 
+// Throttle utility for Safari scroll performance
 const throttle = <T extends (...args: any[]) => any>(func: T, limit: number) => {
   let inThrottle: boolean
   return function(this: ThisParameterType<T>, ...args: Parameters<T>) {
@@ -33,6 +30,8 @@ const throttle = <T extends (...args: any[]) => any>(func: T, limit: number) => 
     }
   }
 }
+
+// --- TERMINAL STYLE COMPONENTS ---
 
 const TerminalButton = ({ 
   children, 
@@ -64,37 +63,39 @@ const TerminalButton = ({
   </button>
 )
 
+// --- MOCK UI COMPONENTS ---
+
 const MockShotCard = ({ title, scene, time, location, status = 'pending', active = false }: any) => (
-  <div className={`p-2 md:p-3 border transition-all ${active ? 'border-primary bg-primary/5' : 'border-white/10 bg-[#0a0a0a]/40'} backdrop-blur-sm`}>
-    <div className="flex flex-col gap-1 md:gap-2">
-      <div className="flex items-center gap-1.5 md:gap-2">
-        <span className="px-1.5 md:px-2 py-0.5 border border-white/20 text-white/80 text-[9px] md:text-[10px] font-mono">
-          {scene}
+  <div className={`p-4 border transition-all ${active ? 'border-primary bg-primary/5' : 'border-white/10 bg-[#0a0a0a]/40'} backdrop-blur-sm`}>
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2">
+        <span className="px-2 py-0.5 border border-white/20 text-white/80 text-[10px] font-mono  tracking-wider">
+          Scene {scene}
         </span>
-        <span className="px-1.5 md:px-2 py-0.5 border border-white/10 text-white/50 text-[9px] md:text-[10px] font-mono flex items-center gap-1">
-          <Clock size={8} /> {time}
+        <span className="px-2 py-0.5 border border-white/10 text-white/50 text-[10px] font-mono flex items-center gap-1.5">
+          <Clock size={9} /> {time}
         </span>
       </div>
 
-      <div className="my-0.5 md:my-1">
-        <h3 className="text-xs md:text-sm font-medium text-white leading-tight truncate">{title}</h3>
-        <div className="flex items-center gap-1 text-white/40 text-[10px] md:text-xs mt-0.5 font-mono">
-          <MapPin size={9} />
+      <div className="my-1">
+        <h3 className="text-base font-medium text-white leading-tight">{title}</h3>
+        <div className="flex items-center gap-2 text-white/40 text-xs mt-1 font-mono">
+          <MapPin size={10} />
           <span className="truncate">{location}</span>
         </div>
       </div>
 
-      <div className="flex items-center justify-between mt-1 md:mt-2">
-        <div className="flex items-center gap-1.5 md:gap-2">
-          <div className="px-1.5 md:px-2 py-0.5 border border-white/10 text-white/50 text-[8px] md:text-[9px] font-mono">
-            Gear
+      <div className="flex items-center justify-between mt-2">
+        <div className="flex items-center gap-2">
+          <div className="px-2 py-1 border border-white/10 text-white/50 text-[9px] font-mono ">
+            Checklist
           </div>
-          <div className="flex items-center gap-1 text-primary text-[9px] md:text-[10px] font-mono">
-            <Package size={10} /> <span className="hidden md:inline">Gear:</span>4/4
+          <div className="flex items-center gap-1.5 text-primary text-[10px] font-mono">
+            <Package size={12} /> <span>Gear:4/4</span>
           </div>
         </div>
-        <div className={`w-5 h-5 md:w-6 md:h-6 flex items-center justify-center border ${status === 'done' ? 'bg-primary border-primary text-black' : 'border-white/20 text-white/40'}`}>
-          <Check size={10} strokeWidth={3} />
+        <div className={`w-6 h-6 flex items-center justify-center border ${status === 'done' ? 'bg-primary border-primary text-black' : 'border-white/20 text-white/40'}`}>
+          <Check size={12} strokeWidth={3} />
         </div>
       </div>
     </div>
@@ -102,246 +103,22 @@ const MockShotCard = ({ title, scene, time, location, status = 'pending', active
 )
 
 const MockTimelineHeader = () => (
-  <div className="px-3 py-2 flex items-center justify-between bg-[#0a0a0a]/60 border-b border-white/10">
+  <div className="px-4 py-3 flex items-center justify-between bg-[#0a0a0a]/60 border-b border-white/10">
     <div className="flex items-center gap-2">
-      <span className="text-[10px] font-mono text-white/60">Mon Oct 24</span>
+      <span className="text-xs font-mono text-white/60  tracking-wider">Monday Oct 24</span>
     </div>
-    <div className="flex items-center gap-2">
-      <div className="flex items-center gap-1 text-[9px] font-mono text-orange-400">
-        <Sun size={9} /> 06:12
+    <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1.5 text-[10px] font-mono text-orange-400">
+        <Sun size={10} /> 06:12
       </div>
-      <div className="flex items-center gap-1 text-[9px] font-mono text-primary">
-        <Moon size={9} /> 18:45
+      <div className="flex items-center gap-1.5 text-[10px] font-mono text-primary">
+        <Moon size={10} /> 18:45
       </div>
-    </div>
-  </div>
-)
-
-const TimelinePreview = () => (
-  <div className="relative border border-white/10 bg-[#0a0a0a]/60 backdrop-blur-sm rounded-lg overflow-hidden">
-    <div className="flex items-center justify-between px-3 py-2 border-b border-white/10 bg-white/5">
-      <div className="flex items-center gap-2">
-        <div className="flex gap-1">
-          <div className="w-2 h-2 rounded-full bg-red-500/80" />
-          <div className="w-2 h-2 rounded-full bg-yellow-500/80" />
-          <div className="w-2 h-2 rounded-full bg-green-500/80" />
-        </div>
-        <span className="ml-2 text-[9px] font-mono text-white/40">production timeline</span>
-      </div>
-    </div>
-    
-    <div className="p-2 space-y-2">
-      <MockTimelineHeader />
-      <div className="space-y-2">
-        <MockShotCard active title="Opening Scene" scene="12A" time="08:00" location="Grand Central" />
-        
-        <div className="flex items-center justify-center gap-2 py-0.5">
-          <div className="h-px flex-1 bg-white/5" />
-          <span className="text-[8px] font-mono text-white/30">15m</span>
-          <div className="h-px flex-1 bg-white/5" />
-        </div>
-
-        <MockShotCard title="Dialogue Seq." scene="12B" time="10:30" location="Studio B" />
-      </div>
-    </div>
-    <div className="px-3 py-1.5 border-t border-white/10 bg-white/5 flex items-center justify-between">
-      <span className="text-[8px] font-mono text-white/30">2 shots</span>
     </div>
   </div>
 )
 
-const InventoryPreview = () => (
-  <div className="relative border border-white/10 bg-[#0a0a0a]/60 backdrop-blur-sm rounded-lg overflow-hidden">
-    <div className="flex items-center justify-between px-3 py-2 border-b border-white/10 bg-white/5">
-      <div className="flex items-center gap-2">
-        <div className="flex gap-1">
-          <div className="w-2 h-2 rounded-full bg-red-500/80" />
-          <div className="w-2 h-2 rounded-full bg-yellow-500/80" />
-          <div className="w-2 h-2 rounded-full bg-green-500/80" />
-        </div>
-        <span className="ml-2 text-[9px] font-mono text-white/40">equipment</span>
-      </div>
-    </div>
-    
-    <div className="p-2 space-y-1.5">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-[9px] font-mono text-primary/60">CAMERAS</span>
-        <div className="h-px flex-1 bg-white/10" />
-        <span className="text-[8px] font-mono text-white/30">4</span>
-      </div>
-      
-      <div className="space-y-1.5">
-        <div className="p-2 border border-white/10 bg-[#0a0a0a]/40">
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-1.5">
-              <Camera size={12} className="text-primary" />
-              <span className="text-[10px] font-medium text-white">Sony FX6</span>
-            </div>
-            <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[8px] font-mono">OWNED</span>
-          </div>
-          <div className="flex items-center gap-2 text-[8px] font-mono text-white/40">
-            <span className="flex items-center gap-1"><Database size={9} /> S35</span>
-            <span className="flex items-center gap-1"><HardDrive size={9} /> E</span>
-          </div>
-        </div>
-
-        <div className="p-2 border border-white/10 bg-[#0a0a0a]/40">
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-1.5">
-              <Camera size={12} className="text-white/60" />
-              <span className="text-[10px] font-medium text-white">RED 6K</span>
-            </div>
-            <span className="px-1.5 py-0.5 bg-orange-500/20 text-orange-400 text-[8px] font-mono">RENT</span>
-          </div>
-          <div className="flex items-center gap-2 text-[8px] font-mono text-white/40">
-            <span className="flex items-center gap-1"><Database size={9} /> FF</span>
-            <span className="flex items-center gap-1"><HardDrive size={9} /> RF</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2 mt-3 mb-2">
-        <span className="text-[9px] font-mono text-primary/60">AUDIO</span>
-        <div className="h-px flex-1 bg-white/10" />
-      </div>
-
-      <div className="p-2 border border-white/10 bg-[#0a0a0a]/40">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <Battery size={12} className="text-primary" />
-            <span className="text-[10px] font-medium text-white">Sennheiser</span>
-          </div>
-          <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[8px] font-mono">OK</span>
-        </div>
-      </div>
-    </div>
-    <div className="px-3 py-1.5 border-t border-white/10 bg-white/5 flex items-center justify-between">
-      <span className="text-[8px] font-mono text-white/30">$2,450</span>
-      <span className="text-[8px] font-mono text-primary">7 items</span>
-    </div>
-  </div>
-)
-
-const PipelinePreview = () => (
-  <div className="relative border border-white/10 bg-[#0a0a0a]/60 backdrop-blur-sm rounded-lg overflow-hidden">
-    <div className="flex items-center justify-between px-3 py-2 border-b border-white/10 bg-white/5">
-      <div className="flex items-center gap-2">
-        <div className="flex gap-1">
-          <div className="w-2 h-2 rounded-full bg-red-500/80" />
-          <div className="w-2 h-2 rounded-full bg-yellow-500/80" />
-          <div className="w-2 h-2 rounded-full bg-green-500/80" />
-        </div>
-        <span className="ml-2 text-[9px] font-mono text-white/40">pipeline</span>
-      </div>
-    </div>
-    
-    <div className="p-2 space-y-2">
-      <div className="flex items-center justify-between">
-        <span className="text-[9px] font-mono text-primary/60">VFX</span>
-        <span className="text-[8px] font-mono text-white/30">2/5</span>
-      </div>
-      
-      <div className="space-y-1.5">
-        <div className="p-2 border border-white/10 bg-[#0a0a0a]/40 flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <CheckCircle2 size={10} className="text-emerald-500" />
-            <span className="text-[9px] text-white">Sc 12A Sky</span>
-          </div>
-          <span className="text-[7px] font-mono text-emerald-500/60">DONE</span>
-        </div>
-        <div className="p-2 border border-white/10 bg-[#0a0a0a]/40 flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <CheckCircle2 size={10} className="text-emerald-500" />
-            <span className="text-[9px] text-white">Sc 14 Wire</span>
-          </div>
-          <span className="text-[7px] font-mono text-emerald-500/60">DONE</span>
-        </div>
-        <div className="p-2 border border-primary/30 bg-primary/5 flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <AlertCircle size={10} className="text-primary animate-pulse" />
-            <span className="text-[9px] text-white">Sc 18 Matte</span>
-          </div>
-          <span className="text-[7px] font-mono text-primary">ACTIVE</span>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2 mt-2">
-        <span className="text-[9px] font-mono text-primary/60">COLOR</span>
-        <div className="h-px flex-1 bg-white/10" />
-      </div>
-
-      <div className="space-y-1.5">
-        <div className="p-2 border border-white/10 bg-[#0a0a0a]/40 flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <Layers size={10} className="text-orange-500" />
-            <span className="text-[9px] text-white">Sc 12A-D</span>
-          </div>
-          <span className="text-[7px] font-mono text-orange-500/60">REVIEW</span>
-        </div>
-      </div>
-    </div>
-    <div className="px-3 py-1.5 border-t border-white/10 bg-white/5 flex items-center justify-between">
-      <span className="text-[8px] font-mono text-white/30">8 remaining</span>
-      <span className="text-[8px] font-mono text-primary">3 members</span>
-    </div>
-  </div>
-)
-
-const NotesPreview = () => (
-  <div className="relative border border-white/10 bg-[#0a0a0a]/60 backdrop-blur-sm rounded-lg overflow-hidden">
-    <div className="flex items-center justify-between px-3 py-2 border-b border-white/10 bg-white/5">
-      <div className="flex items-center gap-2">
-        <div className="flex gap-1">
-          <div className="w-2 h-2 rounded-full bg-red-500/80" />
-          <div className="w-2 h-2 rounded-full bg-yellow-500/80" />
-          <div className="w-2 h-2 rounded-full bg-green-500/80" />
-        </div>
-        <span className="ml-2 text-[9px] font-mono text-white/40">notes</span>
-      </div>
-    </div>
-    
-    <div className="p-2 space-y-1.5">
-      <div className="p-2 border border-white/10 bg-[#0a0a0a]/40">
-        <div className="flex items-center gap-2 mb-1.5">
-          <span className="px-1.5 py-0.5 bg-primary/20 text-primary text-[8px] font-mono">12A</span>
-          <span className="text-[8px] font-mono text-white/30">2 notes</span>
-        </div>
-        <p className="text-[9px] text-white/70 leading-relaxed mb-1.5">
-          Wide shot at golden hour. Contact grip for approval.
-        </p>
-        <div className="flex items-center gap-1">
-          <span className="px-1 py-0.5 border border-white/10 text-white/40 text-[7px] font-mono">@cinema</span>
-        </div>
-      </div>
-
-      <div className="p-2 border border-white/10 bg-[#0a0a0a]/40">
-        <div className="flex items-center gap-2 mb-1.5">
-          <span className="px-1.5 py-0.5 bg-orange-500/20 text-orange-400 text-[8px] font-mono">12B</span>
-          <span className="text-[8px] font-mono text-white/30">1 note</span>
-        </div>
-        <p className="text-[9px] text-white/70 leading-relaxed mb-1.5">
-          Tighten edit - cut 2 sec from middle.
-        </p>
-        <div className="flex items-center gap-1">
-          <span className="px-1 py-0.5 border border-white/10 text-white/40 text-[7px] font-mono">@edit</span>
-        </div>
-      </div>
-
-      <div className="p-2 border border-white/10 bg-[#0a0a0a]/40">
-        <div className="flex items-center gap-2 mb-1.5">
-          <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[8px] font-mono">14</span>
-        </div>
-        <p className="text-[9px] text-white/70 leading-relaxed">
-          Wardrobe confirmed - blue jacket.
-        </p>
-      </div>
-    </div>
-    <div className="px-3 py-1.5 border-t border-white/10 bg-white/5 flex items-center justify-between">
-      <span className="text-[8px] font-mono text-white/30">6 notes</span>
-      <span className="text-[8px] font-mono text-primary">3 scenes</span>
-    </div>
-  </div>
-)
+// --- SECTION COMPONENTS ---
 
 const Navbar = ({ scrolled, onNavigate }: { scrolled: boolean, onNavigate: (path: string) => void }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -434,47 +211,26 @@ const HeroSection = ({ onNavigate }: { onNavigate: (path: string) => void }) => 
     if (element) element.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    { loop: true },
-    [Autoplay({ delay: 5000, stopOnInteraction: false, stopOnMouseEnter: true })]
-  )
-  const [selectedIndex, setSelectedIndex] = useState(0)
-
-  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
-  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
-  const scrollTo = useCallback((index: number) => emblaApi?.scrollTo(index), [emblaApi])
-
-  useEffect(() => {
-    if (!emblaApi) return
-    const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap())
-    emblaApi.on('select', onSelect)
-    return () => { emblaApi.off('select', onSelect) }
-  }, [emblaApi])
-
-  const examples = [
-    { id: 'timeline', title: 'Production Timeline', component: TimelinePreview },
-    { id: 'inventory', title: 'Equipment Inventory', component: InventoryPreview },
-    { id: 'pipeline', title: 'Pipeline Tasks', component: PipelinePreview },
-    { id: 'notes', title: 'Scene Notes', component: NotesPreview }
-  ]
-
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden pt-24">
+    <section className="relative min-h-svh flex items-center overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0a0a0a]/80" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full">
-        <div className="grid lg:grid-cols-2 gap-6 items-center min-w-0">
+        <div className="grid lg:grid-cols-2 gap-6 items-center">
+          {/* Left - Content */}
           <motion.div 
             initial={{ opacity: 0, x: -30 }} 
             animate={{ opacity: 1, x: 0 }} 
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} 
-          >
+          > 
+            {/* Headline */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-4 leading-[1.1] break-words">
               Vemakin
               <br />
               <span className="font-mono text-primary">Filmmaker operating system</span>
             </h1>
             
+            {/* CTA Buttons centered */}
             <div className="flex flex-row items-start gap-4">
               <TerminalButton onClick={() => onNavigate('/auth')}>
                 Start
@@ -488,6 +244,7 @@ const HeroSection = ({ onNavigate }: { onNavigate: (path: string) => void }) => 
               </TerminalButton>
             </div>
 
+            {/* Trust badges */}
             <div className="mt-8 flex flex-wrap items-center gap-4 sm:gap-6 text-white/30 text-[10px] font-mono  tracking-wider">
               <span className="flex items-center gap-2">
                 <span className="w-1 h-1 bg-emerald-500 rounded-full" /> 
@@ -500,59 +257,51 @@ const HeroSection = ({ onNavigate }: { onNavigate: (path: string) => void }) => 
             </div>
           </motion.div>
 
+          {/* Right - Terminal Preview */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-full min-w-0 overflow-hidden"
+            className="relative w-full"
           >
-            <div className="relative w-full max-w-full min-w-0">
-              <div className="relative">
-                <div className="overflow-hidden" ref={emblaRef}>
-                  <div className="flex">
-                    {examples.map((example) => (
-                      <div key={example.id} className="flex-[0_0_100%] min-w-0">
-                        <example.component />
-                      </div>
-                    ))}
+            <div className="relative border border-white/10 bg-[#0a0a0a]/60 backdrop-blur-sm">
+              {/* Terminal Header */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-white/5">
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
                   </div>
+                  <span className="ml-3 text-[10px] font-mono text-white/40">production timeline</span>
                 </div>
-
-                <div className="hidden md:block absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-[#0a0a0a] to-transparent pointer-events-none" />
-                <div className="hidden md:block absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-[#0a0a0a] to-transparent pointer-events-none" />
               </div>
+              
+              {/* Terminal Content */}
+              <div className="p-2 space-y-3">
+                <MockTimelineHeader />
+                <div className="space-y-2">
+                  <MockShotCard active title="Opening Scene - Wide Rooftop" scene="12A" time="08:00" location="Grand Central Roof" />
+                  
+                  <div className="flex items-center justify-center gap-4 py-1">
+                    <div className="h-px flex-1 bg-white/5" />
+                    <span className="text-[9px] font-mono text-white/30  tracking-widest">15m travel time</span>
+                    <div className="h-px flex-1 bg-white/5" />
+                  </div>
 
-              <div className="flex items-center justify-center gap-2 md:gap-4 mt-3 md:mt-4">
-                <button 
-                  onClick={scrollPrev}
-                  className="w-7 h-7 md:w-8 md:h-8 border border-white/20 bg-[#0a0a0a]/80 backdrop-blur-sm flex items-center justify-center text-white/60 hover:text-white hover:border-primary transition-all"
-                >
-                  <ChevronLeft size={14} />
-                </button>
-                
-                <div className="flex gap-1.5 md:gap-2">
-                  {examples.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => scrollTo(index)}
-                      className={`h-1.5 rounded-full transition-all duration-300 ${
-                        index === selectedIndex 
-                          ? 'bg-primary w-6 md:w-8' 
-                          : 'bg-white/20 w-3 md:w-4 hover:bg-white/40'
-                      }`}
-                    />
-                  ))}
+                  <MockShotCard title="Dialogue Sequence - Interior" scene="12B" time="10:30" location="Studio B" />
                 </div>
+              </div>
+              {/* Terminal Footer */}
+              <div className="px-4 py-2 border-t border-white/10 bg-white/5 flex items-center justify-between">
+                <span className="text-[9px] font-mono text-white/30">2 shots scheduled</span>
+                <div className="flex items-center gap-1">
 
-                <button 
-                  onClick={scrollNext}
-                  className="w-7 h-7 md:w-8 md:h-8 border border-white/20 bg-[#0a0a0a]/80 backdrop-blur-sm flex items-center justify-center text-white/60 hover:text-white hover:border-primary transition-all"
-                >
-                  <ChevronRight size={14} />
-                </button>
+                </div>
               </div>
             </div>
             
+            {/* Glow effect */}
             <div className="absolute -inset-1 bg-primary/10 blur-3xl -z-10 opacity-50" />
           </motion.div>
         </div>
@@ -852,6 +601,8 @@ const Footer = () => {
   )
 }
 
+// --- MAIN LANDING PAGE COMPONENT ---
+
 export const LandingPage = () => {
   const navigate = useNavigate()
   const [scrolled, setScrolled] = useState(false)
@@ -864,6 +615,7 @@ export const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-primary/30 font-sans overflow-x-hidden relative">
+      {/* Global Grid Background */}
       <div className="fixed inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px] pointer-events-none z-0" />
       
       <div className="relative z-10">
