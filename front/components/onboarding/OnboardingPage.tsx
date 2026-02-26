@@ -1,241 +1,244 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
 import { Package, Film, ChevronRight } from 'lucide-react';
-import { Logo } from '@/components/atoms';
 
 interface OnboardingPageProps {
   onContinueWithoutProject: () => void;
   onCreateProject: () => void;
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.2
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: [0.25, 0.46, 0.45, 0.94]
-    }
-  }
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 0.6,
-      ease: [0.25, 0.46, 0.45, 0.94]
-    }
-  }
-};
-
 export const OnboardingPage: React.FC<OnboardingPageProps> = ({
   onContinueWithoutProject,
   onCreateProject
 }) => {
+  const [focusedSide, setFocusedSide] = useState<'left' | 'right' | null>(null);
+
+  const getSideOpacity = (side: 'left' | 'right') => {
+    if (focusedSide === null) return 'opacity-100';
+    return focusedSide === side ? 'opacity-100' : 'opacity-40';
+  };
+
+  const getSideStyles = (side: 'left' | 'right') => {
+    const isFocused = focusedSide === side;
+    const isOtherFocused = focusedSide !== null && focusedSide !== side;
+    
+    if (side === 'left') {
+      return {
+        wrapper: `
+          ${isFocused ? 'border-primary dark:border-primary bg-white dark:bg-[#16181D]' : 'border-gray-300 dark:border-white/10 bg-white dark:bg-[#16181D]'}
+          ${isOtherFocused ? 'border-gray-200 dark:border-white/5' : ''}
+          transition-all duration-300
+        `,
+        iconBox: `
+          ${isFocused ? 'border-primary/50 dark:border-primary/50 bg-primary/5 dark:bg-primary/10' : 'border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5'}
+          ${isOtherFocused ? 'border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]' : ''}
+          transition-all duration-300
+        `,
+        icon: `
+          ${isFocused ? 'text-primary' : 'text-gray-500 dark:text-white/50'}
+          ${isOtherFocused ? 'text-gray-300 dark:text-white/20' : ''}
+          transition-all duration-300
+        `,
+        title: `
+          ${isFocused ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-white/70'}
+          ${isOtherFocused ? 'text-gray-400 dark:text-white/30' : ''}
+          transition-all duration-300
+        `,
+        description: `
+          ${isFocused ? 'text-gray-600 dark:text-white/60' : 'text-gray-500 dark:text-white/40'}
+          ${isOtherFocused ? 'text-gray-300 dark:text-white/20' : ''}
+          transition-all duration-300
+        `,
+        feature: `
+          ${isFocused ? 'text-gray-500 dark:text-white/50' : 'text-gray-400 dark:text-white/30'}
+          ${isOtherFocused ? 'text-gray-300 dark:text-white/15' : ''}
+          transition-all duration-300
+        `,
+        dot: `
+          ${isFocused ? 'bg-primary' : 'bg-gray-300 dark:bg-white/20'}
+          ${isOtherFocused ? 'bg-gray-200 dark:bg-white/10' : ''}
+          transition-all duration-300
+        `,
+        cta: `
+          ${isFocused ? 'text-primary gap-2 lg:gap-3' : 'text-gray-500 dark:text-white/50 gap-1.5 lg:gap-2'}
+          ${isOtherFocused ? 'text-gray-300 dark:text-white/20' : ''}
+          transition-all duration-300
+        `
+      };
+    } else {
+      return {
+        wrapper: `
+          ${isFocused ? 'border-primary dark:border-primary bg-white dark:bg-[#16181D]' : 'border-gray-300 dark:border-white/10 bg-white dark:bg-[#16181D]'}
+          ${isOtherFocused ? 'border-gray-200 dark:border-white/5' : ''}
+          transition-all duration-300
+        `,
+        iconBox: `
+          ${isFocused ? 'border-primary/50 dark:border-primary/50 bg-primary/5 dark:bg-primary/10' : 'border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5'}
+          ${isOtherFocused ? 'border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]' : ''}
+          transition-all duration-300
+        `,
+        icon: `
+          ${isFocused ? 'text-primary' : 'text-gray-500 dark:text-white/50'}
+          ${isOtherFocused ? 'text-gray-300 dark:text-white/20' : ''}
+          transition-all duration-300
+        `,
+        title: `
+          ${isFocused ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-white/70'}
+          ${isOtherFocused ? 'text-gray-400 dark:text-white/30' : ''}
+          transition-all duration-300
+        `,
+        description: `
+          ${isFocused ? 'text-gray-600 dark:text-white/60' : 'text-gray-500 dark:text-white/40'}
+          ${isOtherFocused ? 'text-gray-300 dark:text-white/20' : ''}
+          transition-all duration-300
+        `,
+        feature: `
+          ${isFocused ? 'text-gray-500 dark:text-white/50' : 'text-gray-400 dark:text-white/30'}
+          ${isOtherFocused ? 'text-gray-300 dark:text-white/15' : ''}
+          transition-all duration-300
+        `,
+        dot: `
+          ${isFocused ? 'bg-primary' : 'bg-gray-300 dark:bg-white/20'}
+          ${isOtherFocused ? 'bg-gray-200 dark:bg-white/10' : ''}
+          transition-all duration-300
+        `,
+        cta: `
+          ${isFocused ? 'text-primary gap-2 lg:gap-3' : 'text-gray-500 dark:text-white/50 gap-1.5 lg:gap-2'}
+          ${isOtherFocused ? 'text-gray-300 dark:text-white/20' : ''}
+          transition-all duration-300
+        `
+      };
+    }
+  };
+
+  const leftStyles = getSideStyles('left');
+  const rightStyles = getSideStyles('right');
+
   return (
-    <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#0F1116] flex flex-col">
-      {/* Header with Logo */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="pt-8 pb-4 px-6 flex justify-center"
+    <div className="h-[100dvh] w-screen overflow-hidden bg-[#F2F2F7] dark:bg-[#0F1116] flex flex-col lg:flex-row">
+      {/* Left Side - Continue without project */}
+      <button
+        onClick={onContinueWithoutProject}
+        onMouseEnter={() => setFocusedSide('left')}
+        onMouseLeave={() => setFocusedSide(null)}
+        onFocus={() => setFocusedSide('left')}
+        onBlur={() => setFocusedSide(null)}
+        className={`
+          h-[50dvh] lg:h-full lg:flex-1 relative overflow-hidden
+          border-b-0 lg:border-b-0 lg:border-r-2 ${leftStyles.wrapper}
+          ${getSideOpacity('left')}
+          text-left cursor-pointer
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset
+        `}
       >
-        <Logo size="lg" className="opacity-90" />
-      </motion.div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:flex-row px-4 sm:px-6 lg:px-8 xl:px-12 gap-4 lg:gap-6 pb-8">
-        {/* Left Side - Continue without project */}
-        <motion.div
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          className="flex-1"
-        >
-          <button
-            onClick={onContinueWithoutProject}
-            className="w-full h-full min-h-[320px] lg:min-h-0 group relative overflow-hidden rounded-3xl bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/[0.08] hover:border-gray-300 dark:hover:border-white/[0.15] transition-all duration-300 text-left"
-          >
-            {/* Background gradient on hover */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-blue-500/0 to-blue-500/5 dark:from-blue-500/0 dark:via-blue-500/0 dark:to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            
-            {/* Content */}
-            <div className="relative h-full flex flex-col p-8 lg:p-10">
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className="flex-1 flex flex-col"
-              >
-                {/* Icon */}
-                <motion.div
-                  variants={itemVariants}
-                  className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/[0.08] flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-blue-50 dark:group-hover:bg-blue-500/10 group-hover:border-blue-200 dark:group-hover:border-blue-500/20 transition-all duration-300"
-                >
-                  <Package className="w-7 h-7 text-gray-600 dark:text-white/60 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300" />
-                </motion.div>
-
-                {/* Title */}
-                <motion.h2
-                  variants={itemVariants}
-                  className="text-2xl lg:text-3xl font-semibold text-gray-900 dark:text-white mb-3"
-                >
-                  Start with Inventory
-                </motion.h2>
-
-                {/* Description */}
-                <motion.p
-                  variants={itemVariants}
-                  className="text-gray-500 dark:text-white/50 text-base lg:text-lg leading-relaxed mb-6"
-                >
-                  Use the app without a project. Access your equipment inventory, track gear, and organize your kit. Create a project later when you're ready to shoot.
-                </motion.p>
-
-                {/* Features list */}
-                <motion.div
-                  variants={itemVariants}
-                  className="space-y-2 mb-8"
-                >
-                  {[
-                    'Manage equipment inventory',
-                    'Track gear status & location',
-                    'Organize by categories'
-                  ].map((feature, index) => (
-                    <div key={index} className="flex items-center gap-2 text-sm text-gray-400 dark:text-white/40">
-                      <div className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-white/20" />
-                      {feature}
-                    </div>
-                  ))}
-                </motion.div>
-
-                {/* Spacer */}
-                <div className="flex-1" />
-
-                {/* CTA */}
-                <motion.div
-                  variants={itemVariants}
-                  className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-medium group-hover:gap-3 transition-all duration-300"
-                >
-                  <span>Continue to Inventory</span>
-                  <ChevronRight className="w-5 h-5" />
-                </motion.div>
-              </motion.div>
+        {/* Top gradient fade */}
+        <div className="absolute inset-x-0 top-0 h-8 lg:h-12 bg-gradient-to-b from-[#F2F2F7] dark:from-[#0F1116] to-transparent lg:hidden pointer-events-none z-10" />
+        
+        <div className="h-full flex flex-col p-5 lg:p-12 xl:p-16 pb-[max(1.25rem,env(safe-area-inset-bottom))] lg:pb-12">
+          <div className="flex-1 flex flex-col">
+            {/* Icon */}
+            <div className={`w-10 h-10 lg:w-12 lg:h-12 border flex items-center justify-center mb-4 lg:mb-8 ${leftStyles.iconBox}`}>
+              <Package className={`w-5 h-5 lg:w-6 lg:h-6 ${leftStyles.icon}`} />
             </div>
-          </button>
-        </motion.div>
 
-        {/* Right Side - Create project */}
-        <motion.div
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          transition={{ delay: 0.1 }}
-          className="flex-1"
-        >
-          <button
-            onClick={onCreateProject}
-            className="w-full h-full min-h-[320px] lg:min-h-0 group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 to-blue-700 dark:from-blue-600 dark:to-blue-800 text-left"
-          >
-            {/* Shimmer effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-            
-            {/* Glow effect */}
-            <div className="absolute inset-0 bg-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl" />
-            
-            {/* Content */}
-            <div className="relative h-full flex flex-col p-8 lg:p-10">
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className="flex-1 flex flex-col"
-              >
-                {/* Icon */}
-                <motion.div
-                  variants={itemVariants}
-                  className="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-white/20 transition-all duration-300"
-                >
-                  <Film className="w-7 h-7 text-white" />
-                </motion.div>
+            {/* Title */}
+            <h2 className={`text-xl lg:text-3xl xl:text-4xl font-mono font-semibold tracking-tight mb-2 lg:mb-4 ${leftStyles.title}`}>
+              Start with the inventory only
+            </h2>
 
-                {/* Title */}
-                <motion.h2
-                  variants={itemVariants}
-                  className="text-2xl lg:text-3xl font-semibold text-white mb-3"
-                >
-                  Create a Project
-                </motion.h2>
+            {/* Description - shorter on mobile */}
+            <p className={`font-mono text-sm lg:text-base leading-relaxed mb-4 lg:mb-8 max-w-md ${leftStyles.description}`}>
+              <span className="hidden lg:inline">Use the app without a project. Access your equipment inventory, track gear, and organize your kit. Create a project later when you're ready to shoot.</span>
+              <span className="lg:hidden">Access equipment inventory and track gear without a project.</span>
+            </p>
 
-                {/* Description */}
-                <motion.p
-                  variants={itemVariants}
-                  className="text-blue-100 text-base lg:text-lg leading-relaxed mb-6"
-                >
-                  Unlock 100% of Vemakin's features. Create shots, manage tasks, organize notes, and track your entire production workflow in one place.
-                </motion.p>
-
-                {/* Features list */}
-                <motion.div
-                  variants={itemVariants}
-                  className="space-y-2 mb-8"
-                >
-                  {[
-                    'Plan shots & scenes',
-                    'Manage production tasks',
-                    'Organize project notes',
-                    'Full timeline view'
-                  ].map((feature, index) => (
-                    <div key={index} className="flex items-center gap-2 text-sm text-blue-200/80">
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-300" />
-                      {feature}
-                    </div>
-                  ))}
-                </motion.div>
-
-                {/* Spacer */}
-                <div className="flex-1" />
-
-                {/* CTA */}
-                <motion.div
-                  variants={itemVariants}
-                  className="flex items-center gap-2 text-white font-medium group-hover:gap-3 transition-all duration-300"
-                >
-                  <span>Create Your First Project</span>
-                  <ChevronRight className="w-5 h-5" />
-                </motion.div>
-              </motion.div>
+            {/* Features list - vertical on all screens */}
+            <div className="space-y-1 lg:space-y-3 mb-4 lg:mb-8">
+              {[
+                'Manage equipment inventory',
+                'Track gear status & location',
+                'Organize by categories',
+                'Check availability status'
+              ].map((feature, index) => (
+                <div key={index} className={`flex items-center gap-2 lg:gap-3 font-mono text-xs lg:text-sm ${leftStyles.feature}`}>
+                  <span className={`text-primary ${focusedSide === 'right' ? 'opacity-30' : focusedSide === 'left' ? 'opacity-100' : 'opacity-70'}`}>{'>'}</span>
+                  <span>{feature}</span>
+                </div>
+              ))}
             </div>
-          </button>
-        </motion.div>
-      </div>
 
-      {/* Footer hint */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8, duration: 0.5 }}
-        className="pb-6 text-center"
-      >
-        <p className="text-sm text-gray-400 dark:text-white/30">
-          You can always create a project later from the menu
-        </p>
-      </motion.div>
+            {/* Spacer */}
+            <div className="flex-1" />
+
+            {/* CTA */}
+            <div className={`flex items-center font-mono text-sm lg:text-base font-medium ${leftStyles.cta}`}>
+              <span className="tracking-wide">Continue to Inventory</span>
+              <ChevronRight className="w-4 h-4" />
+            </div>
+          </div>
+        </div>
+      </button>
+
+      {/* Right Side - Create project */}
+      <button
+        onClick={onCreateProject}
+        onMouseEnter={() => setFocusedSide('right')}
+        onMouseLeave={() => setFocusedSide(null)}
+        onFocus={() => setFocusedSide('right')}
+        onBlur={() => setFocusedSide(null)}
+        className={`
+          h-[50dvh] lg:h-full lg:flex-1 relative overflow-hidden
+          border-t-0 lg:border-t-0 ${rightStyles.wrapper}
+          ${getSideOpacity('right')}
+          text-left cursor-pointer
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset
+        `}
+        >
+        <div className="h-full flex flex-col p-5 lg:p-12 xl:p-16 pb-[max(1.25rem,env(safe-area-inset-bottom))] lg:pb-12">
+          <div className="flex-1 flex flex-col">
+            {/* Icon */}
+            <div className={`w-10 h-10 lg:w-12 lg:h-12 border flex items-center justify-center mb-4 lg:mb-8 ${rightStyles.iconBox}`}>
+              <Film className={`w-5 h-5 lg:w-6 lg:h-6 ${rightStyles.icon}`} />
+            </div>
+
+            {/* Title */}
+            <h2 className={`text-xl lg:text-3xl xl:text-4xl font-mono font-semibold tracking-tight mb-2 lg:mb-4 ${rightStyles.title}`}>
+              Create a Project
+            </h2>
+
+            {/* Description - shorter on mobile */}
+            <p className={`font-mono text-sm lg:text-base leading-relaxed mb-4 lg:mb-8 max-w-md ${rightStyles.description}`}>
+              <span className="hidden lg:inline">Unlock 100% of Vemakin's features. Create shots, manage tasks, organize notes, and track your entire production workflow in one place.</span>
+              <span className="lg:hidden">Create shots, manage tasks, and track your production workflow.</span>
+            </p>
+
+            {/* Features list - vertical on all screens */}
+            <div className="space-y-1 lg:space-y-3 mb-4 lg:mb-8">
+              {[
+                'Plan shots & scenes',
+                'Manage production tasks',
+                'Organize project notes',
+                'Full timeline view'
+              ].map((feature, index) => (
+                <div key={index} className={`flex items-center gap-2 lg:gap-3 font-mono text-xs lg:text-sm ${rightStyles.feature}`}>
+                  <span className={`text-primary ${focusedSide === 'left' ? 'opacity-30' : focusedSide === 'right' ? 'opacity-100' : 'opacity-70'}`}>{'>'}</span>
+                  <span>{feature}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Spacer */}
+            <div className="flex-1" />
+
+            {/* CTA */}
+            <div className={`flex items-center font-mono text-sm lg:text-base font-medium ${rightStyles.cta}`}>
+              <span className="tracking-wide">Create Your First Project</span>
+              <ChevronRight className="w-4 h-4" />
+            </div>
+          </div>
+        </div>
+        {/* Bottom gradient fade */}
+        <div className="absolute inset-x-0 bottom-0 h-8 lg:h-12 bg-gradient-to-t from-[#F2F2F7] dark:from-[#0F1116] to-transparent lg:hidden pointer-events-none z-10" />
+      </button>
     </div>
   );
 };

@@ -650,7 +650,7 @@ const RootLayoutInner = () => {
         )}
 
         <div
-          className={`content-wrapper px-4 md:px-6 ${shouldHideNavigation ? '' : 'lg:pl-[calc(88px+1.5rem)] 2xl:pl-[calc(280px+1.5rem)]'} view-${mainView}`}
+          className={`content-wrapper ${shouldHideNavigation ? '' : 'lg:pl-[calc(88px+1.5rem)] 2xl:pl-[calc(280px+1.5rem)]'} view-${mainView}`}
           style={mainView === 'settings' || mainView === 'manage-projects' ? { paddingTop: 0 } : layoutStyle}
         >
           <main className="flex-1 flex flex-col mx-auto w-full transition-all duration-500 ease-in-out max-w-[90%]" style={{ paddingBottom: shouldHideNavigation ? '80px' : '140px' }}>
