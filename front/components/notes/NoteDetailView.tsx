@@ -157,7 +157,7 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
         </div>
       }
     >
-      <TerminalCard header="Core content" className="mb-8">
+      <TerminalCard header="Core content" className="mb-4 md:mb-8">
         <div className="p-2 space-y-10">
           <div className="flex flex-col gap-1 min-w-0">
             {isEditing ? (

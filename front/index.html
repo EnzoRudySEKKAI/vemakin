@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -37,8 +37,8 @@
     
         <style>
         html {
-            background-color: #0F1116;
-            color-scheme: dark;
+            background-color: #F2F2F7;
+            color-scheme: light;
             min-height: 100vh;
             min-height: 100dvh;
             min-height: 100svh;
@@ -48,7 +48,26 @@
         }
 
         body {
-            background-color: #0F1116;
+            background-color: #F2F2F7;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            html {
+                background-color: #0F1116;
+                color-scheme: dark;
+            }
+            
+            body {
+                background-color: #0F1116;
+            }
+            
+            #initial-loader {
+                background-color: #0F1116;
+            }
+            
+            .loader-spinner {
+                border-color: rgba(255,255,255,0.2);
+            }
         }
         
         body {
@@ -92,7 +111,7 @@
         .loader-spinner {
             width: 32px;
             height: 32px;
-            border: 3px solid rgba(255,255,255,0.2);
+            border: 3px solid rgba(0,0,0,0.1);
             border-top-color: #4E47DD;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
