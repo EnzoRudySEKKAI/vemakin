@@ -87,7 +87,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
                 <div className="w-8 h-8 bg-[#f5f5f5] dark:bg-white/5 flex items-center justify-center border border-gray-300 dark:border-white/10">
                   <Plus size={16} />
                 </div>
-                Create New Project
+                Create new project
               </button>
             </motion.div>
           </>
