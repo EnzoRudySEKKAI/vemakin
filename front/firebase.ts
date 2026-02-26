@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, Auth } from "firebase/auth";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -11,4 +11,13 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+
+// Lazy auth initialization - don't call getAuth() until needed
+// This prevents the accounts:lookup API call on public pages like the landing page
+let authInstance: Auth | null = null;
+export const getFirebaseAuth = (): Auth => {
+  if (!authInstance) {
+    authInstance = getAuth(app);
+  }
+  return authInstance;
+};

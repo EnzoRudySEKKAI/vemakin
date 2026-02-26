@@ -27,8 +27,8 @@ export const SignUpView: React.FC<SignUpViewProps> = ({ onBack, onSignUp }) => {
     setIsLoading(true)
     try {
       const { createUserWithEmailAndPassword, updateProfile } = await import('firebase/auth')
-      const { auth } = await import('@/firebase')
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      const { getFirebaseAuth } = await import('@/firebase')
+      const userCredential = await createUserWithEmailAndPassword(getFirebaseAuth(), email, password)
 
       if (userCredential.user) {
         await updateProfile(userCredential.user, {

@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
-import { auth } from '@/firebase'
+import { getFirebaseAuth } from '@/firebase'
 import { camelizeKeys, decamelizeKeys } from 'humps'
 
 const api = axios.create({
@@ -12,7 +12,7 @@ const api = axios.create({
 // Request interceptor: Add auth and transform to snake_case
 api.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    const user = auth.currentUser
+    const user = getFirebaseAuth().currentUser
     if (user) {
       const token = await user.getIdToken()
       config.headers.Authorization = `Bearer ${token}`

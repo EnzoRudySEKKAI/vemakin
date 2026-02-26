@@ -47,7 +47,7 @@ const TerminalButton = ({
   <button
     onClick={onClick}
     className={`
-      group relative px-6 py-3 font-mono text-sm tracking-wider 
+      group relative p-2 font-mono text-sm tracking-wider 
       border transition-all duration-300
       ${variant === 'primary' 
         ? 'border-primary text-primary hover:bg-primary hover:text-primary-foreground' 
@@ -58,16 +58,9 @@ const TerminalButton = ({
   >
     <span className="flex items-center gap-3">
       {children}
-      <span className="opacity-0 group-hover:opacity-100 transition-opacity">{'>>'}</span>
+      
     </span>
   </button>
-)
-
-const StatusBadge = ({ text }: { text: string }) => (
-  <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-primary/30 bg-primary/5">
-    <span className="w-1.5 h-1.5 bg-primary animate-pulse rounded-full" />
-    <span className="font-mono text-[10px] text-primary tracking-widest ">{text}</span>
-  </div>
 )
 
 // --- MOCK UI COMPONENTS ---
@@ -77,7 +70,7 @@ const MockShotCard = ({ title, scene, time, location, status = 'pending', active
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
         <span className="px-2 py-0.5 border border-white/20 text-white/80 text-[10px] font-mono  tracking-wider">
-          Scene_{scene}
+          Scene {scene}
         </span>
         <span className="px-2 py-0.5 border border-white/10 text-white/50 text-[10px] font-mono flex items-center gap-1.5">
           <Clock size={9} /> {time}
@@ -112,8 +105,7 @@ const MockShotCard = ({ title, scene, time, location, status = 'pending', active
 const MockTimelineHeader = () => (
   <div className="px-4 py-3 flex items-center justify-between bg-[#0a0a0a]/60 border-b border-white/10">
     <div className="flex items-center gap-2">
-      <Terminal size={12} className="text-primary" />
-      <span className="text-xs font-mono text-white/60  tracking-wider">Monday_Oct_24</span>
+      <span className="text-xs font-mono text-white/60  tracking-wider">Monday Oct 24</span>
     </div>
     <div className="flex items-center gap-3">
       <div className="flex items-center gap-1.5 text-[10px] font-mono text-orange-400">
@@ -156,7 +148,7 @@ const Navbar = ({ scrolled, onNavigate }: { scrolled: boolean, onNavigate: (path
             <button 
               key={item}
               onClick={() => scrollToSection(item.toLowerCase().replace(/\s+/g, '-'))}
-              className="text-xs font-mono text-white/40 hover:text-white transition-colors tracking-widest "
+              className="text-lg font-mono text-white/40 hover:text-white transition-colors tracking-widest "
             >
               {item}
             </button>
@@ -171,7 +163,7 @@ const Navbar = ({ scrolled, onNavigate }: { scrolled: boolean, onNavigate: (path
             Sign In
           </button>
           <TerminalButton onClick={() => navigate('/auth')}>
-            Initialize
+            Register
           </TerminalButton>
         </div>
 
@@ -203,7 +195,7 @@ const Navbar = ({ scrolled, onNavigate }: { scrolled: boolean, onNavigate: (path
               ))}
               <div className="h-px bg-white/10 my-2" />
               <TerminalButton onClick={() => navigate('/auth')} className="w-full">
-                Initialize
+                Login
               </TerminalButton>
             </div>
           </motion.div>
@@ -220,52 +212,35 @@ const HeroSection = ({ onNavigate }: { onNavigate: (path: string) => void }) => 
   }
 
   return (
-    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+    <section className="relative min-h-svh flex items-center overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0a0a0a]/80" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-6 items-center">
           {/* Left - Content */}
           <motion.div 
             initial={{ opacity: 0, x: -30 }} 
             animate={{ opacity: 1, x: 0 }} 
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} 
-          >
-            {/* Status Line */}
-            <div className="mb-6">
-              <StatusBadge text="System Online" />
-            </div>
-            
-            {/* Pre-headline */}
-            <div className="font-mono text-[10px] text-white/30  tracking-[0.3em] mb-4">
-              // VEMAKIN_FEED_ACTIVE — PRODUCTION_OS: READY
-            </div>
-            
+          > 
             {/* Headline */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-4 leading-[1.1] break-words">
-              Production
+              Vemakin
               <br />
-              <span className="font-mono text-primary">[Operating_System]</span>
+              <span className="font-mono text-primary">Filmmaker operating system</span>
             </h1>
             
-            {/* Sub-headline */}
-            <p className="text-base md:text-lg text-white/40 mb-8 max-w-md leading-relaxed font-mono">
-              Automated timeline intelligence, gear tracking, and predictive analytics.
-              <br />
-              Engineered for those who move.
-            </p>
-            
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-start gap-4">
+            {/* CTA Buttons centered */}
+            <div className="flex flex-row items-start gap-4">
               <TerminalButton onClick={() => onNavigate('/auth')}>
-                Initialize Production
+                Start
               </TerminalButton>
               
               <TerminalButton 
                 variant="secondary" 
                 onClick={() => scrollToSection('how-it-works')}
               >
-                View Documentation
+                Documentation
               </TerminalButton>
             </div>
 
@@ -273,11 +248,11 @@ const HeroSection = ({ onNavigate }: { onNavigate: (path: string) => void }) => 
             <div className="mt-8 flex flex-wrap items-center gap-4 sm:gap-6 text-white/30 text-[10px] font-mono  tracking-wider">
               <span className="flex items-center gap-2">
                 <span className="w-1 h-1 bg-emerald-500 rounded-full" /> 
-                Free for Early Adopters
+                Free version available
               </span>
               <span className="flex items-center gap-2">
                 <span className="w-1 h-1 bg-emerald-500 rounded-full" /> 
-                No Credit Card
+                Accessible everywhere
               </span>
             </div>
           </motion.div>
@@ -298,33 +273,30 @@ const HeroSection = ({ onNavigate }: { onNavigate: (path: string) => void }) => 
                     <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
                     <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
                   </div>
-                  <span className="ml-3 text-[10px] font-mono text-white/40">production_timeline.exe</span>
+                  <span className="ml-3 text-[10px] font-mono text-white/40">production timeline</span>
                 </div>
-                <Grid3X3 size={12} className="text-white/20" />
               </div>
               
               {/* Terminal Content */}
-              <div className="p-6 space-y-3">
+              <div className="p-2 space-y-3">
                 <MockTimelineHeader />
                 <div className="space-y-2">
                   <MockShotCard active title="Opening Scene - Wide Rooftop" scene="12A" time="08:00" location="Grand Central Roof" />
                   
                   <div className="flex items-center justify-center gap-4 py-1">
                     <div className="h-px flex-1 bg-white/5" />
-                    <span className="text-[9px] font-mono text-white/30  tracking-widest">15m_travel_time</span>
+                    <span className="text-[9px] font-mono text-white/30  tracking-widest">15m travel time</span>
                     <div className="h-px flex-1 bg-white/5" />
                   </div>
 
                   <MockShotCard title="Dialogue Sequence - Interior" scene="12B" time="10:30" location="Studio B" />
                 </div>
               </div>
-              
               {/* Terminal Footer */}
               <div className="px-4 py-2 border-t border-white/10 bg-white/5 flex items-center justify-between">
                 <span className="text-[9px] font-mono text-white/30">2 shots scheduled</span>
                 <div className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-                  <span className="text-[9px] font-mono text-primary">LIVE</span>
+
                 </div>
               </div>
             </div>
@@ -363,7 +335,7 @@ const Benefits = () => {
   ]
 
   return (
-    <section id="features" className="py-24 md:py-32 px-4 sm:px-6 relative">
+    <section id="features" className="py-2 md:py-2 px-4 sm:px-6 relative">
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="flex items-center gap-4 mb-12">
           <Cpu size={20} className="text-primary" />

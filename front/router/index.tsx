@@ -4,6 +4,7 @@ import { useNavigateBack } from '@/hooks/useNavigateBack'
 import { RootLayout } from '@/layouts/RootLayout'
 import { ProtectedRoute } from '@/routes/ProtectedRoute'
 import { AuthRoute } from '@/routes/AuthRoute'
+import { AuthProvider } from '@/providers/AuthProvider'
 import { prefetchLikelyRoutes } from '@/utils/prefetch'
 import { FullPageLoader } from '@/components/ui/FullPageLoader'
 
@@ -33,6 +34,13 @@ const ProjectFormRoute = lazy(() => import('@/routes/ProjectFormRoute').then(m =
 import { rootLoader, shotsLoader, inventoryLoader, notesLoader, pipelineLoader, detailLoader } from './loaders'
 
 const PageLoader = () => <FullPageLoader />
+
+// Wrapper component that provides AuthProvider for routes that need authentication
+const AuthProviderWrapper = ({ children }: { children: React.ReactNode }) => (
+  <AuthProvider>
+    {children}
+  </AuthProvider>
+)
 
 // Prefetch likely routes after initial load - must forward Outlet context from RootLayout
 const RoutePrefetcher = () => {
@@ -64,14 +72,14 @@ export const router = createBrowserRouter(
         <>
             <Route path="/" element={withSuspense(LandingPage)} />
             
-            <Route element={<AuthRoute />}>
+            <Route element={<AuthProviderWrapper><AuthRoute /></AuthProviderWrapper>}>
                 <Route path="/auth" element={<AuthLandingRoute />} />
                 <Route path="/auth/login" element={<SignInPageRoute />} />
                 <Route path="/auth/register" element={<SignUpPageRoute />} />
                 <Route path="/auth/forgot-password" element={withSuspense(ForgotPasswordView)} />
             </Route>
             
-            <Route element={<ProtectedRoute />}>
+            <Route element={<AuthProviderWrapper><ProtectedRoute /></AuthProviderWrapper>}>
                 <Route path="/dashboard" element={<RootLayout />} loader={rootLoader} hydrateFallbackElement={<PageLoader />}>
                     <Route element={<RoutePrefetcher />}>
                         <Route index element={withSuspense(OverviewRoute)} />

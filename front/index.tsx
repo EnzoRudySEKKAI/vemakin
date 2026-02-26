@@ -5,7 +5,6 @@ import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
 import { router } from './router'
 import { QueryProvider } from './providers/QueryProvider'
-import { AuthProvider } from './providers/AuthProvider'
 import { ErrorBoundary } from './providers/ErrorBoundary'
 import { initPerformanceTracking } from './utils/performance'
 
@@ -65,9 +64,7 @@ const AppContent = () => {
 
   return (
     <QueryProvider>
-      <AuthProvider>
-        <RouterProvider router={router} hydrateFallbackElement={<HydrateFallback />} />
-      </AuthProvider>
+      <RouterProvider router={router} hydrateFallbackElement={<HydrateFallback />} />
     </QueryProvider>
   )
 }

@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Mail, ArrowRight } from 'lucide-react'
 import { sendPasswordResetEmail } from 'firebase/auth'
-import { auth } from '@/firebase'
+import { getFirebaseAuth } from '@/firebase'
 import { Button, Text, Input } from '@/components/atoms'
 import { SimpleCard } from '@/components/ui/Card'
 import { AuthLayout } from './AuthLayout'
@@ -22,7 +22,7 @@ export function ForgotPasswordView() {
     setError(null)
 
     try {
-      await sendPasswordResetEmail(auth, email)
+      await sendPasswordResetEmail(getFirebaseAuth(), email)
       setIsSuccess(true)
     } catch (err: any) {
       console.error('Password reset failed', err)
