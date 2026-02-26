@@ -50,6 +50,7 @@ import {
   useUpdateUserProfile
 } from '@/hooks/useApi'
 import { getViewFromPath, ROUTE_PATHS } from '@/router'
+import { FullPageLoader } from '@/components/ui/FullPageLoader'
 
 const RouteLoading = () => (
   <div className="flex items-center justify-center min-h-[200px]">
@@ -264,7 +265,7 @@ const RootLayoutInner = () => {
 
   // Track initial load
   useEffect(() => {
-    const isLoading = isLoadingAuth || projectsQuery.isLoading
+  const isLoading = isLoadingAuth || projectsQuery.isLoading || currentUser?.firstConnection === undefined
     if (!isLoading) {
       hasInitialLoadCompleted.current = true
     }
@@ -491,62 +492,16 @@ const RootLayoutInner = () => {
     dateFilter ? activeData.tasks.filter((t: { dueDate: string }) => t.dueDate === dateFilter) : activeData.tasks
   , [dateFilter, activeData.tasks])
 
-  const isLoading = isLoadingAuth || projectsQuery.isLoading
+  const isLoading = isLoadingAuth || projectsQuery.isLoading || currentUser?.firstConnection === undefined
 
-  // Show Header immediately while data loads to improve LCP
-  // The Header contains the LCP element (h1 title)
+  useEffect(() => {
+    if (!isLoading) {
+      window.dispatchEvent(new CustomEvent('app-ready'))
+    }
+  }, [isLoading])
+
   if (isLoading) {
-    return (
-      <div className="min-h-[100dvh] min-h-[100svh] bg-[#F2F2F7] dark:bg-[#0F1116] text-[#16181D] dark:text-white">
-        <Header
-          ref={headerRef}
-          filterTranslateY={0}
-          currentProject={currentProjectName || ''}
-          setCurrentProject={() => {}}
-          projects={[]}
-          onNavigateToCreateProject={() => {}}
-          viewTitle={viewTitles[mainView as keyof typeof viewTitles] || "Vemakin"}
-          mainView={mainView}
-          setMainView={() => {}}
-          projectProgress={projectProgress}
-          activeDate={activeDate}
-          shotLayout={shotLayout}
-          setShotLayout={() => {}}
-          isDateSelectorOpen={isDateSelectorOpen}
-          setIsDateSelectorOpen={() => {}}
-          handleDateSelect={() => {}}
-          inventoryFilters={inventoryFilters}
-          setInventoryFilters={() => {}}
-          dates={[]}
-          currency={currency}
-          setCurrency={() => {}}
-          shotSearchQuery={shotSearchQuery}
-          setShotSearchQuery={() => {}}
-          shotStatusFilter={shotStatusFilter}
-          setShotStatusFilter={() => {}}
-          postProdFilters={postProdFilters}
-          setPostProdFilters={() => {}}
-          onAddPostProdTask={() => {}}
-          postProdLayout={postProdLayout}
-          setPostProdLayout={() => {}}
-          inventoryLayout={inventoryLayout}
-          setInventoryLayout={() => {}}
-          notesFilters={notesFilters}
-          setNotesFilters={() => {}}
-          notesLayout={notesLayout}
-          setNotesLayout={() => {}}
-          isWideMode={isWideMode}
-          onToggleWideMode={() => {}}
-          onAdd={() => {}}
-          inventory={[]}
-          tasks={[]}
-        />
-        <div className="flex flex-col items-center justify-center gap-4 pt-32">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-gray-500 dark:text-white/40">Loading your projects...</span>
-        </div>
-      </div>
-    )
+    return <FullPageLoader />
   }
 
   // Show onboarding for first-time users (firstConnection === true)

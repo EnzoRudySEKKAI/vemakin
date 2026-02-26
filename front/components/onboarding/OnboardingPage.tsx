@@ -59,8 +59,8 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
           transition-all duration-300
         `,
         cta: `
-          ${isFocused ? 'text-primary gap-2 lg:gap-3' : 'text-gray-500 dark:text-white/50 gap-1.5 lg:gap-2'}
-          ${isOtherFocused ? 'text-gray-300 dark:text-white/20' : ''}
+          ${isFocused ? 'border-primary text-primary gap-2 lg:gap-3' : 'border-gray-300 dark:border-white/20 text-gray-500 dark:text-white/50 gap-1.5 lg:gap-2'}
+          ${isOtherFocused ? 'border-gray-200 dark:border-white/10 text-gray-300 dark:text-white/20' : ''}
           transition-all duration-300
         `
       };
@@ -102,8 +102,8 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
           transition-all duration-300
         `,
         cta: `
-          ${isFocused ? 'text-primary gap-2 lg:gap-3' : 'text-gray-500 dark:text-white/50 gap-1.5 lg:gap-2'}
-          ${isOtherFocused ? 'text-gray-300 dark:text-white/20' : ''}
+          ${isFocused ? 'border-primary text-primary gap-2 lg:gap-3' : 'border-gray-300 dark:border-white/20 text-gray-500 dark:text-white/50 gap-1.5 lg:gap-2'}
+          ${isOtherFocused ? 'border-gray-200 dark:border-white/10 text-gray-300 dark:text-white/20' : ''}
           transition-all duration-300
         `
       };
@@ -116,18 +116,15 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
   return (
     <div className="h-[100dvh] w-screen overflow-hidden bg-[#F2F2F7] dark:bg-[#0F1116] flex flex-col lg:flex-row">
       {/* Left Side - Continue without project */}
-      <button
-        onClick={onContinueWithoutProject}
+      <div
         onMouseEnter={() => setFocusedSide('left')}
         onMouseLeave={() => setFocusedSide(null)}
-        onFocus={() => setFocusedSide('left')}
-        onBlur={() => setFocusedSide(null)}
         className={`
           h-[50dvh] lg:h-full lg:flex-1 relative overflow-hidden
           ${leftStyles.wrapper}
           ${getSideOpacity('left')}
-          text-left cursor-pointer
-          focus:outline-none
+          text-left
+          cursor-default
         `}
       >
         {/* Top gradient fade */}
@@ -170,27 +167,31 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
             <div className="flex-1" />
 
             {/* CTA */}
-            <div className={`flex items-center font-mono text-sm lg:text-base font-medium ${leftStyles.cta}`}>
+            <button
+              onClick={onContinueWithoutProject}
+              className={`
+                flex items-center font-mono text-sm lg:text-base font-medium w-fit
+                border rounded px-3 py-1.5
+                ${leftStyles.cta}
+              `}
+            >
               <span className="tracking-wide">Continue to Inventory</span>
               <ChevronRight className="w-4 h-4" />
-            </div>
+            </button>
           </div>
         </div>
-      </button>
+      </div>
 
       {/* Right Side - Create project */}
-      <button
-        onClick={onCreateProject}
+      <div
         onMouseEnter={() => setFocusedSide('right')}
         onMouseLeave={() => setFocusedSide(null)}
-        onFocus={() => setFocusedSide('right')}
-        onBlur={() => setFocusedSide(null)}
         className={`
           h-[50dvh] lg:h-full lg:flex-1 relative overflow-hidden
           ${rightStyles.wrapper}
           ${getSideOpacity('right')}
-          text-left cursor-pointer
-          focus:outline-none
+          text-left
+          cursor-default
         `}
         >
         <div className="h-full flex flex-col p-5 lg:p-12 xl:p-16 pb-[max(1.25rem,env(safe-area-inset-bottom))] lg:pb-12">
@@ -202,7 +203,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
 
             {/* Title */}
             <h2 className={`text-xl lg:text-3xl xl:text-4xl font-mono font-semibold tracking-tight mb-2 lg:mb-4 ${rightStyles.title}`}>
-              Create a Project
+              Create a project
             </h2>
 
             {/* Description - shorter on mobile */}
@@ -230,15 +231,22 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
             <div className="flex-1" />
 
             {/* CTA */}
-            <div className={`flex items-center font-mono text-sm lg:text-base font-medium ${rightStyles.cta}`}>
-              <span className="tracking-wide">Create Your First Project</span>
+            <button
+              onClick={onCreateProject}
+              className={`
+                flex items-center font-mono text-sm lg:text-base font-medium w-fit
+                border rounded px-3 py-1.5
+                ${rightStyles.cta}
+              `}
+            >
+              <span className="tracking-wide">Create your first project</span>
               <ChevronRight className="w-4 h-4" />
-            </div>
+            </button>
           </div>
         </div>
         {/* Bottom gradient fade */}
         <div className="absolute inset-x-0 bottom-0 h-8 lg:h-12 bg-gradient-to-t from-[#F2F2F7] dark:from-[#0F1116] to-transparent lg:hidden pointer-events-none z-10" />
-      </button>
+      </div>
     </div>
   );
 };

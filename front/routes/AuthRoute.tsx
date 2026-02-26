@@ -1,15 +1,12 @@
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuthStore } from '@/stores/useAuthStore'
+import { FullPageLoader } from '@/components/ui/FullPageLoader'
 
 export function AuthRoute() {
   const { currentUser, isLoadingAuth } = useAuthStore()
 
   if (isLoadingAuth) {
-    return (
-      <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#0F1116] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+    return <FullPageLoader />
   }
 
   if (currentUser) {

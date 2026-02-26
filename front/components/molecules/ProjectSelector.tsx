@@ -42,7 +42,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
             <span className="text-[10px] font-mono  tracking-wider text-muted-foreground">Current Production</span>
             <div className="flex items-center gap-2">
               <span className="text-base font-medium text-gray-900 dark:text-white">
-                {currentProject || "Create a Project"}
+                {currentProject || "Create a project"}
               </span>
               {hasProjects && <ChevronDown size={14} className="text-gray-500 dark:text-white/40" />}
             </div>
