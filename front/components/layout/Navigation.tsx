@@ -110,7 +110,35 @@ export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, set
                   ))}
                 </div>
               )}
-              <div className="flex justify-between items-center">
+              {stats.tasksByStatus && (
+                <div>
+                  {stats.tasksByStatus.todo > 0 && (
+                    <div className="flex justify-between items-center py-0.5">
+                      <span className="text-xs text-muted-foreground">Todo</span>
+                      <span className="text-xs font-mono font-medium">{stats.tasksByStatus.todo}</span>
+                    </div>
+                  )}
+                  {stats.tasksByStatus.progress > 0 && (
+                    <div className="flex justify-between items-center py-0.5">
+                      <span className="text-xs text-muted-foreground">Progress</span>
+                      <span className="text-xs font-mono font-medium">{stats.tasksByStatus.progress}</span>
+                    </div>
+                  )}
+                  {stats.tasksByStatus.review > 0 && (
+                    <div className="flex justify-between items-center py-0.5">
+                      <span className="text-xs text-muted-foreground">Review</span>
+                      <span className="text-xs font-mono font-medium">{stats.tasksByStatus.review}</span>
+                    </div>
+                  )}
+                  {stats.tasksByStatus.done > 0 && (
+                    <div className="flex justify-between items-center py-0.5">
+                      <span className="text-xs text-muted-foreground">Done</span>
+                      <span className="text-xs font-mono font-medium">{stats.tasksByStatus.done}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              <div className="mt-2 pt-2 border-t border-gray-200 dark:border-white/5 flex justify-between items-center">
                 <span className="text-xs text-muted-foreground">Total tasks</span>
                 <span className="text-xs font-mono font-medium">{stats.tasksCount || 0}</span>
               </div>

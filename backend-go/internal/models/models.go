@@ -19,6 +19,7 @@ type User struct {
 	HubTasksLimit        *int    `db:"hub_tasks_limit" json:"hubTasksLimit"`
 	HubNotesLimit        *int    `db:"hub_notes_limit" json:"hubNotesLimit"`
 	HubEquipmentLimit    *int    `db:"hub_equipment_limit" json:"hubEquipmentLimit"`
+	FirstConnection      *bool   `db:"first_connection" json:"firstConnection"`
 }
 
 type Project struct {

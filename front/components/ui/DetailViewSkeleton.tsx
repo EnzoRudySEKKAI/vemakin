@@ -10,7 +10,7 @@ export const DetailViewSkeleton: React.FC = () => {
     <div className="min-h-screen bg-[#0F1116]">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-[#0F1116]/95 backdrop-blur-xl border-b border-white/5 px-6 py-4">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-[90%] mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Skeleton className="w-10 h-10 rounded-xl" />
@@ -29,7 +29,7 @@ export const DetailViewSkeleton: React.FC = () => {
 
       {/* Content */}
       <div className="px-6 py-8">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-[90%] mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main Content - 2/3 width */}
             <div className="lg:col-span-2 space-y-6">

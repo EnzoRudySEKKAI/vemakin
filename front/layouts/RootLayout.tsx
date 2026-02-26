@@ -19,6 +19,7 @@ import { ActionSuite } from '@/components/layout/ActionSuite'
 import { HeaderActionsProvider } from '@/context/HeaderActionsContext'
 import { TutorialModal } from '@/components/modals/TutorialModal'
 import { NoProjectsView } from '@/components/projects/NoProjectsView'
+import { OnboardingPage } from '@/components/onboarding'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { useUIStore } from '@/stores/useUIStore'
 import { useProjectStore } from '@/stores/useProjectStore'
@@ -45,7 +46,8 @@ import {
   useDeleteTask,
   useCreateEquipment,
   useUpdateEquipment,
-  useDeleteEquipment
+  useDeleteEquipment,
+  useUpdateUserProfile
 } from '@/hooks/useApi'
 import { getViewFromPath, ROUTE_PATHS } from '@/router'
 
@@ -149,6 +151,7 @@ const RootLayoutInner = () => {
   const createEquipmentMutation = useCreateEquipment()
   const updateEquipmentMutation = useUpdateEquipment()
   const deleteEquipmentMutation = useDeleteEquipment()
+  const updateUserProfileMutation = useUpdateUserProfile()
 
   // Derived data
   const projects = useMemo(() => 
@@ -546,6 +549,26 @@ const RootLayoutInner = () => {
     )
   }
 
+  // Show onboarding for first-time users (firstConnection === true)
+  if (currentUser?.firstConnection === true && !isLoading) {
+    return (
+      <OnboardingPage
+        onContinueWithoutProject={async () => {
+          // Update first_connection to false in database and local state
+          await updateUserProfileMutation.mutateAsync({ firstConnection: false })
+          useAuthStore.getState().updateFirstConnection(false)
+          navigate('/dashboard/inventory')
+        }}
+        onCreateProject={() => {
+          // Navigate to project creation form
+          // first_connection will be updated after project creation
+          navigate('/dashboard/projects/new', { state: { isFirstProject: true } })
+        }}
+      />
+    )
+  }
+
+  // Show NoProjectsView for users who have completed onboarding but have no projects
   if (showCreateProjectPrompt && !isLoading) {
     return (
       <NoProjectsView 
@@ -627,10 +650,10 @@ const RootLayoutInner = () => {
         )}
 
         <div
-          className={`content-wrapper px-4 md:px-6 ${shouldHideNavigation ? '' : 'lg:pl-[calc(88px+1.5rem)] 2xl:pl-[calc(280px+1.5rem)]'} view-${mainView}`}
+          className={`content-wrapper ${shouldHideNavigation ? '' : 'lg:pl-[calc(88px+1.5rem)] 2xl:pl-[calc(280px+1.5rem)]'} view-${mainView}`}
           style={mainView === 'settings' || mainView === 'manage-projects' ? { paddingTop: 0 } : layoutStyle}
         >
-          <main className={`flex-1 flex flex-col mx-auto w-full transition-all duration-500 ease-in-out ${isWideMode ? 'max-w-[90%]' : 'max-w-6xl'}`} style={{ paddingBottom: shouldHideNavigation ? '80px' : '140px' }}>
+          <main className="flex-1 flex flex-col mx-auto w-full transition-all duration-500 ease-in-out max-w-[90%]" style={{ paddingBottom: shouldHideNavigation ? '80px' : '140px' }}>
             {/* Remove AnimatePresence mode="wait" to prevent blocking navigation
                 The key prop ensures React reconciles properly without waiting for exit animations */}
             <PageTransition key={location.pathname}>

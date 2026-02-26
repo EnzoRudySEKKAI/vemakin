@@ -20,6 +20,7 @@ export interface User {
     hubTasksLimit?: number | null;
     hubNotesLimit?: number | null;
     hubEquipmentLimit?: number | null;
+    firstConnection?: boolean | null;
 }
 
 export interface Currency {

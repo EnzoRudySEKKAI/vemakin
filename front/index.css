@@ -22,6 +22,7 @@
 html {
   overscroll-behavior-y: none;
   -webkit-overscroll-behavior-y: none;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -128,10 +129,10 @@ html.dark {
   --content-padding-offset: 8px;
   --layout-animation-duration: 300ms;
   --layout-animation-easing: cubic-bezier(0.25, 0.1, 0.25, 1);
-  --view-offset-shots: 8px;
-  --view-offset-inventory: 16px;
+  --view-offset-shots: 12px;
+  --view-offset-inventory: 12px;
   --view-offset-notes: 12px;
-  --view-offset-postprod: 24px;
+  --view-offset-postprod: 12px;
 }
 
 .dark {

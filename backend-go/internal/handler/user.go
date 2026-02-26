@@ -30,6 +30,7 @@ func userToResponse(u models.User) dto.UserResponse {
 		HubTasksLimit:        u.HubTasksLimit,
 		HubNotesLimit:        u.HubNotesLimit,
 		HubEquipmentLimit:    u.HubEquipmentLimit,
+		FirstConnection:      u.FirstConnection,
 	}
 }
 
@@ -85,6 +86,9 @@ func (h *Handler) UpdateUser(c echo.Context) error {
 	}
 	if req.HubEquipmentLimit != nil {
 		updates["hub_equipment_limit"] = *req.HubEquipmentLimit
+	}
+	if req.FirstConnection != nil {
+		updates["first_connection"] = *req.FirstConnection
 	}
 
 	if len(updates) == 0 {

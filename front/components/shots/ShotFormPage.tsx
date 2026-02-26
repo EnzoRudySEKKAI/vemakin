@@ -123,7 +123,7 @@ export const ShotFormPage: React.FC<ShotFormPageProps> = ({
     <FormLayout
       title="New Scene"
       subtitle="Schedule a new shot"
-      detailLabel="Create New"
+      detailLabel="Create new"
       formType="shot"
       onBack={onClose}
       onSwitchForm={onSwitchForm}

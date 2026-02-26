@@ -126,29 +126,23 @@ export function calculateHeaderPadding(
  * These are SMALL breathing room values added on top of the measured header position
  */
 export const VIEW_OFFSETS: Record<string, number> = {
-  // Shots grid is dense, needs minimal extra space
-  shots: 8,
-  'shot-detail': 16,
+  // Unified offset for consistent layout across all views
+  shots: 12,
+  'shot-detail': 12,
   
-  // Inventory has cards, medium breathing room
   inventory: 12,
-  'equipment-detail': 16,
+  'equipment-detail': 12,
   
-  // Postprod tasks are list-based
   postprod: 12,
-  'task-detail': 16,
+  'task-detail': 12,
   
-  // Notes need breathing room for text
-  notes: 16,
-  'note-detail': 20,
+  notes: 12,
+  'note-detail': 12,
   
-  // Overview is dashboard, balanced padding
   overview: 12,
   
-  // Settings has forms, needs more space
-  settings: 16,
+  settings: 12,
   
-  // Project management
   'manage-projects': 12,
 };
 

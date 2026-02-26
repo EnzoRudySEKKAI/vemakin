@@ -27,7 +27,9 @@ import {
   CatalogItem,
   PaginationParams,
   PaginatedResponse,
+  User,
 } from '@/types'
+import { userService } from '@/api/services'
 
 // Query keys for cache management
 export const queryKeys = {
@@ -499,5 +501,12 @@ export const prefetchInitialData = async (
     queryKey: queryKeys.initialData(projectId),
     queryFn: () => bulkApi.getInitialData(projectId),
     staleTime: Math.min(STALE_TIMES.projects, STALE_TIMES.inventory),
+  })
+}
+
+// User profile hooks
+export const useUpdateUserProfile = () => {
+  return useMutation({
+    mutationFn: (data: Partial<User>) => userService.updateProfile(data),
   })
 }
