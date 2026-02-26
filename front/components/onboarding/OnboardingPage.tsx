@@ -194,7 +194,12 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
           cursor-default
         `}
         >
-        <div className="h-full flex flex-col p-5 lg:p-12 xl:p-16 pb-[max(1.25rem,env(safe-area-inset-bottom))] lg:pb-12">
+          <div className="absolute top-4 lg:top-6 right-4 lg:right-6 z-10">
+            <span className="font-mono text-xs uppercase tracking-widest text-primary">
+              [recommended]
+            </span>
+          </div>
+          <div className="h-full flex flex-col p-5 lg:p-12 xl:p-16 pb-[max(1.25rem,env(safe-area-inset-bottom))] lg:pb-12">
           <div className="flex-1 flex flex-col">
             {/* Icon */}
             <div className={`w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center mb-4 lg:mb-8 ${rightStyles.iconBox}`}>

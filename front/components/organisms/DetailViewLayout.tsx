@@ -70,7 +70,7 @@ export const DetailViewLayout: React.FC<DetailViewLayoutProps> = ({
     >
       <div className={`${sizeClasses[size]} w-full mx-auto`}>
         {sidebar ? (
-          <div className="grid grid-cols-1 xl:grid-cols-12 lg:gap-12">
+          <div className="grid grid-cols-1 xl:grid-cols-12 lg:gap-4">
             <div className="xl:col-span-8">
               {children}
             </div>

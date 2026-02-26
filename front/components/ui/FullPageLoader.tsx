@@ -10,7 +10,7 @@ export function FullPageLoader({ className }: FullPageLoaderProps) {
   return (
     <div
       className={cn(
-        "min-h-screen bg-[#0F1116] flex flex-col items-center justify-center",
+        "min-h-screen bg-[#F2F2F7] dark:bg-[#0F1116] flex flex-col items-center justify-center",
         className
       )}
       role="status"
