@@ -52,7 +52,7 @@ export const StatusToggle: React.FC<StatusToggleProps> = ({
       whileTap={{ scale: 0.99 }}
       onClick={onToggle}
       className={cn(
-        "group flex items-center justify-center gap-3",
+        "cursor-pointer group flex items-center justify-center gap-3",
         "w-full px-4 py-3",
         "border bg-primary/5",
         "transition-all duration-200",

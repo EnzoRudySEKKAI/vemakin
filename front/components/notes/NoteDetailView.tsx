@@ -1,6 +1,6 @@
-import React, { useRef, useMemo, useCallback } from 'react'
-import { Plus, Image as ImageIcon, File, Film, Briefcase, ExternalLink, ArrowUpRight, Trash2 } from 'lucide-react'
-import { Note, Shot, PostProdTask, Attachment } from '../../types'
+import React, { useMemo, useCallback } from 'react'
+import { Film, Briefcase, ExternalLink, ArrowUpRight } from 'lucide-react'
+import { Note, Shot, PostProdTask } from '../../types'
 import { useDetailView } from '../../hooks/useDetailView'
 import { DetailViewLayout } from '../../components/organisms/DetailViewLayout'
 import { ActionButtonGroup } from '../../components/molecules/ActionButton'
@@ -50,8 +50,6 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
     onDelete: onDeleteNote
   })
 
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
   const handleSave = useCallback(() => {
     onUpdateNote({
       ...editedItem,
@@ -65,50 +63,6 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
     setShowDeleteConfirm(false)
     onClose()
   }, [note.id, onDeleteNote, onClose, setShowDeleteConfirm])
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0]
-      const isImage = file.type.startsWith('image/')
-
-      const newAttachment: Attachment = {
-        id: `att-${Date.now()}`,
-        name: file.name,
-        type: isImage ? 'image' : 'document',
-        url: URL.createObjectURL(file),
-        size: `${(file.size / 1024).toFixed(1)} KB`,
-        createdAt: new Date().toISOString()
-      }
-
-      setEditedItem(prev => ({
-        ...prev,
-        attachments: [...(prev.attachments || []), newAttachment]
-      }))
-
-      if (!isEditing) {
-        onUpdateNote({
-          ...editedItem,
-          attachments: [...(editedItem.attachments || []), newAttachment],
-          updatedAt: new Date().toISOString()
-        })
-      }
-    }
-  }
-
-  const removeAttachment = (attId: string) => {
-    setEditedItem(prev => ({
-      ...prev,
-      attachments: prev.attachments.filter(a => a.id !== attId)
-    }))
-
-    if (!isEditing) {
-      onUpdateNote({
-        ...editedItem,
-        attachments: editedItem.attachments.filter(a => a.id !== attId),
-        updatedAt: new Date().toISOString()
-      })
-    }
-  }
 
   const linkedShot = useMemo(() => shots.find(s => s.id === note.shotId), [note.shotId, shots])
   const linkedTask = useMemo(() => tasks.find(t => t.id === note.taskId), [note.taskId, tasks])
@@ -233,7 +187,7 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
                 value={editedItem.content}
                 onChange={(e) => setEditedItem(prev => ({ ...prev, content: e.target.value }))}
                 placeholder="Share your thoughts or observations..."
-                className="min-h-[250px]"
+                
               />
             </div>
           ) : (
@@ -243,55 +197,6 @@ export const NoteDetailView: React.FC<NoteDetailViewProps> = ({
               valueClassName="whitespace-pre-wrap"
             />
           )}
-        </div>
-      </TerminalCard>
-
-      <TerminalCard
-        header="Production assets"
-        headerRight={
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 text-[10px] font-mono  tracking-wider text-primary hover:text-primary/70 transition-colors"
-          >
-            <Plus size={12} strokeWidth={3} />
-            Append File
-          </button>
-        }
-      >
-        <div className="p-6">
-          <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {editedItem.attachments && editedItem.attachments.length > 0 ? (
-              editedItem.attachments.map(att => (
-                <div
-                  key={att.id}
-                  className="group relative bg-secondary/30 p-4 border border-border hover:border-primary/30 transition-all flex items-center gap-4"
-                >
-                  <div className="w-10 h-10 flex items-center justify-center bg-secondary text-muted-foreground group-hover:text-primary group-hover:bg-primary/10 transition-all">
-                    {att.type === 'image' ? <ImageIcon size={18} /> : <File size={18} />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors truncate">{att.name}</p>
-                    <p className="text-[10px] text-muted-foreground font-mono">{att.size || 'N/A'}</p>
-                  </div>
-                  <button
-                    onClick={() => removeAttachment(att.id)}
-                    className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              ))
-            ) : (
-              <div className="col-span-full py-16 flex flex-col items-center justify-center text-center opacity-10">
-                <div className="w-12 h-12 bg-secondary flex items-center justify-center mb-4">
-                  <File size={24} />
-                </div>
-                <span className="text-[10px] font-mono  tracking-wider">No documentation attached</span>
-              </div>
-            )}
-          </div>
         </div>
       </TerminalCard>
 

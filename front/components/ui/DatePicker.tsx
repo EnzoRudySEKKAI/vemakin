@@ -92,7 +92,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
             onClose()
           }}
           className={`
-            w-8 h-8 flex items-center justify-center
+            cursor-pointer w-8 h-8 flex items-center justify-center
             font-mono text-sm tracking-wider
             transition-colors duration-150
             ${selected
@@ -143,28 +143,28 @@ export const DatePicker: React.FC<DatePickerProps> = ({
               <div className="flex gap-0">
                 <button
                   onClick={handlePrevYear}
-                  className="w-7 h-7 flex items-center justify-center border border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/30 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-mono text-xs"
+                  className="cursor-pointer w-7 h-7 flex items-center justify-center border border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/30 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-mono text-xs"
                   title="Previous year"
                 >
                   {'<<'}
                 </button>
                 <button
                   onClick={handlePrevMonth}
-                  className="w-7 h-7 flex items-center justify-center border-l-0 border border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/30 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  className="cursor-pointer w-7 h-7 flex items-center justify-center border-l-0 border border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/30 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                   title="Previous month"
                 >
                   <ChevronLeft size={14} strokeWidth={2} />
                 </button>
                 <button
                   onClick={handleNextMonth}
-                  className="w-7 h-7 flex items-center justify-center border-l-0 border border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/30 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  className="cursor-pointer w-7 h-7 flex items-center justify-center border-l-0 border border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/30 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                   title="Next month"
                 >
                   <ChevronRight size={14} strokeWidth={2} />
                 </button>
                 <button
                   onClick={handleNextYear}
-                  className="w-7 h-7 flex items-center justify-center border-l-0 border border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/30 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-mono text-xs"
+                  className="cursor-pointer w-7 h-7 flex items-center justify-center border-l-0 border border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/30 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors font-mono text-xs"
                   title="Next year"
                 >
                   {'>>'}
@@ -209,7 +209,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                   onSelectDate(null)
                   onClose()
                 }}
-                className="font-mono text-xs tracking-wider text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors"
+                className="cursor-pointer font-mono text-xs tracking-wider text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors"
               >
                 [CLEAR]
               </button>

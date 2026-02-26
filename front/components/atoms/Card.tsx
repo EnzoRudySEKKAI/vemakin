@@ -2,7 +2,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { cardClasses, radius, typography } from '../../design-system'
 
-export type CardVariant = 'default' | 'glass' | 'hover' | 'flat'
+export type CardVariant = 'default' | 'flat'
 export type CardSize = 'sm' | 'md' | 'lg'
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -60,7 +60,7 @@ export const Card: React.FC<CardProps> = ({
     </div>
   )
 
-  if (interactive || variant === 'hover') {
+  if (interactive) {
     return (
       <motion.div
         whileHover={{ scale: 1.02 }}

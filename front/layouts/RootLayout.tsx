@@ -343,7 +343,7 @@ const RootLayoutInner = () => {
 
   // View titles
   const viewTitles = useMemo(() => ({
-    overview: "Good morning",
+    overview: "Hub",
     shots: "Timeline",
     'shot-detail': "Shot detail",
     inventory: "Inventory",

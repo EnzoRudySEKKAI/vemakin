@@ -171,7 +171,7 @@ export const TimeSelector: React.FC<TimeSelectorProps> = ({ label, value = '00:0
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           className={`
-            w-full h-12 flex items-center justify-between px-3 pr-10 text-base font-mono text-foreground
+            cursor-pointer w-full h-12 flex items-center justify-between px-3 pr-10 text-base font-mono text-foreground
             bg-[#f5f5f5] dark:bg-[#16181D] border border-gray-300 dark:border-white/10
             transition-all duration-150
             ${isOpen ? 'border-primary ring-1 ring-primary/20' : 'hover:border-gray-400 dark:hover:border-white/20'}
@@ -209,7 +209,7 @@ export const TimeSelector: React.FC<TimeSelectorProps> = ({ label, value = '00:0
                           type="button"
                           onClick={() => handleHourChange(hour)}
                           className={`
-                            w-full flex items-center justify-center px-3 py-2 text-base font-mono transition-all duration-100
+                            cursor-pointer w-full flex items-center justify-center px-3 py-2 text-base font-mono transition-all duration-100
                             ${isSelected 
                               ? 'bg-primary text-primary-foreground' 
                               : 'text-foreground/30 hover:text-foreground hover:bg-[#f5f5f5] dark:hover:bg-white/5'
@@ -235,7 +235,7 @@ export const TimeSelector: React.FC<TimeSelectorProps> = ({ label, value = '00:0
                           type="button"
                           onClick={() => handleMinuteChange(minute)}
                           className={`
-                            w-full flex items-center justify-center px-3 py-2 text-base font-mono transition-all duration-100
+                            cursor-pointer w-full flex items-center justify-center px-3 py-2 text-base font-mono transition-all duration-100
                             ${isSelected 
                               ? 'bg-primary text-primary-foreground' 
                               : 'text-foreground/30 hover:text-foreground hover:bg-[#f5f5f5] dark:hover:bg-white/5'

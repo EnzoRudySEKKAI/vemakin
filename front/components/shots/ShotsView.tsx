@@ -230,7 +230,7 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
                                           e.stopPropagation()
                                           handleToggleChecklist(shot.id)
                                         }}
-                                        className={`h-9 px-2 flex items-center gap-2 text-xs font-mono tracking-wider transition-all ${isChecklistOpen
+                                        className={`cursor-pointer h-9 px-2 flex items-center gap-2 text-xs font-mono tracking-wider transition-all ${isChecklistOpen
                                           ? 'text-primary'
                                           : 'text-muted-foreground hover:text-foreground'
                                           }`}

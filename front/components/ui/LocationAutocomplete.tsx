@@ -415,7 +415,7 @@ export const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
             <button
               type="button"
               onClick={handleClear}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
+              className="cursor-pointer text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
             >
               <X size={14} />
             </button>

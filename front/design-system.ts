@@ -24,16 +24,12 @@ export const colors = {
   },
   surface: {
     light: '#FFFFFF',
-    lightGlass: 'rgba(255, 255, 255, 0.8)',
     dark: '#16181D',
     darker: '#0F1116',
-    darkGlass: 'rgba(22, 24, 29, 0.95)',
   },
   border: {
     light: '#E5E5E5',
-    lightGlass: 'rgba(255, 255, 255, 0.2)',
     dark: 'rgba(255, 255, 255, 0.08)',
-    darkGlass: 'rgba(255, 255, 255, 0.05)',
     darkHover: 'rgba(255, 255, 255, 0.12)',
   },
   text: {
@@ -251,13 +247,6 @@ export function formatText(text: string, type: 'sentence' | 'title' = 'title'): 
     .join(' ')
 }
 
-export function glassClasses(variant: 'light' | 'dark' = 'light'): string {
-  if (variant === 'dark') {
-    return 'bg-[#16181D]/90 backdrop-blur-xl border border-white/5'
-  }
-  return 'bg-white/80 backdrop-blur-xl border border-white/20'
-}
-
 export function primaryButtonClasses(size: 'sm' | 'md' | 'lg' = 'md'): string {
   const sizes = {
     sm: `${componentTokens.button.height.sm} ${componentTokens.button.padding.sm}`,
@@ -276,6 +265,7 @@ export function primaryButtonClasses(size: 'sm' | 'md' | 'lg' = 'md'): string {
     transition-all ${animations.duration.normal}
     hover:opacity-90
     active:scale-[0.98]
+    cursor-pointer
     disabled:opacity-50 disabled:cursor-not-allowed
   `.trim().replace(/\s+/g, ' ')
 }
@@ -298,6 +288,7 @@ export function secondaryButtonClasses(size: 'sm' | 'md' | 'lg' = 'md'): string 
     transition-all ${animations.duration.normal}
     hover:bg-gray-50 dark:hover:bg-white/5
     active:scale-[0.98]
+    cursor-pointer
   `.trim().replace(/\s+/g, ' ')
 }
 
@@ -318,6 +309,7 @@ export function ghostButtonClasses(size: 'sm' | 'md' | 'lg' = 'md'): string {
     transition-all ${animations.duration.normal}
     hover:bg-gray-100 dark:hover:bg-white/5
     active:scale-[0.98]
+    cursor-pointer
   `.trim().replace(/\s+/g, ' ')
 }
 
@@ -338,10 +330,11 @@ export function dangerButtonClasses(size: 'sm' | 'md' | 'lg' = 'md'): string {
     transition-all ${animations.duration.normal}
     hover:bg-red-600 dark:hover:bg-red-700
     active:scale-[0.98]
+    cursor-pointer
   `.trim().replace(/\s+/g, ' ')
 }
 
-export function inputClasses(variant: 'default' | 'glass' = 'default'): string {
+export function inputClasses(): string {
   const base = `
     w-full
     ${componentTokens.input.height.md}
@@ -355,15 +348,11 @@ export function inputClasses(variant: 'default' | 'glass' = 'default'): string {
     transition-all ${animations.duration.normal}
   `.trim().replace(/\s+/g, ' ')
   
-  if (variant === 'glass') {
-    return `${base} bg-white/80 dark:bg-[#16181D]/90 backdrop-blur-xl border border-white/20 dark:border-white/5 focus:border-primary`
-  }
-  
   return `${base} bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/10 focus:border-primary`
 }
 
 export function cardClasses(
-  variant: 'default' | 'glass' | 'hover' | 'flat' | 'window' = 'default',
+  variant: 'default' | 'flat' | 'window' = 'default',
   size: 'sm' | 'md' | 'lg' = 'md'
 ): string {
   const sizes = {
@@ -379,10 +368,6 @@ export function cardClasses(
   `.trim().replace(/\s+/g, ' ')
 
   switch (variant) {
-    case 'glass':
-      return `${base} ${glassClasses('light')} dark:${glassClasses('dark')}`
-    case 'hover':
-      return `${base} ${glassClasses('light')} dark:${glassClasses('dark')} hover:scale-[1.02] hover:shadow-lg cursor-pointer`
     case 'flat':
       return `${base} bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5`
     case 'window':
@@ -440,7 +425,6 @@ export default {
   componentTokens,
   animations,
   formatText,
-  glassClasses,
   primaryButtonClasses,
   secondaryButtonClasses,
   ghostButtonClasses,

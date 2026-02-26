@@ -67,6 +67,73 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
 
   const isValid = form.title.trim();
 
+  const pipelineSidebar = (
+    <TerminalCard header="Pipeline parameters">
+      <div className="space-y-4">
+        {form.category === 'Script' && (
+          <div className="flex flex-col gap-1 min-w-0">
+            <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Scene reference</span>
+            <Input
+              type="text"
+              value={form.metadata['scene'] as string || ''}
+              onChange={(e) => setForm(prev => ({ ...prev, metadata: { ...prev.metadata, scene: e.target.value } }))}
+              placeholder="e.g. 14B"
+              leftIcon={<Hash size={16} className="text-gray-400 dark:text-white/20" />}
+              variant="underline"
+              fullWidth
+            />
+          </div>
+        )}
+        {form.category === 'Editing' && (
+          <>
+            <div className="flex flex-col gap-1 min-w-0">
+              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Target duration</span>
+              <Input
+                type="text"
+                value={form.metadata['duration'] as string || ''}
+                onChange={(e) => setForm(prev => ({ ...prev, metadata: { ...prev.metadata, duration: e.target.value } }))}
+                placeholder="e.g. 2m 30s"
+                leftIcon={<Clock size={16} className="text-gray-400 dark:text-white/20" />}
+                variant="underline"
+                fullWidth
+              />
+            </div>
+            <div className="flex flex-col gap-1 min-w-0">
+              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Aspect ratio</span>
+              <div className="relative group">
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 dark:text-white/20 group-hover:text-primary transition-colors pointer-events-none">
+                  <Crop size={16} />
+                </div>
+                <select
+                  value={form.metadata['aspectRatio'] as string || ''}
+                  onChange={(e) => setForm(prev => ({ ...prev, metadata: { ...prev.metadata, aspectRatio: e.target.value } }))}
+                  className="w-full appearance-none bg-transparent border-b border-gray-300 dark:border-white/10 pl-10 pr-10 py-3 text-sm font-bold tracking-tight focus:outline-none focus:border-primary transition-all cursor-pointer text-gray-800 dark:text-white/80 focus:text-gray-900 dark:focus:text-white"
+                >
+                  <option value="" className="bg-white dark:bg-[#0F1116]">Select Ratio</option>
+                  <option value="16:9" className="bg-white dark:bg-[#0F1116]">16:9 (Widescreen)</option>
+                  <option value="9:16" className="bg-white dark:bg-[#0F1116]">9:16 (Vertical)</option>
+                  <option value="2.39:1" className="bg-white dark:bg-[#0F1116]">2.39:1 (Cinema)</option>
+                  <option value="4:3" className="bg-white dark:bg-[#0F1116]">4:3 (Classic)</option>
+                </select>
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 dark:text-white/20 pointer-events-none group-hover:text-primary transition-colors">
+                  <ChevronDown size={14} strokeWidth={3} />
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+        {(!['Script', 'Editing'].includes(form.category)) && (
+          <div className="py-8 flex flex-col items-center justify-center text-center opacity-10">
+            <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-4">
+              <Layers size={24} />
+            </div>
+            <span className="text-[10px] font-medium text-gray-900 dark:text-white">Standard parameters applied</span>
+          </div>
+        )}
+      </div>
+    </TerminalCard>
+  );
+
   return (
     <FormLayout
       title="New Task"
@@ -78,6 +145,8 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
       onSubmit={handleSubmit}
       submitDisabled={!isValid || !hasProjects}
       submitLabel={hasProjects ? "Create Task" : "Create a project first"}
+      size="wide"
+      sidebar={pipelineSidebar}
     >
       {!hasProjects && (
         <ProjectRequiredBanner
@@ -114,8 +183,8 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
       </TerminalCard>
 
       <TerminalCard header="Core specification" className="mb-8">
-        <div className="p-6 space-y-12">
-          <div className="w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="lg:col-span-2">
             <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Task objective</span>
             <Input
               type="text"
@@ -127,112 +196,41 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
               className="text-lg font-bold tracking-tight"
             />
           </div>
+          <div className="flex flex-col gap-1 min-w-0">
+            <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Timeline deadline</span>
+            <DatePickerInput
+              value={form.dueDate}
+              onChange={(date) => setForm(prev => ({ ...prev, dueDate: date || '' }))}
+              fullWidth
+            />
+          </div>
 
-          <div className="w-full">
+          <div className="flex flex-col gap-1 min-w-0">
+            <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Priority level</span>
+              <div className="relative group">
+              <select
+                value={form.priority}
+                onChange={(e) => setForm(prev => ({ ...prev, priority: e.target.value as any }))}
+                className="w-full bg-transparent border-b border-gray-300 dark:border-white/10 py-3 text-gray-800 dark:text-white/80 focus:text-gray-900 dark:focus:text-white focus:outline-none focus:border-primary appearance-none cursor-pointer pr-10 text-sm font-bold tracking-tight transition-all"
+              >
+                <option value="low" className="bg-white dark:bg-[#0F1116]">Low Tier</option>
+                <option value="medium" className="bg-white dark:bg-[#0F1116]">Medium Tier</option>
+                <option value="high" className="bg-white dark:bg-[#0F1116]">High Priority</option>
+                <option value="critical" className="bg-white dark:bg-[#0F1116]">Mission Critical</option>
+              </select>
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 dark:text-white/20 group-hover:text-primary transition-colors pointer-events-none">
+                <ChevronDown size={16} strokeWidth={3} />
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:col-span-2">
             <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Briefing & requirements</span>
             <Textarea
               value={form.description || ''}
               onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
               placeholder="Define specific technical instructions or creative context..."
-              className="min-h-[160px]"
             />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-12">
-            <div className="flex flex-col gap-1 min-w-0">
-              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Timeline deadline</span>
-              <DatePickerInput
-                value={form.dueDate}
-                onChange={(date) => setForm(prev => ({ ...prev, dueDate: date || '' }))}
-                fullWidth
-              />
-            </div>
-
-            <div className="flex flex-col gap-1 min-w-0">
-              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Priority level</span>
-                <div className="relative group">
-                <select
-                  value={form.priority}
-                  onChange={(e) => setForm(prev => ({ ...prev, priority: e.target.value as any }))}
-                  className="w-full bg-transparent border-b border-gray-300 dark:border-white/10 py-3 text-gray-800 dark:text-white/80 focus:text-gray-900 dark:focus:text-white focus:outline-none focus:border-primary appearance-none cursor-pointer pr-10 text-sm font-bold tracking-tight transition-all"
-                >
-                  <option value="low" className="bg-white dark:bg-[#0F1116]">Low Tier</option>
-                  <option value="medium" className="bg-white dark:bg-[#0F1116]">Medium Tier</option>
-                  <option value="high" className="bg-white dark:bg-[#0F1116]">High Priority</option>
-                  <option value="critical" className="bg-white dark:bg-[#0F1116]">Mission Critical</option>
-                </select>
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 dark:text-white/20 group-hover:text-primary transition-colors pointer-events-none">
-                  <ChevronDown size={16} strokeWidth={3} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </TerminalCard>
-
-      <TerminalCard header="Pipeline parameters">
-        <div className="p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-12">
-            {form.category === 'Script' && (
-              <div className="flex flex-col gap-1 min-w-0">
-                <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Scene reference</span>
-                <Input
-                  type="text"
-                  value={form.metadata['scene'] as string || ''}
-                  onChange={(e) => setForm(prev => ({ ...prev, metadata: { ...prev.metadata, scene: e.target.value } }))}
-                  placeholder="e.g. 14B"
-                  leftIcon={<Hash size={16} className="text-gray-400 dark:text-white/20" />}
-                  variant="underline"
-                  fullWidth
-                />
-              </div>
-            )}
-            {form.category === 'Editing' && (
-              <>
-                <div className="flex flex-col gap-1 min-w-0">
-                  <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Target duration</span>
-                  <Input
-                    type="text"
-                    value={form.metadata['duration'] as string || ''}
-                    onChange={(e) => setForm(prev => ({ ...prev, metadata: { ...prev.metadata, duration: e.target.value } }))}
-                    placeholder="e.g. 2m 30s"
-                    leftIcon={<Clock size={16} className="text-gray-400 dark:text-white/20" />}
-                    variant="underline"
-                    fullWidth
-                  />
-                </div>
-                <div className="flex flex-col gap-1 min-w-0">
-                  <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Aspect ratio</span>
-                  <div className="relative group">
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 dark:text-white/20 group-hover:text-primary transition-colors pointer-events-none">
-                      <Crop size={16} />
-                    </div>
-                    <select
-                      value={form.metadata['aspectRatio'] as string || ''}
-                      onChange={(e) => setForm(prev => ({ ...prev, metadata: { ...prev.metadata, aspectRatio: e.target.value } }))}
-                      className="w-full appearance-none bg-transparent border-b border-gray-300 dark:border-white/10 pl-10 pr-10 py-3 text-sm font-bold tracking-tight focus:outline-none focus:border-primary transition-all cursor-pointer text-gray-800 dark:text-white/80 focus:text-gray-900 dark:focus:text-white"
-                    >
-                      <option value="" className="bg-white dark:bg-[#0F1116]">Select Ratio</option>
-                      <option value="16:9" className="bg-white dark:bg-[#0F1116]">16:9 (Widescreen)</option>
-                      <option value="9:16" className="bg-white dark:bg-[#0F1116]">9:16 (Vertical)</option>
-                      <option value="2.39:1" className="bg-white dark:bg-[#0F1116]">2.39:1 (Cinema)</option>
-                      <option value="4:3" className="bg-white dark:bg-[#0F1116]">4:3 (Classic)</option>
-                    </select>
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 dark:text-white/20 pointer-events-none group-hover:text-primary transition-colors">
-                      <ChevronDown size={14} strokeWidth={3} />
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-            {(!['Script', 'Editing'].includes(form.category)) && (
-              <div className="col-span-2 py-16 flex flex-col items-center justify-center text-center opacity-10">
-                <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-4">
-                  <Layers size={24} />
-                </div>
-                <span className="text-[10px] font-medium text-gray-900 dark:text-white">Standard parameters applied</span>
-              </div>
-            )}
           </div>
         </div>
       </TerminalCard>

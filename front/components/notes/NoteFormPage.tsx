@@ -1,18 +1,16 @@
-import React, { useState, useRef } from 'react';
-import { Paperclip, ArrowUpRight, Image as ImageIcon, File, Trash2, Link as LinkIcon, ChevronDown } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link as LinkIcon, ChevronDown } from 'lucide-react';
 import { FormLayout, FormType } from '../organisms/FormLayout';
-import { Text } from '../atoms/Text';
-import { Input } from '../atoms/Input';
-import { Textarea } from '../atoms/Textarea';
-import { ProjectRequiredBanner } from '../molecules/ProjectRequiredBanner';
-import { Shot, PostProdTask, Attachment } from '../../types';
+import { Input } from '@/components/atoms';
+import { Textarea } from '@/components/atoms';
+import { ProjectRequiredBanner } from '@/components/molecules/ProjectRequiredBanner';
+import { Shot, PostProdTask } from '../../types';
 import { TerminalCard } from '../ui/TerminalCard';
-import { Plus } from 'lucide-react';
 
 interface NoteFormPageProps {
   onClose: () => void;
   onSwitchForm: (type: FormType) => void;
-  onSubmit: (title: string, content: string, linkedId?: string, linkType?: 'shot' | 'task', attachments?: Attachment[]) => void;
+  onSubmit: (title: string, content: string, linkedId?: string, linkType?: 'shot' | 'task') => void;
   existingShots: Shot[];
   existingTasks: PostProdTask[];
   hasProjects?: boolean;
@@ -31,30 +29,7 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
     content: '',
     linkType: 'none' as 'none' | 'shot' | 'task',
     linkedId: '',
-    attachments: [] as Attachment[]
   });
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      const isImage = file.type.startsWith('image/');
-      const newAttachment: Attachment = {
-        id: `att-${Date.now()}`,
-        name: file.name,
-        type: isImage ? 'image' : 'document',
-        url: URL.createObjectURL(file),
-        size: `${(file.size / 1024).toFixed(1)} KB`,
-        createdAt: new Date().toISOString()
-      };
-      setForm(prev => ({ ...prev, attachments: [...prev.attachments, newAttachment] }));
-    }
-  };
-
-  const removeAttachment = (attId: string) => {
-    setForm(prev => ({ ...prev, attachments: prev.attachments.filter(a => a.id !== attId) }));
-  };
 
   const handleSubmit = () => {
     if (!form.title.trim() || !form.content.trim()) return;
@@ -62,13 +37,72 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
       form.title,
       form.content,
       form.linkedId,
-      form.linkType === 'none' ? undefined : form.linkType,
-      form.attachments
+      form.linkType === 'none' ? undefined : form.linkType
     );
     onClose();
   };
 
   const isValid = form.title.trim() && form.content.trim();
+
+  const renderContextAssociation = () => (
+    <div className="space-y-4">
+      <div className="flex p-1 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
+        <button
+          type="button"
+          onClick={() => setForm(prev => ({ ...prev, linkType: 'none', linkedId: '' }))}
+          className={`flex-1 py-2.5 text-[10px] font-medium transition-all ${form.linkType === 'none' ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white border border-gray-300 dark:border-white/20' : 'text-gray-500 dark:text-white/30 hover:text-gray-700 dark:hover:text-white/50'}`}
+        >
+          Standalone
+        </button>
+        <button
+          type="button"
+          onClick={() => setForm(prev => ({ ...prev, linkType: 'shot', linkedId: '' }))}
+          className={`flex-1 py-2.5 text-[10px] font-medium transition-all ${form.linkType === 'shot' ? 'bg-primary/20 text-primary border border-primary/30' : 'text-gray-500 dark:text-white/30 hover:text-primary/50'}`}
+        >
+          Link Shot
+        </button>
+        <button
+          type="button"
+          onClick={() => setForm(prev => ({ ...prev, linkType: 'task', linkedId: '' }))}
+          className={`flex-1 py-2.5 text-[10px] font-medium transition-all ${form.linkType === 'task' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'text-gray-500 dark:text-white/30 hover:text-orange-400/50'}`}
+        >
+          Link Task
+        </button>
+      </div>
+
+      {form.linkType !== 'none' && (
+        <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-gray-400 dark:text-white/20">
+            <LinkIcon size={16} />
+          </div>
+          <select
+            value={form.linkedId}
+            onChange={e => setForm(prev => ({ ...prev, linkedId: e.target.value }))}
+            className="w-full appearance-none bg-transparent border-b border-gray-300 dark:border-white/10 pl-10 pr-10 py-4 text-sm font-bold focus:outline-none focus:border-primary/50 transition-all cursor-pointer text-gray-800 dark:text-white/80"
+          >
+            <option value="" className="bg-white dark:bg-[#0F1116]">Choose a reference point...</option>
+            {form.linkType === 'shot' && existingShots.map(s => (
+              <option key={s.id} value={s.id} className="bg-white dark:bg-[#0F1116]">SCENE {s.sceneNumber}: {s.title}</option>
+            ))}
+            {form.linkType === 'task' && existingTasks.map(t => (
+              <option key={t.id} value={t.id} className="bg-white dark:bg-[#0F1116]">[{t.category}] {t.title}</option>
+            ))}
+          </select>
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-gray-400 dark:text-white/20 pointer-events-none">
+            <ChevronDown size={16} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const contextSidebar = (
+    <div className="hidden xl:block">
+      <TerminalCard header="Context association">
+        {renderContextAssociation()}
+      </TerminalCard>
+    </div>
+  );
 
   return (
     <FormLayout
@@ -81,6 +115,8 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
       onSubmit={handleSubmit}
       submitDisabled={!isValid || !hasProjects}
       submitLabel={hasProjects ? "Save Note" : "Create a project first"}
+      size="wide"
+      sidebar={contextSidebar}
     >
       {!hasProjects && (
         <ProjectRequiredBanner
@@ -90,7 +126,6 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
       )}
       <TerminalCard header="Note details" className="mb-8">
         <div className="space-y-8">
-          {/* Title */}
           <div className="w-full">
             <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Note title</span>
             <Input
@@ -103,121 +138,18 @@ export const NoteFormPage: React.FC<NoteFormPageProps> = ({
             />
           </div>
 
-          {/* Content */}
+          <div className="xl:hidden">
+            <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-4 block">Context association</span>
+            {renderContextAssociation()}
+          </div>
+
           <div className="w-full">
             <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-2 block">Remarks & observations</span>
             <Textarea
               value={form.content}
               onChange={e => setForm(prev => ({ ...prev, content: e.target.value }))}
               placeholder="What are you thinking? Describe your thoughts or observations..."
-              className="min-h-[200px]"
             />
-          </div>
-
-          {/* Context Link */}
-          <div className="w-full">
-            <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-4 block">Context association</span>
-
-            <div className="flex p-1 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-6">
-              <button
-                type="button"
-                onClick={() => setForm(prev => ({ ...prev, linkType: 'none', linkedId: '' }))}
-                className={`flex-1 py-2.5 text-[10px] font-medium transition-all ${form.linkType === 'none' ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white border border-gray-300 dark:border-white/20' : 'text-gray-500 dark:text-white/30 hover:text-gray-700 dark:hover:text-white/50'}`}
-              >
-                Standalone
-              </button>
-              <button
-                type="button"
-                onClick={() => setForm(prev => ({ ...prev, linkType: 'shot', linkedId: '' }))}
-                className={`flex-1 py-2.5 text-[10px] font-medium transition-all ${form.linkType === 'shot' ? 'bg-primary/20 text-primary border border-primary/30' : 'text-gray-500 dark:text-white/30 hover:text-primary/50'}`}
-              >
-                Link Shot
-              </button>
-              <button
-                type="button"
-                onClick={() => setForm(prev => ({ ...prev, linkType: 'task', linkedId: '' }))}
-                className={`flex-1 py-2.5 text-[10px] font-medium transition-all ${form.linkType === 'task' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'text-gray-500 dark:text-white/30 hover:text-orange-400/50'}`}
-              >
-                Link Task
-              </button>
-            </div>
-
-            {form.linkType !== 'none' && (
-              <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-gray-400 dark:text-white/20">
-                  <LinkIcon size={16} />
-                </div>
-                <select
-                  value={form.linkedId}
-                  onChange={e => setForm(prev => ({ ...prev, linkedId: e.target.value }))}
-                  className="w-full appearance-none bg-transparent border-b border-gray-300 dark:border-white/10 pl-10 pr-10 py-4 text-sm font-bold focus:outline-none focus:border-primary/50 transition-all cursor-pointer text-gray-800 dark:text-white/80"
-                >
-                  <option value="" className="bg-white dark:bg-[#0F1116]">Choose a reference point...</option>
-                  {form.linkType === 'shot' && existingShots.map(s => (
-                    <option key={s.id} value={s.id} className="bg-white dark:bg-[#0F1116]">SCENE {s.sceneNumber}: {s.title}</option>
-                  ))}
-                  {form.linkType === 'task' && existingTasks.map(t => (
-                    <option key={t.id} value={t.id} className="bg-white dark:bg-[#0F1116]">[{t.category}] {t.title}</option>
-                  ))}
-                </select>
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-gray-400 dark:text-white/20 pointer-events-none">
-                  <ChevronDown size={16} />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </TerminalCard>
-
-      <TerminalCard
-        header="Reference assets"
-        headerRight={
-          <div className="flex items-center gap-4">
-            <span className="text-gray-500 dark:text-white/40 text-xs">
-              {form.attachments.length} Required
-            </span>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 text-[10px] font-medium text-primary hover:text-primary/70 transition-colors"
-            >
-              <Plus size={12} strokeWidth={3} />
-              Add Image/PDF
-            </button>
-          </div>
-        }
-      >
-        <div>
-          <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {form.attachments.length > 0 ? (
-              form.attachments.map(att => (
-                <div key={att.id} className="group relative bg-gray-50 dark:bg-white/5 p-4 border border-gray-200 dark:border-white/10 hover:border-primary/30 transition-all flex items-center gap-4">
-                  <div className="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/20 group-hover:text-primary transition-all">
-                    {att.type === 'image' ? <ImageIcon size={18} /> : <File size={18} />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-sm font-bold text-gray-700 dark:text-white/80 group-hover:text-gray-900 dark:group-hover:text-white block truncate">{att.name}</span>
-                    <span className="text-[10px] text-gray-400 dark:text-white/40 font-medium">{att.size || 'N/A'}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeAttachment(att.id)}
-                    className="p-2 text-gray-300 dark:text-white/30 hover:text-red-400 hover:bg-red-400/10 transition-all"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              ))
-            ) : (
-              <div className="col-span-full py-16 flex flex-col items-center justify-center text-center opacity-10">
-                <div className="w-12 h-12 bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-4">
-                  <Paperclip size={24} />
-                </div>
-                <span className="text-[10px] font-medium">No documentation attached</span>
-              </div>
-            )}
           </div>
         </div>
       </TerminalCard>

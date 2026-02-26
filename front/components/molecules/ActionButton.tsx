@@ -84,7 +84,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
       className={cn(
-        'group relative flex items-center justify-center',
+        'cursor-pointer group relative flex items-center justify-center',
         'transition-all duration-200',
         buttonSizes[size],
         isActive ? styles.active : styles.base,

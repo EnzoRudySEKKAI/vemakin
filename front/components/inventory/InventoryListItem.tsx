@@ -2,7 +2,6 @@ import React from 'react'
 import { Package, ChevronRight } from 'lucide-react'
 import { Equipment, Currency } from '@/types'
 import { CATEGORY_ICONS } from '@/constants'
-import { HoverCard } from '@/components/ui/HoverCard'
 import { Text, IconContainer } from '@/components/atoms'
 
 interface InventoryListItemProps {
@@ -29,11 +28,9 @@ export const InventoryListItem: React.FC<InventoryListItemProps> = ({
   const subTitle = subtitleParts.join(' ')
 
   return (
-    <HoverCard
+    <div
       onClick={onClick}
-      className="px-6 py-4 flex items-center rounded-[24px] cursor-pointer bg-white/80 dark:bg-[#16181D]/80"
-      blobColor="from-primary/70 to-primary dark:from-primary/70 dark:to-primary"
-      enableHoverScale={true}
+      className="px-6 py-4 flex items-center rounded-[24px] cursor-pointer bg-white dark:bg-[#16181D] border border-gray-200 dark:border-white/10 transition-all hover:shadow-md"
     >
       <div className="w-full flex items-center justify-between gap-8">
         {/* Left: Icon + Title/Subtitle (Expanded & Wide) */}
@@ -55,7 +52,7 @@ export const InventoryListItem: React.FC<InventoryListItemProps> = ({
         <div className="flex items-center gap-6 shrink-0 ml-auto">
           {/* Middle-Left: Category Badge */}
           <div className="hidden md:flex items-center">
-            <span className="w-28 flex justify-center px-3 py-1.5 bg-gray-100/50 dark:bg-white/5 backdrop-blur-md text-gray-900 dark:text-white text-xs font-semibold rounded-xl border border-gray-200/50 dark:border-white/10 whitespace-nowrap">
+            <span className="w-28 flex justify-center px-3 py-1.5 bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white text-xs font-semibold rounded-xl border border-gray-200 dark:border-white/10 whitespace-nowrap">
               {item.category}
             </span>
           </div>
@@ -71,6 +68,6 @@ export const InventoryListItem: React.FC<InventoryListItemProps> = ({
           </div>
         </div>
       </div>
-    </HoverCard>
+    </div>
   )
 }

@@ -33,7 +33,7 @@ export const SegmentControl: React.FC<SegmentControlProps> = ({
             key={option.value}
             onClick={() => onChange(option.value)}
             className={`
-              flex items-center justify-center gap-2 px-2.5 md:px-4 py-2 text-xs tracking-wider transition-all whitespace-nowrap
+              cursor-pointer flex items-center justify-center gap-2 px-2.5 md:px-4 py-2 text-xs tracking-wider transition-all whitespace-nowrap
               ${isActive
                 ? 'bg-primary text-primary-foreground'
                 : 'text-gray-600 dark:text-white/50 hover:text-gray-800 dark:hover:text-white/70 hover:bg-white dark:hover:bg-white/5'
@@ -59,7 +59,7 @@ export const LayoutToggle: React.FC<{
   <div className={`flex items-center bg-[#f5f5f5] dark:bg-[#16181D] border border-gray-300 dark:border-white/[0.05] ${className}`}>
     <button
       onClick={() => onChange('grid')}
-      className={`w-9 h-[36px] flex items-center justify-center transition-all ${value === 'grid'
+      className={`cursor-pointer w-9 h-[36px] flex items-center justify-center transition-all ${value === 'grid'
           ? 'bg-primary text-primary-foreground'
           : 'text-gray-600 dark:text-white/50 hover:text-gray-800 dark:hover:text-white/70 hover:bg-white dark:hover:bg-white/5'
         }`}
@@ -68,7 +68,7 @@ export const LayoutToggle: React.FC<{
     </button>
     <button
       onClick={() => onChange('list')}
-      className={`w-9 h-[36px] flex items-center justify-center transition-all ${value === 'list'
+      className={`cursor-pointer w-9 h-[36px] flex items-center justify-center transition-all ${value === 'list'
           ? 'bg-primary text-primary-foreground'
           : 'text-gray-600 dark:text-white/50 hover:text-gray-800 dark:hover:text-white/70 hover:bg-white dark:hover:bg-white/5'
         }`}

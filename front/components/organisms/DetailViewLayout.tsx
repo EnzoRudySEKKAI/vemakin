@@ -68,13 +68,13 @@ export const DetailViewLayout: React.FC<DetailViewLayoutProps> = ({
         ${className}
       `}
     >
-      <div className={`${sizeClasses[size]} w-full mx-auto py-4 md:py-8 px-0 pt-3`}>
+      <div className={`${sizeClasses[size]} w-full mx-auto`}>
         {sidebar ? (
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-12">
-            <div className="xl:col-span-8 space-y-12">
+          <div className="grid grid-cols-1 xl:grid-cols-12 lg:gap-12">
+            <div className="xl:col-span-8">
               {children}
             </div>
-            <aside className="xl:col-span-4 lg:sticky lg:top-8 self-start">
+            <aside className="xl:col-span-4 lg:sticky self-start">
               {sidebar}
             </aside>
           </div>

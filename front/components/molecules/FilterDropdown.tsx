@@ -58,7 +58,7 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`
-          w-full flex items-center justify-between px-4 py-2.5 text-xs font-mono tracking-wider transition-all
+          cursor-pointer w-full flex items-center justify-between px-4 py-2.5 text-xs font-mono tracking-wider transition-all
           bg-[#f5f5f5] dark:bg-[#16181D] border border-gray-300 dark:border-white/[0.05]
           ${isOpen ? 'border-primary dark:border-white/[0.1]' : ''}
           ${isActive ? 'text-primary dark:text-white' : 'text-gray-500 dark:text-white/50 hover:text-gray-700 dark:hover:text-white/70'}
@@ -98,7 +98,7 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
                       setIsOpen(false)
                     }}
                     className={`
-                      w-full flex items-center justify-between px-3 py-2.5 text-xs font-mono tracking-wider transition-all
+                      cursor-pointer w-full flex items-center justify-between px-3 py-2.5 text-xs font-mono tracking-wider transition-all
                       ${isSelected 
                         ? 'bg-primary text-primary-foreground' 
                         : 'text-gray-600 dark:text-white/50 hover:text-gray-900 dark:hover:text-white hover:bg-[#f5f5f5] dark:hover:bg-white/5'

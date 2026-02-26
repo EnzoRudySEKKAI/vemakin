@@ -112,7 +112,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 </div>
                 <button
                   onClick={onLogout}
-                  className="p-2 text-muted-foreground hover:text-destructive shrink-0 transition-colors"
+                  className="cursor-pointer p-2 text-muted-foreground hover:text-destructive shrink-0 transition-colors"
                 >
                   <LogOut size={16} />
                 </button>
@@ -213,7 +213,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         <motion.section variants={itemVariants} className="pt-4 space-y-4">
           <div className="flex items-center justify-center">
             <button
-              className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors font-mono  tracking-wider text-xs"
+              className="cursor-pointer px-4 py-2 text-muted-foreground hover:text-foreground transition-colors font-mono  tracking-wider text-xs"
             >
               <FileText size={14} className="inline mr-2" />
               Terms & Privacy

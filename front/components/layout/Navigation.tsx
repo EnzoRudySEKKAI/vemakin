@@ -202,7 +202,7 @@ export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, set
         onMouseDown={handleMouseDown}
         onMouseEnter={handleMouseEnter}
         onFocus={handleMouseEnter}
-        className={`flex items-center lg:justify-center 2xl:justify-start gap-4 px-4 lg:px-2 2xl:px-6 py-3.5 text-sm font-mono  tracking-wider transition-all duration-200 group w-full 2xl:w-auto
+        className={`cursor-pointer flex items-center lg:justify-center 2xl:justify-start gap-4 px-4 lg:px-2 2xl:px-6 py-3.5 text-sm font-mono  tracking-wider transition-all duration-200 group w-full 2xl:w-auto
           ${isActive
             ? 'text-primary bg-primary/10'
             : 'text-muted-foreground hover:text-foreground hover:bg-[#e8e8e8] dark:hover:bg-white/10'
@@ -231,7 +231,7 @@ export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, set
         onClick={onClick}
         onMouseEnter={handleMouseEnter}
         onTouchStart={handleTouchStart}
-        className={`flex flex-col items-center justify-center flex-1 gap-1 py-2 transition-all duration-200 pointer-events-auto hover:bg-[#e8e8e8] dark:hover:bg-white/5 rounded-sm ${active ? 'text-primary bg-primary/5' : 'text-muted-foreground'}`}
+        className={`cursor-pointer flex flex-col items-center justify-center flex-1 gap-1 py-2 transition-all duration-200 pointer-events-auto hover:bg-[#e8e8e8] dark:hover:bg-white/5 rounded-sm ${active ? 'text-primary bg-primary/5' : 'text-muted-foreground'}`}
       >
         <Icon size={20} strokeWidth={active ? 2.5 : 2} />
         <span className={`text-[10px] font-mono  tracking-wider ${active ? 'opacity-100' : 'opacity-70'}`}>{label}</span>
@@ -294,7 +294,7 @@ export const Navigation: React.FC<NavigationProps> = React.memo(({ mainView, set
         {/* Add Button */}
         <button
           onClick={onPlusClick}
-          className="mt-auto mx-auto 2xl:mx-0 w-12 h-12 2xl:w-full 2xl:h-14 flex items-center justify-center gap-3 bg-transparent hover:bg-[#e8e8e8] dark:hover:bg-white/10 active:scale-[0.96] text-foreground transition-all font-mono  tracking-wider group"
+          className="cursor-pointer mt-auto mx-auto 2xl:mx-0 w-12 h-12 2xl:w-full 2xl:h-14 flex items-center justify-center gap-3 bg-transparent hover:bg-[#e8e8e8] dark:hover:bg-white/10 active:scale-[0.96] text-foreground transition-all font-mono  tracking-wider group"
         >
           <Plus size={24} strokeWidth={2.8} className="text-primary group-hover:rotate-90 transition-transform duration-300" />
           <span className="hidden 2xl:inline text-sm">New</span>

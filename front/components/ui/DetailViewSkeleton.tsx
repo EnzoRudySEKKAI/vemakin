@@ -9,7 +9,7 @@ export const DetailViewSkeleton: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0F1116]">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-[#0F1116]/95 backdrop-blur-xl border-b border-white/5 px-6 py-4">
+      <div className="sticky top-0 z-10 bg-[#0F1116] border-b border-white/5 px-6 py-4">
         <div className="max-w-[90%] mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
