@@ -1,16 +1,16 @@
-import React, { useState, useCallback, useEffect } from 'react'
-import { Plus, Search, Package, Check, ExternalLink } from 'lucide-react'
+import React, { useState, useCallback, useEffect, useMemo } from 'react'
+import { Plus, Search, Package, Check } from 'lucide-react'
 import { Shot, Note, Equipment } from '@/types'
-import { calculateEndTime, formatDateToNumeric, timeToMinutes, addHoursToTime, subtractHoursFromTime } from '@/utils'
+import { calculateEndTime, formatDateToNumeric, timeToMinutes, subtractHoursFromTime } from '@/utils'
 import { CATEGORY_ICONS } from '@/constants'
 import { useDetailView } from '@/hooks/useDetailView'
 import { DetailViewLayout } from '@/components/organisms/DetailViewLayout'
 import { ActionButton, ActionButtonGroup } from '@/components/molecules/ActionButton'
-import { DetailItem } from '@/components/molecules'
+import { DetailItem, EditableField, LinkedItemsList, EmptyState, MetadataGrid } from '@/components/molecules'
 import { TerminalCard } from '@/components/ui/TerminalCard'
 import { TerminalButton } from '@/components/ui/TerminalButton'
 import { StatusToggle } from '@/components/molecules/StatusToggle'
-import { Text, Input, Button, Textarea } from '@/components/atoms'
+import { Text, Input, Textarea } from '@/components/atoms'
 import { ConfirmModal } from '@/components/ui/ConfirmModal'
 import { TimeSelector } from '@/components/ui/TimeSelector'
 import { LocationAutocomplete } from '@/components/ui/LocationAutocomplete'
@@ -87,7 +87,6 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
     const startMins = timeToMinutes(editedItem.startTime)
     let endMins = timeToMinutes(newEndTime)
 
-    // If end <= start, move start back by 2 hours
     if (endMins <= startMins) {
       const newStartTime = subtractHoursFromTime(newEndTime, 2)
       const newStartMins = timeToMinutes(newStartTime)
@@ -123,22 +122,34 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
   }
 
   const currentEndTime = calculateEndTime(editedItem.startTime, editedItem.duration)
-
   const currentEquipmentIds = isEditing ? editedItem.equipmentIds : (selectedShot.equipmentIds || [])
 
-  const availableGear = inventory.filter(item =>
-    !(editedItem.equipmentIds || []).includes(item.id) &&
-    ((item.customName || item.name).toLowerCase().includes(gearSearchQuery.toLowerCase()) ||
-      item.category.toLowerCase().includes(gearSearchQuery.toLowerCase())) &&
-    (activeCategory === 'All' || item.category === activeCategory)
+  const availableGear = useMemo(() => 
+    inventory.filter(item =>
+      !(editedItem.equipmentIds || []).includes(item.id) &&
+      ((item.customName || item.name).toLowerCase().includes(gearSearchQuery.toLowerCase()) ||
+        item.category.toLowerCase().includes(gearSearchQuery.toLowerCase())) &&
+      (activeCategory === 'All' || item.category === activeCategory)
+    ),
+    [inventory, editedItem.equipmentIds, gearSearchQuery, activeCategory]
   )
 
   const selectedEquipmentIds = selectedShot.equipmentIds || []
   const preparedEquipmentIds = selectedShot.preparedEquipmentIds || []
-  const isChecklistComplete = selectedEquipmentIds.length > 0 &&
-    preparedEquipmentIds.length === selectedEquipmentIds.length
 
-  const associatedNotes = notes.filter(n => n.shotId === selectedShot.id)
+  const associatedNotes = useMemo(() => 
+    notes.filter(n => n.shotId === selectedShot.id),
+    [notes, selectedShot.id]
+  )
+
+  const noteItems = useMemo(() => 
+    associatedNotes.map(note => ({
+      id: note.id,
+      title: note.title || 'Untitled Note',
+      subtitle: note.content || 'Empty content'
+    })),
+    [associatedNotes]
+  )
 
   const headerActions = (
     <div className="flex items-center gap-3">
@@ -170,6 +181,56 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
     </div>
   )
 
+  const renderGearItem = (eId: string, isEditingMode: boolean) => {
+    const item = inventory.find(i => i.id === eId)
+    const Icon = item ? (CATEGORY_ICONS as any)[item.category] || Package : Package
+    const isReady = !isEditingMode && (selectedShot.preparedEquipmentIds || []).includes(eId)
+
+    return (
+      <div
+        key={eId}
+        className={`flex items-center justify-between p-3 transition-all group border ${
+          isReady ? 'bg-primary/5 border-primary/30' : 'bg-transparent border-transparent hover:bg-secondary/50'
+        }`}
+      >
+        <div className="flex items-center gap-4 min-w-0">
+          <div className={`p-2.5 transition-all ${
+            isReady ? 'bg-primary/20 text-primary' : 'bg-secondary/50 text-muted-foreground'
+          }`}>
+            <Icon size={18} strokeWidth={2} />
+          </div>
+          <div className="min-w-0">
+            <p className={`text-sm font-medium truncate transition-colors ${isReady ? 'text-primary' : 'text-foreground'}`}>
+              {item ? (item.customName || item.name) : 'Unknown'}
+            </p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-[10px] font-mono tracking-wider text-muted-foreground">
+                {item?.category}
+              </span>
+            </div>
+          </div>
+        </div>
+        {isEditingMode ? (
+          <button
+            onClick={() => handleRemoveEquipment(eId)}
+            className="cursor-pointer w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
+          >
+            <Plus size={16} className="rotate-45" />
+          </button>
+        ) : (
+          <button
+            onClick={() => onToggleEquipment(selectedShot.id, eId)}
+            className={`cursor-pointer w-8 h-8 flex items-center justify-center transition-all duration-300 ${
+              isReady ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 text-muted-foreground hover:bg-secondary hover:text-foreground'
+            }`}
+          >
+            <Check size={14} strokeWidth={3} />
+          </button>
+        )}
+      </div>
+    )
+  }
+
   return (
     <DetailViewLayout
       title={selectedShot.title}
@@ -192,13 +253,17 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                 <div className="flex border border-border">
                   <button
                     onClick={() => setActiveGearTab('list')}
-                    className={`cursor-pointer flex-1 py-1.5 text-[10px] font-mono  tracking-wider transition-all ${activeGearTab === 'list' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                    className={`cursor-pointer flex-1 py-1.5 text-[10px] font-mono tracking-wider transition-all ${
+                      activeGearTab === 'list' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'
+                    }`}
                   >
                     Assigned
                   </button>
                   <button
                     onClick={() => setActiveGearTab('pool')}
-                    className={`cursor-pointer flex-1 py-1.5 text-[10px] font-mono  tracking-wider transition-all ${activeGearTab === 'pool' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                    className={`cursor-pointer flex-1 py-1.5 text-[10px] font-mono tracking-wider transition-all ${
+                      activeGearTab === 'pool' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'
+                    }`}
                   >
                     Browse Pool
                   </button>
@@ -209,65 +274,14 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                 {(!isEditing || activeGearTab === 'list') && (
                   currentEquipmentIds.length > 0 ? (
                     <div className="space-y-1 max-h-[500px] overflow-y-auto custom-scrollbar pr-1">
-                      {currentEquipmentIds.map(eId => {
-                        const item = inventory.find(i => i.id === eId)
-                        const Icon = item ? (CATEGORY_ICONS as any)[item.category] || Package : Package
-                        const isReady = !isEditing && (selectedShot.preparedEquipmentIds || []).includes(eId)
-
-                        return (
-                          <div
-                            key={eId}
-                            className={`flex items-center justify-between p-3 transition-all group border ${isReady
-                              ? 'bg-primary/5 border-primary/30'
-                              : 'bg-transparent border-transparent hover:bg-secondary/50'
-                              }`}
-                          >
-                            <div className="flex items-center gap-4 min-w-0">
-                              <div className={`p-2.5 transition-all ${isReady
-                                ? 'bg-primary/20 text-primary'
-                                : 'bg-secondary/50 text-muted-foreground'
-                                }`}
-                              >
-                                <Icon size={18} strokeWidth={2} />
-                              </div>
-                              <div className="min-w-0">
-                                <p className={`text-sm font-medium truncate transition-colors ${isReady ? 'text-primary' : 'text-foreground'}`}>
-                                  {item ? (item.customName || item.name) : 'Unknown'}
-                                </p>
-                                <div className="flex items-center gap-2 mt-0.5">
-                                  <span className="text-[10px] font-mono  tracking-wider text-muted-foreground">
-                                    {item?.category}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            {isEditing ? (
-                              <button
-                                onClick={() => handleRemoveEquipment(eId)}
-                                className="cursor-pointer w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
-                              >
-                                <Plus size={16} className="rotate-45" />
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => onToggleEquipment(selectedShot.id, eId)}
-                                className={`cursor-pointer w-8 h-8 flex items-center justify-center transition-all duration-300 ${isReady
-                                  ? 'bg-primary text-primary-foreground'
-                                  : 'bg-secondary/50 text-muted-foreground hover:bg-secondary hover:text-foreground'
-                                  }`}
-                              >
-                                <Check size={14} strokeWidth={3} />
-                              </button>
-                            )}
-                          </div>
-                        )
-                      })}
+                      {currentEquipmentIds.map(eId => renderGearItem(eId, isEditing))}
                     </div>
                   ) : (
-                    <div className="py-12 flex flex-col items-center justify-center text-center opacity-10">
-                      <Package size={24} className="mb-2" />
-                      <span className="text-[10px] font-mono  tracking-wider">No gear assigned</span>
-                    </div>
+                    <EmptyState
+                      icon={Package}
+                      message="No gear assigned"
+                      variant="subtle"
+                    />
                   )
                 )}
 
@@ -299,11 +313,11 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                                   {gear.customName || gear.name}
                                 </p>
                                 <div className="flex items-center gap-2 mt-0.5">
-                                  <span className="text-[10px] font-mono  tracking-wider text-muted-foreground">
+                                  <span className="text-[10px] font-mono tracking-wider text-muted-foreground">
                                     {gear.category}
                                   </span>
                                   {gear.status !== 'available' && (
-                                    <span className="text-[9px] px-1.5 py-0.5 bg-secondary border border-border font-mono  tracking-wider">
+                                    <span className="text-[9px] px-1.5 py-0.5 bg-secondary border border-border font-mono tracking-wider">
                                       {gear.status}
                                     </span>
                                   )}
@@ -316,10 +330,11 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                           </button>
                         )
                       }) : (
-                        <div className="py-12 flex flex-col items-center justify-center text-center opacity-10">
-                          <Search size={24} className="mb-2" />
-                          <span className="text-[10px] font-mono  tracking-wider">Empty results</span>
-                        </div>
+                        <EmptyState
+                          icon={Search}
+                          message="Empty results"
+                          variant="subtle"
+                        />
                       )}
                     </div>
                   </div>
@@ -330,14 +345,14 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
         </div>
       }
     >
-        {isRetaking && (
-          <div className="mb-8 p-4 bg-orange-500/10 border border-orange-500/30 flex flex-wrap items-center gap-4">
-            <Text variant="body" color="warning">Schedule Retake:</Text>
-            <DatePickerInput
-              value={retakeDate}
-              onChange={date => setRetakeDate(date || '')}
-              className="w-auto"
-            />
+      {isRetaking && (
+        <div className="mb-8 p-4 bg-orange-500/10 border border-orange-500/30 flex flex-wrap items-center gap-4">
+          <Text variant="body" color="warning">Schedule Retake:</Text>
+          <DatePickerInput
+            value={retakeDate}
+            onChange={date => setRetakeDate(date || '')}
+            className="w-auto"
+          />
           <Input
             type="time"
             value={retakeTime}
@@ -353,12 +368,10 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
       <div className="flex flex-col">
         {!isEditing && (
           <TerminalCard header="Filming status" className="mb-4 md:mb-8">
-            <div className="">
-              <StatusToggle
-                status={selectedShot.status as any}
-                onToggle={() => onToggleStatus(selectedShot.id)}
-              />
-            </div>
+            <StatusToggle
+              status={selectedShot.status as any}
+              onToggle={() => onToggleStatus(selectedShot.id)}
+            />
           </TerminalCard>
         )}
 
@@ -366,33 +379,30 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
           <div className="p-2 space-y-10">
             {isEditing ? (
               <>
-                {/* Scene Identity */}
                 <div className="w-full">
-                  <span className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-2 block">Scene identity</span>
+                  <span className="text-[10px] font-mono tracking-wider text-muted-foreground mb-2 block">Scene identity</span>
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <div className="sm:col-span-3">
-                      <Input
-                        type="text"
+                      <EditableField
+                        label="Title"
                         value={editedItem.title}
-                        onChange={e => setEditedItem({ ...editedItem, title: e.target.value })}
+                        isEditing={isEditing}
+                        onChange={(value) => setEditedItem({ ...editedItem, title: value })}
                         placeholder="Scene title..."
-                        fullWidth
                       />
                     </div>
                     <div>
-                      <Input
-                        type="text"
+                      <EditableField
+                        label="Scene #"
                         value={editedItem.sceneNumber}
-                        onChange={e => setEditedItem({ ...editedItem, sceneNumber: e.target.value })}
+                        isEditing={isEditing}
+                        onChange={(value) => setEditedItem({ ...editedItem, sceneNumber: value })}
                         placeholder="Scene #"
-                        leftIcon={<span className="text-[10px] font-mono  tracking-wider text-muted-foreground">SC</span>}
-                        fullWidth
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Schedule */}
                 <div className="w-full">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
                     <DatePickerInput
@@ -407,7 +417,6 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                       onChange={v => {
                         const startMins = timeToMinutes(v)
                         const endMins = timeToMinutes(currentEndTime)
-                        // If start >= end, adjust duration so end is start + 2 hours
                         if (startMins >= endMins) {
                           const newDuration = '2h'
                           setEditedItem({ ...editedItem, startTime: v, duration: newDuration })
@@ -420,7 +429,6 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                   </div>
                 </div>
 
-                {/* Location */}
                 <div className="w-full relative z-20">
                   <LocationAutocomplete
                     value={editedItem.location}
@@ -435,19 +443,17 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                   />
                 </div>
 
-                {/* Description */}
-                <div className="w-full">
-                  <span className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-2 block">Description</span>
-                  <Textarea
-                    value={editedItem.description}
-                    onChange={e => setEditedItem({ ...editedItem, description: e.target.value })}
-                    placeholder="Describe the action, atmosphere, and key visual elements..."
-                    className="min-h-[120px]"
-                  />
-                </div>
+                <EditableField
+                  label="Description"
+                  value={editedItem.description}
+                  isEditing={isEditing}
+                  onChange={(value) => setEditedItem({ ...editedItem, description: value })}
+                  type="textarea"
+                  placeholder="Describe the action, atmosphere, and key visual elements..."
+                />
               </>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+              <MetadataGrid cols={1} colsMd={2} gapX={12} gapY={10}>
                 <DetailItem
                   label="Schedule"
                   value={formatDateToNumeric(selectedShot.date)}
@@ -469,7 +475,7 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
                   className="md:col-span-2"
                   valueClassName="whitespace-pre-wrap"
                 />
-              </div>
+              </MetadataGrid>
             )}
           </div>
         </TerminalCard>
@@ -481,38 +487,22 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
         headerRight={
           <button
             onClick={() => onAddNote({ title: '', content: '', shotId: selectedShot.id, attachments: [] })}
-            className="cursor-pointer flex items-center gap-2 text-[10px] font-mono  tracking-wider text-primary hover:text-primary/70 transition-colors"
+            className="cursor-pointer flex items-center gap-2 text-[10px] font-mono tracking-wider text-primary hover:text-primary/70 transition-colors"
           >
             <Plus size={12} strokeWidth={3} />
             Add Note
           </button>
         }
       >
-        <div className="">
-          {associatedNotes.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {associatedNotes.map(note => (
-                <button
-                  key={note.id}
-                  onClick={() => onOpenNote?.(note.id)}
-                  className="cursor-pointer flex flex-col items-start text-left p-5 bg-secondary/30 border border-border hover:border-primary/30 transition-all group"
-                >
-                  <div className="text-sm font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                    {note.title || "Untitled Note"}
-                  </div>
-                  <div className="text-[11px] text-muted-foreground truncate w-full font-mono">
-                    {note.content || "Empty content"}
-                  </div>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="py-12 flex flex-col items-center justify-center text-center opacity-10">
-              <Plus size={24} className="mb-2" />
-              <span className="text-[10px] font-mono  tracking-wider">No associated notes</span>
-            </div>
-          )}
-        </div>
+        <LinkedItemsList
+          title=""
+          items={noteItems}
+          onItemClick={onOpenNote}
+          variant="grid"
+          gridCols={2}
+          emptyMessage="No associated notes"
+          emptyIcon={Plus}
+        />
       </TerminalCard>
 
       <ConfirmModal
@@ -535,6 +525,6 @@ export const ShotDetailView: React.FC<ShotDetailViewProps> = ({
         cancelText="Cancel"
         variant="warning"
       />
-    </DetailViewLayout >
+    </DetailViewLayout>
   )
 }

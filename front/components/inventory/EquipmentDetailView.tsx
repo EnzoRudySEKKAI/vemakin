@@ -1,19 +1,14 @@
-import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Package, ChevronDown, ChevronRight, DollarSign, ShieldCheck } from 'lucide-react'
+import React, { useMemo } from 'react'
+import { Package, ChevronRight } from 'lucide-react'
 import { Equipment, Currency, Shot } from '../../types'
 import { CATEGORY_ICONS } from '../../constants'
 import { useDetailView } from '../../hooks/useDetailView'
 import { DetailViewLayout } from '../../components/organisms/DetailViewLayout'
 import { ActionButtonGroup } from '../../components/molecules/ActionButton'
-import { DetailItem } from '../../components/molecules'
-import { Input } from '../../components/atoms/Input'
+import { DetailItem, EditableField, LinkedItemsList, EmptyState, MetadataGrid, MetadataSection } from '../../components/molecules'
 import { ConfirmModal } from '../ui/ConfirmModal'
 import { TerminalCard } from '../ui/TerminalCard'
-import { useClickOutside } from '../../hooks/useClickOutside'
 import { useCatalogCategories } from '@/hooks/useApi'
-
-import api from '@/api/client'
 
 interface EquipmentDetailViewProps {
   item: Equipment
@@ -52,11 +47,6 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
     onDelete
   })
 
-  const [expandedProject, setExpandedProject] = useState<string | null>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
-
-  useClickOutside(menuRef, () => { }, false)
-
   const { data: catalogCategories = [] } = useCatalogCategories()
 
   const brandName = item.brandName
@@ -73,9 +63,51 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
     return projectShots.filter((s: Shot) => s.equipmentIds.includes(item.id))
   }
 
-  const toggleProject = (projectName: string) => {
-    setExpandedProject(prev => prev === projectName ? null : projectName)
-  }
+  const projectItems = useMemo(() => {
+    return involvedProjects.map(pName => ({
+      id: pName,
+      title: pName,
+      subtitle: `${getShotsForEquipmentInProject(pName).length} shots`,
+      badge: getShotsForEquipmentInProject(pName).length
+    }))
+  }, [involvedProjects, projectData, item.id])
+
+  const expandedContent = useMemo(() => {
+    const content: Record<string, React.ReactNode> = {}
+    involvedProjects.forEach(pName => {
+      const relatedShots = getShotsForEquipmentInProject(pName)
+      content[pName] = (
+        <div className="space-y-0.5">
+          {relatedShots.length > 0 ? (
+            relatedShots.map(shot => (
+              <button
+                key={shot.id}
+                onClick={() => onNavigateToShot(pName, shot.id)}
+                className="w-full flex items-center justify-between p-3 pl-8 text-left hover:bg-secondary/50 transition-all group/shot"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-muted-foreground group-hover/shot:text-primary truncate transition-colors">
+                    {shot.title}
+                  </p>
+                  <p className="text-[10px] font-mono tracking-wider text-muted-foreground mt-0.5">
+                    Sc. {shot.sceneNumber} • {shot.startTime}
+                  </p>
+                </div>
+                <ChevronRight size={12} className="text-border group-hover/shot:text-primary transition-colors" />
+              </button>
+            ))
+          ) : (
+            <EmptyState
+              icon={() => <span className="text-[10px] font-mono tracking-wider">No active sequences</span>}
+              message=""
+              variant="subtle"
+            />
+          )}
+        </div>
+      )
+    })
+    return content
+  }, [involvedProjects, projectData, item.id, onNavigateToShot])
 
   const headerActions = (
     <ActionButtonGroup
@@ -97,110 +129,27 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
       size="wide"
       sidebar={
         <div className="space-y-4">
-          <TerminalCard header="Project usage">
-            <div className="space-y-1">
-              {involvedProjects.length > 0 ? (
-                involvedProjects.map((pName) => {
-                  const relatedShots = getShotsForEquipmentInProject(pName)
-                  const isExpanded = expandedProject === pName
-
-                  return (
-                    <div key={pName} className="space-y-1 ">
-                      <button
-                        onClick={() => toggleProject(pName)}
-                        className={`w-full flex justify-between items-center p-3 transition-all group ${isExpanded ? 'bg-primary/5 border border-primary/30' : 'hover:bg-secondary/50 border border-transparent'}`}
-                      >
-                        <div className="flex items-center gap-4 min-w-0">
-                          <div className={`w-1.5 h-1.5 transition-all ${isExpanded ? 'bg-primary' : 'bg-muted-foreground'}`} />
-                          <span className={`text-sm font-medium truncate transition-colors ${isExpanded ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`}>
-                            {pName}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          {relatedShots.length > 0 && (
-                            <span className={`text-[10px] font-mono  tracking-wider px-2 py-0.5 border transition-all ${isExpanded ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-secondary border-border text-muted-foreground'}`}>
-                              {relatedShots.length}
-                            </span>
-                          )}
-                          <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180 text-primary' : 'text-muted-foreground'}`}>
-                            <ChevronDown size={14} strokeWidth={2} />
-                          </div>
-                        </div>
-                      </button>
-
-                      <AnimatePresence>
-                        {isExpanded && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-                            className="overflow-hidden"
-                          >
-                            <div className="px-2 pb-3 pt-1 space-y-0.5">
-                              {relatedShots.length > 0 ? (
-                                relatedShots.map(shot => (
-                                  <button
-                                    key={shot.id}
-                                    onClick={() => onNavigateToShot(pName, shot.id)}
-                                    className="w-full flex items-center justify-between p-3 pl-8 text-left hover:bg-secondary/50 transition-all group/shot"
-                                  >
-                                    <div className="min-w-0">
-                                      <p className="text-sm font-medium text-muted-foreground group-hover/shot:text-primary truncate transition-colors">
-                                        {shot.title}
-                                      </p>
-                                      <p className="text-[10px] font-mono  tracking-wider text-muted-foreground mt-0.5">
-                                        Sc. {shot.sceneNumber} • {shot.startTime}
-                                      </p>
-                                    </div>
-                                    <ChevronRight size={12} className="text-border group-hover/shot:text-primary transition-colors" />
-                                  </button>
-                                ))
-                              ) : (
-                                <div className="py-4 flex flex-col items-center justify-center text-center opacity-10">
-                                  <span className="text-[10px] font-mono  tracking-wider">No active sequences</span>
-                                </div>
-                              )}
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  )
-                })
-              ) : (
-                <div className="py-12 flex flex-col items-center justify-center text-center opacity-10">
-                  <Package size={24} className="mb-2" />
-                  <span className="text-[10px] font-mono  tracking-wider">Currently idle</span>
-                </div>
-              )}
-            </div>
-          </TerminalCard>
+          <LinkedItemsList
+            title="Project usage"
+            items={projectItems}
+            expandable
+            expandedContent={expandedContent}
+            emptyMessage="Currently idle"
+            emptyIcon={Package}
+          />
         </div>
       }
     >
       <TerminalCard header="Core information" className="mb-4 md:mb-8">
-        <div className="p-2 space-y-12">
-
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 items-start gap-12">
-            {isEditing ? (
-              <div className="flex flex-col gap-1 min-w-0">
-                <span className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-2 block">Custom name</span>
-                <input
-                  type="text"
-                  value={editedItem.customName || ''}
-                  onChange={(e) => setEditedItem({ ...editedItem, customName: e.target.value })}
-                  className="bg-transparent border border-border px-3 py-2 text-sm text-foreground font-medium focus:border-primary focus:outline-none w-full"
-                  placeholder="Enter custom name"
-                />
-              </div>
-            ) : (
-              <DetailItem
-                label="Custom name"
-                value={item.customName || item.name}
-              />
-            )}
+        <div className="p-2">
+          <MetadataGrid cols={2} colsLg={4} gapX={12} gapY={10}>
+            <EditableField
+              label="Custom name"
+              value={editedItem.customName || ''}
+              isEditing={isEditing}
+              onChange={(value) => setEditedItem({ ...editedItem, customName: value })}
+              placeholder={item.name}
+            />
 
             <DetailItem
               label="Brand"
@@ -217,30 +166,20 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
               value={categoryName}
             />
 
-            {isEditing ? (
-              <div className="flex flex-col gap-1 min-w-0">
-                <span className="text-[10px] font-mono  tracking-wider text-muted-foreground mb-2 block">Serial identity</span>
-                <input
-                  type="text"
-                  value={editedItem.serialNumber || ''}
-                  onChange={(e) => setEditedItem({ ...editedItem, serialNumber: e.target.value })}
-                  className="bg-transparent border border-border px-3 py-2 text-sm text-foreground font-medium focus:border-primary focus:outline-none w-full"
-                  placeholder="Enter serial number"
-                />
-              </div>
-            ) : (
-              <DetailItem
-                label="Serial identity"
-                value={item.serialNumber || '—'}
-              />
-            )}
-          </div>
+            <EditableField
+              label="Serial identity"
+              value={editedItem.serialNumber || ''}
+              isEditing={isEditing}
+              onChange={(value) => setEditedItem({ ...editedItem, serialNumber: value })}
+              placeholder="Enter serial number"
+            />
+          </MetadataGrid>
         </div>
       </TerminalCard>
 
       <TerminalCard header="Ownership detail" className="mb-4 md:mb-8">
-        <div className="p-2 space-y-6">
-          <div className="grid grid-cols-2 gap-12">
+        <div className="p-2">
+          <MetadataGrid cols={2} gapX={12} gapY={10}>
             <DetailItem
               label="Deployment registry"
               value={item.isOwned ? 'Owned' : 'Rented'}
@@ -253,13 +192,13 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
                 subValue={`per ${item.rentalFrequency}`}
               />
             )}
-          </div>
+          </MetadataGrid>
         </div>
       </TerminalCard>
 
       <TerminalCard header="Technical specifications" className="mb-4 md:mb-8">
         <div className="p-2">
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-12">
+          <MetadataGrid cols={2} colsMd={3} gapX={12} gapY={10}>
             {Object.entries(item.specs).map(([key, val]) => (
               <DetailItem
                 key={key}
@@ -267,7 +206,7 @@ export const EquipmentDetailView: React.FC<EquipmentDetailViewProps> = ({
                 value={String(val || "UNDEFINED")}
               />
             ))}
-          </div>
+          </MetadataGrid>
         </div>
       </TerminalCard>
 
