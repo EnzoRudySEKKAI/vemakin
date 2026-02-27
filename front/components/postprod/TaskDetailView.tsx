@@ -1,15 +1,13 @@
 import React, { useCallback, useMemo } from 'react'
 import { Plus, Check, FileText, MessageSquare } from 'lucide-react'
-import { PostProdTask, Note } from '../../types'
-import { POST_PROD_CATEGORIES } from '../../constants'
-import { useDetailView } from '../../hooks/useDetailView'
-import { DetailViewLayout } from '../../components/organisms/DetailViewLayout'
-import { ActionButtonGroup } from '../../components/molecules/ActionButton'
-import { DetailItem, EditableField, LinkedItemsList, EmptyState, MetadataGrid } from '../../components/molecules'
-import { Text } from '../../components/atoms/Text'
-import { ConfirmModal } from '../ui/ConfirmModal'
-import { TerminalCard } from '../ui/TerminalCard'
-import { DatePickerInput } from '../ui/DatePickerInput'
+import type { PostProdTask, Note } from '@/types'
+import { POST_PROD_CATEGORIES } from '@/constants'
+import { useDetailView } from '@/hooks/useDetailView'
+import { DetailViewLayout } from '@/components/organisms'
+import { ActionButtonGroup } from '@/components/molecules'
+import { DetailItem, EditableField, LinkedItemsList, EmptyState, MetadataGrid } from '@/components/molecules'
+import { Text } from '@/components/atoms'
+import { ConfirmModal, TerminalCard, DatePickerInput } from '@/components/ui'
 
 interface TaskDetailViewProps {
   task: PostProdTask

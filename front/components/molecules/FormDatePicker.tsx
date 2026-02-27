@@ -1,11 +1,19 @@
 import React from 'react'
-import { Input, InputProps } from '@/components/atoms/Input'
+import { Calendar } from 'lucide-react'
+import { DatePickerInput } from '@/components/ui/DatePickerInput'
 
-export interface FormFieldProps extends Omit<InputProps, 'label'> {
+export interface FormDatePickerProps {
   label: string
+  value?: string
+  onChange: (value: string | undefined) => void
+  placeholder?: string
   hint?: string
   error?: string
   required?: boolean
+  disabled?: boolean
+  minDate?: string
+  maxDate?: string
+  className?: string
 }
 
 function formatLabel(text: string): string {
@@ -15,13 +23,18 @@ function formatLabel(text: string): string {
     .join(' ')
 }
 
-export const FormField: React.FC<FormFieldProps> = ({
+export const FormDatePicker: React.FC<FormDatePickerProps> = ({
   label,
+  value,
+  onChange,
+  placeholder = 'Select date...',
   hint,
   error,
   required = false,
-  className = '',
-  ...inputProps
+  disabled = false,
+  minDate,
+  maxDate,
+  className = ''
 }) => {
   return (
     <div className={`space-y-2 ${className}`}>
@@ -36,9 +49,13 @@ export const FormField: React.FC<FormFieldProps> = ({
         )}
       </div>
       
-      <Input
-        {...inputProps}
-        error={error}
+      <DatePickerInput
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        leftIcon={<Calendar size={16} className="text-muted-foreground" />}
+        fullWidth
+        disabled={disabled}
       />
       
       {error ? (

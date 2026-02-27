@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
-import { PenLine, Scissors, Music, Layers, Palette, Calendar, Flag, ChevronDown, Clock, Crop, Hash } from 'lucide-react';
-import { FormLayout, FormType } from '../organisms/FormLayout';
-import { Text } from '../atoms/Text';
-import { Input } from '../atoms/Input';
-import { Textarea } from '../atoms/Textarea';
-import { ProjectRequiredBanner } from '../molecules/ProjectRequiredBanner';
-import { PostProdTask } from '../../types';
-import { TerminalCard } from '../ui/TerminalCard';
-import { DatePickerInput } from '../ui/DatePickerInput';
+import { PenLine, Scissors, Music, Layers, Palette } from 'lucide-react';
+import { FormLayout, type FormType } from '@/components/organisms';
+import { FormField, FormTextarea, FormDatePicker, FormSelect, FormSection, FormPrioritySelector, ProjectRequiredBanner } from '@/components/molecules';
+import type { PostProdTask } from '@/types';
 
 interface TaskFormPageProps {
   onClose: () => void;
@@ -22,11 +17,25 @@ const toISODate = (dateStr: string) => {
 };
 
 const TASK_CATEGORIES = [
-  { id: 'Script', icon: PenLine, color: 'text-primary', bg: 'bg-primary/5' },
-  { id: 'Editing', icon: Scissors, color: 'text-primary', bg: 'bg-primary/5' },
-  { id: 'Sound', icon: Music, color: 'text-primary', bg: 'bg-primary/5' },
-  { id: 'VFX', icon: Layers, color: 'text-primary', bg: 'bg-primary/5' },
-  { id: 'Color', icon: Palette, color: 'text-primary', bg: 'bg-primary/5' },
+  { id: 'Script', icon: PenLine, color: 'indigo' },
+  { id: 'Editing', icon: Scissors, color: 'orange' },
+  { id: 'Sound', icon: Music, color: 'blue' },
+  { id: 'VFX', icon: Layers, color: 'purple' },
+  { id: 'Color', icon: Palette, color: 'red' },
+];
+
+const PRIORITY_OPTIONS = [
+  { value: 'low', label: 'Low Tier' },
+  { value: 'medium', label: 'Medium Tier' },
+  { value: 'high', label: 'High Priority' },
+  { value: 'critical', label: 'Mission Critical' },
+];
+
+const ASPECT_RATIO_OPTIONS = [
+  { value: '16:9', label: '16:9 (Widescreen)' },
+  { value: '9:16', label: '9:16 (Vertical)' },
+  { value: '2.39:1', label: '2.39:1 (Cinema)' },
+  { value: '4:3', label: '4:3 (Classic)' },
 ];
 
 export const TaskFormPage: React.FC<TaskFormPageProps> = ({
@@ -68,70 +77,41 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
   const isValid = form.title.trim();
 
   const pipelineSidebar = (
-    <TerminalCard header="Pipeline parameters">
-      <div className="space-y-4">
-        {form.category === 'Script' && (
-          <div className="flex flex-col gap-1 min-w-0">
-            <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Scene reference</span>
-            <Input
-              type="text"
-              value={form.metadata['scene'] as string || ''}
-              onChange={(e) => setForm(prev => ({ ...prev, metadata: { ...prev.metadata, scene: e.target.value } }))}
-              placeholder="e.g. 14B"
-              leftIcon={<Hash size={16} className="text-gray-400 dark:text-white/20" />}
-              variant="underline"
-              fullWidth
-            />
-          </div>
-        )}
-        {form.category === 'Editing' && (
-          <>
-            <div className="flex flex-col gap-1 min-w-0">
-              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Target duration</span>
-              <Input
-                type="text"
-                value={form.metadata['duration'] as string || ''}
-                onChange={(e) => setForm(prev => ({ ...prev, metadata: { ...prev.metadata, duration: e.target.value } }))}
-                placeholder="e.g. 2m 30s"
-                leftIcon={<Clock size={16} className="text-gray-400 dark:text-white/20" />}
-                variant="underline"
-                fullWidth
-              />
-            </div>
-            <div className="flex flex-col gap-1 min-w-0">
-              <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Aspect ratio</span>
-              <div className="relative group">
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 dark:text-white/20 group-hover:text-primary transition-colors pointer-events-none">
-                  <Crop size={16} />
-                </div>
-                <select
-                  value={form.metadata['aspectRatio'] as string || ''}
-                  onChange={(e) => setForm(prev => ({ ...prev, metadata: { ...prev.metadata, aspectRatio: e.target.value } }))}
-                  className="w-full appearance-none bg-transparent border-b border-gray-300 dark:border-white/10 pl-10 pr-10 py-3 text-sm font-bold tracking-tight focus:outline-none focus:border-primary transition-all cursor-pointer text-gray-800 dark:text-white/80 focus:text-gray-900 dark:focus:text-white"
-                >
-                  <option value="" className="bg-white dark:bg-[#0F1116]">Select Ratio</option>
-                  <option value="16:9" className="bg-white dark:bg-[#0F1116]">16:9 (Widescreen)</option>
-                  <option value="9:16" className="bg-white dark:bg-[#0F1116]">9:16 (Vertical)</option>
-                  <option value="2.39:1" className="bg-white dark:bg-[#0F1116]">2.39:1 (Cinema)</option>
-                  <option value="4:3" className="bg-white dark:bg-[#0F1116]">4:3 (Classic)</option>
-                </select>
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 dark:text-white/20 pointer-events-none group-hover:text-primary transition-colors">
-                  <ChevronDown size={14} strokeWidth={3} />
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-        {(!['Script', 'Editing'].includes(form.category)) && (
-          <div className="py-8 flex flex-col items-center justify-center text-center opacity-10">
-            <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-4">
-              <Layers size={24} />
-            </div>
-            <span className="text-[10px] font-medium text-gray-900 dark:text-white">Standard parameters applied</span>
-          </div>
-        )}
-      </div>
-    </TerminalCard>
+    <FormSection title="Pipeline parameters">
+      {form.category === 'Script' && (
+        <FormField
+          label="Scene reference"
+          value={form.metadata['scene'] as string || ''}
+          onChange={(e) => setForm(prev => ({ ...prev, metadata: { ...prev.metadata, scene: e.target.value } }))}
+          placeholder="e.g. 14B"
+        />
+      )}
+      
+      {form.category === 'Editing' && (
+        <div className="space-y-4">
+          <FormField
+            label="Target duration"
+            value={form.metadata['duration'] as string || ''}
+            onChange={(e) => setForm(prev => ({ ...prev, metadata: { ...prev.metadata, duration: e.target.value } }))}
+            placeholder="e.g. 2m 30s"
+          />
+          <FormSelect
+            label="Aspect ratio"
+            value={form.metadata['aspectRatio'] as string || ''}
+            onChange={(value) => setForm(prev => ({ ...prev, metadata: { ...prev.metadata, aspectRatio: value } }))}
+            options={ASPECT_RATIO_OPTIONS}
+            placeholder="Select ratio..."
+          />
+        </div>
+      )}
+
+      {(!['Script', 'Editing'].includes(form.category)) && (
+        <div className="py-8 text-center opacity-50">
+          <Layers size={24} className="mx-auto mb-2" />
+          <span className="text-[10px] font-mono">Standard parameters</span>
+        </div>
+      )}
+    </FormSection>
   );
 
   return (
@@ -154,86 +134,67 @@ export const TaskFormPage: React.FC<TaskFormPageProps> = ({
           message="You need to create a project before you can save tasks"
         />
       )}
-      <TerminalCard header="Department selection" className="mb-8">
-        <div className>
-          <div className="grid grid-cols-5 gap-2">
-            {TASK_CATEGORIES.map((cat) => {
-              const CatIcon = cat.icon;
-              const isActive = form.category === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setForm(prev => ({ ...prev, category: cat.id as any, metadata: {} }))}
-                  className={`flex flex-col items-center gap-3 p-4 border transition-all duration-300 group ${isActive
-                    ? 'bg-primary/10 border-primary/50 text-primary'
-                    : 'bg-[#fafafa] dark:bg-[#0a0a0a]/40 border-gray-300 dark:border-white/10 text-gray-500 dark:text-white/30 hover:border-gray-400 dark:hover:border-white/20 hover:text-gray-700 dark:hover:text-white/50'
-                    }`}
-                >
-                  <div className={`p-2 border transition-all duration-300 ${isActive ? 'bg-primary/20 border-primary/30' : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 group-hover:border-gray-300 dark:group-hover:border-white/20'}`}>
-                    <CatIcon size={20} strokeWidth={isActive ? 2.5 : 2} />
-                  </div>
-                  <span className={`text-[10px] font-mono tracking-widest uppercase transition-colors ${isActive ? 'text-primary' : 'text-gray-400 dark:text-white/30 group-hover:text-gray-600 dark:group-hover:text-white/50'}`}>
-                    {cat.id}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </TerminalCard>
 
-      <TerminalCard header="Core specification" className="mb-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="lg:col-span-2">
-            <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Task objective</span>
-            <Input
-              type="text"
-              value={form.title}
-              onChange={(e) => setForm(prev => ({ ...prev, title: e.target.value }))}
-              placeholder="e.g. Master Grade Assembly"
-              variant="underline"
-              fullWidth
-              className="text-lg font-bold tracking-tight"
-            />
-          </div>
-          <div className="flex flex-col gap-1 min-w-0">
-            <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Timeline deadline</span>
-            <DatePickerInput
+      <FormSection title="Department selection" className="mb-8">
+        <div className="grid grid-cols-5 gap-2">
+          {TASK_CATEGORIES.map((cat) => {
+            const CatIcon = cat.icon;
+            const isActive = form.category === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setForm(prev => ({ ...prev, category: cat.id as PostProdTask['category'], metadata: {} }))}
+                className={`flex flex-col items-center gap-3 p-4 border transition-all duration-300 group ${isActive
+                  ? 'bg-primary/10 border-primary/50 text-primary'
+                  : 'bg-[#fafafa] dark:bg-[#0a0a0a]/40 border-gray-300 dark:border-white/10 text-gray-500 dark:text-white/30 hover:border-gray-400 dark:hover:border-white/20 hover:text-gray-700 dark:hover:text-white/50'
+                  }`}
+              >
+                <div className={`p-2 border transition-all duration-300 ${isActive ? 'bg-primary/20 border-primary/30' : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 group-hover:border-gray-300 dark:group-hover:border-white/20'}`}>
+                  <CatIcon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                </div>
+                <span className={`text-[10px] font-mono tracking-widest uppercase transition-colors ${isActive ? 'text-primary' : 'text-gray-400 dark:text-white/30 group-hover:text-gray-600 dark:group-hover:text-white/50'}`}>
+                  {cat.id}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </FormSection>
+
+      <FormSection title="Core specification" className="mb-8">
+        <div className="space-y-6">
+          <FormField
+            label="Task objective"
+            value={form.title}
+            onChange={(e) => setForm(prev => ({ ...prev, title: e.target.value }))}
+            placeholder="e.g. Master Grade Assembly"
+            required
+          />
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <FormDatePicker
+              label="Timeline deadline"
               value={form.dueDate}
               onChange={(date) => setForm(prev => ({ ...prev, dueDate: date || '' }))}
-              fullWidth
+            />
+
+            <FormSelect
+              label="Priority level"
+              value={form.priority}
+              onChange={(value) => setForm(prev => ({ ...prev, priority: value as PostProdTask['priority'] }))}
+              options={PRIORITY_OPTIONS}
             />
           </div>
 
-          <div className="flex flex-col gap-1 min-w-0">
-            <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Priority level</span>
-              <div className="relative group">
-              <select
-                value={form.priority}
-                onChange={(e) => setForm(prev => ({ ...prev, priority: e.target.value as any }))}
-                className="w-full bg-transparent border-b border-gray-300 dark:border-white/10 py-3 text-gray-800 dark:text-white/80 focus:text-gray-900 dark:focus:text-white focus:outline-none focus:border-primary appearance-none cursor-pointer pr-10 text-sm font-bold tracking-tight transition-all"
-              >
-                <option value="low" className="bg-white dark:bg-[#0F1116]">Low Tier</option>
-                <option value="medium" className="bg-white dark:bg-[#0F1116]">Medium Tier</option>
-                <option value="high" className="bg-white dark:bg-[#0F1116]">High Priority</option>
-                <option value="critical" className="bg-white dark:bg-[#0F1116]">Mission Critical</option>
-              </select>
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 dark:text-white/20 group-hover:text-primary transition-colors pointer-events-none">
-                <ChevronDown size={16} strokeWidth={3} />
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-2">
-            <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium mb-3 block">Briefing & requirements</span>
-            <Textarea
-              value={form.description || ''}
-              onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Define specific technical instructions or creative context..."
-            />
-          </div>
+          <FormTextarea
+            label="Briefing & requirements"
+            value={form.description}
+            onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
+            placeholder="Define specific technical instructions or creative context..."
+            rows={4}
+          />
         </div>
-      </TerminalCard>
+      </FormSection>
     </FormLayout>
   );
 };

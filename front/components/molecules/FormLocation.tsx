@@ -1,11 +1,18 @@
 import React from 'react'
-import { Input, InputProps } from '@/components/atoms/Input'
+import { MapPin } from 'lucide-react'
+import { LocationAutocomplete, LocationSuggestion } from '@/components/ui/LocationAutocomplete'
 
-export interface FormFieldProps extends Omit<InputProps, 'label'> {
+export interface FormLocationProps {
   label: string
+  value: string
+  onChange: (value: string) => void
+  onSelectLocation?: (location: LocationSuggestion | null) => void
+  placeholder?: string
   hint?: string
   error?: string
   required?: boolean
+  disabled?: boolean
+  className?: string
 }
 
 function formatLabel(text: string): string {
@@ -15,13 +22,17 @@ function formatLabel(text: string): string {
     .join(' ')
 }
 
-export const FormField: React.FC<FormFieldProps> = ({
+export const FormLocation: React.FC<FormLocationProps> = ({
   label,
+  value,
+  onChange,
+  onSelectLocation,
+  placeholder = 'Search location...',
   hint,
   error,
   required = false,
-  className = '',
-  ...inputProps
+  disabled = false,
+  className = ''
 }) => {
   return (
     <div className={`space-y-2 ${className}`}>
@@ -36,9 +47,14 @@ export const FormField: React.FC<FormFieldProps> = ({
         )}
       </div>
       
-      <Input
-        {...inputProps}
-        error={error}
+      <LocationAutocomplete
+        value={value}
+        onChange={onChange}
+        onSelectLocation={onSelectLocation}
+        placeholder={placeholder}
+        label=""
+        leftIcon={<MapPin size={16} className="text-muted-foreground" />}
+        disabled={disabled}
       />
       
       {error ? (

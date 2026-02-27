@@ -1,11 +1,19 @@
 import React from 'react'
-import { Input, InputProps } from '@/components/atoms/Input'
+import { Clock } from 'lucide-react'
+import { TimeSelector, TimeSelectorProps } from '@/components/ui/TimeSelector'
 
-export interface FormFieldProps extends Omit<InputProps, 'label'> {
+export interface FormTimePickerProps {
   label: string
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
   hint?: string
   error?: string
   required?: boolean
+  disabled?: boolean
+  minTime?: string
+  maxTime?: string
+  className?: string
 }
 
 function formatLabel(text: string): string {
@@ -15,13 +23,16 @@ function formatLabel(text: string): string {
     .join(' ')
 }
 
-export const FormField: React.FC<FormFieldProps> = ({
+export const FormTimePicker: React.FC<FormTimePickerProps> = ({
   label,
+  value,
+  onChange,
+  placeholder = 'Select time...',
   hint,
   error,
   required = false,
-  className = '',
-  ...inputProps
+  disabled = false,
+  className = ''
 }) => {
   return (
     <div className={`space-y-2 ${className}`}>
@@ -36,9 +47,11 @@ export const FormField: React.FC<FormFieldProps> = ({
         )}
       </div>
       
-      <Input
-        {...inputProps}
-        error={error}
+      <TimeSelector
+        label=""
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
       />
       
       {error ? (

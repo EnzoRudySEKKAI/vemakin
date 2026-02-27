@@ -1,7 +1,7 @@
 import React from 'react'
-import { Input, InputProps } from '@/components/atoms/Input'
+import { Textarea, TextareaProps } from '@/components/atoms/Textarea'
 
-export interface FormFieldProps extends Omit<InputProps, 'label'> {
+export interface FormTextareaProps extends Omit<TextareaProps, 'label'> {
   label: string
   hint?: string
   error?: string
@@ -15,13 +15,13 @@ function formatLabel(text: string): string {
     .join(' ')
 }
 
-export const FormField: React.FC<FormFieldProps> = ({
+export const FormTextarea: React.FC<FormTextareaProps> = ({
   label,
   hint,
   error,
   required = false,
   className = '',
-  ...inputProps
+  ...textareaProps
 }) => {
   return (
     <div className={`space-y-2 ${className}`}>
@@ -36,9 +36,9 @@ export const FormField: React.FC<FormFieldProps> = ({
         )}
       </div>
       
-      <Input
-        {...inputProps}
-        error={error}
+      <Textarea
+        {...textareaProps}
+        className={error ? 'border-destructive focus:border-destructive focus:ring-destructive/20' : ''}
       />
       
       {error ? (

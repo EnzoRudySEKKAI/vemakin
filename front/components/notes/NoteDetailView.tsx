@@ -1,12 +1,11 @@
 import React, { useMemo, useCallback } from 'react'
 import { Film, Briefcase, ExternalLink } from 'lucide-react'
-import { Note, Shot, PostProdTask } from '../../types'
-import { useDetailView } from '../../hooks/useDetailView'
-import { DetailViewLayout } from '../../components/organisms/DetailViewLayout'
-import { ActionButtonGroup } from '../../components/molecules/ActionButton'
-import { DetailItem, EditableField, LinkedItemsList, EmptyState, MetadataGrid } from '../../components/molecules'
-import { TerminalCard } from '../ui/TerminalCard'
-import { ConfirmModal } from '../ui/ConfirmModal'
+import type { Note, Shot, PostProdTask } from '@/types'
+import { useDetailView } from '@/hooks/useDetailView'
+import { DetailViewLayout } from '@/components/organisms'
+import { ActionButtonGroup } from '@/components/molecules'
+import { DetailItem, EditableField, LinkedItemsList, EmptyState, MetadataGrid } from '@/components/molecules'
+import { TerminalCard, ConfirmModal } from '@/components/ui'
 
 interface NoteDetailViewProps {
   note: Note
