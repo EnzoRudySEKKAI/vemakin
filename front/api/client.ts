@@ -43,6 +43,10 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 403) {
+      const currentPath = window.location.pathname
+      if (currentPath.includes('/auth/verify')) {
+        return Promise.reject(error)
+      }
       window.location.href = '/auth/verify-required'
       return
     }
