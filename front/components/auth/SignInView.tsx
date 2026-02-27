@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Mail, Lock, ArrowRight } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { ArrowLeft, Mail, Lock, ArrowRight, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,10 +18,19 @@ interface SignInViewProps {
 
 export const SignInView: React.FC<SignInViewProps> = ({ onBack, onSignIn }) => {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { authPromise } = useAuthStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [showVerifiedMessage, setShowVerifiedMessage] = useState(false)
+
+  useEffect(() => {
+    if (searchParams.get('verified') === 'true') {
+      setShowVerifiedMessage(true)
+      setTimeout(() => setShowVerifiedMessage(false), 5000)
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,10 +38,15 @@ export const SignInView: React.FC<SignInViewProps> = ({ onBack, onSignIn }) => {
 
     setIsLoading(true)
     try {
-      const { signInWithEmailAndPassword } = await import('firebase/auth')
+      const { signInWithEmailAndPassword, reload } = await import('firebase/auth')
       const { getFirebaseAuth } = await import('@/firebase')
-      await signInWithEmailAndPassword(getFirebaseAuth(), email, password)
-
+      const auth = getFirebaseAuth()
+      
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      
+      // Reload user to get latest emailVerified status from Firebase
+      await reload(userCredential.user)
+      
       // Wait for auth to be resolved and profile to be fetched
       if (authPromise) {
         await authPromise
@@ -41,9 +55,13 @@ export const SignInView: React.FC<SignInViewProps> = ({ onBack, onSignIn }) => {
       // Small delay to ensure store is updated
       await new Promise(resolve => setTimeout(resolve, 500))
       
-      // Check if email is verified after profile fetch
+      // Check if email is verified - check both Firebase user object and local store
+      const firebaseUser = auth.currentUser
       const { currentUser } = useAuthStore.getState()
-      if (currentUser && !currentUser.emailVerified) {
+      
+      const isEmailVerified = firebaseUser?.emailVerified ?? currentUser?.emailVerified ?? false
+      
+      if (!isEmailVerified) {
         navigate('/auth/verify-email')
       } else {
         onSignIn('', email)
@@ -72,6 +90,13 @@ export const SignInView: React.FC<SignInViewProps> = ({ onBack, onSignIn }) => {
           <h1 className="text-3xl font-bold mb-3 text-foreground">Welcome Back</h1>
           <p className="text-muted-foreground">Enter your credentials to access your productions.</p>
         </div>
+
+        {showVerifiedMessage && (
+          <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg flex items-center gap-3">
+            <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+            <p className="text-sm text-green-400">Your email has been verified! You can now sign in.</p>
+          </div>
+        )}
 
         <Card className="p-8 shadow-2xl shadow-black/50 border-border bg-card">
           <CardContent className="p-0">

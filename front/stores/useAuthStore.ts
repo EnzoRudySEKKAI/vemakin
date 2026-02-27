@@ -54,6 +54,9 @@ export const useAuthStore = create<AuthState>()(
           }
 
           if (user) {
+            // Reload user to get latest emailVerified status from Firebase
+            await user.reload()
+            
             let userProfile: User | null = null
             try {
               userProfile = await userService.getProfile()
@@ -61,7 +64,10 @@ export const useAuthStore = create<AuthState>()(
               console.error('Failed to fetch user profile:', error)
             }
 
-            const emailVerified = userProfile?.emailVerified ?? false
+            // Check emailVerified from Firebase user object first, fallback to database
+            const firebaseEmailVerified = user.emailVerified ?? false
+            const dbEmailVerified = userProfile?.emailVerified ?? false
+            const emailVerified = firebaseEmailVerified || dbEmailVerified
             const needsEmailVerification = !emailVerified
 
             set({
