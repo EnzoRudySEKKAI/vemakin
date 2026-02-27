@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Aperture, Plus, Sun, Moon, MapPin, Check, Package, ChevronUp, ChevronDown, Square } from 'lucide-react'
+import { Aperture, Plus, Sun, Moon, MapPin, Check, Package, ChevronDown, ChevronUp, Square } from 'lucide-react'
 
 import { Shot, ShotLayout, Equipment } from '@/types'
 import { calculateEndTime, timeToMinutes, getSunTimes, formatDateWithDay } from '@/utils'
@@ -9,6 +9,7 @@ import { TerminalButton } from '@/components/ui/TerminalButton'
 import { TravelIndicator } from '@/components/ui/TravelIndicator'
 import { GearTransition } from '@/components/ui/GearTransition'
 import { Button } from '@/components/atoms/Button'
+import { EmptyState } from '@/components/molecules/EmptyState'
 
 interface ShotsViewProps {
   groupedShots: Record<string, Shot[]>
@@ -107,23 +108,14 @@ export const ShotsView: React.FC<ShotsViewProps> = React.memo(({
   if (totalShots === 0) {
     return (
       <div className="centered-empty px-6 select-none">
-        <div className="text-center max-w-sm">
-          <div className="w-14 h-14 border border-white/10 bg-[#0a0a0a]/40 flex items-center justify-center mb-6 mx-auto">
-            <Aperture size={24} className="text-muted-foreground" />
-          </div>
-          <h2 className="text-xl font-semibold text-foreground mb-2 font-mono  tracking-wider">
-            {searchQuery || statusFilter !== 'all' ? "No matches found" : "Empty timeline"}
-          </h2>
-          <p className="text-muted-foreground mb-8 text-sm font-mono">
-            {searchQuery || statusFilter !== 'all' ? "Try adjusting your filters." : "Begin your production by scheduling the first scene."}
-          </p>
-          <TerminalButton
-            variant="primary"
-            onClick={onAddShot}
-          >
-            Schedule First Shot
-          </TerminalButton>
-        </div>
+        <EmptyState
+          icon={Aperture}
+          title={searchQuery || statusFilter !== 'all' ? "No matches found" : "Empty timeline"}
+          description={searchQuery || statusFilter !== 'all' ? "Try adjusting your filters." : "Begin your production by scheduling the first scene."}
+          action={{ label: 'Schedule First Shot', onClick: onAddShot }}
+          variant="default"
+          size="lg"
+        />
       </div>
     )
   }

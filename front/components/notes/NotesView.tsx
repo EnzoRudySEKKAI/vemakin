@@ -1,9 +1,11 @@
 import React, { useMemo } from 'react'
-import { FileText, Calendar, Film, StickyNote, Zap, Paperclip, Plus } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { StickyNote, Calendar, Paperclip, Film } from 'lucide-react'
 import { Shot, Note, PostProdTask, NotesFilters } from '@/types'
 import { TerminalCard } from '@/components/ui/TerminalCard'
-import { TerminalButton } from '@/components/ui/TerminalButton'
+import { CardItem } from '@/components/molecules/CardItem'
+import { CardGrid } from '@/components/molecules/CardGrid'
+import { EmptyState } from '@/components/molecules/EmptyState'
+import { CategoryIcon, getCategoryIcon } from '@/components/atoms/CategoryIcon'
 import { formatDateToNumeric } from '@/utils'
 import { POST_PROD_CATEGORIES } from '@/constants'
 
@@ -29,7 +31,7 @@ const getContextIcon = (note: Note & { isAuto?: boolean }, shots: Shot[], tasks:
   if (note.taskId) {
     const task = tasks.find(t => t.id === note.taskId)
     const catInfo = task ? POST_PROD_CATEGORIES.find(c => c.label === task.category) : null
-    return catInfo?.icon || Zap
+    return catInfo?.icon || StickyNote
   }
   return StickyNote
 }
@@ -94,71 +96,68 @@ export const NotesView: React.FC<NotesViewProps> = React.memo(({
   if (aggregatedNotes.length === 0) {
     return (
       <div className="centered-empty px-6 select-none">
-        <div className="text-center max-w-sm">
-          <div className="w-14 h-14 border border-white/10 bg-[#0a0a0a]/40 flex items-center justify-center mb-6 mx-auto">
-            <StickyNote size={24} className="text-muted-foreground" />
-          </div>
-          <h2 className="text-xl font-semibold text-foreground mb-2 font-mono  tracking-wider">No notes found</h2>
-          <p className="text-muted-foreground mb-8 text-sm font-mono">Adjust filters or create your first note.</p>
-          <TerminalButton variant="primary" onClick={() => setIsAdding(true)}>
-            Add Note
-          </TerminalButton>
-        </div>
+        <EmptyState
+          icon={StickyNote}
+          title="No notes found"
+          description="Adjust filters or create your first note."
+          action={{ label: 'Add Note', onClick: () => setIsAdding(true) }}
+          variant="default"
+          size="lg"
+        />
       </div>
+    )
+  }
+
+  const renderNoteCard = (note: Note & { isAuto?: boolean }) => {
+    const ContextIcon = getContextIcon(note, shots, tasks)
+    const linkedShot = note.shotId ? shots.find(s => s.id === note.shotId) : null
+    const linkedTask = note.taskId ? tasks.find(t => t.id === note.taskId) : null
+
+    let contextLabel = "General Note"
+    if (linkedShot || note.isAuto) {
+      contextLabel = linkedShot ? `Scene ${linkedShot.sceneNumber}` : "Shot Note"
+    } else if (linkedTask) {
+      contextLabel = `${linkedTask.category}`
+    }
+
+    return (
+      <CardItem onClick={() => onSelectNote(note.id)}>
+        <CardItem.Header>
+          <CardItem.Icon icon={ContextIcon} size="sm" />
+          <span className="text-xs font-mono tracking-wider text-muted-foreground">
+            {contextLabel}
+          </span>
+        </CardItem.Header>
+        
+        <CardItem.Content>
+          <CardItem.Title>{note.title}</CardItem.Title>
+          <CardItem.Description lines={2}>{note.content}</CardItem.Description>
+        </CardItem.Content>
+        
+        <CardItem.Footer>
+          <CardItem.Meta icon={Calendar}>
+            {formatDateToNumeric(note.updatedAt)}
+          </CardItem.Meta>
+          {note.attachments && note.attachments.length > 0 && (
+            <CardItem.Meta icon={Paperclip}>
+              {note.attachments.length}
+            </CardItem.Meta>
+          )}
+        </CardItem.Footer>
+      </CardItem>
     )
   }
 
   return (
     <div className="space-y-4">
       {layout === 'grid' ? (
-        <div className={`grid grid-cols-1 gap-4 ${gridColumns === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
-          {aggregatedNotes.map(note => {
-            const ContextIcon = getContextIcon(note, shots, tasks)
-            const linkedShot = note.shotId ? shots.find(s => s.id === note.shotId) : null
-            const linkedTask = note.taskId ? tasks.find(t => t.id === note.taskId) : null
-
-            let contextLabel = "General Note"
-            if (linkedShot || note.isAuto) {
-              contextLabel = linkedShot ? `Scene ${linkedShot.sceneNumber}` : "Shot Note"
-            } else if (linkedTask) {
-              contextLabel = `${linkedTask.category}`
-            }
-
-            return (
-              <div
-                key={note.id}
-                onClick={() => onSelectNote(note.id)}
-                className="group p-4 border border-gray-300 dark:border-white/10 bg-[#fafafa] dark:bg-[#0a0a0a]/40 hover:border-primary/30 dark:hover:border-primary/30 transition-all cursor-pointer"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 bg-[#f5f5f5] dark:bg-[#16181D] flex items-center justify-center border border-gray-300 dark:border-white/10">
-                    <ContextIcon size={14} className="text-muted-foreground" />
-                  </div>
-                  <div className="text-xs font-mono  tracking-wider text-muted-foreground">{contextLabel}</div>
-                </div>
-
-                <div className="mb-3">
-                  <h3 className="text-sm text-foreground font-medium mb-1 line-clamp-1">{note.title}</h3>
-                  <p className="text-xs text-muted-foreground line-clamp-2">{note.content}</p>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-[10px] font-mono  tracking-wider text-muted-foreground">
-                    <Calendar size={10} />
-                    {formatDateToNumeric(note.updatedAt)}
-                  </div>
-
-                  {note.attachments && note.attachments.length > 0 && (
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <Paperclip size={10} />
-                      <span className="text-[10px] font-mono">{note.attachments.length}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )
-          })}
-        </div>
+        <CardGrid
+          items={aggregatedNotes}
+          columns={gridColumns as 1 | 2 | 3 | 4}
+          keyExtractor={(note) => note.id}
+        >
+          {(note) => renderNoteCard(note)}
+        </CardGrid>
       ) : (
         <TerminalCard header="Notes">
           <div className="space-y-2">
@@ -175,31 +174,29 @@ export const NotesView: React.FC<NotesViewProps> = React.memo(({
               }
 
               return (
-              <div
-                key={note.id}
-                onClick={() => onSelectNote(note.id)}
-                className="flex items-center gap-4 p-3 border border-gray-300 dark:border-white/10 bg-[#fafafa] dark:bg-[#0a0a0a]/40 hover:border-primary/30 dark:hover:border-primary/30 transition-all cursor-pointer"
-              >
-                <div className="w-9 h-9 bg-[#f5f5f5] dark:bg-[#16181D] flex items-center justify-center border border-gray-300 dark:border-white/10 shrink-0">
-                  <ContextIcon size={16} className="text-muted-foreground" />
-                </div>
+                <div
+                  key={note.id}
+                  onClick={() => onSelectNote(note.id)}
+                  className="flex items-center gap-4 p-3 border border-gray-300 dark:border-white/10 bg-[#fafafa] dark:bg-[#0a0a0a]/40 hover:border-primary/30 dark:hover:border-primary/30 transition-all cursor-pointer"
+                >
+                  <CardItem.Icon icon={ContextIcon} />
 
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm text-foreground font-medium truncate">{note.title}</div>
-                  <div className="text-xs font-mono  tracking-wider text-muted-foreground">{contextLabel}</div>
-                </div>
-
-                <div className="hidden sm:flex items-center gap-3 shrink-0">
-                  <div className="text-xs font-mono  tracking-wider text-muted-foreground">
-                    {new Date(note.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                  <div className="flex-1 min-w-0">
+                    <CardItem.Title>{note.title}</CardItem.Title>
+                    <CardItem.Subtitle>{contextLabel}</CardItem.Subtitle>
                   </div>
-                  {note.attachments && note.attachments.length > 0 && (
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <Paperclip size={12} />
-                    </div>
-                  )}
+
+                  <div className="hidden sm:flex items-center gap-3 shrink-0">
+                    <CardItem.Meta icon={Calendar}>
+                      {new Date(note.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    </CardItem.Meta>
+                    {note.attachments && note.attachments.length > 0 && (
+                      <CardItem.Meta icon={Paperclip}>
+                        {note.attachments.length}
+                      </CardItem.Meta>
+                    )}
+                  </div>
                 </div>
-              </div>
               )
             })}
           </div>

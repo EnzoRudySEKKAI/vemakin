@@ -1,8 +1,14 @@
 import React, { useMemo } from 'react'
-import { Package, Camera, Lightbulb, Speaker, Wrench } from 'lucide-react'
+import { Package } from 'lucide-react'
 import { Equipment, Shot, InventoryFilters, Currency, InventoryLayout } from '@/types'
 import { TerminalCard } from '@/components/ui/TerminalCard'
 import { useCatalogCategories } from '@/hooks/useApi'
+import { useViewFilters } from '@/hooks/useViewFilters'
+import { CardItem } from '@/components/molecules/CardItem'
+import { CardGrid } from '@/components/molecules/CardGrid'
+import { EmptyState } from '@/components/molecules/EmptyState'
+import { StatusBadge } from '@/components/atoms/StatusBadge'
+import { CategoryIcon, getCategoryIcon } from '@/components/atoms/CategoryIcon'
 
 interface InventoryViewProps {
   inventory: Equipment[]
@@ -13,17 +19,6 @@ interface InventoryViewProps {
   layout?: InventoryLayout
   onAddEquipment: () => void
   gridColumns?: 2 | 3
-}
-
-const getCategoryIcon = (category: string) => {
-  const icons: Record<string, any> = {
-    'Camera': Camera,
-    'Lens': Package,
-    'Light': Lightbulb,
-    'Audio': Speaker,
-    'Grip': Wrench,
-  }
-  return icons[category] || Package
 }
 
 const toPascalCase = (str: string) => {
@@ -39,9 +34,7 @@ const getEquipmentDisplayInfo = (item: Equipment) => {
   const brand = item.brandName
   const model = item.modelName
   const custom = item.customName
-
   const title = custom || item.name
-
   let subtitle = ''
   if (custom) {
     const identity = model || ''
@@ -49,7 +42,6 @@ const getEquipmentDisplayInfo = (item: Equipment) => {
   } else {
     subtitle = brand || ''
   }
-
   return { title, subtitle: toPascalCase(subtitle) }
 }
 
@@ -64,6 +56,14 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
 }) => {
   const { data: catalogCategories = [] } = useCatalogCategories()
 
+  const { filteredData } = useViewFilters({
+    data: inventory,
+    initialFilters: {
+      query: filters.query,
+      category: filters.category,
+    }
+  })
+
   const getCategoryDisplayName = (categoryIdOrName: string): string => {
     if (!catalogCategories || !Array.isArray(catalogCategories)) {
       return categoryIdOrName
@@ -71,39 +71,10 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
     const match = catalogCategories.find((c: { id: string; name: string }) => c.id === categoryIdOrName)
     return match?.name || categoryIdOrName
   }
-  const assignedEquipmentIds = useMemo(() => {
-    const ids = new Set<string>()
-    shots.forEach(shot => {
-      shot.equipmentIds.forEach(id => ids.add(id))
-    })
-    return ids
-  }, [shots])
-
-  const filteredInventory = useMemo(() => {
-    let source = inventory
-
-    return source.filter(item => {
-      if (filters.query) {
-        const q = filters.query.toLowerCase()
-        const specsMatch = Object.values(item.specs).some(val =>
-          typeof val === 'string' && val.toLowerCase().includes(q)
-        )
-        const nameMatch = item.name.toLowerCase().includes(q)
-        const customNameMatch = item.customName?.toLowerCase().includes(q)
-        const categoryMatch = item.category.toLowerCase().includes(q)
-        if (!nameMatch && !categoryMatch && !specsMatch && !customNameMatch) return false
-      }
-      if (filters.category !== 'All' && item.category !== filters.category) return false
-      if (filters.ownership === 'owned' && !item.isOwned) return false
-      if (filters.ownership === 'rented' && item.isOwned) return false
-
-      return true
-    })
-  }, [inventory, filters, assignedEquipmentIds])
 
   const groupedByCategory = useMemo(() => {
     const groups: Record<string, Equipment[]> = {}
-    filteredInventory.forEach(item => {
+    filteredData.forEach(item => {
       const displayName = getCategoryDisplayName(item.category)
       if (!groups[displayName]) {
         groups[displayName] = []
@@ -111,19 +82,53 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
       groups[displayName].push(item)
     })
     return groups
-  }, [filteredInventory, catalogCategories])
+  }, [filteredData, catalogCategories])
 
-  if (filteredInventory.length === 0) {
+  if (filteredData.length === 0) {
     return (
       <div className="centered-empty px-6 select-none">
-        <div className="text-center max-w-sm">
-          <div className="w-14 h-14 border border-white/10 bg-[#0a0a0a]/40 flex items-center justify-center mb-6 mx-auto">
-            <Package size={24} className="text-muted-foreground" />
-          </div>
-          <h2 className="text-xl font-semibold text-foreground mb-2 font-mono  tracking-wider">Empty repository</h2>
-          <p className="text-muted-foreground text-sm font-mono">No items match your criteria</p>
-        </div>
+        <EmptyState
+          icon={Package}
+          title="Empty repository"
+          description="No items match your criteria"
+          variant="default"
+          size="lg"
+        />
       </div>
+    )
+  }
+
+  const renderEquipmentCard = (item: Equipment) => {
+    const { title, subtitle } = getEquipmentDisplayInfo(item)
+    const CategoryIconComponent = getCategoryIcon(item.category)
+
+    return (
+      <CardItem onClick={() => onEquipmentClick(item.id)}>
+        <CardItem.Header>
+          <CardItem.Icon icon={CategoryIconComponent} />
+          <StatusBadge variant="ownership" value={item.isOwned ? 'owned' : 'rented'} />
+        </CardItem.Header>
+        
+        <CardItem.Content>
+          <CardItem.Title>{title}</CardItem.Title>
+          {subtitle && <CardItem.Subtitle>{subtitle}</CardItem.Subtitle>}
+        </CardItem.Content>
+        
+        <CardItem.Footer>
+          <div className="grid grid-cols-2 gap-2 w-full">
+            {Object.entries(item.specs).slice(0, 4).map(([key, val], idx) => (
+              <div key={`${item.id}-spec-${idx}`} className="min-w-0">
+                <span className="text-[9px] text-muted-foreground font-mono tracking-wider truncate block">
+                  {key.replace(/([A-Z])/g, ' $1').trim()}
+                </span>
+                <span className="text-xs font-mono truncate block">
+                  {String(val)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </CardItem.Footer>
+      </CardItem>
     )
   }
 
@@ -135,74 +140,18 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
             key={category}
             header={
               <div className="flex items-center gap-2">
-                {(() => {
-                  const Icon = getCategoryIcon(category)
-                  return <Icon size={16} className="text-muted-foreground" />
-                })()}
+                <CategoryIcon category={category} />
                 <span>{category}</span>
               </div>
             }
           >
-            <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${gridColumns === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-2'}`}>
-              {items.map((item) => {
-                const { title, subtitle } = getEquipmentDisplayInfo(item)
-                return (
-                <div
-                  key={item.id}
-                  onClick={() => onEquipmentClick(item.id)}
-                  className="group p-4 border border-gray-300 dark:border-white/10 bg-[#fafafa] dark:bg-[#0a0a0a]/40 hover:border-primary/30 dark:hover:border-primary/30 transition-all cursor-pointer"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm text-foreground font-medium truncate">
-                        {title}
-                      </div>
-                      {subtitle && (
-                        <div className="mt-1 text-[10px] font-mono  tracking-wider text-muted-foreground truncate">
-                          {subtitle}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="shrink-0 text-right">
-                      <span className="block text-[10px] font-mono  tracking-wider text-muted-foreground mb-1">
-                        {item.isOwned ? 'Owned' : 'Rented'}
-                      </span>
-                      {!item.isOwned && (
-                        <div className="flex items-baseline justify-end gap-1">
-                          <span className="text-xs text-muted-foreground font-mono">
-                            {currency.symbol}{(item.rentalPrice ?? item.pricePerDay ?? 0).toLocaleString()}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground/50">/{item.rentalFrequency || 'Day'}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-3 pt-3 border-t border-border">
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                      {(() => {
-                        const specs = Object.entries(item.specs).slice(0, 4)
-                        const slots = [...specs]
-                        while (slots.length < 4) {
-                          slots.push(['—', '—'])
-                        }
-                        return slots.map(([key, val], idx) => (
-                          <div key={`${item.id}-spec-${idx}`} className="flex flex-col min-w-0">
-                            <span className="text-[9px] text-muted-foreground  font-mono tracking-wider truncate mb-0.5">
-                              {key === '—' ? '—' : key.replace(/([A-Z])/g, ' $1').trim()}
-                            </span>
-                            <span className={`text-xs font-mono truncate ${key === '—' ? 'text-border' : 'text-muted-foreground'}`} title={String(val)}>
-                              {String(val)}
-                            </span>
-                          </div>
-                        ))
-                      })()}
-                    </div>
-                  </div>
-                </div>
-              )})}
-            </div>
+            <CardGrid
+              items={items}
+              columns={gridColumns as 1 | 2 | 3 | 4}
+              keyExtractor={(item) => item.id}
+            >
+              {(item) => renderEquipmentCard(item)}
+            </CardGrid>
           </TerminalCard>
         ))
       ) : (
@@ -217,20 +166,14 @@ export const InventoryView: React.FC<InventoryViewProps> = React.memo(({
                 className="flex items-center gap-4 p-3 border border-gray-300 dark:border-white/10 bg-[#fafafa] dark:bg-[#0a0a0a]/40 hover:border-primary/30 dark:hover:border-primary/30 transition-all cursor-pointer"
               >
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm text-foreground font-medium truncate">{title}</div>
-                  {subtitle && (
-                    <div className="mt-1 text-[10px] font-mono  tracking-wider text-muted-foreground truncate">
-                      {subtitle}
-                    </div>
-                  )}
+                  <CardItem.Title>{title}</CardItem.Title>
+                  {subtitle && <CardItem.Subtitle>{subtitle}</CardItem.Subtitle>}
                 </div>
 
                 <div className="text-right shrink-0">
-                  <span className="block text-[10px] font-mono  tracking-wider text-muted-foreground mb-1">
-                    {item.isOwned ? 'Owned' : 'Rented'}
-                  </span>
+                  <StatusBadge variant="ownership" value={item.isOwned ? 'owned' : 'rented'} />
                   {!item.isOwned && (
-                    <div className="flex items-baseline justify-end gap-1">
+                    <div className="flex items-baseline justify-end gap-1 mt-1">
                       <span className="text-xs text-muted-foreground font-mono">
                         {currency.symbol}{(item.rentalPrice ?? item.pricePerDay ?? 0).toLocaleString()}
                       </span>

@@ -28,3 +28,9 @@ export type { ModalProps, ModalSize, ConfirmModalProps } from './Modal'
 export { Logo } from './Logo'
 export type { LogoProps } from './Logo'
 
+export { StatusBadge, getStatusColor, getStatusBgColor } from './StatusBadge'
+export type { StatusBadgeVariant, StatusValue } from './StatusBadge'
+
+export { CategoryIcon, getCategoryIcon, getCategoryColor, getCategoryBgColor } from './CategoryIcon'
+export type { CategoryIconProps, CategoryType } from './CategoryIcon'
+
