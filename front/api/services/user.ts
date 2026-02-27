@@ -9,4 +9,8 @@ export const userService = {
   updateProfile: async (data: Partial<User>): Promise<User> => {
     return apiClient.patch<User>('/users/profile', data)
   },
+
+  verifyEmail: async (verified: boolean): Promise<User> => {
+    return apiClient.patch<User>('/users/profile/email-verified', { verified })
+  },
 }

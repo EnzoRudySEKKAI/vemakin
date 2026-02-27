@@ -498,6 +498,12 @@ const RootLayoutInner = () => {
     return <FullPageLoader />
   }
 
+  // Redirect to email verification if not verified
+  if (!currentUser?.emailVerified) {
+    navigate('/auth/verify-email', { replace: true })
+    return <FullPageLoader />
+  }
+
   // Show onboarding for first-time users (firstConnection === true)
   if (currentUser?.firstConnection === true && !isLoading) {
     return (

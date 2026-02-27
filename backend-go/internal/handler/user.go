@@ -31,6 +31,7 @@ func userToResponse(u models.User) dto.UserResponse {
 		HubNotesLimit:        u.HubNotesLimit,
 		HubEquipmentLimit:    u.HubEquipmentLimit,
 		FirstConnection:      u.FirstConnection,
+		EmailVerified:        u.EmailVerified,
 	}
 }
 
@@ -96,6 +97,30 @@ func (h *Handler) UpdateUser(c echo.Context) error {
 	}
 
 	if err := h.userRepo.Update(c.Request().Context(), userID, updates); err != nil {
+		return c.JSON(http.StatusInternalServerError, errorResponse(err))
+	}
+
+	user, err := h.userRepo.GetByID(c.Request().Context(), userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, errorResponse(err))
+	}
+
+	return c.JSON(http.StatusOK, userToResponse(*user))
+}
+
+type VerifyEmailRequest struct {
+	Verified bool `json:"verified"`
+}
+
+func (h *Handler) VerifyEmail(c echo.Context) error {
+	userID := getUserID(c)
+
+	var req VerifyEmailRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, errorResponse(err))
+	}
+
+	if err := h.userRepo.UpdateEmailVerified(c.Request().Context(), userID, req.Verified); err != nil {
 		return c.JSON(http.StatusInternalServerError, errorResponse(err))
 	}
 

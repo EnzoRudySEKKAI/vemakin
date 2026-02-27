@@ -14,12 +14,14 @@ interface AuthState {
   authPromise: Promise<void> | null
   resolveAuth: (() => void) | null
   previousUserId: string | null
+  needsEmailVerification: boolean
 
   initAuth: () => () => void
   login: (name: string, email: string) => void
   logout: () => Promise<void>
   setLoading: (loading: boolean) => void
   updateFirstConnection: (value: boolean) => void
+  updateEmailVerified: (value: boolean) => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -30,6 +32,7 @@ export const useAuthStore = create<AuthState>()(
       authPromise: null,
       resolveAuth: null,
       previousUserId: null,
+      needsEmailVerification: false,
 
       initAuth: () => {
         if (get().authPromise) return () => {}
@@ -58,6 +61,9 @@ export const useAuthStore = create<AuthState>()(
               console.error('Failed to fetch user profile:', error)
             }
 
+            const emailVerified = userProfile?.emailVerified ?? false
+            const needsEmailVerification = !emailVerified
+
             set({
               currentUser: {
                 id: user.uid,
@@ -72,10 +78,12 @@ export const useAuthStore = create<AuthState>()(
                 hubTasksLimit: userProfile?.hubTasksLimit,
                 hubNotesLimit: userProfile?.hubNotesLimit,
                 hubEquipmentLimit: userProfile?.hubEquipmentLimit,
-                firstConnection: userProfile?.firstConnection ?? true
+                firstConnection: userProfile?.firstConnection ?? true,
+                emailVerified: emailVerified
               },
               previousUserId: user.uid,
-              isLoadingAuth: false
+              isLoadingAuth: false,
+              needsEmailVerification
             })
 
             // Sync grid columns from user profile to UI store (skip server sync since we just got the data from server)
@@ -134,7 +142,8 @@ export const useAuthStore = create<AuthState>()(
         set({
           currentUser: null,
           previousUserId: null,
-          isLoadingAuth: false
+          isLoadingAuth: false,
+          needsEmailVerification: false
         })
         
         useProjectStore.getState().reset()
@@ -159,6 +168,19 @@ export const useAuthStore = create<AuthState>()(
               ...currentUser,
               firstConnection: value
             }
+          })
+        }
+      },
+
+      updateEmailVerified: (value: boolean) => {
+        const { currentUser } = get()
+        if (currentUser) {
+          set({
+            currentUser: {
+              ...currentUser,
+              emailVerified: value
+            },
+            needsEmailVerification: !value
           })
         }
       }

@@ -13,6 +13,7 @@ const LandingView = lazy(() => import('@/components/auth/LandingView').then(m =>
 const SignInView = lazy(() => import('@/components/auth/SignInView').then(m => ({ default: m.SignInView })))
 const SignUpView = lazy(() => import('@/components/auth/SignUpView').then(m => ({ default: m.SignUpView })))
 const ForgotPasswordView = lazy(() => import('@/components/auth/ForgotPasswordView').then(m => ({ default: m.ForgotPasswordView })))
+const EmailVerificationView = lazy(() => import('@/components/auth/EmailVerificationView').then(m => ({ default: m.EmailVerificationView })))
 const OverviewRoute = lazy(() => import('@/routes/OverviewRoute').then(m => ({ default: m.OverviewRoute })))
 const ShotsRoute = lazy(() => import('@/routes/ShotsRoute').then(m => ({ default: m.ShotsRoute })))
 const ShotDetailRoute = lazy(() => import('@/routes/ShotDetailRoute').then(m => ({ default: m.ShotDetailRoute })))
@@ -77,6 +78,10 @@ export const router = createBrowserRouter(
                 <Route path="/auth/login" element={<SignInPageRoute />} />
                 <Route path="/auth/register" element={<SignUpPageRoute />} />
                 <Route path="/auth/forgot-password" element={withSuspense(ForgotPasswordView)} />
+            </Route>
+            
+            <Route element={<AuthProviderWrapper><ProtectedRoute /></AuthProviderWrapper>}>
+                <Route path="/auth/verify-email" element={<EmailVerificationPageRoute />} />
             </Route>
             
             <Route element={<AuthProviderWrapper><ProtectedRoute /></AuthProviderWrapper>}>
@@ -147,6 +152,14 @@ function AuthLandingRoute() {
   )
 }
 
+function EmailVerificationPageRoute() {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <EmailVerificationView />
+    </Suspense>
+  )
+}
+
 export const ROUTE_PATHS = {
     overview: '/dashboard',
     shots: '/dashboard/shots',
@@ -168,6 +181,7 @@ export const ROUTE_PATHS = {
     login: '/auth/login',
     register: '/auth/register',
     forgotPassword: '/auth/forgot-password',
+    verifyEmail: '/auth/verify-email',
 } as const
 
 export function getViewFromPath(pathname: string): string {

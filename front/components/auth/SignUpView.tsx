@@ -8,6 +8,7 @@ import {
   CardContent,
 } from '@/components/ui/Card'
 import { AuthLayout } from './AuthLayout'
+import { useNavigate } from 'react-router-dom'
 
 interface SignUpViewProps {
   onBack: () => void
@@ -15,6 +16,7 @@ interface SignUpViewProps {
 }
 
 export const SignUpView: React.FC<SignUpViewProps> = ({ onBack, onSignUp }) => {
+  const navigate = useNavigate()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -26,7 +28,7 @@ export const SignUpView: React.FC<SignUpViewProps> = ({ onBack, onSignUp }) => {
 
     setIsLoading(true)
     try {
-      const { createUserWithEmailAndPassword, updateProfile } = await import('firebase/auth')
+      const { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } = await import('firebase/auth')
       const { getFirebaseAuth } = await import('@/firebase')
       const userCredential = await createUserWithEmailAndPassword(getFirebaseAuth(), email, password)
 
@@ -34,6 +36,11 @@ export const SignUpView: React.FC<SignUpViewProps> = ({ onBack, onSignUp }) => {
         await updateProfile(userCredential.user, {
           displayName: name
         })
+        
+        await sendEmailVerification(userCredential.user)
+        
+        onSignUp(name, email)
+        navigate('/auth/verify-email')
       }
     } catch (error: any) {
       console.error("Sign up failed", error)

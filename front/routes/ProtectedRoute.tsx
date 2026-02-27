@@ -13,5 +13,9 @@ export function ProtectedRoute() {
     return <Navigate to="/auth/login" replace />
   }
 
+  if (!currentUser.emailVerified) {
+    return <Navigate to="/auth/verify-email" replace />
+  }
+
   return <Outlet />
 }

@@ -236,6 +236,7 @@ type UserResponse struct {
 	HubNotesLimit        *int     `json:"hubNotesLimit"`
 	HubEquipmentLimit    *int     `json:"hubEquipmentLimit"`
 	FirstConnection      *bool    `json:"firstConnection"`
+	EmailVerified        bool     `json:"emailVerified"`
 }
 
 type UpdateUserRequest struct {

@@ -21,6 +21,7 @@ export interface User {
     hubNotesLimit?: number | null;
     hubEquipmentLimit?: number | null;
     firstConnection?: boolean | null;
+    emailVerified?: boolean;
 }
 
 export interface Currency {

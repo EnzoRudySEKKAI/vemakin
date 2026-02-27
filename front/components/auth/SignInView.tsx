@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Mail, Lock, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,6 +9,7 @@ import {
   CardContent,
 } from '@/components/ui/Card'
 import { AuthLayout } from './AuthLayout'
+import { useAuthStore } from '@/stores/useAuthStore'
 
 interface SignInViewProps {
   onBack: () => void
@@ -16,6 +17,8 @@ interface SignInViewProps {
 }
 
 export const SignInView: React.FC<SignInViewProps> = ({ onBack, onSignIn }) => {
+  const navigate = useNavigate()
+  const { authPromise } = useAuthStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -29,6 +32,22 @@ export const SignInView: React.FC<SignInViewProps> = ({ onBack, onSignIn }) => {
       const { signInWithEmailAndPassword } = await import('firebase/auth')
       const { getFirebaseAuth } = await import('@/firebase')
       await signInWithEmailAndPassword(getFirebaseAuth(), email, password)
+
+      // Wait for auth to be resolved and profile to be fetched
+      if (authPromise) {
+        await authPromise
+      }
+      
+      // Small delay to ensure store is updated
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Check if email is verified after profile fetch
+      const { currentUser } = useAuthStore.getState()
+      if (currentUser && !currentUser.emailVerified) {
+        navigate('/auth/verify-email')
+      } else {
+        onSignIn('', email)
+      }
     } catch (error: any) {
       console.error("Sign in failed", error)
       alert("Login failed. Please check your credentials.")
