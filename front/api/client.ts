@@ -42,11 +42,13 @@ api.interceptors.response.use(
     return response
   },
   (error) => {
+    // Ne pas intercepter les erreurs sur les pages de vérification d'email
+    const currentPath = window.location.pathname
+    if (currentPath.includes('/auth/verify')) {
+      return Promise.reject(error)
+    }
+
     if (error.response?.status === 403) {
-      const currentPath = window.location.pathname
-      if (currentPath.includes('/auth/verify')) {
-        return Promise.reject(error)
-      }
       window.location.href = '/auth/verify-required'
       return
     }
