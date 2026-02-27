@@ -9,6 +9,7 @@ type User struct {
 	ID                   string  `db:"id" json:"id"`
 	Email                string  `db:"email" json:"email"`
 	Name                 string  `db:"name" json:"name"`
+	EmailVerified        *bool   `db:"email_verified" json:"emailVerified"`
 	DarkMode             *bool   `db:"dark_mode" json:"darkMode"`
 	LastProjectID        *string `db:"last_project_id" json:"lastProjectId"`
 	PostProdGridColumns  *int    `db:"post_prod_grid_columns" json:"postProdGridColumns"`

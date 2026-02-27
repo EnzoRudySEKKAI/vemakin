@@ -21,10 +21,11 @@ type FirebaseAuth struct {
 }
 
 type CachedToken struct {
-	UID     string `json:"uid"`
-	Email   string `json:"email"`
-	Name    string `json:"name"`
-	Expires int64  `json:"expires"`
+	UID           string `json:"uid"`
+	Email         string `json:"email"`
+	Name          string `json:"name"`
+	EmailVerified bool   `json:"email_verified"`
+	Expires       int64  `json:"expires"`
 }
 
 func NewFirebaseAuth(credentialsPath string, projectID string) (*FirebaseAuth, error) {
@@ -88,11 +89,12 @@ func (f *FirebaseAuth) VerifyIDToken(ctx context.Context, tokenString string) (*
 	uid := token.UID
 	email, _ := token.Claims["email"].(string)
 	name, _ := token.Claims["name"].(string)
+	emailVerified, _ := token.Claims["email_verified"].(bool)
 	if name == "" && email != "" {
 		name = email[:len(email)-len("@"+extractDomain(email))]
 	}
 
-	if email == "" || name == "" {
+	if email == "" || name == "" || !emailVerified {
 		userRecord, err := f.client.GetUser(ctx, uid)
 		if err == nil {
 			if email == "" {
@@ -104,14 +106,18 @@ func (f *FirebaseAuth) VerifyIDToken(ctx context.Context, tokenString string) (*
 					name = email[:len(email)-len("@"+extractDomain(email))]
 				}
 			}
+			if !emailVerified {
+				emailVerified = userRecord.EmailVerified
+			}
 		}
 	}
 
 	cachedToken := &CachedToken{
-		UID:     uid,
-		Email:   email,
-		Name:    name,
-		Expires: time.Now().Add(f.cacheTTL).Unix(),
+		UID:           uid,
+		Email:         email,
+		Name:          name,
+		EmailVerified: emailVerified,
+		Expires:       time.Now().Add(f.cacheTTL).Unix(),
 	}
 
 	if f.cache != nil {

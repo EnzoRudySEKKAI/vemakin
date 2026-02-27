@@ -155,6 +155,7 @@ func routes(e *echo.Echo, h *handler.Handler, authMiddleware *middleware.AuthMid
 	protected.Use(authMiddleware.Authenticate())
 
 	protected.GET("/users/me", h.GetMe)
+	protected.POST("/users/sync-email-verified", h.SyncEmailVerified)
 	protected.GET("/users/profile", h.GetUser)
 	protected.PATCH("/users/profile", h.UpdateUser)
 

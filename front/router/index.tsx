@@ -13,6 +13,9 @@ const LandingView = lazy(() => import('@/components/auth/LandingView').then(m =>
 const SignInView = lazy(() => import('@/components/auth/SignInView').then(m => ({ default: m.SignInView })))
 const SignUpView = lazy(() => import('@/components/auth/SignUpView').then(m => ({ default: m.SignUpView })))
 const ForgotPasswordView = lazy(() => import('@/components/auth/ForgotPasswordView').then(m => ({ default: m.ForgotPasswordView })))
+const VerificationPendingView = lazy(() => import('@/components/auth/VerificationPendingView').then(m => ({ default: m.VerificationPendingView })))
+const VerificationCallbackView = lazy(() => import('@/components/auth/VerificationCallbackView').then(m => ({ default: m.VerificationCallbackView })))
+const VerificationRequiredView = lazy(() => import('@/components/auth/VerificationRequiredView').then(m => ({ default: m.VerificationRequiredView })))
 const OverviewRoute = lazy(() => import('@/routes/OverviewRoute').then(m => ({ default: m.OverviewRoute })))
 const ShotsRoute = lazy(() => import('@/routes/ShotsRoute').then(m => ({ default: m.ShotsRoute })))
 const ShotDetailRoute = lazy(() => import('@/routes/ShotDetailRoute').then(m => ({ default: m.ShotDetailRoute })))
@@ -77,6 +80,9 @@ export const router = createBrowserRouter(
                 <Route path="/auth/login" element={<SignInPageRoute />} />
                 <Route path="/auth/register" element={<SignUpPageRoute />} />
                 <Route path="/auth/forgot-password" element={withSuspense(ForgotPasswordView)} />
+                <Route path="/auth/verify-pending" element={<VerificationPendingPageRoute />} />
+                <Route path="/auth/verify-callback" element={<VerificationCallbackPageRoute />} />
+                <Route path="/auth/verify-required" element={<VerificationRequiredPageRoute />} />
             </Route>
             
             <Route element={<AuthProviderWrapper><ProtectedRoute /></AuthProviderWrapper>}>
@@ -121,6 +127,7 @@ function SignInPageRoute() {
       <SignInView
         onBack={navigateBack}
         onSignIn={() => navigate('/dashboard')}
+        onVerificationRequired={(email) => navigate('/auth/verify-required', { state: { email } })}
       />
     </Suspense>
   )
@@ -133,7 +140,65 @@ function SignUpPageRoute() {
     <Suspense fallback={<PageLoader />}>
       <SignUpView
         onBack={navigateBack}
-        onSignUp={() => navigate('/dashboard')}
+        onSignUp={(name, email) => navigate('/auth/verify-pending', { state: { email } })}
+      />
+    </Suspense>
+  )
+}
+
+function VerificationPendingPageRoute() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const email = location.state?.email || ''
+  
+  const handleResendEmail = async () => {
+    const { sendEmailVerification } = await import('firebase/auth')
+    const { getFirebaseAuth } = await import('@/firebase')
+    const user = getFirebaseAuth().currentUser
+    if (user) {
+      await sendEmailVerification(user)
+    }
+  }
+  
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <VerificationPendingView
+        email={email}
+        onResendEmail={handleResendEmail}
+        onGoToLogin={() => navigate('/auth/login')}
+      />
+    </Suspense>
+  )
+}
+
+function VerificationCallbackPageRoute() {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <VerificationCallbackView />
+    </Suspense>
+  )
+}
+
+function VerificationRequiredPageRoute() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const email = location.state?.email || ''
+  
+  const handleResendEmail = async () => {
+    const { sendEmailVerification } = await import('firebase/auth')
+    const { getFirebaseAuth } = await import('@/firebase')
+    const user = getFirebaseAuth().currentUser
+    if (user) {
+      await sendEmailVerification(user)
+    }
+  }
+  
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <VerificationRequiredView
+        email={email}
+        onResendEmail={handleResendEmail}
+        onGoToLogin={() => navigate('/auth/login')}
       />
     </Suspense>
   )

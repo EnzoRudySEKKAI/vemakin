@@ -24,6 +24,10 @@ func (m *AuthMiddleware) Authenticate() echo.MiddlewareFunc {
 				return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 			}
 
+			if !tokenData.EmailVerified {
+				return echo.NewHTTPError(http.StatusForbidden, "email not verified")
+			}
+
 			c.Set("userID", tokenData.UID)
 			c.Set("userEmail", tokenData.Email)
 			c.Set("userName", tokenData.Name)

@@ -26,7 +26,7 @@ export const SignUpView: React.FC<SignUpViewProps> = ({ onBack, onSignUp }) => {
 
     setIsLoading(true)
     try {
-      const { createUserWithEmailAndPassword, updateProfile } = await import('firebase/auth')
+      const { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } = await import('firebase/auth')
       const { getFirebaseAuth } = await import('@/firebase')
       const userCredential = await createUserWithEmailAndPassword(getFirebaseAuth(), email, password)
 
@@ -34,7 +34,10 @@ export const SignUpView: React.FC<SignUpViewProps> = ({ onBack, onSignUp }) => {
         await updateProfile(userCredential.user, {
           displayName: name
         })
+        await sendEmailVerification(userCredential.user)
       }
+
+      onSignUp(name, email)
     } catch (error: any) {
       console.error("Sign up failed", error)
       alert(`Sign up failed: ${error.message}`)

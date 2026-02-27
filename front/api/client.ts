@@ -41,7 +41,12 @@ api.interceptors.response.use(
     }
     return response
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    if (error.response?.status === 403 && error.response?.data?.message === 'email not verified') {
+      window.location.href = '/auth/verify-required'
+    }
+    return Promise.reject(error)
+  }
 )
 
 export default api

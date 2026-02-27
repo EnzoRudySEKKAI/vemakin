@@ -78,3 +78,25 @@ func (h *Handler) GetMe(c echo.Context) error {
 		Email: email,
 	})
 }
+
+type SyncEmailVerifiedRequest struct {
+	EmailVerified bool `json:"emailVerified"`
+}
+
+func (h *Handler) SyncEmailVerified(c echo.Context) error {
+	userID := getUserID(c)
+
+	var req SyncEmailVerifiedRequest
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid payload")
+	}
+
+	err := h.userRepo.UpdateEmailVerified(c.Request().Context(), userID, req.EmailVerified)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to update email verified status")
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"status": "updated",
+	})
+}
