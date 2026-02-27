@@ -458,6 +458,10 @@ const FAQ = () => {
       answer: "Not yet, but we are planning to add collaboration features in the future to allow teams to work together seamlessly on projects, share updates, and manage tasks in real-time."
     },
     {
+      question: "What language is supported ?",
+      answer: "At the moment, Vemakin is only available in English. However, we have plans to support multiple languages in the future to make our platform more accessible to filmmakers around the world."
+    },
+    {
       question: "What is our plan for the future ?",
       answer: "We have a clear roadmap for Vemakin, with plans to introduce advanced collaboration features, mobile apps for on-the-go access, news about cinema and gear and AI to assist you for your inventory, shots, tasks and notes. Our goal is to continuously evolve Vemakin based on user feedback and the changing needs of filmmakers, ensuring it remains an indispensable tool in the production process."
     },
