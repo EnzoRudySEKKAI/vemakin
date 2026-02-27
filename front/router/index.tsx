@@ -159,13 +159,20 @@ function VerificationPendingPageRoute() {
       await sendEmailVerification(user)
     }
   }
+
+  const handleGoToLogin = async () => {
+    const { signOut } = await import('firebase/auth')
+    const { getFirebaseAuth } = await import('@/firebase')
+    await signOut(getFirebaseAuth())
+    navigate('/auth/login')
+  }
   
   return (
     <Suspense fallback={<PageLoader />}>
       <VerificationPendingView
         email={email}
         onResendEmail={handleResendEmail}
-        onGoToLogin={() => navigate('/auth/login')}
+        onGoToLogin={handleGoToLogin}
       />
     </Suspense>
   )
@@ -192,13 +199,20 @@ function VerificationRequiredPageRoute() {
       await sendEmailVerification(user)
     }
   }
+
+  const handleGoToLogin = async () => {
+    const { signOut } = await import('firebase/auth')
+    const { getFirebaseAuth } = await import('@/firebase')
+    await signOut(getFirebaseAuth())
+    navigate('/auth/login')
+  }
   
   return (
     <Suspense fallback={<PageLoader />}>
       <VerificationRequiredView
         email={email}
         onResendEmail={handleResendEmail}
-        onGoToLogin={() => navigate('/auth/login')}
+        onGoToLogin={handleGoToLogin}
       />
     </Suspense>
   )

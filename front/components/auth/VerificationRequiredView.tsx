@@ -6,7 +6,7 @@ import { AuthLayout } from './AuthLayout'
 interface VerificationRequiredViewProps {
   email: string
   onResendEmail: () => Promise<void>
-  onGoToLogin: () => void
+  onGoToLogin: () => Promise<void>
 }
 
 export const VerificationRequiredView: React.FC<VerificationRequiredViewProps> = ({

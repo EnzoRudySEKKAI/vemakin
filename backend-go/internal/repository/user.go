@@ -26,28 +26,28 @@ func (r *UserRepository) GetByID(ctx context.Context, id string) (*models.User, 
 	return &u, err
 }
 
-func (r *UserRepository) Create(ctx context.Context, id, email, name string) (*models.User, error) {
+func (r *UserRepository) Create(ctx context.Context, id, email, name string, emailVerified bool) (*models.User, error) {
 	var u models.User
 	err := r.db.GetContext(ctx, &u, `
-		INSERT INTO users (id, email, name)
-		VALUES ($1, $2, $3)
+		INSERT INTO users (id, email, name, email_verified)
+		VALUES ($1, $2, $3, $4)
 		ON CONFLICT (id) DO NOTHING
-		RETURNING id, email, name, dark_mode, last_project_id, post_prod_grid_columns, notes_grid_columns, inventory_grid_columns, hub_card_order, hub_shots_limit, hub_tasks_limit, hub_notes_limit, hub_equipment_limit, first_connection
-	`, id, email, name)
+		RETURNING id, email, name, email_verified, dark_mode, last_project_id, post_prod_grid_columns, notes_grid_columns, inventory_grid_columns, hub_card_order, hub_shots_limit, hub_tasks_limit, hub_notes_limit, hub_equipment_limit, first_connection
+	`, id, email, name, emailVerified)
 	if err == sql.ErrNoRows {
 		return r.GetByID(ctx, id)
 	}
 	return &u, err
 }
 
-func (r *UserRepository) Upsert(ctx context.Context, id, email, name string) (*models.User, error) {
+func (r *UserRepository) Upsert(ctx context.Context, id, email, name string, emailVerified bool) (*models.User, error) {
 	var u models.User
 	err := r.db.GetContext(ctx, &u, `
-		INSERT INTO users (id, email, name)
-		VALUES ($1, $2, $3)
-		ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email, name = EXCLUDED.name
-		RETURNING id, email, name, dark_mode, last_project_id, post_prod_grid_columns, notes_grid_columns, inventory_grid_columns, hub_card_order, hub_shots_limit, hub_tasks_limit, hub_notes_limit, hub_equipment_limit, first_connection
-	`, id, email, name)
+		INSERT INTO users (id, email, name, email_verified)
+		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email, name = EXCLUDED.name, email_verified = EXCLUDED.email_verified
+		RETURNING id, email, name, email_verified, dark_mode, last_project_id, post_prod_grid_columns, notes_grid_columns, inventory_grid_columns, hub_card_order, hub_shots_limit, hub_tasks_limit, hub_notes_limit, hub_equipment_limit, first_connection
+	`, id, email, name, emailVerified)
 	return &u, err
 }
 

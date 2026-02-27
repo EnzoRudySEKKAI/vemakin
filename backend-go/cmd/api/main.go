@@ -150,6 +150,9 @@ func routes(e *echo.Echo, h *handler.Handler, authMiddleware *middleware.AuthMid
 	// API routes (all under /api prefix)
 	api := e.Group("/api")
 
+	// Public API routes (no auth required)
+	api.POST("/users", h.CreateUser)
+
 	// Protected API routes require authentication
 	protected := api.Group("")
 	protected.Use(authMiddleware.Authenticate())

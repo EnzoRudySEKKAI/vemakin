@@ -12,10 +12,16 @@ const api = axios.create({
 // Request interceptor: Add auth and transform to snake_case
 api.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    const user = getFirebaseAuth().currentUser
-    if (user) {
-      const token = await user.getIdToken()
-      config.headers.Authorization = `Bearer ${token}`
+    // Don't send auth token on ANY /auth/* pages to prevent 403 loops
+    const currentPath = window.location.pathname
+    if (currentPath.startsWith('/auth/')) {
+      // Skip adding Authorization header entirely on auth pages
+    } else {
+      const user = getFirebaseAuth().currentUser
+      if (user) {
+        const token = await user.getIdToken()
+        config.headers.Authorization = `Bearer ${token}`
+      }
     }
 
     // Transform request body from camelCase to snake_case
@@ -42,12 +48,13 @@ api.interceptors.response.use(
     return response
   },
   (error) => {
-    // Ne pas intercepter les erreurs sur les pages de vérification d'email
+    // Don't redirect on auth pages - just reject the error
     const currentPath = window.location.pathname
-    if (currentPath.includes('/auth/verify')) {
+    if (currentPath.startsWith('/auth/')) {
       return Promise.reject(error)
     }
 
+    // Redirect to verification page on 403
     if (error.response?.status === 403) {
       window.location.href = '/auth/verify-required'
       return

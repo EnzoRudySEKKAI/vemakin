@@ -51,11 +51,16 @@ export const useAuthStore = create<AuthState>()(
           }
 
           if (user) {
+            const isEmailVerified = user.emailVerified
             let userProfile: User | null = null
-            try {
-              userProfile = await userService.getProfile()
-            } catch (error) {
-              console.error('Failed to fetch user profile:', error)
+
+            // Only fetch profile if email is verified
+            if (isEmailVerified) {
+              try {
+                userProfile = await userService.getProfile()
+              } catch (error) {
+                console.error('Failed to fetch user profile:', error)
+              }
             }
 
             set({

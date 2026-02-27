@@ -31,6 +31,7 @@ func (m *AuthMiddleware) Authenticate() echo.MiddlewareFunc {
 			c.Set("userID", tokenData.UID)
 			c.Set("userEmail", tokenData.Email)
 			c.Set("userName", tokenData.Name)
+			c.Set("userEmailVerified", tokenData.EmailVerified)
 
 			return next(c)
 		}
@@ -54,6 +55,7 @@ func (m *AuthMiddleware) OptionalAuth() echo.MiddlewareFunc {
 			c.Set("userID", tokenData.UID)
 			c.Set("userEmail", tokenData.Email)
 			c.Set("userName", tokenData.Name)
+			c.Set("userEmailVerified", tokenData.EmailVerified)
 
 			return next(c)
 		}

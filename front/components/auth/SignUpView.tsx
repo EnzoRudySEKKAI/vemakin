@@ -8,6 +8,7 @@ import {
   CardContent,
 } from '@/components/ui/Card'
 import { AuthLayout } from './AuthLayout'
+import api from '@/api/client'
 
 interface SignUpViewProps {
   onBack: () => void
@@ -35,6 +36,17 @@ export const SignUpView: React.FC<SignUpViewProps> = ({ onBack, onSignUp }) => {
           displayName: name
         })
         await sendEmailVerification(userCredential.user)
+
+        try {
+          await api.post('/users', {
+            id: userCredential.user.uid,
+            email: email,
+            name: name,
+            emailVerified: false
+          })
+        } catch (dbError) {
+          console.error('Failed to create user in database:', dbError)
+        }
       }
 
       onSignUp(name, email)

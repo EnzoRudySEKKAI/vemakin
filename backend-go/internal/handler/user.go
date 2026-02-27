@@ -38,8 +38,9 @@ func (h *Handler) GetUser(c echo.Context) error {
 	userID := getUserID(c)
 	email := c.Get("userEmail").(string)
 	name := c.Get("userName").(string)
+	emailVerified := c.Get("userEmailVerified").(bool)
 
-	user, err := h.userRepo.Upsert(c.Request().Context(), userID, email, name)
+	user, err := h.userRepo.Upsert(c.Request().Context(), userID, email, name, emailVerified)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, errorResponse(err))
 	}

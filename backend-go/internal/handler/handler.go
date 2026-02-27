@@ -85,18 +85,47 @@ type SyncEmailVerifiedRequest struct {
 
 func (h *Handler) SyncEmailVerified(c echo.Context) error {
 	userID := getUserID(c)
+	email := c.Get("userEmail").(string)
+	name := c.Get("userName").(string)
 
 	var req SyncEmailVerifiedRequest
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid payload")
 	}
 
-	err := h.userRepo.UpdateEmailVerified(c.Request().Context(), userID, req.EmailVerified)
+	_, err := h.userRepo.Upsert(c.Request().Context(), userID, email, name, req.EmailVerified)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to update email verified status")
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to sync email verified status")
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{
 		"status": "updated",
+	})
+}
+
+type CreateUserRequest struct {
+	ID            string `json:"id"`
+	Email         string `json:"email"`
+	Name          string `json:"name"`
+	EmailVerified bool   `json:"emailVerified"`
+}
+
+func (h *Handler) CreateUser(c echo.Context) error {
+	var req CreateUserRequest
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid payload")
+	}
+
+	if req.ID == "" || req.Email == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "id and email are required")
+	}
+
+	_, err := h.userRepo.Create(c.Request().Context(), req.ID, req.Email, req.Name, req.EmailVerified)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create user")
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"status": "created",
 	})
 }

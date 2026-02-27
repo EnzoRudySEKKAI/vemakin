@@ -6,7 +6,7 @@ import { AuthLayout } from './AuthLayout'
 interface VerificationPendingViewProps {
   email: string
   onResendEmail: () => Promise<void>
-  onGoToLogin: () => void
+  onGoToLogin: () => Promise<void>
   verified?: boolean
 }
 
