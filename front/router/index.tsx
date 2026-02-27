@@ -83,7 +83,8 @@ export const router = createBrowserRouter(
             
             <Route path="/auth/verify-callback" element={<EmailVerificationCallbackRoute />} />
             
-            <Route element={<AuthProviderWrapper><ProtectedRoute /></AuthProviderWrapper>}>
+            {/* Route accessible aux utilisateurs connectés même non vérifiés */}
+            <Route element={<AuthProviderWrapper><Outlet /></AuthProviderWrapper>}>
                 <Route path="/auth/verify-email" element={<EmailVerificationPageRoute />} />
             </Route>
             

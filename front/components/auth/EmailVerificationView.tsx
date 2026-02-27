@@ -9,24 +9,30 @@ import {
 import { AuthLayout } from './AuthLayout'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { getFirebaseAuth } from '@/firebase'
-import { userService } from '@/api/services'
 
 const RESEND_COOLDOWN_SECONDS = 60
 
 export const EmailVerificationView: React.FC = () => {
   const navigate = useNavigate()
-  const { logout, updateEmailVerified } = useAuthStore()
+  const { logout, currentUser } = useAuthStore()
   const [isResending, setIsResending] = useState(false)
   const [cooldown, setCooldown] = useState(0)
   const [isVerifying, setIsVerifying] = useState(true)
+  const [firebaseEmailVerified, setFirebaseEmailVerified] = useState(false)
 
   useEffect(() => {
     const checkVerification = async () => {
       try {
-        const profile = await userService.getProfile()
-        if (profile.emailVerified) {
-          updateEmailVerified(true)
-          navigate('/dashboard')
+        const { getAuth, reload } = await import('firebase/auth')
+        const auth = getFirebaseAuth()
+        
+        if (auth.currentUser) {
+          await reload(auth.currentUser)
+          setFirebaseEmailVerified(auth.currentUser.emailVerified)
+          
+          if (auth.currentUser.emailVerified) {
+            navigate('/dashboard')
+          }
         }
       } catch (error) {
         console.error('Failed to check verification status:', error)
@@ -36,7 +42,7 @@ export const EmailVerificationView: React.FC = () => {
     }
 
     checkVerification()
-  }, [updateEmailVerified, navigate])
+  }, [navigate])
 
   useEffect(() => {
     if (cooldown > 0) {
@@ -50,10 +56,16 @@ export const EmailVerificationView: React.FC = () => {
 
     const interval = setInterval(async () => {
       try {
-        const profile = await userService.getProfile()
-        if (profile.emailVerified) {
-          updateEmailVerified(true)
-          navigate('/dashboard')
+        const { getAuth, reload } = await import('firebase/auth')
+        const auth = getFirebaseAuth()
+        
+        if (auth.currentUser) {
+          await reload(auth.currentUser)
+          setFirebaseEmailVerified(auth.currentUser.emailVerified)
+          
+          if (auth.currentUser.emailVerified) {
+            navigate('/dashboard')
+          }
         }
       } catch (error) {
         console.error('Failed to check verification status:', error)
@@ -61,7 +73,7 @@ export const EmailVerificationView: React.FC = () => {
     }, 3000)
 
     return () => clearInterval(interval)
-  }, [isVerifying, updateEmailVerified, navigate])
+  }, [isVerifying, navigate])
 
   const handleResendEmail = async () => {
     if (cooldown > 0) return
